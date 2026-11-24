@@ -2549,7 +2549,43 @@
   }
   .app-footer-links a.kofi-mini:hover { border-color: #ff5e5b; color: #fff; }
 
-  /* INTERACTIVE BROADCAST GUIDE MODAL (100% ENGLISH) */
+  /* INTERACTIVE BROADCAST GUIDE MODAL & LANGUAGE SWITCHER */
+  .lang-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 2px 3px;
+    border-radius: 8px;
+    background: rgba(15, 23, 42, 0.72);
+    border: 1px solid var(--border-hi);
+  }
+  .lang-switch .lang-globe {
+    font-size: 12px;
+    padding: 0 3px 0 4px;
+    opacity: 0.85;
+    user-select: none;
+  }
+  .lang-switch button {
+    padding: 4px 7px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--muted);
+    min-width: 28px;
+  }
+  .lang-switch button:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+  }
+  .lang-switch button.active-lang {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.34), rgba(14, 165, 233, 0.24));
+    border-color: rgba(56, 189, 248, 0.65);
+    color: #fff;
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+  }
   .btn-guide-hdr {
     background: linear-gradient(135deg, rgba(37, 99, 235, 0.22), rgba(14, 165, 233, 0.16));
     border-color: rgba(56, 189, 248, 0.52);
@@ -2794,6 +2830,11 @@
       <button type="button" id="btn-open-results" title="Open results.html in a new tab">↗ Open Results</button>
       <button type="button" id="btn-res-replay" class="primary">🎬 Results Intro</button>
       <button type="button" id="btn-res-vis" class="btn-vis">👁 Results ON</button>
+    </div>
+    <div class="lang-switch" id="seg-lang" role="group" aria-label="Language" title="Switch interface language (English / Español)">
+      <span class="lang-globe" aria-hidden="true" data-no-i18n>🌐</span>
+      <button type="button" data-lang="en" class="active-lang" aria-pressed="true" data-no-i18n>EN</button>
+      <button type="button" data-lang="es" aria-pressed="false" data-no-i18n>ES</button>
     </div>
     <button type="button" id="btn-open-guide" class="btn-guide-hdr" title="Interactive Broadcast Guide, OBS Setup, Hotkeys &amp; Pre-Event Checklist">📖 Guide</button>
     <button type="button" id="btn-open-share" class="btn-support-hdr" title="Creator socials, GitHub repository, share link &amp; optional Ko-fi support">☕ Share &amp; Support</button>
@@ -5193,6 +5234,7 @@
 <script src="sf6-themes.js"></script>
 <script src="results-designs.js"></script>
 <script src="qr.js"></script>
+<script src="i18n.js"></script>
 <script>
 (() => {
   /* =========================================================================
@@ -5649,9 +5691,11 @@
   const vsPreviewFrame = $('vs-preview-frame');
   const resultsPreviewFrame = $('results-preview-frame');
 
+  const tr = (msg) => (window.FGC_I18N ? window.FGC_I18N.t(msg) : msg);
+
   function toast(msg) {
     const t = $('toast');
-    t.textContent = msg;
+    t.textContent = tr(msg);
     t.classList.add('show');
     clearTimeout(toast._t);
     toast._t = setTimeout(() => t.classList.remove('show'), 2100);
@@ -8063,12 +8107,12 @@
       : (am.swapped ? am.slot1EntrantId : am.slot2EntrantId);
 
     if (!liveOnly) {
-      const ok = window.confirm(
+      const ok = window.confirm(tr(
         `Report match result to ${am.provider.toUpperCase()}?\n\n` +
         `Round: ${am.roundText}\n` +
         `Score: ${state.p1.name} ${s1} - ${s2} ${state.p2.name}\n` +
         `Winner: ${winnerName}`
-      );
+      ));
       if (!ok) return;
     }
 
@@ -8265,7 +8309,7 @@
       URL.revokeObjectURL(a.href);
     });
     $('btn-hist-clear').addEventListener('click', async () => {
-      if (!historyDb.length || !window.confirm('Clear all local match history?')) return;
+      if (!historyDb.length || !window.confirm(tr('Clear all local match history?'))) return;
       if (isHttp) {
         const res = await fetch('/api/history', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'clear' }) });
         if (res.ok) historyDb = await res.json();
@@ -9008,7 +9052,7 @@
     $('btn-clear-pack').addEventListener('click', async () => {
       const game = $('vs-game-select').value || 'tekken8';
       const pack = $('vs-pack-select').value || 'full';
-      if (!window.confirm(`Clear local cached renders for ${game}/${pack}?`)) return;
+      if (!window.confirm(tr(`Clear local cached renders for ${game}/${pack}?`))) return;
       await fetch('/api/assets/clear-pack', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ game, pack })
@@ -9021,7 +9065,7 @@
       const file = e.target.files?.[0];
       if (!file) return;
       const game = $('vs-game-select').value || 'tekken8';
-      const charName = window.prompt('Character name for this custom PNG:', state.p1?.character || '');
+      const charName = window.prompt(tr('Character name for this custom PNG:'), state.p1?.character || '');
       if (!charName || !charName.trim()) { e.target.value = ''; return; }
       try {
         await uploadLocalImage(file, 'character', charName.trim(), game);
@@ -10005,6 +10049,16 @@
     renderUI();
     renderPlayersDb();
   }
+
+  // Bilingual EN / ES Language Switcher (persists in localStorage)
+  $('seg-lang')?.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-lang]');
+    if (!btn || !window.FGC_I18N) return;
+    const next = btn.dataset.lang;
+    window.FGC_I18N.setLang(next);
+    toast(next === 'es' ? '🌐 Idioma: Español' : '🌐 Language: English');
+  });
+  window.FGC_I18N?.init();
 })();
 </script>
 </body>
