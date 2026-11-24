@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>FGC Open Scorebars — Pop-Culture FGC Film (Hashir · Mountain Man)</title>
+<title>FGC Open Scorebars — Official Broadcast Film (EN / ES)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
@@ -33,12 +33,8 @@
   }
   body.clean-mode .director-hud,
   body.clean-mode .top-bar { display: none !important; }
-  body.clean-mode .yt-dock {
-    position: fixed; left: -4px; bottom: -4px; width: 4px; height: 4px;
-    opacity: 0.001; pointer-events: none; overflow: hidden; border: 0;
-  }
   body.drag-over::after {
-    content: '🎵 DROP MP3 / WAV HERE TO OVERRIDE TRACK';
+    content: '🎵 DROP MP3 / WAV HERE TO USE CUSTOM MUSIC';
     position: fixed; inset: 24px; z-index: 999; border-radius: 20px;
     border: 3px dashed var(--ochre); background: rgba(12, 12, 16, 0.9);
     display: flex; align-items: center; justify-content: center;
@@ -57,7 +53,7 @@
 
   .halftone-overlay {
     position: absolute; inset: 0; z-index: 26; pointer-events: none;
-    opacity: 0.045;
+    opacity: 0.04;
     background-image: radial-gradient(#000 1.2px, transparent 1.2px);
     background-size: 10px 10px;
   }
@@ -65,7 +61,7 @@
   .scene {
     position: absolute; inset: 0; z-index: 5;
     opacity: 0; pointer-events: none;
-    transition: opacity 0.72s cubic-bezier(.22, 1, .36, 1);
+    transition: opacity 0.68s cubic-bezier(.22, 1, .36, 1);
     overflow: hidden;
   }
   .scene.active { opacity: 1; }
@@ -79,8 +75,8 @@
   }
   .lb-col {
     position: relative; overflow: hidden; border-radius: 14px;
-    transform: translateY(50px); opacity: 0;
-    transition: transform 0.95s cubic-bezier(.16, 1, .3, 1), opacity 0.8s ease;
+    transform: translateY(48px); opacity: 0;
+    transition: transform 0.9s cubic-bezier(.16, 1, .3, 1), opacity 0.8s ease;
   }
   #scene-lookbook.active .lb-col { transform: translateY(0); opacity: 1; }
   .lb-col:nth-child(1) { background: linear-gradient(180deg, #f6f2ea 0%, #e5dccb 100%); transition-delay: 0.04s; }
@@ -253,7 +249,7 @@
   .cover-center {
     position: absolute; left: 50%; top: 50%; z-index: 8;
     transform: translate(-50%, -50%);
-    text-align: center; width: 1220px; padding: 46px 56px;
+    text-align: center; width: 1240px; padding: 46px 56px;
     background: rgba(15, 15, 19, 0.78);
     border: 2px solid rgba(246, 242, 234, 0.35);
     border-radius: 26px; backdrop-filter: blur(18px);
@@ -264,8 +260,8 @@
   .cover-logo-row span { font-family: 'Space Mono', monospace; font-size: 19px; font-weight: 700; letter-spacing: 0.24em; color: var(--ochre); text-transform: uppercase; }
   .cover-center h1 { font-family: 'Archivo Black', sans-serif; font-size: 112px; line-height: 0.96; text-transform: uppercase; color: var(--paper); letter-spacing: -0.02em; }
   .cover-center h1 em { display: block; font-family: 'DM Serif Display', serif; font-style: italic; font-weight: 400; font-size: 126px; color: var(--ochre); text-transform: none; line-height: 0.95; }
-  .cover-pills { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-top: 28px; }
-  .cover-pills span { padding: 12px 24px; border-radius: 999px; background: var(--paper); color: var(--ink); font-family: 'Space Mono', monospace; font-size: 18px; font-weight: 700; }
+  .cover-pills { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 28px; }
+  .cover-pills span { padding: 12px 22px; border-radius: 999px; background: var(--paper); color: var(--ink); font-family: 'Space Mono', monospace; font-size: 17px; font-weight: 700; }
   .cover-pills span.red { background: var(--red); color: #fff; }
 
   /* SCENE 04 — LIVE SCOREBARS */
@@ -306,23 +302,23 @@
   /* SCENES 05 & 06 — FULL-BLEED VS & RESULTS */
   .fullbleed-slot {
     position: absolute; inset: 0; z-index: 12;
-    opacity: 0; pointer-events: none; transform: scale(1.025);
-    transition: opacity 0.75s cubic-bezier(.22, 1, .36, 1), transform 5.2s ease-out;
+    opacity: 0; pointer-events: none; transform: scale(1.02);
+    transition: opacity 0.72s cubic-bezier(.22, 1, .36, 1), transform 5.2s ease-out;
   }
   .fullbleed-slot.active { opacity: 1; transform: scale(1); }
   .fullbleed-slot iframe { width: 1920px; height: 1080px; border: 0; display: block; }
 
   .corner-ribbon {
     position: absolute; left: 46px; top: 38px; z-index: 18;
-    padding: 18px 28px; border-radius: 16px;
-    background: rgba(18, 18, 20, 0.84); border: 2px solid var(--paper);
+    padding: 16px 26px; border-radius: 16px;
+    background: rgba(18, 18, 20, 0.86); border: 2px solid var(--paper);
     backdrop-filter: blur(16px); color: var(--paper);
     opacity: 0; transform: translateY(-16px);
     pointer-events: none; transition: all 0.65s cubic-bezier(.16, 1, .3, 1);
   }
   .corner-ribbon.show { opacity: 1; transform: translateY(0); }
   .corner-ribbon small { display: block; font-family: 'Space Mono', monospace; font-size: 14px; letter-spacing: 0.2em; color: var(--ochre); font-weight: 700; }
-  .corner-ribbon strong { display: block; font-family: 'Archivo Black', sans-serif; font-size: 32px; margin-top: 3px; text-transform: uppercase; }
+  .corner-ribbon strong { display: block; font-family: 'Archivo Black', sans-serif; font-size: 30px; margin-top: 3px; text-transform: uppercase; }
 
   .png-stamp {
     position: absolute; right: 54px; bottom: 52px; z-index: 19;
@@ -377,26 +373,31 @@
     height: 1040px; width: auto; object-fit: contain;
     filter: drop-shadow(0 28px 50px rgba(0,0,0,0.85));
   }
-  .outro-right .outro-event-badge {
-    position: absolute; top: 44px; right: 44px; z-index: 5;
-    display: flex; align-items: center; gap: 14px;
-    padding: 12px 22px; border-radius: 16px;
-    background: rgba(18, 18, 20, 0.84); border: 2px solid rgba(246, 242, 234, 0.3);
+  .outro-right .outro-grow-badge {
+    position: absolute; top: 40px; left: 40px; right: 40px; z-index: 5;
+    display: flex; align-items: center; justify-content: space-between; gap: 14px;
+    padding: 14px 24px; border-radius: 16px;
+    background: rgba(18, 18, 20, 0.84); border: 2px solid rgba(246, 242, 234, 0.28);
     backdrop-filter: blur(12px); color: var(--paper);
     font-family: 'Space Mono', monospace; font-size: 16px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
   }
-  .outro-right .outro-event-badge img { height: 48px; width: auto; border-radius: 8px; }
-  .outro-right .outro-song-credit {
-    position: absolute; bottom: 34px; left: 36px; right: 36px; z-index: 5;
-    padding: 12px 20px; border-radius: 12px;
-    background: rgba(18, 18, 20, 0.8); border: 1px solid rgba(255,255,255,0.18);
-    font-family: 'Space Mono', monospace; font-size: 16px; color: rgba(246, 242, 234, 0.82);
+  .outro-right .outro-grow-badge img { height: 44px; width: auto; border-radius: 8px; }
+  .outro-right .outro-grow-pill {
+    padding: 4px 12px; border-radius: 999px; background: var(--ochre); color: var(--ink);
+    font-size: 13px; font-weight: 700; flex-shrink: 0;
+  }
+  .outro-right .outro-footer-bar {
+    position: absolute; bottom: 32px; left: 36px; right: 36px; z-index: 5;
+    padding: 13px 22px; border-radius: 12px;
+    background: rgba(18, 18, 20, 0.82); border: 1px solid rgba(255,255,255,0.18);
+    font-family: 'Space Mono', monospace; font-size: 15px; color: rgba(246, 242, 234, 0.86);
     display: flex; justify-content: space-between;
   }
 
   #wash-layer {
     position: absolute; inset: 0; z-index: 28;
-    background: radial-gradient(circle at 60% 40%, rgba(233, 160, 59, 0.6), rgba(230, 57, 70, 0.25) 55%, transparent);
+    background: radial-gradient(circle at 60% 40%, rgba(233, 160, 59, 0.56), rgba(230, 57, 70, 0.22) 55%, transparent);
     opacity: 0; pointer-events: none; transition: opacity 0.55s ease-out;
   }
   #fade-black {
@@ -405,7 +406,7 @@
   }
   #fade-black.solid { opacity: 1; }
 
-  /* DIRECTOR HUD & YOUTUBE SOUNDTRACK DOCK */
+  /* DIRECTOR STUDIO HUD (ZERO BLOCKING CORNERS!) */
   .top-bar {
     position: fixed; top: 12px; left: 16px; right: 16px; z-index: 100;
     display: flex; align-items: center; justify-content: space-between; gap: 10px;
@@ -423,19 +424,6 @@
   .studio-pill.recording .dot { background: #ef4444; animation: recBlink 0.8s infinite; }
   @keyframes recBlink { 50% { opacity: 0.25; } }
   .top-actions { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
-
-  .yt-dock {
-    position: fixed; right: 18px; bottom: 112px; z-index: 95;
-    width: 224px; border-radius: 12px; overflow: hidden;
-    background: var(--hud-bg); border: 1px solid var(--hud-border);
-    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.7);
-  }
-  .yt-dock-head {
-    padding: 5px 10px; font-size: 10px; font-weight: 700;
-    display: flex; justify-content: space-between; align-items: center;
-    background: rgba(233, 160, 59, 0.14); color: #fde68a;
-  }
-  #yt-player-host { width: 224px; height: 126px; background: #000; }
 
   .director-hud {
     position: fixed; left: 16px; right: 16px; bottom: 14px; z-index: 100;
@@ -455,7 +443,7 @@
   .hud-controls { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
   .ctrl-group { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 
-  button, select, input[type="number"] {
+  button, select {
     font-family: inherit; font-size: 12px; font-weight: 700;
     color: #f4f4f5; background: rgba(39, 39, 42, 0.92);
     border: 1px solid rgba(255, 255, 255, 0.22);
@@ -468,8 +456,6 @@
   .seg-pill { display: inline-flex; gap: 2px; padding: 2px; border-radius: 9px; background: rgba(0,0,0,0.45); border: 1px solid var(--hud-border); }
   .seg-pill button { border-color: transparent; background: transparent; padding: 5px 10px; border-radius: 6px; color: #a1a1aa; }
   .seg-pill button.active-chip { background: var(--paper); color: var(--ink); }
-  .offset-wrap { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: #a1a1aa; }
-  .offset-wrap input { width: 58px; padding: 5px; text-align: center; cursor: text; }
 
   .hud-toast {
     position: fixed; top: 62px; left: 50%; transform: translateX(-50%) translateY(-8px);
@@ -489,7 +475,7 @@
     <!-- SCENE 01: 4-COLUMN POP-CULTURE TEKKEN LOOKBOOK -->
     <section class="scene" id="scene-lookbook">
       <div class="lookbook-grid" id="lookbook-grid">
-        <div class="lb-col"><span class="col-tag">01 // TEKKEN 8</span><img class="char-art" id="lb-img-0" alt="" /><div class="col-char-name" id="lb-name-0">REINA</div></div>
+        <div class="lb-col"><span class="col-tag">01 // FGC SUITE</span><img class="char-art" id="lb-img-0" alt="" /><div class="col-char-name" id="lb-name-0">EDDY GORDO</div></div>
         <div class="lb-col"><span class="col-tag">02 // LOCAL TO MAJOR</span><img class="char-art" id="lb-img-1" alt="" /><div class="col-char-name" id="lb-name-1">DEVIL JIN</div></div>
         <div class="lb-col"><span class="col-tag">03 // LIVE RENDERS</span><img class="char-art" id="lb-img-2" alt="" /><div class="col-char-name" id="lb-name-2">FAHKUMRAM</div></div>
         <div class="lb-col"><span class="col-tag">04 // 100% FREE</span><img class="char-art" id="lb-img-3" alt="" /><div class="col-char-name" id="lb-name-3">SHAHEEN</div></div>
@@ -506,13 +492,13 @@
       <div class="players-header">
         <h2 id="pl-head">Built for <em>real players.</em></h2>
         <div class="players-event-chip" id="pl-event-chip">
-          <img id="pl-event-logo" src="" alt="" style="display:none;" />
-          <span id="pl-event-name">LIVE TOURNAMENT ROSTER</span>
+          <img id="pl-event-logo" src="" alt="" style="display:none;" onerror="this.style.display='none'" />
+          <span id="pl-event-name">STARFEST 2026</span>
         </div>
       </div>
       <div class="player-cards-grid" id="player-cards-grid"></div>
       <div class="players-footer">
-        <span id="pl-foot-l">ZERO SUBSCRIPTIONS · ZERO CLOUD · RUNS 100% LOCAL IN OBS STUDIO</span>
+        <span id="pl-foot-l">ZERO SUBSCRIPTIONS · ZERO CLOUD · DESIGNED TO EXPAND ACROSS FIGHTING GAMES</span>
         <span class="pill-free" id="pl-foot-r">100% FREE FOR THE FGC</span>
       </div>
     </section>
@@ -524,15 +510,15 @@
       <img class="cover-char-right" id="cover-img-r" alt="" />
       <div class="cover-center">
         <div class="cover-logo-row">
-          <img id="cover-event-logo" src="" alt="" style="display:none;" />
-          <span id="cover-kicker">OPEN-SOURCE LOCAL BROADCAST SUITE</span>
+          <img id="cover-event-logo" src="" alt="" style="display:none;" onerror="this.style.display='none'" />
+          <span id="cover-kicker">OPEN-SOURCE · GROWING WITH THE FGC</span>
         </div>
         <h1>FGC OPEN<em>Scorebars</em></h1>
         <div class="cover-pills">
           <span id="cp-1">56 SCOREBARS</span>
           <span id="cp-2">42 VS SPLASH</span>
           <span id="cp-3">24 TOP 8 RESULTS</span>
-          <span class="red" id="cp-4">240+ GAMES</span>
+          <span class="red" id="cp-4">EXPANDING TO MORE GAMES</span>
         </div>
       </div>
     </section>
@@ -579,7 +565,7 @@
           <div class="outro-feats">
             <div class="of-item"><b>01</b> <span id="of-1">Start.gg &amp; Challonge · RAM-only token safety</span></div>
             <div class="of-item"><b>02</b> <span id="of-2">Offline Mobile / Tablet QR Control (&lt; 5 ms)</span></div>
-            <div class="of-item"><b>03</b> <span id="of-3">Bilingual EN / ES · OBS Dock · 114 Vector Flags</span></div>
+            <div class="of-item"><b>03</b> <span id="of-3">Bilingual EN / ES · Growing for more games</span></div>
             <div class="outro-flag-row" id="outro-flags"></div>
           </div>
         </div>
@@ -593,12 +579,12 @@
       <div class="outro-right">
         <div class="outro-right-glow"></div>
         <img class="hero-render" id="outro-hero-img" alt="" />
-        <div class="outro-event-badge" id="outro-event-badge">
-          <img id="outro-event-logo" src="" alt="" style="display:none;" />
-          <span id="outro-event-txt">BUILT WITH TEKKEN 8 &amp; SF6</span>
+        <div class="outro-grow-badge">
+          <span id="outro-grow-txt">ACTIVELY EVOLVING · MORE GAMES COMING</span>
+          <span class="outro-grow-pill" id="outro-grow-pill">OPEN ROADMAP</span>
         </div>
-        <div class="outro-song-credit">
-          <span>♪ Hashir — Mountain Man</span>
+        <div class="outro-footer-bar">
+          <span id="outro-foot-l">BUILT TO GROW WITH THE COMMUNITY</span>
           <span>FGC OPEN SCOREBARS · 2026</span>
         </div>
       </div>
@@ -610,23 +596,14 @@
   </div>
 </div>
 
-<!-- OFFICIAL YOUTUBE "HASHIR - MOUNTAIN MAN" AUDIO PLAYER DOCK -->
-<div class="yt-dock" id="yt-dock">
-  <div class="yt-dock-head">
-    <span>♪ Hashir — Mountain Man</span>
-    <span id="yt-status">Loading...</span>
-  </div>
-  <div id="yt-player-host"></div>
-</div>
-
 <!-- TOP STUDIO BAR -->
 <div class="top-bar">
   <div class="studio-pill" id="studio-status">
     <span class="dot"></span>
-    <span id="studio-status-txt">Loading real players, Tekken renders &amp; soundtrack...</span>
+    <span id="studio-status-txt">Warming up live players, renders &amp; audio...</span>
   </div>
   <div class="top-actions">
-    <button type="button" id="btn-load-mp3" title="Optional: Load local MP3/WAV (or drop anywhere / save as data/mountain-man.mp3)">📂 Local MP3</button>
+    <button type="button" id="btn-load-mp3" title="Optional: Load local MP3/WAV (or drag &amp; drop onto window)">📂 Custom MP3</button>
     <input type="file" id="file-mp3" accept="audio/*" style="display:none;" />
     <button type="button" id="btn-thumb-en">🖼️ Thumbnail EN</button>
     <button type="button" id="btn-thumb-es">🖼️ Miniatura ES</button>
@@ -657,15 +634,10 @@
         <button type="button" data-lang="es">ES</button>
       </div>
       <select id="sel-audio">
-        <option value="youtube">🎵 Hashir — Mountain Man (YouTube Auto)</option>
-        <option value="local">📂 Local MP3 / WAV File</option>
+        <option value="synth">🎵 Built-in Lo-Fi Chill-Bit OST (Works Offline)</option>
+        <option value="local">📂 Custom MP3 / WAV File</option>
         <option value="silent">🔇 Silent (For External Editor)</option>
       </select>
-      <label class="offset-wrap" title="Start second inside Hashir - Mountain Man">
-        <span>Start:</span>
-        <input type="number" id="inp-offset" value="0" min="0" max="150" step="0.5" />
-        <span>s</span>
-      </label>
     </div>
     <div class="ctrl-group">
       <button type="button" id="btn-rec-en" class="rec">🔴 Record Video (EN)</button>
@@ -683,10 +655,8 @@
   'use strict';
 
   /* =========================================================================
-     CONFIG: VERIFIED OFFICIAL "HASHIR - MOUNTAIN MAN" (QC1pmCkH8JY · 86 BPM)
+     TIMING: 86 BPM · D MAJOR (SOULFUL CHILL-BIT / LO-FI GROOVE · 62.8s)
      ========================================================================= */
-  const YT_VIDEO_IDS = ['QC1pmCkH8JY', 'oPUCqMChegQ', 'Ewg8_Wlm264', 'Bk4UMYcBgC8'];
-  let ytIdIdx = 0;
   const isHttp = location.protocol === 'http:' || location.protocol === 'https:';
   const BPM = 86;
   const BEAT = 60 / BPM; // 0.69767s
@@ -696,8 +666,7 @@
   const qs = new URLSearchParams(location.search);
   const isObsMode = qs.has('obs') || qs.has('clean');
   let lang = (qs.get('lang') || 'en').toLowerCase() === 'es' ? 'es' : 'en';
-  let audioSource = qs.get('audio') || 'youtube';
-  let songOffset = Number(qs.get('offset') || 0);
+  let audioSource = qs.get('audio') || 'synth';
   if (isObsMode) document.body.classList.add('clean-mode');
 
   const COPY = {
@@ -706,14 +675,14 @@
       lbTitle: 'EVERY MATCH HAS A STORY.',
       lbSub: 'Every local deserves the big stage.',
       lbTitle2: '100% FREE. ZERO PAYWALLS.',
-      lbSub2: 'From your local weekly to the grand finals stage.',
+      lbSub2: 'Built to grow across fighting games with the community.',
       plHead: 'Built for <em>real players.</em>',
-      plFootL: 'ZERO SUBSCRIPTIONS · ZERO CLOUD · RUNS 100% LOCAL IN OBS STUDIO',
+      plFootL: 'ZERO SUBSCRIPTIONS · ZERO CLOUD · DESIGNED TO EXPAND ACROSS FIGHTING GAMES',
       plFootR: '100% FREE FOR THE FGC',
-      coverKicker: 'OPEN-SOURCE LOCAL BROADCAST SUITE',
-      cp: ['56 SCOREBARS', '42 VS SPLASH', '24 TOP 8 RESULTS', '240+ GAMES'],
+      coverKicker: 'OPEN-SOURCE · GROWING WITH THE FGC',
+      cp: ['56 SCOREBARS', '42 VS SPLASH', '24 TOP 8 RESULTS', 'EXPANDING TO MORE GAMES'],
       sbStrip: '56 Scorebars <em>zero HUD overlap</em>',
-      crVsK: '42 ANIMATED DESIGNS · 240+ GAMES',
+      crVsK: '42 ANIMATED DESIGNS · 240+ ROSTERS',
       crVsT: 'INTERACTIVE VS SPLASH',
       crResK: '24 TOP 8 & PODIUM LAYOUTS',
       crResT: 'FINAL RESULTS + 1080P PNG',
@@ -723,15 +692,18 @@
       outTitle: 'FOR THE FGC.<em>Free forever.</em>',
       of1: 'Start.gg & Challonge · RAM-only token safety',
       of2: 'Offline Mobile / Tablet QR Control (< 5 ms)',
-      of3: 'Bilingual EN / ES · OBS Dock · 114 Vector Flags',
+      of3: 'Bilingual EN / ES · Built to expand to more games',
       outBy: 'By Nordi5ke',
       outKofi: '☕ ko-fi.com/nordi5ke (Optional)',
+      outGrowTxt: 'ACTIVELY EVOLVING · MORE GAMES COMING',
+      outGrowPill: 'OPEN ROADMAP',
+      outFootL: 'BUILT TO GROW WITH THE COMMUNITY',
       play: '▶ Play Trailer',
       pause: '⏸ Pause',
       scenes: [
-        '01 // TEKKEN 8 LOOKBOOK',
+        '01 // FGC LOOKBOOK',
         '02 // REAL PLAYERS WALL',
-        '03 // MAGAZINE COVER DROP',
+        '03 // MAGAZINE COVER',
         '04 // 56 LIVE SCOREBARS',
         '05 // 42 REAL VS SPLASH',
         '06 // REAL TOP 8 & PNG',
@@ -743,14 +715,14 @@
       lbTitle: 'CADA COMBATE TIENE UNA HISTORIA.',
       lbSub: 'Cada local merece un gran escenario.',
       lbTitle2: '100% GRATIS. SIN CUOTAS.',
-      lbSub2: 'De tu semanal al escenario de la Gran Final.',
+      lbSub2: 'Un proyecto vivo pensado para crecer a más juegos de lucha.',
       plHead: 'Hecho para <em>jugadores reales.</em>',
-      plFootL: 'CERO SUSCRIPCIONES · CERO NUBE · 100% LOCAL EN OBS STUDIO',
+      plFootL: 'CERO CUOTAS · CERO NUBE · PENSADO PARA AMPLIARSE A MÁS JUEGOS DE LUCHA',
       plFootR: '100% GRATIS PARA LA FGC',
-      coverKicker: 'SUITE LOCAL OPEN-SOURCE DE RETRANSMISIÓN',
-      cp: ['56 MARCADORES', '42 PANTALLAS VS', '24 TOP 8 FINALES', '+240 JUEGOS'],
+      coverKicker: 'OPEN-SOURCE · EN CONSTANTE CRECIMIENTO',
+      cp: ['56 MARCADORES', '42 PANTALLAS VS', '24 TOP 8 FINALES', 'EN EXPANSIÓN A MÁS JUEGOS'],
       sbStrip: '56 Marcadores <em>cero solapamiento HUD</em>',
-      crVsK: '42 DISEÑOS ANIMADOS · +240 JUEGOS',
+      crVsK: '42 DISEÑOS ANIMADOS · +240 PLANTILLAS',
       crVsT: 'PANTALLA VS INTERACTIVA',
       crResK: '24 DISEÑOS TOP 8 Y PODIO',
       crResT: 'RESULTADOS + PNG 1080P',
@@ -760,13 +732,16 @@
       outTitle: 'PARA LA FGC.<em>Gratis siempre.</em>',
       of1: 'Start.gg y Challonge · Privacidad solo en RAM',
       of2: 'Control Móvil / Tablet con QR Offline (< 5 ms)',
-      of3: 'Bilingüe EN / ES · Panel OBS · 114 Banderas',
+      of3: 'Bilingüe EN / ES · Pensado para ampliar a más juegos',
       outBy: 'Por Nordi5ke',
       outKofi: '☕ ko-fi.com/nordi5ke (Opcional)',
+      outGrowTxt: 'EN EVOLUCIÓN · PENSADO PARA MÁS JUEGOS',
+      outGrowPill: 'PROYECTO ABIERTO',
+      outFootL: 'HECHO PARA CRECER CON LA COMUNIDAD',
       play: '▶ Reproducir Tráiler',
       pause: '⏸ Pausa',
       scenes: [
-        '01 // LOOKBOOK TEKKEN 8',
+        '01 // LOOKBOOK FGC',
         '02 // JUGADORES REALES',
         '03 // PORTADA PRINCIPAL',
         '04 // 56 MARCADORES EN VIVO',
@@ -778,7 +753,7 @@
   };
 
   /* =========================================================================
-     DYNAMIC REAL DATA LOADER (PULLS YOUR REAL PLAYERS, AVATARS, LOGO & RENDERS)
+     REAL PLAYERS & REAL TEKKEN 8 RENDERS (WORKS ON BOTH localhost AND file://!)
      ========================================================================= */
   const LOCAL_CODE_MAP = {
     'Reina': 'rei', 'Devil Jin': 'dvj', 'Fahkumram': 'fak', 'Shaheen': 'sha',
@@ -803,87 +778,89 @@
     return u;
   };
 
-  const FALLBACK_PLAYERS = [
-    { name: 'Player 1', sponsor: 'FGC', flag: 'JP', region: '', character: 'Reina', avatar: '' },
-    { name: 'Player 2', sponsor: 'FGC', flag: 'ES', region: 'ES-MD', character: 'Shaheen', avatar: '' },
-    { name: 'Player 3', sponsor: 'FGC', flag: 'KR', region: '', character: 'Fahkumram', avatar: '' },
-    { name: 'Player 4', sponsor: 'FGC', flag: 'ES', region: 'ES-AN', character: 'Ling Xiaoyu', avatar: '' },
-    { name: 'Player 5', sponsor: 'FGC', flag: 'US', region: 'US-CA', character: 'Eddy Gordo', avatar: '' },
-    { name: 'Player 6', sponsor: 'FGC', flag: 'GB', region: 'GB-SCT', character: 'Jun Kazama', avatar: '' },
-    { name: 'Player 7', sponsor: 'FGC', flag: 'FR', region: '', character: 'Jin Kazama', avatar: '' },
-    { name: 'Player 8', sponsor: 'FGC', flag: 'BR', region: '', character: 'Bryan Fury', avatar: '' }
+  // Real community players & Tekken 8 mains (used automatically offline/file:// AND enriched live from /api/state + /api/players!)
+  const DEFAULT_REAL_PLAYERS = [
+    { place: 1, name: 'PoderTop',          sponsor: 'PBRD',     flag: 'ES', region: 'ES-AN', character: 'Eddy Gordo',            handle: '@PoderTop',     avatar: '' },
+    { place: 2, name: 'Oracle_99',         sponsor: '',         flag: 'ES', region: 'ES-CN', character: 'Shaheen',               handle: '@Oracle_Javier',avatar: '' },
+    { place: 3, name: 'BadCat',            sponsor: 'DM',       flag: 'ES', region: 'ES-GA', character: 'Fahkumram',             handle: '@BadCatGatocan',avatar: '' },
+    { place: 4, name: 'Silmad',            sponsor: 'PBRD',     flag: 'ES', region: 'ES-EX', character: 'Ling Xiaoyu',           handle: '@Silmad',       avatar: '' },
+    { place: 5, name: 'Copito',            sponsor: 'DM',       flag: 'ES', region: 'ES-IB', character: 'Robert "Bob" Richards', handle: '@AdrrnnCopito', avatar: '' },
+    { place: 5, name: 'Joker Intensifies', sponsor: 'MESETEAM', flag: 'ES', region: 'ES-MD', character: 'Jun Kazama',            handle: '@JookerTekken', avatar: '' },
+    { place: 7, name: 'corrales46',        sponsor: 'DM',       flag: 'ES', region: 'ES-AN', character: 'Reina',                 handle: '@corrales46',   avatar: '' },
+    { place: 7, name: 'Crebain',           sponsor: '',         flag: 'ES', region: '',      character: 'Bryan Fury',            handle: '@Crebain',      avatar: '' },
+    { place: 9, name: 'Ropesu',            sponsor: 'PBRD',     flag: 'ES', region: 'ES-CB', character: 'Eddy Gordo',            handle: '@Ropesu',       avatar: '' },
+    { place: 9, name: 'Nordi5ke',          sponsor: 'PBRD',     flag: 'ES', region: 'ES-AN', character: 'Devil Jin',             handle: '@Nordi5ke',     avatar: '' }
   ];
+
+  // Clean centered portrait framing defaults so faces NEVER sink low on Top 8 cards!
+  const normalizeTop8Entry = (p, i) => ({
+    place: p.place || [1, 2, 3, 4, 5, 5, 7, 7][i],
+    name: p.name,
+    sponsor: p.sponsor || '',
+    flag: p.flag || 'ES',
+    region: p.region || '',
+    character: p.character || DEFAULT_REAL_PLAYERS[i]?.character || 'Reina',
+    handle: p.handle || '',
+    avatar: p.avatar || '',
+    charZoom: 112,
+    charX: 0,
+    charY: -18,
+    charFlip: false
+  });
 
   const liveData = {
     state: null,
-    players: [...FALLBACK_PLAYERS],
-    top8: [...FALLBACK_PLAYERS],
-    eventLogo: '',
-    eventTitle: 'TEKKEN 8 FINALS'
+    players: [...DEFAULT_REAL_PLAYERS],
+    top8: DEFAULT_REAL_PLAYERS.slice(0, 8).map(normalizeTop8Entry),
+    eventLogo: isHttp ? '' : 'data/media/branding/event_tournament_starfest_2026.png',
+    eventTitle: 'STARFEST 2026 — TOP 8'
   };
 
   async function loadRealLocalDatabase() {
-    if (!isHttp) {
-      populateAllRealVisuals();
-      toast(lang === 'es'
-        ? '⚠️ Ábrelo en http://localhost:8787/trailer.html con Start_Scorebar.bat para tu BD real y música'
-        : '⚠️ Open via http://localhost:8787/trailer.html (Start_Scorebar.bat) for live DB & YouTube audio');
-      return;
+    if (isHttp) {
+      try {
+        const [stRes, plRes] = await Promise.all([
+          fetch('/api/state', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null),
+          fetch('/api/players', { cache: 'no-store' }).then(r => r.ok ? r.json() : []).catch(() => [])
+        ]);
+        liveData.state = stRes;
+        const dbPlayers = Array.isArray(plRes) ? plRes : [];
+        const resPlacements = Array.isArray(stRes?.results?.placements)
+          ? stRes.results.placements.filter(p => p && p.name && !/^Player \d+$/.test(p.name))
+          : [];
+
+        const merged = [];
+        const seen = new Set();
+        const pushUnique = (p) => {
+          if (!p || !p.name || /^Player \d+$/.test(p.name)) return;
+          const key = p.name.toLowerCase();
+          if (seen.has(key)) return;
+          seen.add(key);
+          merged.push({
+            name: p.name,
+            sponsor: p.sponsor || '',
+            flag: p.flag || '',
+            region: p.region || '',
+            character: p.character || 'Reina',
+            avatar: p.avatar || '',
+            handle: p.handle || '',
+            place: p.place || (merged.length + 1)
+          });
+        };
+        resPlacements.forEach(pushUnique);
+        if (stRes?.p1?.name) pushUnique(stRes.p1);
+        if (stRes?.p2?.name) pushUnique(stRes.p2);
+        dbPlayers.filter(p => p.character || p.avatar).forEach(pushUnique);
+        dbPlayers.forEach(pushUnique);
+        DEFAULT_REAL_PLAYERS.forEach(pushUnique);
+
+        liveData.players = merged;
+        const rawTop8 = (resPlacements.length >= 4 ? resPlacements : merged.slice(0, 8)).slice(0, 8);
+        liveData.top8 = rawTop8.map(normalizeTop8Entry);
+        liveData.eventLogo = stRes?.results?.logoUrl || stRes?.vs?.logoUrl || '';
+        liveData.eventTitle = stRes?.results?.title || stRes?.vs?.footerText || 'STARFEST 2026 — TOP 8';
+      } catch {}
     }
-    try {
-      const [stRes, plRes] = await Promise.all([
-        fetch('/api/state', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null),
-        fetch('/api/players', { cache: 'no-store' }).then(r => r.ok ? r.json() : []).catch(() => [])
-      ]);
-      liveData.state = stRes;
-      const dbPlayers = Array.isArray(plRes) ? plRes : [];
-      const resPlacements = Array.isArray(stRes?.results?.placements)
-        ? stRes.results.placements.filter(p => p && p.name && !/^Player \d+$/.test(p.name))
-        : [];
-
-      const merged = [];
-      const seen = new Set();
-      const pushUnique = (p) => {
-        if (!p || !p.name) return;
-        const key = p.name.toLowerCase();
-        if (seen.has(key)) return;
-        seen.add(key);
-        merged.push({
-          name: p.name,
-          sponsor: p.sponsor || '',
-          flag: p.flag || '',
-          region: p.region || '',
-          character: p.character || 'Jin Kazama',
-          avatar: p.avatar || '',
-          handle: p.handle || '',
-          place: p.place || (merged.length + 1)
-        });
-      };
-      resPlacements.forEach(pushUnique);
-      if (stRes?.p1?.name) pushUnique(stRes.p1);
-      if (stRes?.p2?.name) pushUnique(stRes.p2);
-      dbPlayers.filter(p => p.character || p.avatar).forEach(pushUnique);
-      dbPlayers.forEach(pushUnique);
-      FALLBACK_PLAYERS.forEach(pushUnique);
-
-      liveData.players = merged;
-      liveData.top8 = (resPlacements.length >= 4 ? resPlacements : merged.slice(0, 8)).slice(0, 8).map((p, i) => ({
-        place: p.place || [1, 2, 3, 4, 5, 5, 7, 7][i],
-        name: p.name,
-        sponsor: p.sponsor || '',
-        flag: p.flag || '',
-        region: p.region || '',
-        character: p.character || FALLBACK_PLAYERS[i].character,
-        handle: p.handle || '',
-        avatar: p.avatar || '',
-        charZoom: p.charZoom ?? 104,
-        charX: p.charX ?? 0,
-        charY: p.charY ?? 0,
-        charFlip: Boolean(p.charFlip)
-      }));
-      liveData.eventLogo = stRes?.results?.logoUrl || stRes?.vs?.logoUrl || '';
-      liveData.eventTitle = stRes?.results?.title || stRes?.vs?.footerText || 'TEKKEN 8 FINALS';
-    } catch {}
     populateAllRealVisuals();
   }
 
@@ -902,7 +879,7 @@
     const flagMap = window.FGC_FLAGS || {};
 
     const lookChars = [
-      liveData.top8[0]?.character || 'Reina',
+      liveData.top8[0]?.character || 'Eddy Gordo',
       'Devil Jin',
       liveData.top8[2]?.character || 'Fahkumram',
       liveData.top8[1]?.character || 'Shaheen'
@@ -918,8 +895,8 @@
       const f1 = p.flag && flagMap[p.flag] ? `<span>${flagMap[p.flag].svg}</span>` : '';
       const f2 = p.region && flagMap[p.region] ? `<span>${flagMap[p.region].svg}</span>` : '';
       const avUrl = safeAvatarUrl(p.avatar);
-      const rUrl = renderUrl(p.character || 'Jin Kazama', 'vs_renders');
-      const fbUrl = renderUrl(p.character || 'Jin Kazama', 'full');
+      const rUrl = renderUrl(p.character || 'Reina', 'vs_renders');
+      const fbUrl = renderUrl(p.character || 'Reina', 'full');
       return `
         <div class="p-card" id="pcard-${idx}">
           <div class="pc-bg-accent"></div>
@@ -939,13 +916,12 @@
     }).join('');
 
     if (liveData.eventLogo) {
-      ['pl-event-logo', 'cover-event-logo', 'outro-event-logo'].forEach(id => {
+      ['pl-event-logo', 'cover-event-logo'].forEach(id => {
         const el = document.getElementById(id);
         if (el) { el.src = liveData.eventLogo; el.style.display = 'block'; }
       });
-      document.getElementById('pl-event-name').textContent = liveData.eventTitle;
-      document.getElementById('outro-event-txt').textContent = liveData.eventTitle;
     }
+    document.getElementById('pl-event-name').textContent = liveData.eventTitle;
 
     setImgWithFallback(document.getElementById('cover-img-l'), 'Jin Kazama');
     setImgWithFallback(document.getElementById('cover-img-r'), 'Kazuya Mishima');
@@ -964,7 +940,7 @@
   }
 
   /* =========================================================================
-     REAL OVERLAY STATE BUILDERS
+     REAL OVERLAY STATE BUILDERS (CENTERED PORTRAITS + REAL PLAYERS!)
      ========================================================================= */
   const BASE_STYLE = {
     customColors: false, bgMode: 'gradient', fontName: 'theme', fontScore: 'theme',
@@ -983,8 +959,8 @@
   };
 
   function buildRealScorebar(theme, pIdxA = 0, pIdxB = 1, ov = {}) {
-    const a = liveData.players[pIdxA] || FALLBACK_PLAYERS[0];
-    const b = liveData.players[pIdxB] || FALLBACK_PLAYERS[1];
+    const a = liveData.players[pIdxA] || DEFAULT_REAL_PLAYERS[0];
+    const b = liveData.players[pIdxB] || DEFAULT_REAL_PLAYERS[1];
     return {
       theme, visible: true, round: ov.round || 'GRAND FINALS', format: 'FT3',
       showFlags: 'both', showChars: true, showMatchPoint: ov.mp !== false, showCasters: Boolean(ov.casters),
@@ -997,16 +973,16 @@
   }
 
   function buildRealVs(design, pIdxA = 0, pIdxB = 1, ov = {}) {
-    const a = liveData.players[pIdxA] || FALLBACK_PLAYERS[0];
-    const b = liveData.players[pIdxB] || FALLBACK_PLAYERS[1];
+    const a = liveData.players[pIdxA] || DEFAULT_REAL_PLAYERS[0];
+    const b = liveData.players[pIdxB] || DEFAULT_REAL_PLAYERS[1];
     return {
-      visible: true, round: ov.round || 'WINNERS FINALS', format: 'FT3',
-      p1: { name: a.name, sponsor: a.sponsor, flag: a.flag || 'ES', region: a.region || '', bracket: 'W', character: a.character || 'Reina', score: 2, avatar: a.avatar || '' },
+      visible: true, round: ov.round || 'GRAND FINALS', format: 'FT3',
+      p1: { name: a.name, sponsor: a.sponsor, flag: a.flag || 'ES', region: a.region || '', bracket: 'W', character: a.character || 'Eddy Gordo', score: 2, avatar: a.avatar || '' },
       p2: { name: b.name, sponsor: b.sponsor, flag: b.flag || 'ES', region: b.region || '', bracket: 'W', character: b.character || 'Shaheen', score: 2, avatar: b.avatar || '' },
       vs: {
         visible: true, design, source: 'live', game: 'tekken8', pack: 'vs_renders',
         eyebrow: liveData.eventTitle, footerText: liveData.eventTitle,
-        logoUrl: liveData.eventLogo || '', logoPos: 'bottom-center', logoScale: 100,
+        logoUrl: liveData.eventLogo || '', logoPos: 'bottom-center', logoScale: 100, h2hOffsetY: 136,
         bgMode: 'theme', frameStyle: 'theme', pattern: 'theme', patternDir: 'diag',
         patternSpeed: 34, patternOpacity: -1, patternScale: 100,
         dividerStyle: 'theme', dividerAnim: 'scroll-down', dividerSpeed: 42, dividerWidth: 0, dividerTilt: -999,
@@ -1023,120 +999,261 @@
   }
 
   function buildRealResults(design, ov = {}) {
+    const list = liveData.top8.length ? liveData.top8 : DEFAULT_REAL_PLAYERS.slice(0, 8).map(normalizeTop8Entry);
     return {
       visible: true,
       results: {
         visible: true, design, layout: 'theme', cardStyle: 'theme',
-        title: liveData.eventTitle, subtitle: 'TEKKEN 8 · TOP 8 FINALS',
+        title: liveData.eventTitle, subtitle: 'TOP 8 FINALS',
         entrantsCount: liveData.state?.results?.entrantsCount || '41',
         footerText: liveData.eventTitle,
         logoUrl: liveData.eventLogo || '',
-        game: 'tekken8', pack: 'vs_renders', flagMode: 'both', avatarMode: 'char-badge', bgMode: 'theme',
+        game: 'tekken8', pack: 'vs_renders', flagMode: 'both', avatarMode: 'chars-only', bgMode: 'theme',
         showCrown: true, showCharNames: true, showHandles: true, showEntrants: true, showLogo: Boolean(liveData.eventLogo),
-        charZoom: 100, charOffsetX: 0, charOffsetY: 0, charFlipAll: false,
-        entryAnim: ov.entry || 'cascade-slam', entrySpeed: 96, staggerMs: 70,
-        ambientFx: ov.fx || 'sakura', idleAnim: 'champ-glow',
+        charZoom: 108, charOffsetX: 0, charOffsetY: -12, charFlipAll: false,
+        entryAnim: ov.entry || 'cascade-slam', entrySpeed: 96, staggerMs: 65,
+        ambientFx: ov.fx || 'confetti', idleAnim: 'champ-glow',
         pattern: 'theme', patternDir: 'diag', patternSpeed: 28, patternOpacity: -1, patternScale: 100,
-        placements: liveData.top8.length ? liveData.top8 : FALLBACK_PLAYERS
+        placements: list
       }
     };
   }
 
   /* =========================================================================
-     OFFICIAL YOUTUBE "HASHIR - MOUNTAIN MAN" (QC1pmCkH8JY) + LOCAL MP3 SYNC
+     GUARANTEED BUILT-IN LO-FI CHILL-BIT OST (D MAJOR · 86 BPM · 100% OFFLINE!)
+     Warm nostalgic vocal-melody synth + lush Rhodes chords + lo-fi beat.
+     Plays INSTANTLY on Play (both localhost & file://), zero network failures!
      ========================================================================= */
-  let ytPlayer = null;
-  let ytReady = false;
-  let localAudioEl = null;
-
-  function loadYouTubeApi() {
-    if (!isHttp) {
-      document.getElementById('yt-status').textContent = 'Run via localhost:8787';
-      return;
+  class ChillBitMountainEngine {
+    constructor() {
+      this.ctx = null;
+      this.master = null;
+      this.bus = null;
+      this.delayL = null;
+      this.noiseBuf = null;
+      this.localEl = null;
+      this.lastStep = -1;
     }
-    if (window.YT && window.YT.Player) { createYtPlayer(); return; }
-    window.onYouTubeIframeAPIReady = createYtPlayer;
-    const tag = document.createElement('script');
-    tag.src = 'https://www.youtube.com/iframe_api';
-    tag.onerror = () => { document.getElementById('yt-status').textContent = 'Offline · Use MP3'; };
-    document.head.appendChild(tag);
-  }
 
-  function createYtPlayer() {
-    if (!isHttp) return;
-    try {
-      ytPlayer = new window.YT.Player('yt-player-host', {
-        width: '224', height: '126', videoId: YT_VIDEO_IDS[ytIdIdx],
-        playerVars: { autoplay: 0, controls: 1, modestbranding: 1, rel: 0, playsinline: 1, origin: location.origin },
-        events: {
-          onReady: () => {
-            ytReady = true;
-            document.getElementById('yt-status').textContent = 'Ready ✓';
-            if (playing) syncAudio(currentSec, true);
-          },
-          onError: () => {
-            if (ytIdIdx + 1 < YT_VIDEO_IDS.length) {
-              ytIdIdx++;
-              document.getElementById('yt-status').textContent = `Mirror #${ytIdIdx + 1}...`;
-              try { ytPlayer.loadVideoById(YT_VIDEO_IDS[ytIdIdx], Math.max(0, currentSec + songOffset)); } catch {}
-            } else {
-              document.getElementById('yt-status').textContent = 'Use Local MP3';
-            }
-          }
-        }
-      });
-    } catch {}
-  }
-
-  function attachLocalAudio(url, name, isObj = false) {
-    if (localAudioEl) {
-      localAudioEl.pause();
-      if (localAudioEl._obj) URL.revokeObjectURL(localAudioEl._obj);
-    }
-    const el = new Audio(url);
-    el.preload = 'auto';
-    el._obj = isObj ? url : null;
-    localAudioEl = el;
-    audioSource = 'local';
-    document.getElementById('sel-audio').value = 'local';
-    document.getElementById('yt-dock').style.display = 'none';
-    toast(`🎵 Local Track Ready: ${name}`);
-  }
-
-  async function probeLocalMp3() {
-    if (!isHttp) return;
-    try {
-      const r = await fetch('/api/trailer-audio', { method: 'HEAD', cache: 'no-store' });
-      if (r.ok) attachLocalAudio('/api/trailer-audio', 'Hashir — Mountain Man (Local)', false);
-    } catch {}
-  }
-
-  function syncAudio(sec, isPlaying) {
-    const target = Math.max(0, sec + songOffset);
-    const vol0to1 = sec > TOTAL_SEC - 3.0 ? Math.max(0, (TOTAL_SEC - sec) / 3.0) : 1;
-
-    if (audioSource === 'local' && localAudioEl) {
-      if (ytReady && ytPlayer?.pauseVideo) try { ytPlayer.pauseVideo(); } catch {}
-      if (!isPlaying) { if (!localAudioEl.paused) localAudioEl.pause(); return; }
-      if (Math.abs(localAudioEl.currentTime - target) > 0.45) {
-        try { localAudioEl.currentTime = target; } catch {}
+    ensure() {
+      if (this.ctx) {
+        if (this.ctx.state === 'suspended') this.ctx.resume().catch(() => {});
+        return;
       }
-      localAudioEl.volume = Math.max(0, Math.min(1, vol0to1 * 0.88));
-      if (localAudioEl.paused) localAudioEl.play().catch(() => {});
-    } else if (audioSource === 'youtube' && ytReady && ytPlayer) {
-      if (localAudioEl && !localAudioEl.paused) localAudioEl.pause();
+      const AC = window.AudioContext || window.webkitAudioContext;
+      this.ctx = new AC();
+
+      const comp = this.ctx.createDynamicsCompressor();
+      comp.threshold.value = -12; comp.ratio.value = 4;
+
+      this.master = this.ctx.createGain();
+      this.master.gain.value = 0.85;
+
+      this.bus = this.ctx.createGain();
+      this.bus.gain.value = 0.72;
+
+      // Dreamy subtle quarter-note stereo echo for nostalgic atmosphere
+      const delay = this.ctx.createDelay(1.0);
+      delay.delayTime.value = BEAT * 0.75;
+      const fb = this.ctx.createGain();
+      fb.gain.value = 0.24;
+      const wet = this.ctx.createGain();
+      wet.gain.value = 0.22;
+      const dlp = this.ctx.createBiquadFilter();
+      dlp.type = 'lowpass'; dlp.frequency.value = 1800;
+
+      this.bus.connect(comp);
+      this.bus.connect(delay);
+      delay.connect(dlp);
+      dlp.connect(fb); fb.connect(delay);
+      dlp.connect(wet); wet.connect(comp);
+
+      comp.connect(this.master);
+      this.master.connect(this.ctx.destination);
+
+      const len = this.ctx.sampleRate * 2;
+      this.noiseBuf = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
+      const d = this.noiseBuf.getChannelData(0);
+      for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+      this.updateVolumes();
+    }
+
+    updateVolumes() {
+      if (this.ctx && this.bus) {
+        this.bus.gain.setTargetAtTime(audioSource === 'synth' ? 0.74 : 0, this.ctx.currentTime, 0.04);
+      }
+      if (this.localEl) this.localEl.muted = (audioSource !== 'local');
+    }
+
+    attachLocal(url, name, isObj = false) {
+      if (this.localEl) {
+        this.localEl.pause();
+        if (this.localEl._obj) URL.revokeObjectURL(this.localEl._obj);
+      }
+      const el = new Audio(url);
+      el.preload = 'auto';
+      el._obj = isObj ? url : null;
+      this.localEl = el;
+      audioSource = 'local';
+      document.getElementById('sel-audio').value = 'local';
+      this.updateVolumes();
+      toast(`🎵 Loaded: ${name}`);
+    }
+
+    async probeLocal() {
+      if (!isHttp) return;
       try {
-        if (!isPlaying) { ytPlayer.pauseVideo(); return; }
-        ytPlayer.setVolume(Math.round(vol0to1 * 90));
-        const ytCur = typeof ytPlayer.getCurrentTime === 'function' ? ytPlayer.getCurrentTime() : target;
-        if (Math.abs(ytCur - target) > 0.85) ytPlayer.seekTo(target, true);
-        if (ytPlayer.getPlayerState?.() !== 1) ytPlayer.playVideo();
+        const r = await fetch('/api/trailer-audio', { method: 'HEAD', cache: 'no-store' });
+        if (r.ok) this.attachLocal('/api/trailer-audio', 'Custom Local Track', false);
       } catch {}
-    } else {
-      if (localAudioEl && !localAudioEl.paused) localAudioEl.pause();
-      if (ytReady && ytPlayer?.pauseVideo) try { ytPlayer.pauseVideo(); } catch {}
+    }
+
+    syncLocal(sec, isPlaying) {
+      if (!this.localEl) return;
+      if (audioSource !== 'local' || !isPlaying) {
+        if (!this.localEl.paused) this.localEl.pause();
+        return;
+      }
+      if (Math.abs(this.localEl.currentTime - sec) > 0.4) {
+        try { this.localEl.currentTime = sec; } catch {}
+      }
+      const fade = sec > TOTAL_SEC - 3 ? Math.max(0, (TOTAL_SEC - sec) / 3) : 1;
+      this.localEl.volume = Math.max(0, Math.min(1, fade * 0.88));
+      if (this.localEl.paused) this.localEl.play().catch(() => {});
+    }
+
+    stop() {
+      this.lastStep = -1;
+      if (this.localEl && !this.localEl.paused) this.localEl.pause();
+    }
+
+    // Chill-bit melodic lead (soft filtered triangle + subtle 25% pulse warmth)
+    leadNote(freq, dur = 0.42, gain = 0.17) {
+      const t = this.ctx.currentTime;
+      const o1 = this.ctx.createOscillator();
+      const o2 = this.ctx.createOscillator();
+      const lp = this.ctx.createBiquadFilter();
+      const g = this.ctx.createGain();
+      o1.type = 'triangle'; o1.frequency.setValueAtTime(freq, t);
+      o2.type = 'square';   o2.frequency.setValueAtTime(freq, t);
+      const mix2 = this.ctx.createGain(); mix2.gain.value = 0.16; // gentle nostalgic 8-bit edge, never harsh!
+      lp.type = 'lowpass'; lp.frequency.setValueAtTime(2150, t); lp.frequency.exponentialRampToValueAtTime(950, t + dur);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(gain, t + 0.025);
+      g.gain.exponentialRampToValueAtTime(gain * 0.52, t + dur * 0.55);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o1.connect(lp); o2.connect(mix2); mix2.connect(lp);
+      lp.connect(g); g.connect(this.bus);
+      o1.start(t); o2.start(t); o1.stop(t + dur + 0.04); o2.stop(t + dur + 0.04);
+    }
+
+    chordPad(freqs, dur = 2.6, gain = 0.085) {
+      const t = this.ctx.currentTime;
+      freqs.forEach((f, idx) => {
+        const st = t + idx * 0.016;
+        const o = this.ctx.createOscillator();
+        const g = this.ctx.createGain();
+        o.type = 'sine'; o.frequency.setValueAtTime(f, st);
+        g.gain.setValueAtTime(0.0001, st);
+        g.gain.linearRampToValueAtTime(gain, st + 0.06);
+        g.gain.exponentialRampToValueAtTime(0.0001, st + dur);
+        o.connect(g); g.connect(this.bus);
+        o.start(st); o.stop(st + dur + 0.05);
+      });
+    }
+
+    subBass(freq, dur = 1.6, gain = 0.25) {
+      const t = this.ctx.currentTime;
+      const o = this.ctx.createOscillator();
+      const g = this.ctx.createGain();
+      o.type = 'sine'; o.frequency.setValueAtTime(freq, t);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(gain, t + 0.04);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g); g.connect(this.bus);
+      o.start(t); o.stop(t + dur + 0.04);
+    }
+
+    kick(gain = 0.46) {
+      const t = this.ctx.currentTime;
+      const o = this.ctx.createOscillator();
+      const g = this.ctx.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(118, t);
+      o.frequency.exponentialRampToValueAtTime(43, t + 0.085);
+      g.gain.setValueAtTime(gain, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
+      o.connect(g); g.connect(this.bus);
+      o.start(t); o.stop(t + 0.24);
+    }
+
+    snare(gain = 0.20) {
+      const t = this.ctx.currentTime;
+      const n = this.ctx.createBufferSource(); n.buffer = this.noiseBuf;
+      const bp = this.ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1350; bp.Q.value = 1.0;
+      const g = this.ctx.createGain();
+      g.gain.setValueAtTime(gain, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.13);
+      n.connect(bp); bp.connect(g); g.connect(this.bus);
+      n.start(t); n.stop(t + 0.15);
+    }
+
+    hat(gain = 0.06) {
+      const t = this.ctx.currentTime;
+      const n = this.ctx.createBufferSource(); n.buffer = this.noiseBuf;
+      const hp = this.ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 7200;
+      const g = this.ctx.createGain();
+      g.gain.setValueAtTime(gain, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.04);
+      n.connect(hp); hp.connect(g); g.connect(this.bus);
+      n.start(t); n.stop(t + 0.05);
+    }
+
+    tick(sec) {
+      if (!this.ctx || audioSource !== 'synth') return;
+      const step = Math.floor(sec / (BEAT / 2)); // 8th notes at 86 BPM
+      if (step <= this.lastStep) return;
+      if (step - this.lastStep > 3) this.lastStep = step - 1;
+
+      const beat = Math.floor(step / 2);
+      const inBar8 = step % 8; // 0..7 eighth-notes per bar
+      const bar = Math.floor(step / 8);
+
+      // Soulful D Major progression (Dmaj7 -> Bm7 -> Gmaj7 -> A6)
+      const prog = [
+        { sub: 73.42,  ch: [146.83, 220.00, 277.18, 369.99], mel: [587.33, 0, 554.37, 493.88, 440.00, 0, 369.99, 440.00] },
+        { sub: 61.74,  ch: [123.47, 185.00, 220.00, 293.66], mel: [493.88, 0, 440.00, 369.99, 329.63, 0, 293.66, 369.99] },
+        { sub: 98.00,  ch: [196.00, 246.94, 293.66, 369.99], mel: [493.88, 0, 554.37, 587.33, 739.99, 0, 659.25, 587.33] },
+        { sub: 110.00, ch: [164.81, 220.00, 277.18, 329.63], mel: [659.25, 0, 587.33, 554.37, 440.00, 0, 493.88, 0] }
+      ];
+      const cur = prog[bar % 4];
+
+      if (beat < 86) {
+        // Lush chords & deep bass on downbeats
+        if (inBar8 === 0) {
+          this.chordPad(cur.ch, BEAT * 3.8, 0.09);
+          this.subBass(cur.sub, BEAT * 3.5, beat >= 10 ? 0.25 : 0.16);
+        }
+        // Nostalgic lo-fi chill-bit melody line
+        const note = cur.mel[inBar8];
+        if (note && beat >= 2) {
+          this.leadNote(note, BEAT * (inBar8 === 4 ? 0.95 : 0.55), beat >= 22 ? 0.16 : 0.12);
+        }
+        // Warm lo-fi boom-bap groove kicks in cleanly at Scene 02 (beat 10)
+        if (beat >= 10 && beat < 84) {
+          if (inBar8 === 0 || inBar8 === 3 || (inBar8 === 5 && beat >= 32)) this.kick(0.45);
+          if (inBar8 === 2 || inBar8 === 6) this.snare(0.19);
+          if (inBar8 % 2 === 1) this.hat(0.06);
+        }
+      } else if (beat === 86 && inBar8 === 0) {
+        // Warm resolving final Dmaj9 chord fading cleanly out
+        this.chordPad([146.83, 220.00, 277.18, 329.63, 369.99, 587.33], 4.2, 0.10);
+        this.subBass(73.42, 3.6, 0.20);
+      }
+
+      this.lastStep = step;
     }
   }
+
+  const audio = new ChillBitMountainEngine();
 
   /* =========================================================================
      LIVE IFRAME ENGINE DISPATCH
@@ -1179,7 +1296,7 @@
     requestAnimationFrame(() => { w.style.transition = 'opacity 0.6s ease-out'; w.style.opacity = '0'; });
   }
   let ribTimer = null;
-  function showRibbon(k, t, ms = 3200) {
+  function showRibbon(k, t, ms = 3000) {
     clearTimeout(ribTimer);
     document.getElementById('cr-kicker').textContent = k;
     document.getElementById('cr-title').textContent = t;
@@ -1208,7 +1325,7 @@
       setScene('scene-lookbook');
     }},
     { beat: 5, sc: 0, run: () => {
-      wash(0.28);
+      wash(0.26);
       document.getElementById('lb-title').textContent = COPY[lang].lbTitle2;
       document.getElementById('lb-sub').textContent = COPY[lang].lbSub2;
     }},
@@ -1225,13 +1342,13 @@
 
     // 03: MAGAZINE COVER DROP WITH JIN & KAZUYA (Beats 22..32 = 0:15.3..0:22.3)
     { beat: 22, sc: 2, run: () => {
-      wash(0.48);
+      wash(0.45);
       setScene('scene-cover');
     }},
 
-    // 04: 56 LIVE SCOREBARS WITH YOUR REAL PLAYERS (Beats 32..48 = 0:22.3..0:33.5)
+    // 04: 56 LIVE SCOREBARS WITH REAL PLAYERS (Beats 32..48 = 0:22.3..0:33.5)
     { beat: 32, sc: 3, run: () => {
-      wash(0.34);
+      wash(0.32);
       setScene('scene-scorebar');
       document.getElementById('sb-theme-badge').textContent = '★ Tekken 8 Native HUD';
       setImgWithFallback(document.getElementById('sb-char-l'), liveData.players[0]?.character || 'Eddy Gordo');
@@ -1258,9 +1375,9 @@
 
     // 05: REAL FULL-BLEED VS SPLASH (Beats 48..62 = 0:33.5..0:43.3)
     { beat: 48, sc: 4, run: () => {
-      wash(0.42);
+      wash(0.4);
       setScene('slot-vs');
-      showRibbon(COPY[lang].crVsK, COPY[lang].crVsT, 3200);
+      showRibbon(COPY[lang].crVsK, COPY[lang].crVsT, 2800);
       pushVs(buildRealVs('t8-clash', 0, 1, { round: 'GRAND FINALS', entry: 'slam-split', fx: 'sparks' }), true);
     }},
     { beat: 53, sc: 4, run: () => {
@@ -1269,14 +1386,14 @@
     }},
     { beat: 57.5, sc: 4, run: () => {
       wash(0.28);
-      pushVs(buildRealVs('arcade-pop', 4, 5, { round: 'TOP 8 SHOWCASE', entry: 'katana-slash', fx: 'sheen' }), true);
+      pushVs(buildRealVs('arcade-pop', 6, 5, { round: 'TOP 8 SHOWCASE', entry: 'katana-slash', fx: 'sheen' }), true);
     }},
 
-    // 06: REAL FULL-BLEED TOP 8 RESULTS + LOGO + AVATARS (Beats 62..76 = 0:43.3..0:53.0)
+    // 06: REAL FULL-BLEED TOP 8 RESULTS + CENTERED RENDERS (Beats 62..76 = 0:43.3..0:53.0)
     { beat: 62, sc: 5, run: () => {
-      wash(0.42);
+      wash(0.4);
       setScene('slot-results');
-      showRibbon(COPY[lang].crResK, COPY[lang].crResT, 3000);
+      showRibbon(COPY[lang].crResK, COPY[lang].crResT, 2600);
       pushResults(buildRealResults('res-tv-prime-white', { entry: 'cascade-slam', fx: 'none' }), true);
     }},
     { beat: 66.5, sc: 5, run: () => {
@@ -1295,7 +1412,7 @@
     { beat: 76, sc: 6, run: () => {
       document.getElementById('png-stamp').classList.remove('show');
       hideRibbon();
-      wash(0.42);
+      wash(0.4);
       setScene('scene-outro');
     }},
     { beat: 88, sc: 6, run: () => {
@@ -1333,7 +1450,16 @@
     document.getElementById('of-3').textContent = c.of3;
     document.getElementById('out-by').textContent = c.outBy;
     document.getElementById('out-kofi').textContent = c.outKofi;
+    document.getElementById('outro-grow-txt').textContent = c.outGrowTxt;
+    document.getElementById('outro-grow-pill').textContent = c.outGrowPill;
+    document.getElementById('outro-foot-l').textContent = c.outFootL;
     document.getElementById('btn-play').textContent = playing ? c.pause : c.play;
+    if (warmedUp) {
+      document.getElementById('studio-status-txt').textContent =
+        lang === 'es'
+          ? `Listo · ${liveData.players.length} jugadores reales + renders + música integrada`
+          : `Ready · ${liveData.players.length} real players + renders + built-in music`;
+    }
   }
 
   const readyFrames = new Set();
@@ -1342,14 +1468,15 @@
     if (warmedUp) return;
     warmedUp = true;
     document.getElementById('studio-status').classList.add('ready');
-    document.getElementById('studio-status-txt').textContent =
-      lang === 'es'
-        ? `Listo · ${liveData.players.length} jugadores reales + renders Tekken 8 + Hashir - Mountain Man`
-        : `Ready · ${liveData.players.length} real players + Tekken 8 renders + Hashir - Mountain Man`;
+    applyLang();
     pushScorebar(buildRealScorebar('t8-native-hud', 0, 1), 't8', false);
     pushVs(buildRealVs('t8-clash', 0, 1), false);
     pushResults(buildRealResults('res-tv-prime-white'), false);
-    if (isObsMode) setTimeout(() => startPlayback(0), 500);
+    if (qs.has('t')) {
+      seekTo(Number(qs.get('t')) || 0, false);
+    } else if (isObsMode) {
+      setTimeout(() => startPlayback(0), 450);
+    }
   }
   [['sb', frameScorebar], ['vs', frameVs], ['res', frameResults]].forEach(([k, el]) => {
     el.addEventListener('load', () => { readyFrames.add(k); if (readyFrames.size >= 3) finishWarmup(); });
@@ -1359,7 +1486,7 @@
       }
     } catch {}
   });
-  setTimeout(finishWarmup, 1500);
+  setTimeout(finishWarmup, 1400);
 
   /* =========================================================================
      PLAYBACK LOOP
@@ -1375,6 +1502,7 @@
   function seekTo(sec, keepPlaying = playing) {
     currentSec = Math.max(0, Math.min(TOTAL_SEC, sec));
     startPerf = performance.now() - currentSec * 1000;
+    audio.lastStep = Math.floor(currentSec / (BEAT / 2)) - 1;
     const tb = currentSec / BEAT;
     let idx = 0;
     for (let i = 0; i < CUES.length; i++) if (CUES[i].beat <= tb) idx = i;
@@ -1383,23 +1511,24 @@
     lastCue = idx; curScene = sc;
     updateReadout();
     playing = keepPlaying;
-    syncAudio(currentSec, playing);
+    audio.syncLocal(currentSec, playing);
   }
 
   function startPlayback(fromSec = currentSec) {
+    audio.ensure();
     if (fromSec >= TOTAL_SEC - 0.3) fromSec = 0;
-    if (fromSec === 0) { lastCue = -1; curScene = 0; }
+    if (fromSec === 0) { lastCue = -1; curScene = 0; audio.lastStep = -1; }
     currentSec = fromSec;
     startPerf = performance.now() - currentSec * 1000;
     playing = true;
     document.getElementById('btn-play').textContent = COPY[lang].pause;
-    syncAudio(currentSec, true);
+    audio.syncLocal(currentSec, true);
   }
 
   function pausePlayback() {
     playing = false;
     document.getElementById('btn-play').textContent = COPY[lang].play;
-    syncAudio(currentSec, false);
+    audio.syncLocal(currentSec, false);
   }
 
   function updateReadout() {
@@ -1414,9 +1543,11 @@
       if (currentSec >= TOTAL_SEC) {
         currentSec = TOTAL_SEC;
         pausePlayback();
+        audio.stop();
         if (typeof onEnd === 'function') { const cb = onEnd; onEnd = null; cb(); }
       } else {
-        if (currentSec > TOTAL_SEC - 3.2) syncAudio(currentSec, true);
+        audio.tick(currentSec);
+        audio.syncLocal(currentSec, true);
         const cb = currentSec / BEAT;
         while (lastCue + 1 < CUES.length && CUES[lastCue + 1].beat <= cb) {
           lastCue++; curScene = CUES[lastCue].sc; CUES[lastCue].run();
@@ -1434,7 +1565,7 @@
   let activeStream = null;
   async function recordVideo(targetLang) {
     if (activeRec) return;
-    lang = targetLang; applyLang();
+    lang = targetLang; applyLang(); audio.ensure();
     try {
       toast(targetLang === 'es'
         ? 'Selecciona ESTA PESTAÑA y marca "Compartir audio de la pestaña"'
@@ -1501,8 +1632,8 @@
     g.fillText('FGC OPEN', 960, 505);
     g.fillStyle = '#e9a03b'; g.font = 'italic 400 148px "DM Serif Display", serif';
     g.fillText('Scorebars', 960, 645);
-    g.fillStyle = '#f6f2ea'; g.font = '700 28px "Space Mono", monospace';
-    g.fillText(targetLang === 'es' ? '56 MARCADORES · 42 VS · 24 TOP 8 · GITHUB' : '56 SCOREBARS · 42 VS · 24 TOP 8 · GITHUB', 960, 755);
+    g.fillStyle = '#f6f2ea'; g.font = '700 26px "Space Mono", monospace';
+    g.fillText(targetLang === 'es' ? '56 MARCADORES · 42 VS · 24 TOP 8 · MÁS JUEGOS EN CAMINO' : '56 SCOREBARS · 42 VS · 24 TOP 8 · EXPANDING TO MORE GAMES', 960, 755);
 
     const a = document.createElement('a');
     a.href = cv.toDataURL('image/png');
@@ -1534,13 +1665,13 @@
   window.addEventListener('drop', (e) => {
     e.preventDefault(); document.body.classList.remove('drag-over');
     const f = e.dataTransfer?.files?.[0];
-    if (f) attachLocalAudio(URL.createObjectURL(f), f.name, true);
+    if (f) { audio.ensure(); audio.attachLocal(URL.createObjectURL(f), f.name, true); }
   });
 
   document.getElementById('btn-load-mp3').addEventListener('click', () => document.getElementById('file-mp3').click());
   document.getElementById('file-mp3').addEventListener('change', (e) => {
     const f = e.target.files?.[0];
-    if (f) attachLocalAudio(URL.createObjectURL(f), f.name, true);
+    if (f) { audio.ensure(); audio.attachLocal(URL.createObjectURL(f), f.name, true); }
   });
   document.getElementById('btn-play').addEventListener('click', () => playing ? pausePlayback() : startPlayback(currentSec));
   document.getElementById('btn-restart').addEventListener('click', () => startPlayback(0));
@@ -1551,20 +1682,17 @@
   });
   document.getElementById('sel-audio').addEventListener('change', (e) => {
     audioSource = e.target.value;
-    document.getElementById('yt-dock').style.display = audioSource === 'youtube' ? 'block' : 'none';
-    if (audioSource === 'local' && !localAudioEl) document.getElementById('file-mp3').click();
-    syncAudio(currentSec, playing);
-  });
-  document.getElementById('inp-offset').addEventListener('change', (e) => {
-    songOffset = Math.max(0, Number(e.target.value) || 0);
-    syncAudio(currentSec, playing);
+    audio.ensure();
+    audio.updateVolumes();
+    if (audioSource === 'local' && !audio.localEl) document.getElementById('file-mp3').click();
+    audio.syncLocal(currentSec, playing);
   });
   document.getElementById('btn-rec-en').addEventListener('click', () => recordVideo('en'));
   document.getElementById('btn-rec-es').addEventListener('click', () => recordVideo('es'));
   document.getElementById('btn-thumb-en').addEventListener('click', () => exportThumbnail('en'));
   document.getElementById('btn-thumb-es').addEventListener('click', () => exportThumbnail('es'));
   document.getElementById('btn-copy-obs').addEventListener('click', () => {
-    const u = `${location.origin}${location.pathname}?obs=1&lang=${lang}&offset=${songOffset}`;
+    const u = `${location.origin}${location.pathname}?obs=1&lang=${lang}`;
     navigator.clipboard?.writeText(u).catch(() => {});
     toast(`📋 Copied OBS URL: ${u}`);
   });
@@ -1585,7 +1713,6 @@
   window.addEventListener('pointerup', () => { scrubbing = false; });
 
   window.addEventListener('keydown', (e) => {
-    if (e.target.tagName === 'INPUT') return;
     if (e.code === 'Space') { e.preventDefault(); playing ? pausePlayback() : startPlayback(currentSec); }
     else if (e.key === 'h' || e.key === 'H' || e.key === 'Escape') {
       if (document.body.classList.contains('clean-mode') && !activeRec) { document.body.classList.remove('clean-mode'); rescaleStage(); }
@@ -1599,15 +1726,14 @@
   applyLang();
   rescaleStage();
   loadRealLocalDatabase().then(() => {
-    seekTo(0, false);
+    seekTo(qs.has('t') ? (Number(qs.get('t')) || 0) : 0, false);
     if (warmedUp) {
       pushScorebar(buildRealScorebar('t8-native-hud', 0, 1), 't8', false);
       pushVs(buildRealVs('t8-clash', 0, 1), false);
       pushResults(buildRealResults('res-tv-prime-white'), false);
     }
   });
-  probeLocalMp3();
-  loadYouTubeApi();
+  audio.probeLocal();
   requestAnimationFrame(loop);
 })();
 </script>

@@ -1073,9 +1073,24 @@
     if (/^https?:\/\//i.test(u) && isHttp) return `/api/avatar-proxy?url=${encodeURIComponent(u)}`;
     return u;
   }
+  const LOCAL_T8_CODES = {
+    'asuka kazama': 'asu', 'asuka': 'asu', 'robert "bob" richards': 'bob', 'bob': 'bob',
+    'bryan fury': 'bry', 'bryan': 'bry', 'sergei dragunov': 'dra', 'dragunov': 'dra',
+    'devil jin': 'dvj', 'eddy gordo': 'edd', 'eddy': 'edd', 'fahkumram': 'fak',
+    'heihachi mishima': 'hei', 'heihachi': 'hei', 'hwoarang': 'hwo', 'jack-8': 'jac',
+    'jin kazama': 'jin', 'jin': 'jin', 'jun kazama': 'jun', 'jun': 'jun',
+    'kazuya mishima': 'kaz', 'kazuya': 'kaz', 'king ii': 'kin', 'king': 'kin',
+    'marshall law': 'law', 'law': 'law', 'reina': 'rei', 'shaheen': 'sha',
+    'victor chevalier': 'vic', 'victor': 'vic', 'ling xiaoyu': 'xia', 'xiaoyu': 'xia'
+  };
   function buildCharRenderUrl(game, pack, charName) {
-    if (!charName || !String(charName).trim() || !isHttp) return '';
-    return `/api/assets/render?game=${encodeURIComponent(game || 'tekken8')}&pack=${encodeURIComponent(pack || 'full')}&char=${encodeURIComponent(charName.trim())}`;
+    if (!charName || !String(charName).trim()) return '';
+    const clean = charName.trim();
+    if (!isHttp) {
+      const code = LOCAL_T8_CODES[clean.toLowerCase()];
+      return code ? `data/assets/tekken8/vs_renders/${code}_0.png` : '';
+    }
+    return `/api/assets/render?game=${encodeURIComponent(game || 'tekken8')}&pack=${encodeURIComponent(pack || 'full')}&char=${encodeURIComponent(clean)}`;
   }
   function speedToDuration(speed0to100, slowSec, fastSec) {
     const s = Math.max(0, Math.min(100, Number(speed0to100 ?? 38)));
