@@ -1403,6 +1403,10 @@
   let interactiveEdit = isPreview;
   let dragEnabled = isPreview;
   let selectedElement = '';
+  let currentState = null;
+  let historyDb = [];
+  let lastIntroNonce = 0;
+  let lastImgSrc = { p1Char: '', p2Char: '', p1Av: '', p2Av: '' };
 
   if (isPreview) document.body.classList.add('preview-mode', 'interactive-edit');
   const rescalePreview = () => {
@@ -1424,11 +1428,6 @@
   };
   window.addEventListener('resize', rescalePreview);
   rescalePreview();
-
-  let currentState = null;
-  let historyDb = [];
-  let lastIntroNonce = 0;
-  let lastImgSrc = { p1Char: '', p2Char: '', p1Av: '', p2Av: '' };
 
   function norm(s) {
     return String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
