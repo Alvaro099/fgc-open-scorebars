@@ -3670,10 +3670,14 @@
             <span id="dock-url-text">http://localhost:8787/panel.html</span>
             <button id="copy-dock" style="padding:3px 8px;font-size:11px;">Copy</button>
           </div>
-          <label style="margin-top:10px;">5. Mobile / Tablet LAN Remote Control (same Wi-Fi network)</label>
+          <label style="margin-top:10px;">5. Mobile / Tablet LAN Remote Control (same Wi-Fi / router) <span id="lan-iface-badge" style="color:#4ade80;font-weight:700;margin-left:4px;"></span></label>
           <div class="code-line">
             <span id="lan-url-text">Detecting local IP...</span>
             <button id="copy-lan" style="padding:3px 8px;font-size:11px;">Copy</button>
+          </div>
+          <div id="lan-alt-list" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;"></div>
+          <div style="font-size:10.5px;color:var(--muted);margin-top:5px;line-height:1.4;">
+            Tip: VPN/virtual adapters (Radmin, Hamachi, WSL) are skipped automatically. If your phone or tablet still times out on the same Wi-Fi, allow <b>Node.js / TCP port 8787</b> in <b>Windows Defender Firewall (Private networks)</b>.
           </div>
         </div>
         <div>
@@ -7458,6 +7462,10 @@
     $('copy-results-2').addEventListener('click', () => copyText($('results-url-text').textContent, 'Tournament Results OBS URL'));
     $('copy-dock').addEventListener('click', () => copyText($('dock-url-text').textContent, 'Dock URL'));
     $('copy-lan').addEventListener('click', () => copyText($('lan-url-text').textContent, 'LAN Mobile URL'));
+    $('lan-alt-list')?.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-copy-alt-lan]');
+      if (btn) copyText(btn.dataset.copyAltLan, 'Alternate Network URL');
+    });
     $('btn-open-overlay').addEventListener('click', () => window.open('index.html', '_blank'));
     $('btn-open-vs').addEventListener('click', () => window.open('vs.html', '_blank'));
     $('btn-open-results').addEventListener('click', () => window.open('results.html', '_blank'));
@@ -9780,7 +9788,19 @@
         if (info.vsOverlayUrl) $('vs-url-text').textContent = info.vsOverlayUrl;
         if (info.resultsOverlayUrl && $('results-url-text')) $('results-url-text').textContent = info.resultsOverlayUrl;
         $('dock-url-text').textContent = info.panelUrl;
-        $('lan-url-text').textContent = info.lanPanelUrls?.[0] || info.panelUrl;
+        const ifaces = Array.isArray(info.networkInterfaces) ? info.networkInterfaces : [];
+        const primaryLan = ifaces.find(n => n.kind === 'lan') || ifaces[0];
+        $('lan-url-text').textContent = primaryLan?.url || info.lanPanelUrls?.[0] || info.panelUrl;
+        if ($('lan-iface-badge')) {
+          $('lan-iface-badge').textContent = primaryLan ? `(${primaryLan.name})` : '';
+        }
+        if ($('lan-alt-list')) {
+          const extras = ifaces.filter(n => n.url !== $('lan-url-text').textContent);
+          $('lan-alt-list').innerHTML = extras.map(n => {
+            const tag = n.kind === 'vpn' ? 'VPN' : n.kind === 'virtual' ? 'Virtual' : 'LAN';
+            return `<button type="button" data-copy-alt-lan="${n.url}" style="padding:2px 7px;font-size:10px;opacity:${n.kind === 'lan' ? '1' : '0.68'};" title="Click to copy ${n.url}">[${tag}] ${n.name}: ${n.ip}</button>`;
+          }).join('');
+        }
         $('conn-pill').classList.add('online');
         $('conn-text').textContent = `Local Server OK · ${info.connectedClients} overlay(s)`;
       }).catch(() => {

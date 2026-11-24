@@ -502,17 +502,58 @@ const MIME_TYPES = {
   '.woff2': 'font/woff2'
 };
 
-function getLanIps() {
+const VIRTUAL_IFACE_RE = /radmin|hamachi|tailscale|zerotier|wireguard|nordlynx|openvpn|proton|mullvad|wintun|vpn|vethernet|wsl|hyper-v|virtualbox|vmware|vbox|docker|loopback|bluetooth|npcap|tap-?windows|\btap\b|\btun\b/i;
+
+function classifyIpv4(name, ip) {
+  const parts = String(ip || '').split('.').map(Number);
+  const [a, b, c] = parts;
+  const isLinkLocal = a === 169 && b === 254;
+  const isRadminOrHamachi = a === 26 || a === 25;
+  const isCgnat = a === 100 && b >= 64 && b <= 127;
+  const isVboxHostOnly = a === 192 && b === 168 && c === 56;
+  const isRfc1918 = (a === 192 && b === 168) || a === 10 || (a === 172 && b >= 16 && b <= 31);
+  const isVirtualName = VIRTUAL_IFACE_RE.test(name || '');
+
+  let kind = 'lan';
+  let score = 0;
+
+  if (isLinkLocal) {
+    kind = 'virtual';
+    score = -200;
+  } else if (isRadminOrHamachi || isCgnat || isVboxHostOnly || isVirtualName) {
+    kind = (isRadminOrHamachi || isCgnat || /radmin|hamachi|tailscale|zerotier|wireguard|vpn/i.test(name || '')) ? 'vpn' : 'virtual';
+    score = -100;
+  } else {
+    if (a === 192 && b === 168) score += 60;
+    else if (a === 10) score += 50;
+    else if (a === 172 && b >= 16 && b <= 31) score += 45;
+    else score += 10;
+    if (/wi-?fi|wlan|wireless/i.test(name || '')) score += 30;
+    else if (/ethernet|eth\d|en\d|local area/i.test(name || '')) score += 25;
+    if (!isRfc1918) score -= 20;
+  }
+
+  return { name, ip, kind, score };
+}
+
+function getRankedNetworkInterfaces() {
   const nets = os.networkInterfaces();
-  const ips = [];
+  const list = [];
   for (const name of Object.keys(nets)) {
     for (const net of nets[name] || []) {
       if (net.family === 'IPv4' && !net.internal) {
-        ips.push(net.address);
+        list.push(classifyIpv4(name, net.address));
       }
     }
   }
-  return ips;
+  return list.sort((x, y) => y.score - x.score);
+}
+
+function getLanIps() {
+  const ranked = getRankedNetworkInterfaces();
+  const physical = ranked.filter(x => x.kind === 'lan');
+  if (physical.length) return physical.map(x => x.ip);
+  return ranked.filter(x => x.score > -150).map(x => x.ip);
 }
 
 function sendJson(res, status, data) {
@@ -1235,6 +1276,7 @@ const server = http.createServer(async (req, res) => {
 
   // --- API: Server Info (URLs, LAN IPs, client count) ---
   if (pathname === '/api/info' && req.method === 'GET') {
+    const ranked = getRankedNetworkInterfaces();
     const lanIps = getLanIps();
     return sendJson(res, 200, {
       port: PORT,
@@ -1243,6 +1285,12 @@ const server = http.createServer(async (req, res) => {
       resultsOverlayUrl: `http://localhost:${PORT}/results.html`,
       panelUrl: `http://localhost:${PORT}/panel.html`,
       lanPanelUrls: lanIps.map(ip => `http://${ip}:${PORT}/panel.html`),
+      networkInterfaces: ranked.map(n => ({
+        name: n.name,
+        ip: n.ip,
+        kind: n.kind,
+        url: `http://${n.ip}:${PORT}/panel.html`
+      })),
       connectedClients: sseClients.size
     });
   }
@@ -1281,15 +1329,17 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, HOST, () => {
-  const lanIps = getLanIps();
+  const ranked = getRankedNetworkInterfaces();
+  const primaryLan = ranked.find(n => n.kind === 'lan') || ranked[0];
   console.log('\n=======================================================');
   console.log('  FGC OPEN SCOREBARS — LOCAL SERVER RUNNING (0 deps)');
   console.log('=======================================================');
   console.log(`  Scorebar Overlay (OBS):   http://localhost:${PORT}/`);
   console.log(`  VS Splash Overlay (OBS):  http://localhost:${PORT}/vs.html`);
+  console.log(`  Results Overlay (OBS):    http://localhost:${PORT}/results.html`);
   console.log(`  Local Control Panel:      http://localhost:${PORT}/panel.html`);
-  if (lanIps.length) {
-    console.log(`  Mobile / Tablet LAN UI:   http://${lanIps[0]}:${PORT}/panel.html`);
+  if (primaryLan) {
+    console.log(`  Mobile / Tablet LAN UI:   http://${primaryLan.ip}:${PORT}/panel.html (${primaryLan.name})`);
   }
   console.log('=======================================================\n');
 });
