@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Control Panel — FGC Open Scorebars (Tekken 8)</title>
+<title>Control Panel — FGC Open Scorebars (Tekken 8 &amp; SF6)</title>
 <style>
   :root {
     --bg: #0c0e14;
@@ -1137,8 +1137,72 @@
     border: 1px solid rgba(255, 255, 255, 0.11);
     flex-shrink: 0;
   }
+  .theme-thumb.is-sf6 {
+    background:
+      linear-gradient(180deg, rgba(6, 9, 18, 0.7) 0%, rgba(6, 9, 18, 0.54) 55%, rgba(6, 9, 18, 0.88) 100%),
+      url('assets/sf6-gameplay-ref.jpg') center 22% / cover no-repeat;
+  }
   .theme-card.active .theme-thumb {
     border-color: rgba(96, 165, 250, 0.75);
+  }
+
+  /* Matching-scale Street Fighter 6 HUD reference (crimson/blue healthbars, 99 timer, Drive Gauge, [M]/[C]) */
+  .mt-sf6-hud {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 34px;
+    height: 36px;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.92;
+  }
+  .mt-sf6-bar {
+    position: absolute;
+    top: 11px;
+    width: 34.5%;
+    height: 6.5px;
+    border: 0.8px solid rgba(255, 255, 255, 0.72);
+  }
+  .mt-sf6-bar.l {
+    left: 9.5%;
+    background: linear-gradient(90deg, #9d0b3b, #d81354);
+    clip-path: polygon(0 0, calc(100% - 4px) 0, 100% 100%, 4px 100%);
+  }
+  .mt-sf6-bar.r {
+    right: 9.5%;
+    background: linear-gradient(270deg, #064fa3, #0b75db);
+    clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%);
+  }
+  .mt-sf6-drive {
+    position: absolute;
+    top: 21px;
+    width: 17%;
+    height: 3.5px;
+    background: repeating-linear-gradient(90deg, #a3e635 0 6px, transparent 6px 8px);
+    opacity: 0.9;
+  }
+  .mt-sf6-drive.l { left: 28%; }
+  .mt-sf6-drive.r { right: 28%; }
+  .mt-sf6-ctrl {
+    position: absolute;
+    top: 1px;
+    font: 900 7px/1 'Chakra Petch', sans-serif;
+    padding: 1.5px 3px;
+    border-radius: 2px;
+    color: #fff;
+  }
+  .mt-sf6-ctrl.l { left: 9%; background: #c28014; }
+  .mt-sf6-ctrl.r { right: 9%; background: #6d28d9; }
+  .mt-sf6-timer {
+    position: absolute;
+    left: 50%;
+    top: 6px;
+    transform: translateX(-50%);
+    font: 900 13px/1 'Chakra Petch', sans-serif;
+    color: #e9d5ff;
+    -webkit-text-stroke: 0.6px #7e22ce;
+    text-shadow: 0 1px 4px #000;
   }
 
   /* Subtle matching-scale Tekken 8 HUD reference (healthbars, round orbs, timer) below the miniature scorebar */
@@ -1237,9 +1301,31 @@
   .mt-stage.lay-arch .mt-wing.p2 { right: 4.5%; }
   .mt-stage.lay-arch .mt-center { top: 10px; height: 16px; min-width: 19%; }
 
+  /* Street Fighter 6 miniature proportions (clear of portraits, [M]/[C], healthbars & 99 timer!) */
+  .mt-stage.lay-sf6-drive .mt-wing { top: 16px; width: 32%; height: 23px; }
+  .mt-stage.lay-sf6-drive .mt-wing.p1 { left: 11.5%; }
+  .mt-stage.lay-sf6-drive .mt-wing.p2 { right: 11.5%; }
+  .mt-stage.lay-sf6-drive .mt-center { top: 10px; height: 15px; min-width: 15%; }
+
+  .mt-stage.lay-sf6-cpt .mt-wing { top: 11px; width: 33%; height: 21px; }
+  .mt-stage.lay-sf6-cpt .mt-wing.p1 { left: 10.5%; }
+  .mt-stage.lay-sf6-cpt .mt-wing.p2 { right: 10.5%; }
+  .mt-stage.lay-sf6-cpt .mt-center { top: 11px; height: 21px; width: 15.5%; }
+
+  .mt-stage.lay-sf6-sfl .mt-wing { top: 11px; width: 33%; height: 18px; }
+  .mt-stage.lay-sf6-sfl .mt-wing.p1 { left: 10.5%; }
+  .mt-stage.lay-sf6-sfl .mt-wing.p2 { right: 10.5%; }
+  .mt-stage.lay-sf6-sfl .mt-center { top: 11px; height: 18px; width: 15.5%; }
+
+  .mt-stage.lay-sf6-metro .mt-wing { top: 16px; width: 31.5%; height: 21px; }
+  .mt-stage.lay-sf6-metro .mt-wing.p1 { left: 11.5%; }
+  .mt-stage.lay-sf6-metro .mt-wing.p2 { right: 11.5%; }
+  .mt-stage.lay-sf6-metro .mt-center { top: 9px; height: 15px; min-width: 15%; }
+
   /* Wing shapes */
   .mt-wing.sh-blade.p1, .mt-wing.sh-diag.p1 { clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 100%, 8px 100%); }
   .mt-wing.sh-blade.p2, .mt-wing.sh-diag.p2 { clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%); }
+  .mt-wing.sh-bevel { clip-path: polygon(5px 0, calc(100% - 5px) 0, 100% 5px, 100% calc(100% - 5px), calc(100% - 5px) 100%, 5px 100%, 0 calc(100% - 5px), 0 5px); }
   .mt-wing.sh-hex { clip-path: polygon(7px 0, calc(100% - 7px) 0, 100% 50%, calc(100% - 7px) 100%, 7px 100%, 0 50%); }
   .mt-wing.sh-skew.p1 { transform: skewX(-13deg); border-radius: 2px; }
   .mt-wing.sh-skew.p2 { transform: skewX(13deg); border-radius: 2px; }
@@ -2217,6 +2303,7 @@
       <div class="preview-toolbar-group">
         <strong style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-right:4px;">Live Preview:</strong>
         <button class="active-chip" data-bg="t8">🎮 Tekken 8</button>
+        <button data-bg="sf6">🥊 SF6</button>
         <button data-bg="checker">🏁 Transparent</button>
         <button data-bg="green">🟩 Chroma</button>
         <button id="btn-guides">📐 HUD Guides</button>
@@ -2647,14 +2734,18 @@
 
         <div class="studio-grid" style="margin-bottom:10px;">
           <div class="studio-box">
-            <h3>Geometry &amp; Tekken 8 HUD Layout</h3>
+            <h3>Geometry &amp; Game HUD Layout</h3>
             <label for="st-layout">HUD Layout Mode</label>
             <select id="st-layout" style="margin-bottom:8px;">
               <option value="theme">— From Active Theme —</option>
-              <option value="blade">⚡ TWT Blade (Flush Above Healthbars)</option>
-              <option value="crown">Crown 36px (Top Broadcast Strip)</option>
-              <option value="split">Split-Wing T8 (Between Portrait &amp; Orbs)</option>
-              <option value="arch">Stepped Arch (Connected Visor)</option>
+              <option value="blade">⚡ T8 Blade (Flush Above Healthbars)</option>
+              <option value="crown">T8 Crown 36px (Top Broadcast Strip)</option>
+              <option value="split">T8 Split-Wing (Between Portrait &amp; Orbs)</option>
+              <option value="arch">T8 Stepped Arch (Connected Visor)</option>
+              <option value="sf6-drive">🥊 SF6 Drive Wing (Parallel Healthbars)</option>
+              <option value="sf6-cpt">🥊 SF6 CPT Top Bar (Flush y:0–46px)</option>
+              <option value="sf6-sfl">🥊 SF6 SFL Slim Ribbon (Ultra-Slim 38px)</option>
+              <option value="sf6-metro">🥊 SF6 Metro Arch (Floating Plates)</option>
             </select>
             <label for="st-shape">Plate Shape</label>
             <select id="st-shape">
@@ -3122,13 +3213,14 @@
 <aside class="card designs-sidebar" id="designs-sidebar">
   <div class="designs-panel-body" id="designs-panel-body">
     <div class="designs-head">
-      <h2>🎨 Scorebar Designs <span class="designs-count-pill" id="theme-count">32</span></h2>
+      <h2>🎨 Scorebar Designs <span class="designs-count-pill" id="theme-count">56</span></h2>
       <button type="button" id="btn-close-sidebar" style="padding:3px 7px;font-size:11px;" title="Collapse sidebar (moves Designs to a tab)">✕</button>
     </div>
     <div class="designs-tools">
-      <input type="text" id="theme-search" placeholder="🔍 Search designs (Tekken, TWT, Gold, Blade, Jin, Glass, EVO...)" style="padding:5px 9px;font-size:12px;" />
+      <input type="text" id="theme-search" placeholder="🔍 Search 56 designs (Tekken, SF6, CPT, Drive, Ryu, Juri, Blade...)" style="padding:5px 9px;font-size:12px;" />
       <div class="filter-tabs" id="theme-filters">
         <button class="active-chip" data-cat="all">All</button>
+        <button data-cat="sf6">🥊 SF6</button>
         <button data-cat="blade">⚡ Blades</button>
         <button data-cat="tekken">T8 &amp; TWT</button>
         <button data-cat="char">Characters</button>
@@ -3791,6 +3883,7 @@
 
 <script src="flags.js"></script>
 <script src="vs-designs.js"></script>
+<script src="sf6-themes.js"></script>
 <script>
 (() => {
   /* =========================================================================
@@ -3892,7 +3985,8 @@
       desc: 'Modern translucent frosted glass with subtle backdrop blur and slim color accents.' },
     { id: 't8-arcade-1997',       name: 'Tekken 3 Arcade 1997',      cat: 'minimal', layout: 'Crown 36px',   colors: ['#1d4ed8','#fde047','#b91c1c'],
       pv: { lay:'crown', sh:'flat',  fs:'classic',cs:'flat', edge:false, bg:'linear-gradient(180deg,#1d4ed8,#0f172a)', p1:'#fbbf24', p2:'#fbbf24', sc1:'#fde047', sc2:'#fde047', sct:'#111', cbg:'#991b1b', ct:'#fde047', tx:'#fff', sp1:'#fde047', sp2:'#fde047', fullBorder:true },
-      desc: 'Retro 1997 Namco arcade homage in metallic royal blue and gold bevels.' }
+      desc: 'Retro 1997 Namco arcade homage in metallic royal blue and gold bevels.' },
+    ...(window.FGC_SF6_THEMES || [])
   ];
 
   const FONT_OPTIONS = [
@@ -4011,6 +4105,9 @@
     't8-sakura-dojo': 14, 'fgc-hex-arcane': 12, 'fgc-strive-bolt': 12, 'fgc-metro-clash': 16,
     'fgc-clean-major': 10, 'fgc-hyper-flame': 16, 't8-glass-minimal': 12, 't8-arcade-1997': 10
   };
+  for (const sf6 of (window.FGC_SF6_THEMES || [])) {
+    THEME_SLANTS[sf6.id] = sf6.cfg?.slant ?? 14;
+  }
 
   const DEFAULT_VS = {
     visible: true,
@@ -4760,15 +4857,29 @@
     const sp2 = state.p2?.sponsor ? `<i style="color:${pv.sp2}">${state.p2.sponsor.slice(0, 7)}</i>` : '';
     const rd = (state.round || 'ROUND 1').slice(0, 12);
 
+    const isSf6 = t.cat === 'sf6';
+    const hudBackdropHtml = isSf6
+      ? `<div class="mt-sf6-hud" aria-hidden="true">
+           <span class="mt-sf6-ctrl l">M</span>
+           <div class="mt-sf6-bar l"></div>
+           <div class="mt-sf6-drive l"></div>
+           <div class="mt-sf6-timer">99</div>
+           <div class="mt-sf6-bar r"></div>
+           <div class="mt-sf6-drive r"></div>
+           <span class="mt-sf6-ctrl r">C</span>
+         </div>`
+      : `<div class="mt-t8-hud" aria-hidden="true">
+           <div class="mt-t8-orbs l"><i></i><i></i><i class="on"></i></div>
+           <div class="mt-t8-bar l"></div>
+           <div class="mt-t8-timer">58</div>
+           <div class="mt-t8-orbs r"><i class="on"></i><i></i><i></i></div>
+           <div class="mt-t8-bar r"></div>
+         </div>`;
+    const cBorderCol = pv.cborder || pv.p1;
+
     return `
-      <div class="theme-thumb">
-        <div class="mt-t8-hud" aria-hidden="true">
-          <div class="mt-t8-orbs l"><i></i><i></i><i class="on"></i></div>
-          <div class="mt-t8-bar l"></div>
-          <div class="mt-t8-timer">58</div>
-          <div class="mt-t8-orbs r"><i class="on"></i><i></i><i></i></div>
-          <div class="mt-t8-bar r"></div>
-        </div>
+      <div class="theme-thumb ${isSf6 ? 'is-sf6' : ''}">
+        ${hudBackdropHtml}
         <div class="mt-stage lay-${pv.lay} ${pv.outer ? 'outer-score' : ''}">
           ${pv.bridge ? `<div class="mt-bridge" style="background:${pv.bridge}"></div>` : ''}
           <div class="mt-wing p1 sh-${pv.sh} ${prismCls}" style="background:${p1Bg};${borderP1};color:${pv.tx}">
@@ -4777,14 +4888,14 @@
             <span class="mt-name" style="color:${pv.tx}">${sp1}${n1}</span>
             <span class="mt-score" style="background:${pv.sc1};color:${pv.sct}">${state.p1?.score ?? 0}</span>
           </div>
-          <div class="mt-center cs-${pv.cs} ${prismCls}" style="background:${pv.cbg};color:${pv.ct};border-bottom:${pv.cs === 'float' ? 'none' : `1.5px solid ${pv.p1}`}">
+          <div class="mt-center cs-${pv.cs} ${prismCls}" style="background:${pv.cbg};color:${pv.ct};border-bottom:${pv.cs === 'float' ? 'none' : `1.5px solid ${cBorderCol}`}">
             ${rd}
           </div>
           <div class="mt-wing p2 sh-${pv.sh} ${prismCls}" style="background:${p2Bg};${borderP2};color:${pv.tx}">
             ${pv.edge ? `<span class="mt-edge" style="background:${pv.p2}"></span>` : ''}
             ${getFlagsHtml(state.p2 || {}, pv.p2)}
             <span class="mt-name" style="color:${pv.tx}">${n2}${sp2}</span>
-            <span class="mt-score" style="background:${pv.sc2};color:${pv.sct}">${state.p2?.score ?? 0}</span>
+            <span class="mt-score" style="background:${pv.sc2};color:${pv.sct2 || pv.sct}">${state.p2?.score ?? 0}</span>
           </div>
         </div>
       </div>`;
@@ -5287,12 +5398,13 @@
     });
 
     // Preview toolbar
+    const setPreviewBackdrop = (mode) => {
+      previewBg = mode;
+      document.querySelectorAll('[data-bg]').forEach(b => b.classList.toggle('active-chip', b.dataset.bg === mode));
+      pushPreviewConfig();
+    };
     document.querySelectorAll('[data-bg]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        previewBg = btn.dataset.bg;
-        document.querySelectorAll('[data-bg]').forEach(b => b.classList.toggle('active-chip', b === btn));
-        pushPreviewConfig();
-      });
+      btn.addEventListener('click', () => setPreviewBackdrop(btn.dataset.bg));
     });
     $('btn-guides').addEventListener('click', (e) => {
       previewGuides = !previewGuides;
@@ -5330,6 +5442,8 @@
       themeSearch = '';
       $('theme-search').value = '';
       $('theme-filters').querySelectorAll('button').forEach(b => b.classList.toggle('active-chip', b === btn));
+      if (currentCat === 'sf6' && previewBg === 't8') setPreviewBackdrop('sf6');
+      else if (['blade', 'tekken', 'char'].includes(currentCat) && previewBg === 'sf6') setPreviewBackdrop('t8');
       renderThemeGallery();
     });
     $('theme-grid').addEventListener('click', (e) => {
@@ -5337,6 +5451,8 @@
       if (!card) return;
       const t = THEMES.find(x => x.id === card.dataset.themeId);
       if (!t) return;
+      if (t.cat === 'sf6' && previewBg === 't8') setPreviewBackdrop('sf6');
+      else if (t.cat !== 'sf6' && previewBg === 'sf6') setPreviewBackdrop('t8');
       const pv = t.pv;
       const pickHex = (v, fb) => {
         const m = String(v || '').match(/#[0-9a-fA-F]{6}/);
@@ -7239,6 +7355,10 @@
   if (isHttp) {
     const stateReady = fetch('/api/state').then(r => r.json()).then(s => {
       state = s;
+      if (String(state.theme || '').startsWith('sf6-') && previewBg === 't8') {
+        previewBg = 'sf6';
+        document.querySelectorAll('[data-bg]').forEach(b => b.classList.toggle('active-chip', b.dataset.bg === 'sf6'));
+      }
       renderUI();
       pushPreviewConfig();
       loadGamesCatalog(false);

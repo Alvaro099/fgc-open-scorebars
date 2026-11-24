@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FGC Open Scorebar — Tekken 8 Broadcast Overlay</title>
+  <title>FGC Open Scorebar — Multi-Game Broadcast Overlay (Tekken 8 &amp; SF6)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -41,12 +41,17 @@
     }
 
     /* Preview backdrop modes (ONLY active when ?preview=... is used in Control Panel) */
-    body.bg-t8 {
+    body.bg-t8,
+    body.bg-sf6 {
       background: #05070d;
     }
 
     body.bg-t8 #stage {
       background: #000 url('assets/t8-gameplay-ref.jpg') 0 0 / 1920px 1080px no-repeat;
+    }
+
+    body.bg-sf6 #stage {
+      background: #000 url('assets/sf6-gameplay-ref.jpg') 0 0 / 1920px 1080px no-repeat;
     }
 
     body.bg-checker {
@@ -87,6 +92,18 @@
     }
 
     body.show-guides #hud-guides {
+      display: block;
+    }
+
+    #hud-guides-sf6 {
+      display: none;
+    }
+
+    body.bg-sf6 #hud-guides-t8 {
+      display: none;
+    }
+
+    body.bg-sf6 #hud-guides-sf6 {
       display: block;
     }
 
@@ -304,6 +321,216 @@
       max-width: 340px;
       height: 34px;
       z-index: 10;
+    }
+
+    /* =========================================================================
+       STREET FIGHTER 6 NATIVE BROADCAST ARCHETYPES (4 HUD-CALIBRATED LAYOUTS)
+       Exact SF6 1920x1080 clearances:
+         Portraits: 0..202 & 1718..1920 | [M]/[C]: 210..238 & 1682..1710
+         Health Bars: y=62..96 | Timer "99": x=912..1008, y=52..122 | Drive: y=112..132
+       ========================================================================= */
+
+    /* ARCHETYPE 4: SF6 DRIVE (Angled parallel to SF6 healthbars, clear of [M]/[C], timer & round marks!) */
+    #scorebar-root[data-layout="sf6-drive"] {
+      --safe-outer-pad: calc(var(--blade-slant, 20px) + 14px);
+    }
+
+    #scorebar-root[data-layout="sf6-drive"] .sb-wing {
+      top: 6px;
+      width: calc(564px + var(--wing-spread));
+      height: var(--bar-h, 50px);
+    }
+
+    #scorebar-root[data-layout="sf6-drive"] .sb-wing.p1 {
+      left: calc(246px - var(--wing-spread));
+    }
+
+    #scorebar-root[data-layout="sf6-drive"] .sb-wing.p2 {
+      right: calc(246px - var(--wing-spread));
+    }
+
+    #scorebar-root[data-layout="sf6-drive"] .sb-center {
+      position: absolute;
+      top: 2px;
+      left: 50%;
+      transform: translateX(-50%);
+      min-width: 218px;
+      max-width: 300px;
+      height: 36px;
+      z-index: 10;
+    }
+
+    /* ARCHETYPE 5: SF6 CPT TOP BAR (Flush y=0..46px Capcom Pro Tour broadcast bar cleanly above 99 timer!) */
+    #scorebar-root[data-layout="sf6-cpt"] .sb-wing {
+      top: 0;
+      width: calc(590px + var(--wing-spread));
+      height: var(--bar-h, 46px);
+    }
+
+    #scorebar-root[data-layout="sf6-cpt"] .sb-wing.p1 {
+      left: calc(244px - var(--wing-spread));
+    }
+
+    #scorebar-root[data-layout="sf6-cpt"] .sb-wing.p2 {
+      right: calc(244px - var(--wing-spread));
+    }
+
+    #scorebar-root[data-layout="sf6-cpt"] .sb-center {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 256px;
+      height: var(--bar-h, 46px);
+      z-index: 10;
+    }
+
+    /* ARCHETYPE 6: SF6 SFL SLIM RIBBON (Ultra-clean 38px flush top broadcast bar, maximum stage view!) */
+    #scorebar-root[data-layout="sf6-sfl"] .sb-wing {
+      top: 0;
+      width: calc(592px + var(--wing-spread));
+      height: var(--bar-h, 38px);
+    }
+
+    #scorebar-root[data-layout="sf6-sfl"] .sb-wing.p1 {
+      left: calc(242px - var(--wing-spread));
+    }
+
+    #scorebar-root[data-layout="sf6-sfl"] .sb-wing.p2 {
+      right: calc(242px - var(--wing-spread));
+    }
+
+    #scorebar-root[data-layout="sf6-sfl"] .sb-center {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 256px;
+      height: var(--bar-h, 38px);
+      z-index: 10;
+    }
+
+    /* ARCHETYPE 7: SF6 METRO / BATTLE HUB (Floating plates + optional top bridge cleanly above SF6 HUD!) */
+    #scorebar-root[data-layout="sf6-metro"] .arch-bridge {
+      display: block;
+      left: calc(248px - var(--wing-spread));
+      right: calc(248px - var(--wing-spread));
+      height: 6px;
+    }
+
+    #scorebar-root[data-layout="sf6-metro"] .sb-wing {
+      top: 8px;
+      width: calc(556px + var(--wing-spread));
+      height: var(--bar-h, 46px);
+    }
+
+    #scorebar-root[data-layout="sf6-metro"] .sb-wing.p1 {
+      left: calc(250px - var(--wing-spread));
+    }
+
+    #scorebar-root[data-layout="sf6-metro"] .sb-wing.p2 {
+      right: calc(250px - var(--wing-spread));
+    }
+
+    #scorebar-root[data-layout="sf6-metro"] .sb-center {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      min-width: 228px;
+      max-width: 300px;
+      height: 36px;
+      z-index: 10;
+    }
+
+    /* SF6 Compact & Proportional Typography + Score Plaque Sizing */
+    #scorebar-root[data-layout="sf6-sfl"] .player-info {
+      gap: 8px;
+      padding: 0 12px;
+    }
+
+    #scorebar-root[data-layout="sf6-sfl"] .player-name {
+      font-size: 22px;
+    }
+
+    #scorebar-root[data-layout="sf6-sfl"] .sponsor-tag {
+      font-size: 17px;
+    }
+
+    #scorebar-root[data-layout="sf6-sfl"] .score-box {
+      width: 54px;
+      font-size: 24px;
+    }
+
+    #scorebar-root[data-layout="sf6-sfl"] .bracket-badge {
+      height: 19px;
+      min-width: 20px;
+      font-size: 11px;
+    }
+
+    #scorebar-root[data-layout="sf6-sfl"] .iso-tag {
+      font-size: 13px;
+      padding: 0 6px;
+    }
+
+    #scorebar-root[data-layout="sf6-sfl"] .flag-wrap {
+      width: 25px;
+      height: 17px;
+    }
+
+    #scorebar-root[data-layout="sf6-cpt"] .player-name,
+    #scorebar-root[data-layout="sf6-metro"] .player-name {
+      font-size: 26px;
+    }
+
+    #scorebar-root[data-layout="sf6-cpt"] .sponsor-tag,
+    #scorebar-root[data-layout="sf6-metro"] .sponsor-tag {
+      font-size: 20px;
+    }
+
+    #scorebar-root[data-layout="sf6-cpt"] .score-box,
+    #scorebar-root[data-layout="sf6-metro"] .score-box {
+      width: 60px;
+      font-size: 29px;
+    }
+
+    #scorebar-root[data-layout="sf6-drive"] .player-name {
+      font-size: 27px;
+    }
+
+    #scorebar-root[data-layout="sf6-drive"] .sponsor-tag {
+      font-size: 21px;
+    }
+
+    /* SF6 Match Point side-peek clearances (dock cleanly above y=62px healthbar on flush CPT/SFL layouts) */
+    #scorebar-root[data-mp-style="side-peek"][data-layout="sf6-cpt"] .mp-tag,
+    #scorebar-root[data-mp-style="side-peek"][data-layout="sf6-sfl"] .mp-tag {
+      top: calc(100% + 1px);
+      height: 16px;
+      font-size: 8.5px;
+      padding: 0 12px;
+      z-index: 6;
+      transform: translateY(-10px);
+    }
+
+    #scorebar-root[data-mp-style="side-peek"][data-layout="sf6-cpt"] .sb-wing.p1 .mp-tag,
+    #scorebar-root[data-mp-style="side-peek"][data-layout="sf6-sfl"] .sb-wing.p1 .mp-tag {
+      left: auto;
+      right: 110px;
+      clip-path: polygon(0 0, 100% 0, calc(100% - 7px) 100%, 7px 100%);
+    }
+
+    #scorebar-root[data-mp-style="side-peek"][data-layout="sf6-cpt"] .sb-wing.p2 .mp-tag,
+    #scorebar-root[data-mp-style="side-peek"][data-layout="sf6-sfl"] .sb-wing.p2 .mp-tag {
+      right: auto;
+      left: 110px;
+      clip-path: polygon(0 0, 100% 0, calc(100% - 7px) 100%, 7px 100%);
+    }
+
+    #scorebar-root[data-mp-style="side-peek"][data-layout="sf6-drive"] .mp-tag,
+    #scorebar-root[data-mp-style="side-peek"][data-layout="sf6-metro"] .mp-tag {
+      top: 4px;
+      height: 22px;
     }
 
     /* Wing Inner Plate & Flex Directions */
@@ -3192,7 +3419,9 @@
       padding: 0 !important;
     }
 
-    #scorebar-root[data-shape="flat"][data-layout="crown"] .sb-wing .score-box {
+    #scorebar-root[data-shape="flat"][data-layout="crown"] .sb-wing .score-box,
+    #scorebar-root[data-shape="flat"][data-layout="sf6-sfl"] .sb-wing .score-box,
+    #scorebar-root[data-shape="bevel"][data-layout="sf6-sfl"] .sb-wing .score-box {
       width: 54px !important;
     }
 
@@ -3208,7 +3437,8 @@
       padding: 0 !important;
     }
 
-    #scorebar-root[data-shape="rounded"][data-layout="crown"] .sb-wing .score-box {
+    #scorebar-root[data-shape="rounded"][data-layout="crown"] .sb-wing .score-box,
+    #scorebar-root[data-shape="rounded"][data-layout="sf6-sfl"] .sb-wing .score-box {
       width: 54px !important;
     }
 
@@ -3239,6 +3469,87 @@
     #scorebar-root[data-border-style="none"] .sb-wing .wing-plate,
     #scorebar-root[data-border-style="none"] .sb-center {
       border: none !important;
+    }
+
+    /* --- 4B. Dedicated Street Fighter 6 24-Design Parametric Theme Engine --- */
+    #scorebar-root[data-sf6="1"] {
+      --p1-accent: var(--sf6-p1, #e11d48);
+      --p2-accent: var(--sf6-p2, #0ea5e9);
+      --p1-glow: var(--sf6-glow1, var(--sf6-p1, #e11d48));
+      --p2-glow: var(--sf6-glow2, var(--sf6-p2, #0ea5e9));
+      --center-accent: var(--sf6-cborder, #a3e635);
+      --text-main: var(--sf6-tx, #ffffff);
+      --sponsor-color: var(--sf6-sp1, #fde047);
+      --font-display: var(--sf6-font, 'Barlow Condensed', 'Bahnschrift', sans-serif);
+    }
+
+    #scorebar-root[data-sf6="1"] .sb-wing.p1 .wing-plate {
+      background: var(--sf6-bg-p1);
+      border-bottom: 3px solid var(--sf6-p1);
+      border-top: 1px solid rgba(255, 255, 255, 0.16);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.52), 0 0 16px var(--sf6-glow1, transparent);
+    }
+
+    #scorebar-root[data-sf6="1"] .sb-wing.p2 .wing-plate {
+      background: var(--sf6-bg-p2);
+      border-bottom: 3px solid var(--sf6-p2);
+      border-top: 1px solid rgba(255, 255, 255, 0.16);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.52), 0 0 16px var(--sf6-glow2, transparent);
+    }
+
+    #scorebar-root[data-sf6="1"][data-sf6-full-border="1"] .sb-wing.p1 .wing-plate {
+      border: 2px solid var(--sf6-p1);
+    }
+
+    #scorebar-root[data-sf6="1"][data-sf6-full-border="1"] .sb-wing.p2 .wing-plate {
+      border: 2px solid var(--sf6-p2);
+    }
+
+    #scorebar-root[data-sf6="1"][data-sf6-glass="1"] .wing-plate,
+    #scorebar-root[data-sf6="1"][data-sf6-glass="1"] .sb-center {
+      backdrop-filter: blur(16px) saturate(145%);
+      -webkit-backdrop-filter: blur(16px) saturate(145%);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 8px 26px rgba(0, 0, 0, 0.42);
+    }
+
+    #scorebar-root[data-sf6="1"] .sb-wing.p1 .score-box {
+      background: var(--sf6-sc1);
+      color: var(--sf6-sct1, #ffffff);
+    }
+
+    #scorebar-root[data-sf6="1"] .sb-wing.p2 .score-box {
+      background: var(--sf6-sc2);
+      color: var(--sf6-sct2, #ffffff);
+    }
+
+    #scorebar-root[data-sf6="1"] .sb-wing.p1 .sponsor-tag {
+      color: var(--sf6-sp1);
+    }
+
+    #scorebar-root[data-sf6="1"] .sb-wing.p2 .sponsor-tag {
+      color: var(--sf6-sp2);
+    }
+
+    #scorebar-root[data-sf6="1"] .sb-center {
+      background: var(--sf6-cbg);
+      color: var(--sf6-ct);
+      border-bottom: 3px solid var(--sf6-cborder);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    #scorebar-root[data-sf6="1"] .format-pill {
+      background: var(--sf6-cborder);
+      color: #0b0d14;
+    }
+
+    #scorebar-root[data-sf6="1"] .arch-bridge {
+      background: var(--sf6-bridge, transparent);
+    }
+
+    #scorebar-root[data-sf6="1"][data-sf6-italic="1"]:not([data-italic="off"]) .player-name,
+    #scorebar-root[data-sf6="1"][data-sf6-italic="1"]:not([data-italic="off"]) .sponsor-tag,
+    #scorebar-root[data-sf6="1"][data-sf6-italic="1"]:not([data-italic="off"]) .round-text {
+      font-style: italic;
     }
 
     /* --- 5. Custom Colors, Surfaces & Adaptive Gradients Engine --- */
@@ -3747,18 +4058,34 @@
 
 <body>
   <div id="stage">
-    <!-- Tekken 8 HUD Safe-Zone Guides (Preview Debug Aid Only) -->
+    <!-- Game-Aware HUD Safe-Zone Guides (Tekken 8 & Street Fighter 6 — Preview Debug Aid Only) -->
     <div id="hud-guides">
-      <div class="guide-box danger" style="left:0;top:0;width:188px;height:120px;">P1 PORTRAIT</div>
-      <div class="guide-box danger" style="right:0;top:0;width:188px;height:120px;">P2 PORTRAIT</div>
-      <div class="guide-box danger" style="left:195px;top:70px;width:675px;height:46px;">P1 HEALTH BAR (y:70-116)</div>
-      <div class="guide-box danger" style="right:195px;top:70px;width:675px;height:46px;">P2 HEALTH BAR (y:70-116)</div>
-      <div class="guide-box danger" style="left:716px;top:38px;width:110px;height:26px;">P1 ORBS</div>
-      <div class="guide-box danger" style="right:716px;top:38px;width:110px;height:26px;">P2 ORBS</div>
-      <div class="guide-box danger" style="left:890px;top:40px;width:140px;height:95px;">TIMER (y:40-135)</div>
-      <div class="guide-box" style="left:192px;top:10px;width:514px;height:52px;">SAFE WING P1</div>
-      <div class="guide-box" style="right:192px;top:10px;width:514px;height:52px;">SAFE WING P2</div>
-      <div class="guide-box" style="left:815px;top:0;width:290px;height:36px;">SAFE TOP CROWN</div>
+      <div id="hud-guides-t8">
+        <div class="guide-box danger" style="left:0;top:0;width:188px;height:120px;">P1 PORTRAIT</div>
+        <div class="guide-box danger" style="right:0;top:0;width:188px;height:120px;">P2 PORTRAIT</div>
+        <div class="guide-box danger" style="left:195px;top:70px;width:675px;height:46px;">P1 HEALTH BAR (y:70-116)</div>
+        <div class="guide-box danger" style="right:195px;top:70px;width:675px;height:46px;">P2 HEALTH BAR (y:70-116)</div>
+        <div class="guide-box danger" style="left:716px;top:38px;width:110px;height:26px;">P1 ORBS</div>
+        <div class="guide-box danger" style="right:716px;top:38px;width:110px;height:26px;">P2 ORBS</div>
+        <div class="guide-box danger" style="left:890px;top:40px;width:140px;height:95px;">TIMER (y:40-135)</div>
+        <div class="guide-box" style="left:192px;top:10px;width:514px;height:52px;">SAFE WING P1</div>
+        <div class="guide-box" style="right:192px;top:10px;width:514px;height:52px;">SAFE WING P2</div>
+        <div class="guide-box" style="left:815px;top:0;width:290px;height:36px;">SAFE TOP CROWN</div>
+      </div>
+      <div id="hud-guides-sf6">
+        <div class="guide-box danger" style="left:0;top:24px;width:202px;height:78px;">P1 PORTRAIT</div>
+        <div class="guide-box danger" style="right:0;top:24px;width:202px;height:78px;">P2 PORTRAIT</div>
+        <div class="guide-box danger" style="left:210px;top:26px;width:28px;height:30px;">M/C</div>
+        <div class="guide-box danger" style="right:210px;top:26px;width:28px;height:30px;">M/C</div>
+        <div class="guide-box danger" style="left:180px;top:62px;width:692px;height:34px;">SF6 P1 HEALTH BAR (y:62-96)</div>
+        <div class="guide-box danger" style="right:180px;top:62px;width:692px;height:34px;">SF6 P2 HEALTH BAR (y:62-96)</div>
+        <div class="guide-box danger" style="left:564px;top:112px;width:323px;height:20px;">P1 DRIVE GAUGE</div>
+        <div class="guide-box danger" style="right:564px;top:112px;width:323px;height:20px;">P2 DRIVE GAUGE</div>
+        <div class="guide-box danger" style="left:912px;top:52px;width:96px;height:70px;">TIMER 99</div>
+        <div class="guide-box" style="left:244px;top:0;width:590px;height:56px;">SF6 SAFE WING P1 (x:244-834)</div>
+        <div class="guide-box" style="right:244px;top:0;width:590px;height:56px;">SF6 SAFE WING P2 (x:1086-1676)</div>
+        <div class="guide-box" style="left:832px;top:0;width:256px;height:46px;">SF6 SAFE CENTER (y:0-46)</div>
+      </div>
     </div>
 
     <!-- MAIN SCOREBAR OVERLAY (Starts primed off-screen so OBS scene activation plays full intro cleanly) -->
@@ -3848,11 +4175,13 @@
   </div>
 
   <script src="flags.js"></script>
+  <script src="sf6-themes.js"></script>
   <script>
     (() => {
       /* =========================================================================
-         THEME METADATA REGISTRY (31 Tekken 8 & FGC Broadcast Themes)
+         THEME METADATA REGISTRY (32 Tekken 8/FGC + 24 Street Fighter 6 Themes)
          ========================================================================= */
+      const SF6_THEME_MAP = window.FGC_SF6_THEME_MAP || {};
       const THEME_CONFIG = {
         't8-native-hud': { layout: 'blade', scorePos: 'inner', flagStyle: 'blade-twt', centerStyle: 'trapezoid', outerBlade: 'on', slant: 26 },
         't8-twt-2026-official': { layout: 'blade', scorePos: 'inner', flagStyle: 'blade-twt', centerStyle: 'floating', outerBlade: 'on', slant: 26 },
@@ -3887,6 +4216,9 @@
         't8-glass-minimal': { layout: 'split', scorePos: 'inner', flagStyle: 'bezel', centerStyle: 'pill', outerBlade: 'off', slant: 12 },
         't8-arcade-1997': { layout: 'crown', scorePos: 'inner', flagStyle: 'classic', centerStyle: 'theme', outerBlade: 'off', slant: 10 }
       };
+      for (const sf6 of (window.FGC_SF6_THEMES || [])) {
+        THEME_CONFIG[sf6.id] = { ...sf6.cfg };
+      }
 
       const FONT_STACKS = {
         'Barlow Condensed': `'Barlow Condensed', 'Bahnschrift', sans-serif`,
@@ -3992,11 +4324,12 @@
       window.addEventListener('resize', updateStageScale);
       updateStageScale();
 
-      /* Preview Query Parameters (?preview=t8|checker|green&guides=1) */
+      /* Preview Query Parameters (?preview=t8|sf6|checker|green&guides=1) */
       const params = new URLSearchParams(window.location.search);
       function applyPreviewMode(mode, guides) {
-        document.body.classList.remove('bg-t8', 'bg-checker', 'bg-green');
+        document.body.classList.remove('bg-t8', 'bg-sf6', 'bg-checker', 'bg-green');
         if (mode === 't8') document.body.classList.add('bg-t8');
+        else if (mode === 'sf6') document.body.classList.add('bg-sf6');
         else if (mode === 'checker') document.body.classList.add('bg-checker');
         else if (mode === 'green') document.body.classList.add('bg-green');
         document.body.classList.toggle('show-guides', Boolean(guides));
@@ -4257,14 +4590,47 @@
         const activeFlagStyle = rawFlagStyle === 'twt-slant' ? 'blade-twt' : rawFlagStyle;
         const activeCenterStyle = (st.centerStyle && st.centerStyle !== 'theme') ? st.centerStyle : (cfg.centerStyle || 'theme');
         const activeOuterBlade = (st.outerBlade && st.outerBlade !== 'theme') ? st.outerBlade : (cfg.outerBlade || 'off');
+        const sf6Theme = SF6_THEME_MAP[themeId] || null;
+        const effectiveShape = (st.shape && st.shape !== 'theme') ? st.shape : (sf6Theme?.cfg?.shape || '');
 
         els.root.dataset.theme = themeId;
         els.root.dataset.layout = activeLayout;
         els.root.dataset.scorePos = (st.scorePosOverride && st.scorePosOverride !== 'theme') ? st.scorePosOverride : cfg.scorePos;
-        els.root.dataset.shape = st.shape && st.shape !== 'theme' ? st.shape : '';
+        els.root.dataset.shape = effectiveShape;
         els.root.dataset.flagStyle = activeFlagStyle;
         els.root.dataset.centerStyle = activeCenterStyle !== 'theme' ? activeCenterStyle : '';
         els.root.dataset.outerBlade = activeOuterBlade;
+
+        if (sf6Theme) {
+          const pv = sf6Theme.pv;
+          els.root.dataset.sf6 = '1';
+          els.root.dataset.sf6Glass = pv.glass ? '1' : '0';
+          els.root.dataset.sf6FullBorder = pv.fullBorder ? '1' : '0';
+          els.root.dataset.sf6Italic = sf6Theme.cfg.italic ? '1' : '0';
+          els.root.style.setProperty('--sf6-bg-p1', pv.bg1 || pv.bg);
+          els.root.style.setProperty('--sf6-bg-p2', pv.bg2 || pv.bg);
+          els.root.style.setProperty('--sf6-p1', pv.p1);
+          els.root.style.setProperty('--sf6-p2', pv.p2);
+          els.root.style.setProperty('--sf6-sc1', pv.sc1);
+          els.root.style.setProperty('--sf6-sc2', pv.sc2);
+          els.root.style.setProperty('--sf6-sct1', pv.sct || '#ffffff');
+          els.root.style.setProperty('--sf6-sct2', pv.sct2 || pv.sct || '#ffffff');
+          els.root.style.setProperty('--sf6-cbg', pv.cbg);
+          els.root.style.setProperty('--sf6-cborder', pv.cborder || pv.p1);
+          els.root.style.setProperty('--sf6-ct', pv.ct || '#ffffff');
+          els.root.style.setProperty('--sf6-tx', pv.tx || '#ffffff');
+          els.root.style.setProperty('--sf6-sp1', pv.sp1 || pv.p1);
+          els.root.style.setProperty('--sf6-sp2', pv.sp2 || pv.p2);
+          els.root.style.setProperty('--sf6-bridge', pv.bridge || 'transparent');
+          els.root.style.setProperty('--sf6-glow1', pv.glow1 || 'transparent');
+          els.root.style.setProperty('--sf6-glow2', pv.glow2 || 'transparent');
+          els.root.style.setProperty('--sf6-font', FONT_STACKS[sf6Theme.cfg.font] || FONT_STACKS['Barlow Condensed']);
+        } else {
+          delete els.root.dataset.sf6;
+          delete els.root.dataset.sf6Glass;
+          delete els.root.dataset.sf6FullBorder;
+          delete els.root.dataset.sf6Italic;
+        }
         els.root.dataset.borderStyle = st.borderStyle && st.borderStyle !== 'theme' ? st.borderStyle : '';
         els.root.dataset.glow = st.glow || 'subtle';
         els.root.dataset.sheen = st.sheen || 'off';
@@ -4305,7 +4671,7 @@
           't8-heat-ignited', 't8-twt-official', 't8-iron-fist-gold', 't8-devil-gene', 't8-g-corp-tactical',
           't8-evo-grand-finals', 't8-jin-flame', 't8-kazuya-crimson', 't8-urban-square-neon', 'fgc-hyper-flame'
         ]);
-        const shapeOverride = st.shape && st.shape !== 'theme' ? st.shape : '';
+        const shapeOverride = effectiveShape;
         const isSlantedScoreBox = shapeOverride
           ? (shapeOverride === 'blade-slant' || shapeOverride === 'diagonal')
           : (activeLayout === 'blade' || SLANTED_THEMES.has(themeId));
