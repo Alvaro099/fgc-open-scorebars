@@ -1194,6 +1194,23 @@
   }
   .mt-sf6-ctrl.l { left: 9%; background: #c28014; }
   .mt-sf6-ctrl.r { right: 9%; background: #6d28d9; }
+  .mt-sf6-wins {
+    position: absolute;
+    top: 2px;
+    display: flex;
+    gap: 3px;
+  }
+  .mt-sf6-wins.l { left: 37.5%; }
+  .mt-sf6-wins.r { right: 37.5%; }
+  .mt-sf6-wins i {
+    width: 5px;
+    height: 4px;
+    background: #fbbf24;
+    box-shadow: 0 0 3px #f59e0b;
+    transform: skewX(-22deg);
+  }
+  .mt-sf6-wins.r i { transform: skewX(22deg); }
+  .mt-sf6-wins i.off { background: rgba(15, 23, 42, 0.85); border: 0.6px solid rgba(255,255,255,0.4); box-shadow: none; }
   .mt-sf6-timer {
     position: absolute;
     left: 50%;
@@ -1301,26 +1318,26 @@
   .mt-stage.lay-arch .mt-wing.p2 { right: 4.5%; }
   .mt-stage.lay-arch .mt-center { top: 10px; height: 16px; min-width: 19%; }
 
-  /* Street Fighter 6 miniature proportions (clear of portraits, [M]/[C], healthbars & 99 timer!) */
-  .mt-stage.lay-sf6-drive .mt-wing { top: 16px; width: 32%; height: 23px; }
-  .mt-stage.lay-sf6-drive .mt-wing.p1 { left: 11.5%; }
-  .mt-stage.lay-sf6-drive .mt-wing.p2 { right: 11.5%; }
-  .mt-stage.lay-sf6-drive .mt-center { top: 10px; height: 15px; min-width: 15%; }
+  /* Street Fighter 6 miniature proportions (clear of portraits, [M]/[C], Round Wins, healthbars & 99 timer!) */
+  .mt-stage.lay-sf6-drive .mt-wing { top: 17px; width: 27%; height: 22px; }
+  .mt-stage.lay-sf6-drive .mt-wing.p1 { left: 10.5%; }
+  .mt-stage.lay-sf6-drive .mt-wing.p2 { right: 10.5%; }
+  .mt-stage.lay-sf6-drive .mt-center { top: 10px; height: 15px; min-width: 14%; }
 
-  .mt-stage.lay-sf6-cpt .mt-wing { top: 11px; width: 33%; height: 21px; }
+  .mt-stage.lay-sf6-cpt .mt-wing { top: 14px; width: 27%; height: 20px; }
   .mt-stage.lay-sf6-cpt .mt-wing.p1 { left: 10.5%; }
   .mt-stage.lay-sf6-cpt .mt-wing.p2 { right: 10.5%; }
-  .mt-stage.lay-sf6-cpt .mt-center { top: 11px; height: 21px; width: 15.5%; }
+  .mt-stage.lay-sf6-cpt .mt-center { top: 14px; height: 19px; width: 14.5%; }
 
-  .mt-stage.lay-sf6-sfl .mt-wing { top: 11px; width: 33%; height: 18px; }
+  .mt-stage.lay-sf6-sfl .mt-wing { top: 11px; width: 32.5%; height: 16px; }
   .mt-stage.lay-sf6-sfl .mt-wing.p1 { left: 10.5%; }
   .mt-stage.lay-sf6-sfl .mt-wing.p2 { right: 10.5%; }
-  .mt-stage.lay-sf6-sfl .mt-center { top: 11px; height: 18px; width: 15.5%; }
+  .mt-stage.lay-sf6-sfl .mt-center { top: 11px; height: 16px; width: 15%; }
 
-  .mt-stage.lay-sf6-metro .mt-wing { top: 16px; width: 31.5%; height: 21px; }
-  .mt-stage.lay-sf6-metro .mt-wing.p1 { left: 11.5%; }
-  .mt-stage.lay-sf6-metro .mt-wing.p2 { right: 11.5%; }
-  .mt-stage.lay-sf6-metro .mt-center { top: 9px; height: 15px; min-width: 15%; }
+  .mt-stage.lay-sf6-metro .mt-wing { top: 17px; width: 26.8%; height: 21px; }
+  .mt-stage.lay-sf6-metro .mt-wing.p1 { left: 10.5%; }
+  .mt-stage.lay-sf6-metro .mt-wing.p2 { right: 10.5%; }
+  .mt-stage.lay-sf6-metro .mt-center { top: 9px; height: 15px; min-width: 14%; }
 
   /* Wing shapes */
   .mt-wing.sh-blade.p1, .mt-wing.sh-diag.p1 { clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 100%, 8px 100%); }
@@ -2742,9 +2759,9 @@
               <option value="crown">T8 Crown 36px (Top Broadcast Strip)</option>
               <option value="split">T8 Split-Wing (Between Portrait &amp; Orbs)</option>
               <option value="arch">T8 Stepped Arch (Connected Visor)</option>
-              <option value="sf6-drive">🥊 SF6 Drive Wing (Parallel Healthbars)</option>
-              <option value="sf6-cpt">🥊 SF6 CPT Top Bar (Flush y:0–46px)</option>
-              <option value="sf6-sfl">🥊 SF6 SFL Slim Ribbon (Ultra-Slim 38px)</option>
+              <option value="sf6-drive">🥊 SF6 Drive Wing (Clears Round Wins)</option>
+              <option value="sf6-cpt">🥊 SF6 CPT Top Bar (Flush y:0–44px)</option>
+              <option value="sf6-sfl">🥊 SF6 SFL Slim Ribbon (31px Above Round Wins)</option>
               <option value="sf6-metro">🥊 SF6 Metro Arch (Floating Plates)</option>
             </select>
             <label for="st-shape">Plate Shape</label>
@@ -4861,9 +4878,11 @@
     const hudBackdropHtml = isSf6
       ? `<div class="mt-sf6-hud" aria-hidden="true">
            <span class="mt-sf6-ctrl l">M</span>
+           <div class="mt-sf6-wins l"><i class="off"></i><i></i></div>
            <div class="mt-sf6-bar l"></div>
            <div class="mt-sf6-drive l"></div>
            <div class="mt-sf6-timer">99</div>
+           <div class="mt-sf6-wins r"><i></i><i class="off"></i></div>
            <div class="mt-sf6-bar r"></div>
            <div class="mt-sf6-drive r"></div>
            <span class="mt-sf6-ctrl r">C</span>

@@ -325,28 +325,32 @@
 
     /* =========================================================================
        STREET FIGHTER 6 NATIVE BROADCAST ARCHETYPES (4 HUD-CALIBRATED LAYOUTS)
-       Exact SF6 1920x1080 clearances:
-         Portraits: 0..202 & 1718..1920 | [M]/[C]: 210..238 & 1682..1710
-         Health Bars: y=62..96 | Timer "99": x=912..1008, y=52..122 | Drive: y=112..132
+       Exact SF6 1920x1080 pixel-verified clearances (ZERO overlap with Round Wins!):
+         Portraits:    x = 0..202 & 1718..1920, y = 24..102
+         [M]/[C] Tags: x = 208..238 & 1682..1712, y = 24..56
+         Round Wins:   x = 754..832 & 1088..1166, y = 33..50 (TWO slanted diamonds per side!)
+         Health Bars:  x = 180..872 & 1048..1740, y = 62..96
+         Timer ("99"): x = 912..1008, y = 52..122
+         Drive Gauge:  x = 564..887 & 1033..1356, y = 112..132
        ========================================================================= */
 
-    /* ARCHETYPE 4: SF6 DRIVE (Angled parallel to SF6 healthbars, clear of [M]/[C], timer & round marks!) */
+    /* ARCHETYPE 4: SF6 DRIVE (x:244..750, y:6..54 — clears [M]/[C], Round Wins, Timer & Healthbars!) */
     #scorebar-root[data-layout="sf6-drive"] {
       --safe-outer-pad: calc(var(--blade-slant, 20px) + 14px);
     }
 
     #scorebar-root[data-layout="sf6-drive"] .sb-wing {
       top: 6px;
-      width: calc(564px + var(--wing-spread));
-      height: var(--bar-h, 50px);
+      width: calc(506px + var(--wing-spread));
+      height: var(--bar-h, 48px);
     }
 
     #scorebar-root[data-layout="sf6-drive"] .sb-wing.p1 {
-      left: calc(246px - var(--wing-spread));
+      left: calc(244px - var(--wing-spread));
     }
 
     #scorebar-root[data-layout="sf6-drive"] .sb-wing.p2 {
-      right: calc(246px - var(--wing-spread));
+      right: calc(244px - var(--wing-spread));
     }
 
     #scorebar-root[data-layout="sf6-drive"] .sb-center {
@@ -354,17 +358,17 @@
       top: 2px;
       left: 50%;
       transform: translateX(-50%);
-      min-width: 218px;
-      max-width: 300px;
-      height: 36px;
+      min-width: 214px;
+      max-width: 252px;
+      height: 38px;
       z-index: 10;
     }
 
-    /* ARCHETYPE 5: SF6 CPT TOP BAR (Flush y=0..46px Capcom Pro Tour broadcast bar cleanly above 99 timer!) */
+    /* ARCHETYPE 5: SF6 CPT TOP BAR (Flush y:0..44, x:244..750 — frames Round Wins cleanly between wings & center!) */
     #scorebar-root[data-layout="sf6-cpt"] .sb-wing {
       top: 0;
-      width: calc(590px + var(--wing-spread));
-      height: var(--bar-h, 46px);
+      width: calc(506px + var(--wing-spread));
+      height: var(--bar-h, 44px);
     }
 
     #scorebar-root[data-layout="sf6-cpt"] .sb-wing.p1 {
@@ -380,24 +384,25 @@
       top: 0;
       left: 50%;
       transform: translateX(-50%);
-      width: 256px;
-      height: var(--bar-h, 46px);
+      min-width: 214px;
+      max-width: 252px;
+      height: var(--bar-h, 42px);
       z-index: 10;
     }
 
-    /* ARCHETYPE 6: SF6 SFL SLIM RIBBON (Ultra-clean 38px flush top broadcast bar, maximum stage view!) */
+    /* ARCHETYPE 6: SF6 SFL ULTRA-SLIM TOP RIBBON (y:0..31px — floats cleanly ABOVE Round Wins y:35..47!) */
     #scorebar-root[data-layout="sf6-sfl"] .sb-wing {
       top: 0;
-      width: calc(592px + var(--wing-spread));
-      height: var(--bar-h, 38px);
+      width: calc(586px + var(--wing-spread));
+      height: var(--bar-h, 31px);
     }
 
     #scorebar-root[data-layout="sf6-sfl"] .sb-wing.p1 {
-      left: calc(242px - var(--wing-spread));
+      left: calc(244px - var(--wing-spread));
     }
 
     #scorebar-root[data-layout="sf6-sfl"] .sb-wing.p2 {
-      right: calc(242px - var(--wing-spread));
+      right: calc(244px - var(--wing-spread));
     }
 
     #scorebar-root[data-layout="sf6-sfl"] .sb-center {
@@ -406,30 +411,30 @@
       left: 50%;
       transform: translateX(-50%);
       width: 256px;
-      height: var(--bar-h, 38px);
+      height: var(--bar-h, 31px);
       z-index: 10;
     }
 
-    /* ARCHETYPE 7: SF6 METRO / BATTLE HUB (Floating plates + optional top bridge cleanly above SF6 HUD!) */
+    /* ARCHETYPE 7: SF6 METRO / BATTLE HUB (x:246..750, y:7..53 + top bridge at y:0..5 cleanly above Round Wins!) */
     #scorebar-root[data-layout="sf6-metro"] .arch-bridge {
       display: block;
-      left: calc(248px - var(--wing-spread));
-      right: calc(248px - var(--wing-spread));
-      height: 6px;
+      left: calc(246px - var(--wing-spread));
+      right: calc(246px - var(--wing-spread));
+      height: 5px;
     }
 
     #scorebar-root[data-layout="sf6-metro"] .sb-wing {
-      top: 8px;
-      width: calc(556px + var(--wing-spread));
+      top: 7px;
+      width: calc(504px + var(--wing-spread));
       height: var(--bar-h, 46px);
     }
 
     #scorebar-root[data-layout="sf6-metro"] .sb-wing.p1 {
-      left: calc(250px - var(--wing-spread));
+      left: calc(246px - var(--wing-spread));
     }
 
     #scorebar-root[data-layout="sf6-metro"] .sb-wing.p2 {
-      right: calc(250px - var(--wing-spread));
+      right: calc(246px - var(--wing-spread));
     }
 
     #scorebar-root[data-layout="sf6-metro"] .sb-center {
@@ -437,100 +442,136 @@
       top: 0;
       left: 50%;
       transform: translateX(-50%);
-      min-width: 228px;
-      max-width: 300px;
-      height: 36px;
+      min-width: 214px;
+      max-width: 252px;
+      height: 38px;
       z-index: 10;
     }
 
     /* SF6 Compact & Proportional Typography + Score Plaque Sizing */
     #scorebar-root[data-layout="sf6-sfl"] .player-info {
-      gap: 8px;
-      padding: 0 12px;
+      gap: 7px;
+      padding: 0 11px;
     }
 
     #scorebar-root[data-layout="sf6-sfl"] .player-name {
-      font-size: 22px;
+      font-size: 20px;
     }
 
     #scorebar-root[data-layout="sf6-sfl"] .sponsor-tag {
-      font-size: 17px;
+      font-size: 16px;
     }
 
     #scorebar-root[data-layout="sf6-sfl"] .score-box {
-      width: 54px;
-      font-size: 24px;
+      width: 48px;
+      font-size: 21px;
+    }
+
+    #scorebar-root[data-layout="sf6-sfl"] .round-text {
+      font-size: 15px;
+    }
+
+    #scorebar-root[data-layout="sf6-sfl"] .format-pill {
+      font-size: 11px;
+      padding: 2px 6px;
     }
 
     #scorebar-root[data-layout="sf6-sfl"] .bracket-badge {
-      height: 19px;
-      min-width: 20px;
-      font-size: 11px;
+      height: 17px;
+      min-width: 18px;
+      font-size: 10px;
     }
 
     #scorebar-root[data-layout="sf6-sfl"] .iso-tag {
-      font-size: 13px;
-      padding: 0 6px;
+      font-size: 12px;
+      padding: 0 5px;
     }
 
     #scorebar-root[data-layout="sf6-sfl"] .flag-wrap {
-      width: 25px;
-      height: 17px;
+      width: 23px;
+      height: 15px;
     }
 
     #scorebar-root[data-layout="sf6-cpt"] .player-name,
     #scorebar-root[data-layout="sf6-metro"] .player-name {
-      font-size: 26px;
+      font-size: 25px;
     }
 
     #scorebar-root[data-layout="sf6-cpt"] .sponsor-tag,
     #scorebar-root[data-layout="sf6-metro"] .sponsor-tag {
-      font-size: 20px;
+      font-size: 19px;
     }
 
     #scorebar-root[data-layout="sf6-cpt"] .score-box,
     #scorebar-root[data-layout="sf6-metro"] .score-box {
-      width: 60px;
-      font-size: 29px;
-    }
-
-    #scorebar-root[data-layout="sf6-drive"] .player-name {
+      width: 58px;
       font-size: 27px;
     }
 
-    #scorebar-root[data-layout="sf6-drive"] .sponsor-tag {
-      font-size: 21px;
+    #scorebar-root[data-layout="sf6-drive"] .player-name {
+      font-size: 26px;
     }
 
-    /* SF6 Match Point side-peek clearances (dock cleanly above y=62px healthbar on flush CPT/SFL layouts) */
-    #scorebar-root[data-mp-style="side-peek"][data-layout="sf6-cpt"] .mp-tag,
+    #scorebar-root[data-layout="sf6-drive"] .sponsor-tag {
+      font-size: 20px;
+    }
+
+    /* SF6 Match Point clearances (NEVER cover SF6 Round Win diamonds at x:754..832 & 1088..1166!) */
     #scorebar-root[data-mp-style="side-peek"][data-layout="sf6-sfl"] .mp-tag {
       top: calc(100% + 1px);
-      height: 16px;
+      height: 17px;
       font-size: 8.5px;
       padding: 0 12px;
       z-index: 6;
       transform: translateY(-10px);
     }
 
-    #scorebar-root[data-mp-style="side-peek"][data-layout="sf6-cpt"] .sb-wing.p1 .mp-tag,
     #scorebar-root[data-mp-style="side-peek"][data-layout="sf6-sfl"] .sb-wing.p1 .mp-tag {
       left: auto;
-      right: 110px;
+      right: 162px;
       clip-path: polygon(0 0, 100% 0, calc(100% - 7px) 100%, 7px 100%);
     }
 
-    #scorebar-root[data-mp-style="side-peek"][data-layout="sf6-cpt"] .sb-wing.p2 .mp-tag,
     #scorebar-root[data-mp-style="side-peek"][data-layout="sf6-sfl"] .sb-wing.p2 .mp-tag {
       right: auto;
-      left: 110px;
+      left: 162px;
       clip-path: polygon(0 0, 100% 0, calc(100% - 7px) 100%, 7px 100%);
     }
 
+    /* On SF6 Drive / CPT / Metro, tuck side-peek cleanly inside wing beside score so Round Wins stay 100% visible */
     #scorebar-root[data-mp-style="side-peek"][data-layout="sf6-drive"] .mp-tag,
+    #scorebar-root[data-mp-style="side-peek"][data-layout="sf6-cpt"] .mp-tag,
     #scorebar-root[data-mp-style="side-peek"][data-layout="sf6-metro"] .mp-tag {
-      top: 4px;
-      height: 22px;
+      top: 50%;
+      height: 19px;
+      padding: 0 9px;
+      font-size: 8.5px;
+      border-radius: 3px;
+      z-index: 15;
+      transform: translateY(-50%) scale(0.86);
+    }
+
+    #scorebar-root[data-mp-style="side-peek"][data-layout="sf6-drive"] .sb-wing.p1 .mp-tag,
+    #scorebar-root[data-mp-style="side-peek"][data-layout="sf6-cpt"] .sb-wing.p1 .mp-tag,
+    #scorebar-root[data-mp-style="side-peek"][data-layout="sf6-metro"] .sb-wing.p1 .mp-tag {
+      left: auto;
+      right: calc(68px + var(--blade-slant, 14px));
+      clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 100%, 6px 100%);
+    }
+
+    #scorebar-root[data-mp-style="side-peek"][data-layout="sf6-drive"] .sb-wing.p2 .mp-tag,
+    #scorebar-root[data-mp-style="side-peek"][data-layout="sf6-cpt"] .sb-wing.p2 .mp-tag,
+    #scorebar-root[data-mp-style="side-peek"][data-layout="sf6-metro"] .sb-wing.p2 .mp-tag {
+      right: auto;
+      left: calc(68px + var(--blade-slant, 14px));
+      clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+    }
+
+    #scorebar-root[data-mp-style="side-peek"][data-layout="sf6-drive"] .sb-wing.match-point .mp-tag,
+    #scorebar-root[data-mp-style="side-peek"][data-layout="sf6-cpt"] .sb-wing.match-point .mp-tag,
+    #scorebar-root[data-mp-style="side-peek"][data-layout="sf6-metro"] .sb-wing.match-point .mp-tag {
+      opacity: 1;
+      transform: translateY(-50%) scale(1);
     }
 
     /* Wing Inner Plate & Flex Directions */
@@ -3406,11 +3447,15 @@
       transform: skewX(-14deg);
     }
 
-    #scorebar-root[data-shape="flat"] .sb-wing .wing-plate,
-    #scorebar-root[data-shape="flat"] .sb-center {
+    #scorebar-root[data-shape="flat"] .sb-wing .wing-plate {
       clip-path: none !important;
       border-radius: 0 !important;
       transform: none !important;
+    }
+
+    #scorebar-root[data-shape="flat"] .sb-center {
+      clip-path: none !important;
+      border-radius: 0 !important;
     }
 
     #scorebar-root[data-shape="flat"] .sb-wing .score-box {
@@ -3419,10 +3464,13 @@
       padding: 0 !important;
     }
 
-    #scorebar-root[data-shape="flat"][data-layout="crown"] .sb-wing .score-box,
+    #scorebar-root[data-shape="flat"][data-layout="crown"] .sb-wing .score-box {
+      width: 54px !important;
+    }
+
     #scorebar-root[data-shape="flat"][data-layout="sf6-sfl"] .sb-wing .score-box,
     #scorebar-root[data-shape="bevel"][data-layout="sf6-sfl"] .sb-wing .score-box {
-      width: 54px !important;
+      width: 48px !important;
     }
 
     #scorebar-root[data-shape="rounded"] .sb-wing .wing-plate {
@@ -4075,16 +4123,19 @@
       <div id="hud-guides-sf6">
         <div class="guide-box danger" style="left:0;top:24px;width:202px;height:78px;">P1 PORTRAIT</div>
         <div class="guide-box danger" style="right:0;top:24px;width:202px;height:78px;">P2 PORTRAIT</div>
-        <div class="guide-box danger" style="left:210px;top:26px;width:28px;height:30px;">M/C</div>
-        <div class="guide-box danger" style="right:210px;top:26px;width:28px;height:30px;">M/C</div>
+        <div class="guide-box danger" style="left:208px;top:24px;width:30px;height:32px;">M/C</div>
+        <div class="guide-box danger" style="right:208px;top:24px;width:30px;height:32px;">M/C</div>
+        <div class="guide-box danger" style="left:754px;top:33px;width:78px;height:18px;">P1 WINS</div>
+        <div class="guide-box danger" style="right:754px;top:33px;width:78px;height:18px;">P2 WINS</div>
         <div class="guide-box danger" style="left:180px;top:62px;width:692px;height:34px;">SF6 P1 HEALTH BAR (y:62-96)</div>
         <div class="guide-box danger" style="right:180px;top:62px;width:692px;height:34px;">SF6 P2 HEALTH BAR (y:62-96)</div>
         <div class="guide-box danger" style="left:564px;top:112px;width:323px;height:20px;">P1 DRIVE GAUGE</div>
         <div class="guide-box danger" style="right:564px;top:112px;width:323px;height:20px;">P2 DRIVE GAUGE</div>
         <div class="guide-box danger" style="left:912px;top:52px;width:96px;height:70px;">TIMER 99</div>
-        <div class="guide-box" style="left:244px;top:0;width:590px;height:56px;">SF6 SAFE WING P1 (x:244-834)</div>
-        <div class="guide-box" style="right:244px;top:0;width:590px;height:56px;">SF6 SAFE WING P2 (x:1086-1676)</div>
-        <div class="guide-box" style="left:832px;top:0;width:256px;height:46px;">SF6 SAFE CENTER (y:0-46)</div>
+        <div class="guide-box" style="left:244px;top:0;width:506px;height:54px;">SF6 SAFE WING P1 (x:244-750)</div>
+        <div class="guide-box" style="right:244px;top:0;width:506px;height:54px;">SF6 SAFE WING P2 (x:1170-1676)</div>
+        <div class="guide-box" style="left:834px;top:0;width:252px;height:42px;">SF6 SAFE CENTER</div>
+        <div class="guide-box" style="left:244px;top:0;width:586px;height:31px;opacity:.55;">SFL TOP 31px</div>
       </div>
     </div>
 

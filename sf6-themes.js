@@ -2,16 +2,17 @@
  * FGC Open Scorebars — 24 Dedicated Street Fighter 6 Broadcast Scorebar Designs
  * Shared single source of truth between index.html (OBS 1920x1080) and panel.html (Control Panel).
  *
- * Calibrated to exact Street Fighter 6 1920x1080 HUD Safe Zones:
+ * Calibrated to exact Street Fighter 6 1920x1080 HUD Safe Zones (ZERO overlap with Round Wins!):
  *   • Left Portrait:  x = 0..202px,    y = 24..102px
  *   • Right Portrait: x = 1718..1920px, y = 24..102px
- *   • [M] / [C] Tags: x = 210..238px & 1682..1710px, y = 26..56px
+ *   • [M] / [C] Tags: x = 208..238px & 1682..1712px, y = 24..56px
+ *   • Round Wins:     x = 754..832px & 1088..1166px, y = 33..50px (2 slanted diamonds per side!)
  *   • Health Bars:    x = 180..872px & 1048..1740px, y = 62..96px
  *   • Timer ("99"):   x = 912..1008px, y = 52..122px
  *   • Drive Gauge:    x = 564..887px & 1033..1356px, y = 112..132px
- *   • Safe Wing P1:   x = 244..834px,  y = 0..56px
- *   • Safe Wing P2:   x = 1086..1676px, y = 0..56px
- *   • Safe Center:    x = 832..1088px, y = 0..46px (cleanly above "99" timer)
+ *   • Safe Wing P1:   x = 244..750px,  y = 0..54px  (or y = 0..31px ultra-slim above Round Wins)
+ *   • Safe Wing P2:   x = 1170..1676px, y = 0..54px (or y = 0..31px ultra-slim above Round Wins)
+ *   • Safe Center:    x = 834..1086px, y = 0..42px  (cleanly between Round Wins & above "99" timer)
  */
 (function (global) {
   'use strict';
