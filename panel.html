@@ -4101,6 +4101,8 @@
      STATE & SYNC ENGINE (HTTP/SSE + BroadcastChannel Fallback)
      ========================================================================= */
   const STORAGE_KEY = 'fgc_open_scorebar_state_v1';
+  const CLIENT_ID = `pnl_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`;
+  let localSeq = 0;
   const isHttp = location.protocol === 'http:' || location.protocol === 'https:';
   let bc = null;
   try { bc = new BroadcastChannel('fgc_open_scorebar'); } catch {}
@@ -4126,7 +4128,10 @@
   let gamesCatalog = { featured: [], all: [], loadedAll: false };
   let activeRoster = { game: 'tekken8', gameName: 'Tekken 8', pack: 'full', characters: [], cachedCount: 0, total: 0 };
   let rosterLoadingKey = '';
+  const failedRosterKeys = new Set();
   let rosterSearch = '';
+  let lastRosterSig = '';
+  let rosterRefreshTimer = null;
   let dlPollTimer = null;
   let playersDb = [];
   let presetsDb = [];
@@ -4181,9 +4186,28 @@
   function commitState(patch, immediate = false) {
     let nextVs = { ...DEFAULT_VS, ...(state.vs || {}) };
     if (patch.vs) {
+      let nextMatchVal = nextVs.nextMatch;
+      if (patch.vs.nextMatch === null) {
+        nextMatchVal = null;
+      } else if (patch.vs.nextMatch) {
+        const incoming = patch.vs.nextMatch;
+        if (incoming.setId !== undefined || (incoming.p1 && incoming.p2)) {
+          nextMatchVal = incoming;
+        } else if (nextVs.nextMatch) {
+          nextMatchVal = {
+            ...nextVs.nextMatch,
+            ...incoming,
+            p1: incoming.p1 ? { ...(nextVs.nextMatch.p1 || {}), ...incoming.p1 } : nextVs.nextMatch.p1,
+            p2: incoming.p2 ? { ...(nextVs.nextMatch.p2 || {}), ...incoming.p2 } : nextVs.nextMatch.p2
+          };
+        } else {
+          nextMatchVal = incoming;
+        }
+      }
       nextVs = {
         ...nextVs,
         ...patch.vs,
+        nextMatch: nextMatchVal,
         customMatch: patch.vs.customMatch
           ? {
               ...(nextVs.customMatch || DEFAULT_VS.customMatch),
@@ -4194,6 +4218,7 @@
           : nextVs.customMatch
       };
     }
+    const seq = ++localSeq;
     state = {
       ...state,
       ...patch,
@@ -4202,7 +4227,9 @@
       commentators: patch.commentators ? { ...state.commentators, ...patch.commentators } : state.commentators,
       tweaks: patch.tweaks ? { ...state.tweaks, ...patch.tweaks } : state.tweaks,
       style: patch.style ? { ...DEFAULT_STYLE, ...(state.style || {}), ...patch.style } : { ...DEFAULT_STYLE, ...(state.style || {}) },
-      vs: nextVs
+      vs: nextVs,
+      _cid: CLIENT_ID,
+      _seq: seq
     };
     renderUI();
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
@@ -6553,12 +6580,14 @@
 
     if ($('vs-game-select')?.options.length && vs.game) {
       $('vs-game-select').value = vs.game;
-      const wantKey = `${vs.game}/${vs.pack || 'full'}`;
-      if ((activeRoster.game !== vs.game || activeRoster.pack !== vs.pack) && rosterLoadingKey !== wantKey) {
-        syncPackSelectForGame(vs.game, vs.pack);
-        loadActiveRoster(vs.game, vs.pack || 'full');
+      const wantPack = vs.pack || 'full';
+      const wantKey = `${vs.game}/${wantPack}`;
+      if ((activeRoster.game !== vs.game || activeRoster.pack !== wantPack) && rosterLoadingKey !== wantKey && !failedRosterKeys.has(wantKey)) {
+        syncPackSelectForGame(vs.game, wantPack);
+        loadActiveRoster(vs.game, wantPack);
       }
     }
+    if (activeRoster.characters?.length) renderRosterStrip();
   }
 
   function syncPackSelectForGame(gameId, preferredPack) {
@@ -6595,11 +6624,17 @@
 
   async function loadActiveRoster(gameId, packId) {
     if (!isHttp) return;
-    const key = `${gameId}/${packId}`;
+    const g = gameId || 'tekken8';
+    const p = packId || 'full';
+    const key = `${g}/${p}`;
     rosterLoadingKey = key;
     try {
-      const res = await fetch(`/api/assets/roster?game=${encodeURIComponent(gameId)}&pack=${encodeURIComponent(packId)}`);
-      if (!res.ok) return;
+      const res = await fetch(`/api/assets/roster?game=${encodeURIComponent(g)}&pack=${encodeURIComponent(p)}`);
+      if (!res.ok) {
+        failedRosterKeys.add(key);
+        return;
+      }
+      failedRosterKeys.delete(key);
       activeRoster = await res.json();
       populateCharSelects(activeRoster.characters, activeRoster.gameName);
       $('p1-char').value = state.p1?.character || '';
@@ -6607,26 +6642,55 @@
       if ($('vs-c-p1-char')) $('vs-c-p1-char').value = state.vs?.customMatch?.p1?.character || '';
       if ($('vs-c-p2-char')) $('vs-c-p2-char').value = state.vs?.customMatch?.p2?.character || '';
       $('vs-cache-status').textContent = `${activeRoster.cachedCount} / ${activeRoster.total} cached offline`;
-      renderRosterStrip();
-    } catch {} finally {
+      renderRosterStrip(true);
+    } catch {
+      failedRosterKeys.add(key);
+    } finally {
       if (rosterLoadingKey === key) rosterLoadingKey = '';
     }
   }
 
-  function renderRosterStrip() {
+  function getActiveVsChars() {
+    const src = state.vs?.source || 'current';
+    if (src === 'custom') {
+      return { p1: state.vs?.customMatch?.p1?.character || '', p2: state.vs?.customMatch?.p2?.character || '' };
+    }
+    if (src === 'next' && state.vs?.nextMatch?.p1) {
+      return { p1: state.vs.nextMatch.p1.character || '', p2: state.vs.nextMatch.p2?.character || '' };
+    }
+    return { p1: state.p1?.character || '', p2: state.p2?.character || '' };
+  }
+
+  function renderRosterStrip(force = false) {
     const q = normText(rosterSearch.trim());
+    const cur = getActiveVsChars();
+    const curP1 = normText(cur.p1);
+    const curP2 = normText(cur.p2);
+    const sig = `${activeRoster.game}|${activeRoster.pack}|${activeRoster.cachedCount}|${activeRoster.total}|${q}|${curP1}|${curP2}`;
+    if (!force && sig === lastRosterSig) return;
+    lastRosterSig = sig;
     const chars = (activeRoster.characters || []).filter(c => !q || normText(`${c.name} ${c.shortName} ${c.codename}`).includes(q));
-    $('vs-roster-strip').innerHTML = chars.map(c => `
+    $('vs-roster-strip').innerHTML = chars.map(c => {
+      const cn = normText(c.name);
+      const isP1 = Boolean(curP1 && cn === curP1);
+      const isP2 = Boolean(curP2 && cn === curP2);
+      const p1Style = isP1
+        ? 'border-color:var(--p1);background:var(--p1);color:#0b0d14;font-weight:900;'
+        : 'border-color:var(--p1);';
+      const p2Style = isP2
+        ? 'border-color:var(--p2);background:var(--p2);color:#fff;font-weight:900;'
+        : 'border-color:var(--p2);';
+      return `
       <div class="roster-chip ${c.cached ? 'cached' : ''}">
         <span class="roster-chip-name" title="${c.name}${c.cached ? ' (Cached Offline)' : ' (Auto-downloads on select)'}">
           ${c.cached ? '✅ ' : ''}${c.name}
         </span>
         <span class="roster-chip-btns">
-          <button type="button" data-char-p1="${c.name.replace(/"/g, '&quot;')}" style="border-color:var(--p1);">P1</button>
-          <button type="button" data-char-p2="${c.name.replace(/"/g, '&quot;')}" style="border-color:var(--p2);">P2</button>
+          <button type="button" data-char-p1="${c.name.replace(/"/g, '&quot;')}" style="${p1Style}">P1</button>
+          <button type="button" data-char-p2="${c.name.replace(/"/g, '&quot;')}" style="${p2Style}">P2</button>
         </span>
-      </div>
-    `).join('') || '<div style="grid-column:1/-1;color:var(--muted);font-size:11px;padding:8px;">No characters matched.</div>';
+      </div>`;
+    }).join('') || '<div style="grid-column:1/-1;color:var(--muted);font-size:11px;padding:8px;">No characters matched.</div>';
   }
 
   function pollDownloadStatus() {
@@ -6954,12 +7018,14 @@
     $('vs-game-select').addEventListener('change', async (e) => {
       const g = e.target.value;
       const p = syncPackSelectForGame(g, 'full');
+      failedRosterKeys.delete(`${g}/${p}`);
       commitState({ vs: { game: g, pack: p } }, true);
       await loadActiveRoster(g, p);
     });
     $('vs-pack-select').addEventListener('change', async (e) => {
       const g = $('vs-game-select').value || state.vs?.game || 'tekken8';
       const p = e.target.value;
+      failedRosterKeys.delete(`${g}/${p}`);
       commitState({ vs: { game: g, pack: p } }, true);
       await loadActiveRoster(g, p);
     });
@@ -7016,16 +7082,25 @@
     $('vs-roster-strip').addEventListener('click', (e) => {
       const b1 = e.target.closest('[data-char-p1]');
       const b2 = e.target.closest('[data-char-p2]');
-      if (b1) {
-        const ch = b1.dataset.charP1;
-        if (state.vs?.source === 'custom') commitState({ vs: { customMatch: { p1: { character: ch } } } }, true);
-        else commitState({ p1: { character: ch } }, true);
-        toast(`P1 Character → ${ch}`);
-      } else if (b2) {
-        const ch = b2.dataset.charP2;
-        if (state.vs?.source === 'custom') commitState({ vs: { customMatch: { p2: { character: ch } } } }, true);
-        else commitState({ p2: { character: ch } }, true);
-        toast(`P2 Character → ${ch}`);
+      const side = b1 ? 'p1' : (b2 ? 'p2' : '');
+      if (!side) return;
+      const ch = b1 ? b1.dataset.charP1 : b2.dataset.charP2;
+      const src = state.vs?.source || 'current';
+      if (src === 'custom') {
+        commitState({ vs: { customMatch: { [side]: { character: ch } } } }, true);
+      } else if (src === 'next' && state.vs?.nextMatch?.p1) {
+        commitState({ vs: { nextMatch: { [side]: { character: ch } } } }, true);
+      } else {
+        commitState({ [side]: { character: ch } }, true);
+      }
+      toast(`${side.toUpperCase()} Character → ${ch}`);
+      // If render wasn't cached yet, refresh cached badge count once auto-download completes
+      const entry = (activeRoster.characters || []).find(c => c.name === ch);
+      if (isHttp && entry && !entry.cached) {
+        clearTimeout(rosterRefreshTimer);
+        rosterRefreshTimer = setTimeout(() => {
+          loadActiveRoster(state.vs?.game || 'tekken8', state.vs?.pack || 'full');
+        }, 2400);
       }
     });
   }
@@ -7072,14 +7147,65 @@
     refreshInfo();
     setInterval(refreshInfo, 4000);
 
-    // Listen to remote updates (e.g. if another phone/dock edits scores!)
-    const es = new EventSource('/api/events');
-    es.addEventListener('state', (ev) => {
-      try {
-        state = JSON.parse(ev.data);
-        renderUI();
-      } catch {}
-    });
+    // Receive live updates from sibling tabs or the shared SSE leader tab (zero extra sockets!)
+    if (bc) {
+      bc.onmessage = (ev) => {
+        if (ev.data?.type === 'state' && ev.data.payload) {
+          const incoming = ev.data.payload;
+          if (incoming._cid === CLIENT_ID && Number(incoming._seq || 0) <= localSeq) return;
+          state = incoming;
+          renderUI();
+          pushPreviewConfig();
+        }
+      };
+    }
+
+    // Single-SSE Leader Election per browser origin (prevents Chrome 6-socket HTTP/1.1 exhaustion!)
+    let activeEs = null;
+    let sseReconnectTimer = null;
+    let pageUnloading = false;
+    const closePanelSSE = () => {
+      pageUnloading = true;
+      clearTimeout(sseReconnectTimer);
+      if (activeEs) { try { activeEs.close(); } catch {} activeEs = null; }
+    };
+    window.addEventListener('pagehide', closePanelSSE);
+    window.addEventListener('beforeunload', closePanelSSE);
+
+    const connectPanelSSE = () => {
+      if (pageUnloading) return;
+      if (activeEs) { try { activeEs.close(); } catch {} }
+      const es = new EventSource('/api/events');
+      activeEs = es;
+      es.addEventListener('state', (ev) => {
+        try {
+          const data = JSON.parse(ev.data);
+          // Skip our own in-flight / already-rendered echoes so rapid clicks & sliders never jitter
+          if (data._cid === CLIENT_ID && Number(data._seq || 0) <= localSeq) return;
+          state = data;
+          renderUI();
+          pushPreviewConfig();
+          if (bc) bc.postMessage({ type: 'state', payload: data, fromSse: true });
+        } catch {}
+      });
+      es.onerror = () => {
+        if (activeEs === es) activeEs = null;
+        try { es.close(); } catch {}
+        clearTimeout(sseReconnectTimer);
+        if (!pageUnloading) sseReconnectTimer = setTimeout(connectPanelSSE, 2000);
+      };
+    };
+
+    if (navigator.locks && typeof navigator.locks.request === 'function' && bc) {
+      navigator.locks.request('fgc_open_scorebar_sse_leader', () => new Promise((resolve) => {
+        if (pageUnloading) return resolve();
+        connectPanelSSE();
+        window.addEventListener('pagehide', resolve, { once: true });
+        window.addEventListener('beforeunload', resolve, { once: true });
+      })).catch(() => connectPanelSSE());
+    } else {
+      connectPanelSSE();
+    }
   } else {
     $('conn-pill').classList.add('online');
     $('conn-text').textContent = 'Local File Mode (BroadcastChannel)';

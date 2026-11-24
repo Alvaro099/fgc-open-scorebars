@@ -59,6 +59,7 @@ export function createAssetManager(dataDir) {
   }
 
   const memConfigCache = new Map();
+  const inFlightRenders = new Map();
   let remoteCatalogCache = null;
 
   const downloadJob = {
@@ -94,7 +95,8 @@ export function createAssetManager(dataDir) {
     }
     try {
       const res = await fetch(`${RAW_BASE}/${relPath}`, {
-        headers: { 'User-Agent': 'FGC-Open-Scorebars/1.1' }
+        headers: { 'User-Agent': 'FGC-Open-Scorebars/1.1' },
+        signal: AbortSignal.timeout(10000)
       });
       if (!res.ok) {
         if (cached) return cached;
@@ -343,26 +345,41 @@ export function createAssetManager(dataDir) {
       };
     }
 
-    // Download from StreamHelperAssets raw CDN and cache atomically
-    const remoteUrl = `${RAW_BASE}/games/${g}/${p}/${encodeURIComponent(filename)}`;
-    const res = await fetch(remoteUrl, { headers: { 'User-Agent': 'FGC-Open-Scorebars/1.1' } });
-    if (!res.ok) {
-      // Fallback to skin 0 if requested alt skin doesn't exist
-      if (skinIdx !== 0) return ensureCharacterRender(g, p, charQuery, 0);
-      return null;
+    // Download from StreamHelperAssets raw CDN and cache atomically (coalesce concurrent requests)
+    const flightKey = `${g}/${p}/${filename}`;
+    if (inFlightRenders.has(flightKey)) {
+      return inFlightRenders.get(flightKey);
     }
-    const buf = Buffer.from(await res.arrayBuffer());
-    const tmp = `${localPath}.${process.pid}.${Date.now()}.tmp`;
-    fs.writeFileSync(tmp, buf);
-    fs.renameSync(tmp, localPath);
+    const task = (async () => {
+      const remoteUrl = `${RAW_BASE}/games/${g}/${p}/${encodeURIComponent(filename)}`;
+      const res = await fetch(remoteUrl, {
+        headers: { 'User-Agent': 'FGC-Open-Scorebars/1.1' },
+        signal: AbortSignal.timeout(12000)
+      });
+      if (!res.ok) {
+        // Fallback to skin 0 if requested alt skin doesn't exist
+        if (skinIdx !== 0) return ensureCharacterRender(g, p, charQuery, 0);
+        return null;
+      }
+      const buf = Buffer.from(await res.arrayBuffer());
+      const tmp = `${localPath}.${process.pid}.${Date.now()}.tmp`;
+      fs.writeFileSync(tmp, buf);
+      fs.renameSync(tmp, localPath);
 
-    return {
-      filePath: localPath,
-      codename: matched.codename,
-      displayName: matched.displayName,
-      eyesight: packCfg?.eyesights?.[matched.codename]?.[String(skinIdx)] || null,
-      size: packCfg?.image_sizes?.[matched.codename]?.[String(skinIdx)] || null
-    };
+      return {
+        filePath: localPath,
+        codename: matched.codename,
+        displayName: matched.displayName,
+        eyesight: packCfg?.eyesights?.[matched.codename]?.[String(skinIdx)] || null,
+        size: packCfg?.image_sizes?.[matched.codename]?.[String(skinIdx)] || null
+      };
+    })();
+    inFlightRenders.set(flightKey, task);
+    try {
+      return await task;
+    } finally {
+      inFlightRenders.delete(flightKey);
+    }
   }
 
   /**

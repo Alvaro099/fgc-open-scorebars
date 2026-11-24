@@ -446,9 +446,29 @@ function readBody(req, maxBytes = 512 * 1024) {
 function deepMergeState(prev, patch) {
   let nextVs = prev.vs || structuredClone(DEFAULT_VS);
   if (patch.vs) {
+    let nextMatchVal = nextVs.nextMatch;
+    if (patch.vs.nextMatch === null) {
+      nextMatchVal = null;
+    } else if (patch.vs.nextMatch) {
+      const incoming = patch.vs.nextMatch;
+      // Full replacement when a new queue set is loaded; partial merge when editing p1/p2 character
+      if (incoming.setId !== undefined || (incoming.p1 && incoming.p2)) {
+        nextMatchVal = incoming;
+      } else if (nextVs.nextMatch) {
+        nextMatchVal = {
+          ...nextVs.nextMatch,
+          ...incoming,
+          p1: incoming.p1 ? { ...(nextVs.nextMatch.p1 || {}), ...incoming.p1 } : nextVs.nextMatch.p1,
+          p2: incoming.p2 ? { ...(nextVs.nextMatch.p2 || {}), ...incoming.p2 } : nextVs.nextMatch.p2
+        };
+      } else {
+        nextMatchVal = incoming;
+      }
+    }
     nextVs = {
       ...nextVs,
       ...patch.vs,
+      nextMatch: nextMatchVal,
       customMatch: patch.vs.customMatch
         ? {
             ...(nextVs.customMatch || DEFAULT_VS.customMatch),
@@ -496,6 +516,8 @@ const server = http.createServer(async (req, res) => {
 
   // --- SSE real-time stream ---
   if (pathname === '/api/events' && req.method === 'GET') {
+    req.socket?.setTimeout(0);
+    req.socket?.setNoDelay(true);
     res.writeHead(200, {
       'Content-Type': 'text/event-stream; charset=utf-8',
       'Cache-Control': 'no-cache, no-transform',
@@ -505,7 +527,10 @@ const server = http.createServer(async (req, res) => {
     });
     res.write(`event: state\ndata: ${JSON.stringify(currentState)}\n\n`);
     sseClients.add(res);
-    req.on('close', () => sseClients.delete(res));
+    const cleanup = () => sseClients.delete(res);
+    req.on('close', cleanup);
+    res.on('close', cleanup);
+    res.on('error', cleanup);
     return;
   }
 
@@ -904,7 +929,10 @@ const server = http.createServer(async (req, res) => {
         res.writeHead(403);
         return res.end('Host not allowed');
       }
-      const upstream = await fetch(parsed.toString(), { headers: { 'User-Agent': 'FGC-Open-Scorebars/1.1' } });
+      const upstream = await fetch(parsed.toString(), {
+        headers: { 'User-Agent': 'FGC-Open-Scorebars/1.1' },
+        signal: AbortSignal.timeout(8000)
+      });
       if (!upstream.ok) {
         res.writeHead(404);
         return res.end('Avatar unavailable');

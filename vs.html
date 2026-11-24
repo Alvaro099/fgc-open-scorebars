@@ -616,8 +616,10 @@
     filter: drop-shadow(0 18px 28px rgba(0, 0, 0, var(--char-shadow-alpha, 0.55)));
     transform-origin: center center;
     will-change: transform;
+    transition: opacity 0.16s ease;
   }
-  .vs-char-img.loaded { display: block; }
+  .vs-char-img.loaded { display: block; opacity: 1; }
+  .vs-char-img.loading { opacity: 0.45; }
   #p1-char-img { transform: translate3d(var(--p1-x), var(--p1-y), 0) scale(var(--p1-zoom)) scaleX(var(--p1-flip)); }
   #p2-char-img { transform: translate3d(var(--p2-x), var(--p2-y), 0) scale(var(--p2-zoom)) scaleX(var(--p2-flip)); }
 
@@ -1481,11 +1483,20 @@
     if (lastImgSrc[chKey] !== charUrl) {
       lastImgSrc[chKey] = charUrl;
       if (charUrl) {
-        charImg.onload = () => { charImg.classList.add('loaded'); applyAvatarVisibility(); };
-        charImg.onerror = () => { charImg.classList.remove('loaded'); applyAvatarVisibility(); };
+        charImg.classList.add('loading');
+        charImg.onload = () => {
+          charImg.classList.remove('loading');
+          charImg.classList.add('loaded');
+          applyAvatarVisibility();
+        };
+        charImg.onerror = () => {
+          charImg.classList.remove('loading', 'loaded');
+          if (lastImgSrc[chKey] === charUrl) lastImgSrc[chKey] = '';
+          applyAvatarVisibility();
+        };
         charImg.src = charUrl;
       } else {
-        charImg.classList.remove('loaded');
+        charImg.classList.remove('loading', 'loaded');
         charImg.removeAttribute('src');
       }
     }
@@ -2024,19 +2035,64 @@
   window.addEventListener('obsSourceVisibleChanged', (e) => { if (e?.detail?.visible) onSceneShow(); });
   document.addEventListener('visibilitychange', () => { if (!document.hidden) onSceneShow(); });
 
+  let bc = null;
   try {
-    const bc = new BroadcastChannel('fgc_open_scorebar');
+    bc = new BroadcastChannel('fgc_open_scorebar');
     bc.onmessage = (ev) => { if (ev.data?.type === 'state' && ev.data.payload) render(ev.data.payload); };
   } catch {}
 
+  // NOTE: Preview iframes inside panel.html NEVER open EventSource (prevents Chrome 6-socket HTTP/1.1 deadlock).
   if (isHttp) {
     fetch('/api/history').then(r => r.json()).then(list => { historyDb = list; if (currentState) render(currentState); }).catch(() => {});
     fetch('/api/state').then(r => r.json()).then(st => {
       render(st);
       if (!isPreview && st?.vs?.visible !== false) triggerEntryAnim(st?.vs?.entryAnim || 'slam-split');
     }).catch(() => {});
-    const es = new EventSource('/api/events');
-    es.addEventListener('state', (ev) => { try { render(JSON.parse(ev.data)); } catch {} });
+
+    if (!isPreview) {
+      let activeEs = null;
+      let reconnectTimer = null;
+      let pageUnloading = false;
+      const closeSSE = () => {
+        pageUnloading = true;
+        clearTimeout(reconnectTimer);
+        if (activeEs) { try { activeEs.close(); } catch {} activeEs = null; }
+      };
+      window.addEventListener('pagehide', closeSSE);
+      window.addEventListener('beforeunload', closeSSE);
+
+      const connectSSE = () => {
+        if (pageUnloading) return;
+        if (activeEs) { try { activeEs.close(); } catch {} }
+        const es = new EventSource('/api/events');
+        activeEs = es;
+        es.addEventListener('state', (ev) => {
+          try {
+            const data = JSON.parse(ev.data);
+            render(data);
+            if (bc) bc.postMessage({ type: 'state', payload: data, fromSse: true });
+          } catch {}
+        });
+        es.onerror = () => {
+          if (activeEs === es) activeEs = null;
+          try { es.close(); } catch {}
+          clearTimeout(reconnectTimer);
+          if (!pageUnloading) reconnectTimer = setTimeout(connectSSE, 1500);
+        };
+      };
+
+      const isObs = Boolean(window.obsstudio);
+      if (!isObs && navigator.locks && typeof navigator.locks.request === 'function' && bc) {
+        navigator.locks.request('fgc_open_scorebar_sse_leader', () => new Promise((resolve) => {
+          if (pageUnloading) return resolve();
+          connectSSE();
+          window.addEventListener('pagehide', resolve, { once: true });
+          window.addEventListener('beforeunload', resolve, { once: true });
+        })).catch(() => connectSSE());
+      } else {
+        connectSSE();
+      }
+    }
   }
 })();
 </script>
