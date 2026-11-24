@@ -971,14 +971,16 @@
   const isHttp = location.protocol === 'http:' || location.protocol === 'https:';
   const $ = (id) => document.getElementById(id);
 
+  let rescalePreview = () => {};
   if (isPreview) {
     document.body.classList.add('preview-mode');
-    const rescale = () => {
+    rescalePreview = () => {
+      if (!window.innerWidth || !window.innerHeight) return;
       const s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
       $('vs-scaler').style.transform = `scale(${s})`;
     };
-    window.addEventListener('resize', rescale);
-    rescale();
+    window.addEventListener('resize', rescalePreview);
+    rescalePreview();
   }
 
   let currentState = null;
@@ -1480,7 +1482,7 @@
   window.addEventListener('message', (ev) => {
     const d = ev.data;
     if (!d) return;
-    if (d.type === 'state-update' && d.state) render(d.state);
+    if (d.type === 'state-update' && d.state) { rescalePreview(); render(d.state); }
     else if (d.type === 'history-update' && Array.isArray(d.history)) { historyDb = d.history; if (currentState) render(currentState); }
     else if (d.type === 'test-vs-entry') triggerEntryAnim(currentState?.vs?.entryAnim || 'slam-split');
     else if (d.type === 'export-vs-png') exportPngGraphic();

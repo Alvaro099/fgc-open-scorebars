@@ -85,6 +85,100 @@
     gap: 8px;
     flex-wrap: wrap;
   }
+  /* Primary Top-Level Workspace Switcher (Scorebars | VS Splash | Tournaments) */
+  .top-workspace-nav {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px;
+    border-radius: 10px;
+    background: #090c13;
+    border: 1px solid var(--border-hi);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+  .top-workspace-nav button {
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--muted);
+    padding: 6px 14px;
+    border-radius: 7px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    transition: background 0.16s, color 0.16s, border-color 0.16s, box-shadow 0.16s;
+  }
+  .top-workspace-nav button:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.05);
+  }
+  .top-workspace-nav button.active-ws {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    border-color: #60a5fa;
+    color: #fff;
+    box-shadow: 0 3px 12px rgba(37, 99, 235, 0.42);
+  }
+  .top-workspace-nav .ws-badge {
+    font-size: 10px;
+    padding: 1px 5px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.28);
+    color: #dbeafe;
+  }
+  .workspace-view { display: none; }
+  .workspace-view.active { display: block; }
+  .shared-match-wrap {
+    max-width: 1860px;
+    margin: 0 auto;
+    padding: 10px 16px 0;
+  }
+  .shared-match-wrap:not(:has(.active-match-bar.visible)) {
+    display: none;
+  }
+  .vs-workspace-shell {
+    max-width: 1820px;
+    margin: 0 auto;
+    padding: 12px 16px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: 14px;
+    align-items: start;
+  }
+  .vs-designs-sidebar {
+    position: sticky;
+    top: 62px;
+    max-height: calc(100vh - 76px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .vs-designs-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+  .vs-designs-sidebar .vs-design-grid {
+    grid-template-columns: 1fr;
+    margin-bottom: 0;
+  }
+  .vs-designs-sidebar .vs-design-swatch { height: 46px; font-size: 13px; }
+  @media (max-width: 1220px) {
+    .vs-workspace-shell { grid-template-columns: 1fr; }
+    .vs-designs-sidebar { position: static; max-height: none; }
+    .vs-designs-sidebar .vs-design-grid { grid-template-columns: repeat(auto-fill, minmax(175px, 1fr)); }
+  }
+  .trn-workspace-shell {
+    max-width: 1460px;
+    margin: 0 auto;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .trn-sub-pane { display: none; }
+  .trn-sub-pane.active { display: block; }
+  .hdr-ws-group { display: inline-flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+  .hdr-ws-group.hidden { display: none; }
   .status-pill {
     display: inline-flex;
     align-items: center;
@@ -1656,17 +1750,31 @@
     gap: 8px;
     margin-bottom: 10px;
   }
+  .vs-preview-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: box-shadow 0.2s, border-color 0.2s;
+  }
+  .vs-preview-card.is-pinned {
+    position: sticky;
+    top: 62px;
+    z-index: 35;
+    border-color: rgba(122, 92, 255, 0.48);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.72);
+  }
   .vs-preview-stage {
     position: relative;
     width: 100%;
     max-width: 820px;
-    margin: 0 auto 12px;
+    margin: 0 auto;
     aspect-ratio: 16 / 9;
-    border-radius: 9px;
     overflow: hidden;
-    border: 1px solid var(--border-hi);
     background: #07090f;
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55);
+  }
+  .vs-preview-card.is-pinned .vs-preview-stage {
+    max-width: 680px;
   }
   .vs-preview-stage iframe {
     width: 100%;
@@ -1810,22 +1918,64 @@
     <div class="brand-logo">T8</div>
     <div>
       <h1>FGC Open Scorebars</h1>
-      <small>Ultra-Light Local Broadcast Panel · 32 Tekken 8 &amp; TWT Designs · Integrated Flags · 114 SVGs</small>
+      <small>Local Broadcast Suite · Scorebars · VS Splash · Tournaments</small>
     </div>
   </div>
+
+  <!-- TOP-LEVEL WORKSPACE SWITCHER -->
+  <nav class="top-workspace-nav" id="top-workspace-nav" aria-label="Broadcast Workspaces">
+    <button type="button" data-ws="scorebars" class="active-ws">🎛 Scorebars</button>
+    <button type="button" data-ws="vs">⚔️ VS Splash</button>
+    <button type="button" data-ws="tournaments">🏆 Tournaments <span class="ws-badge" id="trn-ws-badge">Start.gg / Challonge</span></button>
+  </nav>
+
   <div class="header-right">
     <div class="status-pill" id="conn-pill">
       <span class="status-dot"></span>
       <span id="conn-text">Connecting...</span>
     </div>
-    <button id="btn-toggle-sidebar" class="active-chip" title="Show or hide the Scorebar Designs sidebar">🎨 Designs</button>
-    <button id="btn-copy-obs" title="Copy URL for OBS Browser Source">📋 Copy OBS URL</button>
-    <button id="btn-open-overlay" title="Open index.html in a new tab">↗ Open Overlay</button>
-    <button id="btn-replay-obs" class="primary" title="Replay live entry transition in OBS (Shortcut: Alt+E)">🎬 OBS Intro</button>
-    <button id="btn-toggle-vis" class="btn-vis" title="Shortcut: Alt+H">👁 Overlay ON</button>
+    <!-- Contextual actions for Scorebars & Tournaments -->
+    <div class="hdr-ws-group" id="hdr-group-scorebars">
+      <button id="btn-toggle-sidebar" class="active-chip" title="Show or hide the Scorebar Designs sidebar">🎨 Designs</button>
+      <button id="btn-copy-obs" title="Copy URL for OBS Browser Source">📋 Copy OBS URL</button>
+      <button id="btn-open-overlay" title="Open index.html in a new tab">↗ Overlay</button>
+      <button id="btn-replay-obs" class="primary" title="Replay live entry transition in OBS (Shortcut: Alt+E)">🎬 OBS Intro</button>
+      <button id="btn-toggle-vis" class="btn-vis" title="Shortcut: Alt+H">👁 Overlay ON</button>
+    </div>
+    <!-- Contextual actions for VS Splash workspace -->
+    <div class="hdr-ws-group hidden" id="hdr-group-vs">
+      <button type="button" id="btn-copy-vs" title="Copy VS Splash Browser Source URL for OBS">📋 Copy VS URL</button>
+      <button type="button" id="btn-open-vs" title="Open vs.html in a new tab">↗ Open VS</button>
+      <button type="button" id="btn-vs-replay" class="primary">🎬 VS Intro</button>
+      <button type="button" id="btn-vs-vis" class="btn-vis">👁 VS ON</button>
+    </div>
   </div>
 </header>
 
+<!-- SHARED ACTIVE LINKED TOURNAMENT MATCH BAR (Visible across all workspaces whenever a tournament set is linked) -->
+<div class="shared-match-wrap">
+  <section class="active-match-bar" id="active-match-bar">
+    <div class="am-info">
+      <span class="am-pill" id="am-provider-pill">START.GG</span>
+      <span class="am-pill swapped" id="am-swapped-pill" style="display:none;">⇄ Sides Swapped</span>
+      <strong id="am-summary">ROUND 1 · P1 vs P2</strong>
+      <span id="am-h2h" style="color:var(--gold);font-weight:700;font-size:11px;"></span>
+    </div>
+    <div class="am-actions">
+      <button type="button" id="btn-am-sync-live" style="display:none;" title="Sync live in-progress score to Challonge without closing the set">📡 Sync Score</button>
+      <button type="button" id="btn-am-report" class="btn-report">📤 Report Result</button>
+      <button type="button" id="btn-am-next" class="primary">⏭ Next in Queue</button>
+      <button type="button" id="btn-am-save-hist">💾 Save to History</button>
+      <button type="button" id="btn-am-go-scorebar" title="Jump to Scorebars workspace">🎛 Scorebar</button>
+      <button type="button" id="btn-am-unlink" title="Unlink tournament set">🔓</button>
+    </div>
+  </section>
+</div>
+
+<!-- =========================================================================
+     WORKSPACE 1: SCOREBARS (Live Preview + Match Cockpit + Style Studio + Designs Sidebar)
+     ========================================================================= -->
+<div class="workspace-view active" id="ws-scorebars">
 <div class="workspace-shell" id="workspace-shell">
 <div class="main-column">
   <!-- LIVE PREVIEW OVER REAL TEKKEN 8 GAMEPLAY (Pinned by default for real-time editing!) -->
@@ -2043,31 +2193,11 @@
     </div>
   </section>
 
-  <!-- ACTIVE LINKED TOURNAMENT MATCH BAR (Shows when a Start.gg / Challonge / Demo set is loaded) -->
-  <section class="active-match-bar" id="active-match-bar">
-    <div class="am-info">
-      <span class="am-pill" id="am-provider-pill">START.GG</span>
-      <span class="am-pill swapped" id="am-swapped-pill" style="display:none;">⇄ Sides Swapped</span>
-      <strong id="am-summary">ROUND 1 · P1 vs P2</strong>
-      <span id="am-h2h" style="color:var(--gold);font-weight:700;font-size:11px;"></span>
-    </div>
-    <div class="am-actions">
-      <button type="button" id="btn-am-sync-live" style="display:none;" title="Sync live in-progress score to Challonge without closing the set">📡 Sync Score</button>
-      <button type="button" id="btn-am-report" class="btn-report">📤 Report Result</button>
-      <button type="button" id="btn-am-next" class="primary">⏭ Next in Queue</button>
-      <button type="button" id="btn-am-save-hist">💾 Save to History</button>
-      <button type="button" id="btn-am-unlink" title="Unlink tournament set">🔓</button>
-    </div>
-  </section>
-
-  <!-- EXTRA CONTROLS TABS -->
+  <!-- EXTRA CONTROLS TABS (Scorebar-specific controls) -->
   <section class="card">
     <div class="tab-nav" id="bottom-tabs">
       <button id="tab-btn-designs" data-tab="designs" style="display:none;">🎨 Scorebar Designs (32)</button>
       <button class="active-chip" data-tab="tweaks">✨ Style Studio (Fonts, Colors, FX)</button>
-      <button data-tab="vs">⚔️ VS Splash &amp; Character Packs</button>
-      <button data-tab="tournament">🏆 Tournaments (Start.gg / Challonge)</button>
-      <button data-tab="history">📜 History &amp; H2H (<span id="hist-count">0</span>)</button>
       <button data-tab="casters">🎙 Commentators</button>
       <button data-tab="players">👥 Saved Players</button>
       <button data-tab="obs">📡 OBS, Mobile LAN &amp; Hotkeys</button>
@@ -2525,259 +2655,6 @@
       </div>
     </div>
 
-    <!-- TAB 1A: VS MATCH SPLASH & MULTI-GAME CHARACTER PACKS -->
-    <div class="tab-pane" id="tab-vs">
-      <div class="vs-top-bar">
-        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-          <span style="font-size:11px;color:var(--muted);font-weight:700;">Match Source:</span>
-          <div class="seg-bar" id="seg-vs-source">
-            <button type="button" data-val="current" class="active-chip">🎮 Current Match</button>
-            <button type="button" data-val="next">⏭ Up Next (Queue)</button>
-            <button type="button" data-val="custom">✏️ Custom VS</button>
-          </div>
-        </div>
-        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-          <button type="button" id="btn-vs-vis" class="btn-vis">👁 VS ON</button>
-          <button type="button" id="btn-vs-replay" class="primary">🎬 Replay VS Intro</button>
-          <button type="button" id="btn-vs-export-png" title="Render &amp; download a 1920x1080 PNG graphic for X/Twitter/Discord">⬇ Export 1920×1080 PNG</button>
-          <button type="button" id="btn-copy-vs" title="Copy VS Splash Browser Source URL for OBS">📋 Copy VS URL</button>
-          <button type="button" id="btn-open-vs" title="Open vs.html in a new tab">↗ Open VS</button>
-        </div>
-      </div>
-
-      <div class="vs-preview-stage">
-        <iframe id="vs-preview-frame" src="vs.html?preview=1"></iframe>
-      </div>
-
-      <!-- Next-Up Queue Helper Bar (shown when source='next') -->
-      <div class="vs-next-bar" id="vs-next-bar">
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-          <div>
-            <strong style="font-size:12px;color:#93c5fd;">⏭ Up Next Queue Match:</strong>
-            <span id="vs-next-summary" style="font-size:12px;margin-left:6px;color:#fff;">Connect a Start.gg / Challonge / Demo tournament and click Sync Next Set.</span>
-          </div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <button type="button" id="btn-vs-sync-next" class="primary">🔄 Pull Next Set from Queue</button>
-            <button type="button" id="btn-vs-promote-next" title="Push this Up Next match onto the live scorebar">▶ Send to Live Scorebar</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Custom VS Match Editor Bar (shown when source='custom') -->
-      <div class="vs-next-bar" id="vs-custom-bar">
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:8px;">
-          <div><label for="vs-c-round">Round</label><input type="text" id="vs-c-round" placeholder="GRAND FINALS" /></div>
-          <div><label for="vs-c-p1-name">P1 Name</label><input type="text" id="vs-c-p1-name" placeholder="PLAYER 1" /></div>
-          <div><label for="vs-c-p1-char">P1 Character</label><select id="vs-c-p1-char"></select></div>
-          <div><label for="vs-c-p2-name">P2 Name</label><input type="text" id="vs-c-p2-name" placeholder="PLAYER 2" /></div>
-          <div><label for="vs-c-p2-char">P2 Character</label><select id="vs-c-p2-char"></select></div>
-        </div>
-      </div>
-
-      <label>VS Splash Broadcast Designs (6 Layouts)</label>
-      <div class="vs-design-grid" id="vs-design-grid"></div>
-
-      <div class="studio-grid">
-        <div class="studio-box">
-          <h3>Profile Avatars, Branding &amp; Info</h3>
-          <label>Player Profile Photo Mode</label>
-          <div class="seg-bar" id="seg-vs-avatar" style="margin-bottom:8px;">
-            <button type="button" data-val="badge">Badge + Char</button>
-            <button type="button" data-val="hero-fallback" class="active-chip">Auto Fallback</button>
-            <button type="button" data-val="portrait-hero">Photo Spotlight</button>
-            <button type="button" data-val="off">Off</button>
-          </div>
-          <div class="row" style="margin-bottom:8px;">
-            <div><label for="vs-eyebrow">Top Eyebrow Label</label><input type="text" id="vs-eyebrow" placeholder="UP NEXT" maxlength="24" /></div>
-            <div><label for="vs-subtitle">Event Footer Text</label><input type="text" id="vs-subtitle" placeholder="Tournament / Channel" maxlength="40" /></div>
-          </div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
-            <label class="toggle-item"><input type="checkbox" id="chk-vs-flags" checked /> Flags</label>
-            <label class="toggle-item"><input type="checkbox" id="chk-vs-h2h" checked /> H2H</label>
-            <label class="toggle-item"><input type="checkbox" id="chk-vs-sponsor" checked /> Sponsors</label>
-            <label class="toggle-item"><input type="checkbox" id="chk-vs-charname" checked /> Char Name</label>
-            <label class="toggle-item"><input type="checkbox" id="chk-vs-score" /> Score</label>
-            <label class="toggle-item"><input type="checkbox" id="chk-vs-logo" checked /> Logo</label>
-          </div>
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <button type="button" id="btn-vs-logo-upload" style="font-size:11px;">🏷️ Upload Event Logo</button>
-            <button type="button" id="btn-vs-logo-clear" style="font-size:11px;display:none;">✕ Remove Logo</button>
-            <span id="vs-logo-status" style="font-size:10px;color:var(--muted);">No event logo</span>
-            <input type="file" id="file-vs-logo" accept="image/png,image/jpeg,image/webp,image/svg+xml" style="display:none;" />
-          </div>
-        </div>
-
-        <div class="studio-box">
-          <h3>Backdrop, Pattern &amp; Entry Animation</h3>
-          <label>Background Style</label>
-          <div class="seg-bar" id="seg-vs-bg" style="margin-bottom:8px;">
-            <button type="button" data-val="theme" class="active-chip">Design Theme</button>
-            <button type="button" data-val="custom">Custom Colors</button>
-            <button type="button" data-val="transparent">Transparent</button>
-          </div>
-          <label>Animated Pattern</label>
-          <div class="seg-bar" id="seg-vs-pat" style="margin-bottom:8px;">
-            <button type="button" data-val="symbols" class="active-chip">△○×□</button>
-            <button type="button" data-val="grid">Grid</button>
-            <button type="button" data-val="halftone">Halftone</button>
-            <button type="button" data-val="diagonal">Stripes</button>
-            <button type="button" data-val="none">None</button>
-          </div>
-          <div class="color-pair-row" style="margin-bottom:8px;">
-            <div class="color-pick">BG 1 <input type="color" id="vs-bg1" value="#f5b800" /></div>
-            <div class="color-pick">BG 2 <input type="color" id="vs-bg2" value="#10131e" /></div>
-            <div class="color-pick">P1 <input type="color" id="vs-p1col" value="#ff512f" /></div>
-            <div class="color-pick">P2 <input type="color" id="vs-p2col" value="#2563eb" /></div>
-          </div>
-          <label for="vs-entryAnim">OBS Scene Entry Animation</label>
-          <select id="vs-entryAnim">
-            <option value="slam-split">⚡ Side Slam + VS Impact</option>
-            <option value="curtain">🪟 Split Curtain Reveal</option>
-            <option value="zoom-burst">💥 Zoom Burst</option>
-            <option value="fade">🌫 Smooth Fade</option>
-          </select>
-        </div>
-
-        <div class="studio-box">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-            <h3 style="margin:0;">Character Framing &amp; Flip</h3>
-            <button type="button" id="btn-vs-reset-frame" class="mini-tool-btn">↺ Reset</button>
-          </div>
-          <div style="display:flex;gap:6px;margin-bottom:8px;">
-            <button type="button" id="btn-vs-p1-flip" style="flex:1;font-size:11px;">⇄ Flip P1</button>
-            <button type="button" id="btn-vs-p2-flip" class="active-chip" style="flex:1;font-size:11px;">⇄ Flip P2</button>
-          </div>
-          <div class="slider-head"><span>P1 Character Zoom</span><b id="val-vs-p1Zoom">100%</b></div>
-          <input type="range" id="rng-vs-p1Zoom" min="65" max="150" step="5" value="100" />
-          <div class="slider-head" style="margin-top:6px;"><span>P1 Vertical Offset</span><b id="val-vs-p1Y">0 px</b></div>
-          <input type="range" id="rng-vs-p1Y" min="-140" max="140" step="10" value="0" />
-          <div class="slider-head" style="margin-top:8px;"><span>P2 Character Zoom</span><b id="val-vs-p2Zoom">100%</b></div>
-          <input type="range" id="rng-vs-p2Zoom" min="65" max="150" step="5" value="100" />
-          <div class="slider-head" style="margin-top:6px;"><span>P2 Vertical Offset</span><b id="val-vs-p2Y">0 px</b></div>
-          <input type="range" id="rng-vs-p2Y" min="-140" max="140" step="10" value="0" />
-        </div>
-      </div>
-
-      <!-- MULTI-GAME CHARACTER ASSET PACK MANAGER (StreamHelperAssets) -->
-      <div class="asset-mgr-box">
-        <div class="asset-mgr-head">
-          <div>
-            <strong style="font-size:12px;color:#c4b5fd;">📦 Multi-Game Character Splash Manager (Offline Cache)</strong>
-            <div style="font-size:11px;color:var(--muted);">Renders auto-download on demand when you pick a character, or pre-download an entire game pack for 100% offline tournaments.</div>
-          </div>
-          <span class="designs-count-pill" id="vs-cache-status">Loading catalog...</span>
-        </div>
-
-        <div class="asset-mgr-controls">
-          <div>
-            <label for="vs-game-select">Active Game Roster <button type="button" id="btn-load-all-games" class="mini-tool-btn" style="margin-left:6px;">Load All 240+ Games</button></label>
-            <select id="vs-game-select"></select>
-          </div>
-          <div>
-            <label for="vs-pack-select">Render Art Pack</label>
-            <select id="vs-pack-select"></select>
-          </div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <button type="button" id="btn-dl-pack" class="primary" style="height:33px;">⬇ Download Full Pack</button>
-            <button type="button" id="btn-upload-custom-char" style="height:33px;" title="Upload a custom transparent PNG for the currently selected P1 character">⬆ Custom PNG</button>
-            <button type="button" id="btn-clear-pack" style="height:33px;" title="Clear local disk cache for this pack">🗑</button>
-            <input type="file" id="file-custom-char" accept="image/png,image/webp,image/jpeg" style="display:none;" />
-          </div>
-        </div>
-
-        <div class="asset-progress" id="vs-dl-progress">
-          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);">
-            <span id="vs-dl-text">Downloading...</span>
-            <b id="vs-dl-pct" style="color:#fff;">0%</b>
-          </div>
-          <div class="asset-progress-track"><div class="asset-progress-fill" id="vs-dl-fill"></div></div>
-        </div>
-
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px;">
-          <input type="text" id="vs-roster-search" placeholder="🔍 Filter game roster &amp; quick-assign to P1 / P2..." style="max-width:320px;padding:5px 9px;font-size:12px;" />
-          <span style="font-size:10px;color:var(--muted);">Source: community <code>StreamHelperAssets</code> · cached locally in <code>data/assets/</code></span>
-        </div>
-        <div class="roster-strip" id="vs-roster-strip"></div>
-      </div>
-    </div>
-
-    <!-- TAB 1B: TOURNAMENTS (START.GG & CHALLONGE NATIVE FREE SYNC) -->
-    <div class="tab-pane" id="tab-tournament">
-      <div class="trn-top">
-        <div class="seg-bar" id="trn-provider-tabs">
-          <button type="button" data-prov="startgg" class="active-chip">🟣 Start.gg (GraphQL)</button>
-          <button type="button" data-prov="challonge">🟠 Challonge (API v1)</button>
-          <button type="button" data-prov="demo">⚡ Demo Tournament (No Token)</button>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-          <label class="toggle-item" style="padding:4px 8px;"><input type="checkbox" id="chk-trn-autosync" /> Auto-Sync (15s)</label>
-          <span id="trn-token-hint" style="font-size:11px;color:var(--muted);">Tokens stored locally on your PC only</span>
-        </div>
-      </div>
-
-      <div class="trn-connect-grid" id="trn-connect-form">
-        <div>
-          <label for="trn-url-input" id="trn-url-label">Tournament URL or Slug (start.gg)</label>
-          <input type="text" id="trn-url-input" placeholder="https://www.start.gg/tournament/your-tournament/event/tekken-8" />
-        </div>
-        <div>
-          <label for="trn-token-input" id="trn-token-label">
-            Free API Token (<a id="trn-token-link" href="https://start.gg/admin/profile/developer" target="_blank" rel="noopener" style="color:#60a5fa;">Get free token ↗</a>)
-          </label>
-          <input type="password" id="trn-token-input" autocomplete="off" placeholder="Paste your personal token (masked on stream)" />
-        </div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;">
-          <button type="button" id="btn-trn-connect" class="primary" style="height:33px;">🔌 Connect</button>
-          <button type="button" id="btn-trn-refresh" style="height:33px;" title="Refresh Stream Queue & Sets">↻</button>
-        </div>
-      </div>
-
-      <div class="trn-banner" id="trn-banner">
-        <div class="trn-banner-meta">
-          <strong id="trn-name-display">—</strong>
-          <span id="trn-meta-display">—</span>
-        </div>
-        <div class="trn-banner-controls">
-          <select id="trn-event-select" style="width:auto;min-width:175px;"></select>
-          <button type="button" id="btn-trn-import" title="Import entrants, sponsors, and country/region flags into your local roster">👥 Import Entrants</button>
-          <button type="button" id="btn-trn-load-next" class="primary">⏭ Load Next Set</button>
-        </div>
-      </div>
-
-      <div class="trn-filter-bar" id="trn-filter-bar" style="display:none;">
-        <div class="seg-bar" id="trn-set-filters">
-          <button type="button" data-sflt="stream" class="active-chip">📺 Stream Queue (<span id="cnt-stream">0</span>)</button>
-          <button type="button" data-sflt="open">🔥 Active / Open (<span id="cnt-open">0</span>)</button>
-          <button type="button" data-sflt="complete">✅ Completed (<span id="cnt-done">0</span>)</button>
-          <button type="button" data-sflt="all">All (<span id="cnt-all">0</span>)</button>
-        </div>
-        <input type="text" id="trn-set-search" placeholder="Filter sets by player or round..." style="width:230px;" />
-      </div>
-
-      <div class="trn-sets-grid" id="trn-sets-grid">
-        <div style="grid-column:1/-1;padding:18px;text-align:center;color:var(--muted);background:#0d1018;border:1px dashed var(--border);border-radius:8px;">
-          Connect a <b>start.gg</b> or <b>Challonge</b> tournament above, or click <b>⚡ Demo Tournament (No Token) → 🔌 Connect</b> to test Stream Queue, 1-click loading, automatic country/region flag detection, and result reporting offline.
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB 1C: LOCAL MATCH HISTORY & HEAD-TO-HEAD -->
-    <div class="tab-pane" id="tab-history">
-      <div class="h2h-banner">
-        <div>
-          <strong id="h2h-title" style="font-size:13px;">⚔️ Current Head-to-Head</strong>
-          <div id="h2h-detail" style="font-size:11px;color:var(--muted);">No previous matches recorded between P1 and P2.</div>
-        </div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;">
-          <button type="button" id="btn-hist-record" class="primary">💾 Save Current Set</button>
-          <button type="button" id="btn-hist-json">⬇ Export JSON</button>
-          <button type="button" id="btn-hist-csv">⬇ Export CSV</button>
-          <button type="button" id="btn-hist-clear">🗑 Clear</button>
-        </div>
-      </div>
-      <div class="history-list" id="history-list"></div>
-    </div>
-
     <!-- TAB 2: COMMENTATORS -->
     <div class="tab-pane" id="tab-casters">
       <div class="row">
@@ -2877,6 +2754,289 @@
     </div>
   </div>
 </aside>
+</div>
+</div>
+
+<!-- =========================================================================
+     WORKSPACE 2: VS SPLASH STUDIO & MULTI-GAME CHARACTER PACKS (Dedicated 2-Col View)
+     ========================================================================= -->
+<div class="workspace-view" id="ws-vs">
+  <div class="vs-workspace-shell">
+    <div class="main-column">
+      <!-- PINNED 16:9 VS LIVE PREVIEW MONITOR -->
+      <section class="vs-preview-card is-pinned" id="vs-preview-card">
+        <div class="preview-toolbar">
+          <div class="preview-toolbar-group">
+            <strong style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-right:4px;">Match Source:</strong>
+            <div class="seg-bar" id="seg-vs-source">
+              <button type="button" data-val="current" class="active-chip">🎮 Current Match</button>
+              <button type="button" data-val="next">⏭ Up Next (Queue)</button>
+              <button type="button" data-val="custom">✏️ Custom VS</button>
+            </div>
+          </div>
+          <div class="preview-toolbar-group">
+            <button type="button" id="btn-vs-export-png" title="Render &amp; download a 1920x1080 PNG graphic for X/Twitter/Discord">⬇ Export 1920×1080 PNG</button>
+            <button type="button" id="btn-pin-vs" class="active-chip" title="Keep the VS Live Preview pinned at the top while scrolling">📌 Pin Top</button>
+          </div>
+        </div>
+        <div class="vs-preview-stage">
+          <iframe id="vs-preview-frame" src="vs.html?preview=1"></iframe>
+        </div>
+      </section>
+
+      <!-- Next-Up Queue Helper Bar (shown when source='next') -->
+      <section class="vs-next-bar" id="vs-next-bar">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+          <div>
+            <strong style="font-size:12px;color:#93c5fd;">⏭ Up Next Queue Match:</strong>
+            <span id="vs-next-summary" style="font-size:12px;margin-left:6px;color:#fff;">Connect a Start.gg / Challonge / Demo tournament and click Pull Next Set from Queue.</span>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button type="button" id="btn-vs-sync-next" class="primary">🔄 Pull Next Set from Queue</button>
+            <button type="button" id="btn-vs-promote-next" title="Push this Up Next match onto the live scorebar">▶ Send to Live Scorebar</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Custom VS Match Editor Bar (shown when source='custom') -->
+      <section class="vs-next-bar" id="vs-custom-bar">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:8px;">
+          <div><label for="vs-c-round">Round</label><input type="text" id="vs-c-round" placeholder="GRAND FINALS" /></div>
+          <div><label for="vs-c-p1-name">P1 Name</label><input type="text" id="vs-c-p1-name" placeholder="PLAYER 1" /></div>
+          <div><label for="vs-c-p1-char">P1 Character</label><select id="vs-c-p1-char"></select></div>
+          <div><label for="vs-c-p2-name">P2 Name</label><input type="text" id="vs-c-p2-name" placeholder="PLAYER 2" /></div>
+          <div><label for="vs-c-p2-char">P2 Character</label><select id="vs-c-p2-char"></select></div>
+        </div>
+      </section>
+
+      <!-- VS STUDIO CONTROLS -->
+      <section class="card">
+        <div class="studio-grid">
+          <div class="studio-box">
+            <h3>Profile Avatars, Branding &amp; Info</h3>
+            <label>Player Profile Photo Mode</label>
+            <div class="seg-bar" id="seg-vs-avatar" style="margin-bottom:8px;">
+              <button type="button" data-val="badge">Badge + Char</button>
+              <button type="button" data-val="hero-fallback" class="active-chip">Auto Fallback</button>
+              <button type="button" data-val="portrait-hero">Photo Spotlight</button>
+              <button type="button" data-val="off">Off</button>
+            </div>
+            <div class="row" style="margin-bottom:8px;">
+              <div><label for="vs-eyebrow">Top Eyebrow Label</label><input type="text" id="vs-eyebrow" placeholder="UP NEXT" maxlength="24" /></div>
+              <div><label for="vs-subtitle">Event Footer Text</label><input type="text" id="vs-subtitle" placeholder="Tournament / Channel" maxlength="40" /></div>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+              <label class="toggle-item"><input type="checkbox" id="chk-vs-flags" checked /> Flags</label>
+              <label class="toggle-item"><input type="checkbox" id="chk-vs-h2h" checked /> H2H</label>
+              <label class="toggle-item"><input type="checkbox" id="chk-vs-sponsor" checked /> Sponsors</label>
+              <label class="toggle-item"><input type="checkbox" id="chk-vs-charname" checked /> Char Name</label>
+              <label class="toggle-item"><input type="checkbox" id="chk-vs-score" /> Score</label>
+              <label class="toggle-item"><input type="checkbox" id="chk-vs-logo" checked /> Logo</label>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+              <button type="button" id="btn-vs-logo-upload" style="font-size:11px;">🏷️ Upload Event Logo</button>
+              <button type="button" id="btn-vs-logo-clear" style="font-size:11px;display:none;">✕ Remove Logo</button>
+              <span id="vs-logo-status" style="font-size:10px;color:var(--muted);">No event logo</span>
+              <input type="file" id="file-vs-logo" accept="image/png,image/jpeg,image/webp,image/svg+xml" style="display:none;" />
+            </div>
+          </div>
+
+          <div class="studio-box">
+            <h3>Backdrop, Pattern &amp; Entry Animation</h3>
+            <label>Background Style</label>
+            <div class="seg-bar" id="seg-vs-bg" style="margin-bottom:8px;">
+              <button type="button" data-val="theme" class="active-chip">Design Theme</button>
+              <button type="button" data-val="custom">Custom Colors</button>
+              <button type="button" data-val="transparent">Transparent</button>
+            </div>
+            <label>Animated Pattern</label>
+            <div class="seg-bar" id="seg-vs-pat" style="margin-bottom:8px;">
+              <button type="button" data-val="symbols" class="active-chip">△○×□</button>
+              <button type="button" data-val="grid">Grid</button>
+              <button type="button" data-val="halftone">Halftone</button>
+              <button type="button" data-val="diagonal">Stripes</button>
+              <button type="button" data-val="none">None</button>
+            </div>
+            <div class="color-pair-row" style="margin-bottom:8px;">
+              <div class="color-pick">BG 1 <input type="color" id="vs-bg1" value="#f5b800" /></div>
+              <div class="color-pick">BG 2 <input type="color" id="vs-bg2" value="#10131e" /></div>
+              <div class="color-pick">P1 <input type="color" id="vs-p1col" value="#ff512f" /></div>
+              <div class="color-pick">P2 <input type="color" id="vs-p2col" value="#2563eb" /></div>
+            </div>
+            <label for="vs-entryAnim">OBS Scene Entry Animation</label>
+            <select id="vs-entryAnim">
+              <option value="slam-split">⚡ Side Slam + VS Impact</option>
+              <option value="curtain">🪟 Split Curtain Reveal</option>
+              <option value="zoom-burst">💥 Zoom Burst</option>
+              <option value="fade">🌫 Smooth Fade</option>
+            </select>
+          </div>
+
+          <div class="studio-box">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+              <h3 style="margin:0;">Character Framing &amp; Flip</h3>
+              <button type="button" id="btn-vs-reset-frame" class="mini-tool-btn">↺ Reset</button>
+            </div>
+            <div style="display:flex;gap:6px;margin-bottom:8px;">
+              <button type="button" id="btn-vs-p1-flip" style="flex:1;font-size:11px;">⇄ Flip P1</button>
+              <button type="button" id="btn-vs-p2-flip" class="active-chip" style="flex:1;font-size:11px;">⇄ Flip P2</button>
+            </div>
+            <div class="slider-head"><span>P1 Character Zoom</span><b id="val-vs-p1Zoom">100%</b></div>
+            <input type="range" id="rng-vs-p1Zoom" min="65" max="150" step="5" value="100" />
+            <div class="slider-head" style="margin-top:6px;"><span>P1 Vertical Offset</span><b id="val-vs-p1Y">0 px</b></div>
+            <input type="range" id="rng-vs-p1Y" min="-140" max="140" step="10" value="0" />
+            <div class="slider-head" style="margin-top:8px;"><span>P2 Character Zoom</span><b id="val-vs-p2Zoom">100%</b></div>
+            <input type="range" id="rng-vs-p2Zoom" min="65" max="150" step="5" value="100" />
+            <div class="slider-head" style="margin-top:6px;"><span>P2 Vertical Offset</span><b id="val-vs-p2Y">0 px</b></div>
+            <input type="range" id="rng-vs-p2Y" min="-140" max="140" step="10" value="0" />
+          </div>
+        </div>
+
+        <!-- MULTI-GAME CHARACTER ASSET PACK MANAGER (StreamHelperAssets) -->
+        <div class="asset-mgr-box">
+          <div class="asset-mgr-head">
+            <div>
+              <strong style="font-size:12px;color:#c4b5fd;">📦 Multi-Game Character Splash Manager (Offline Cache)</strong>
+              <div style="font-size:11px;color:var(--muted);">Renders auto-download on demand when you pick a character, or pre-download an entire game pack for 100% offline tournaments.</div>
+            </div>
+            <span class="designs-count-pill" id="vs-cache-status">Loading catalog...</span>
+          </div>
+
+          <div class="asset-mgr-controls">
+            <div>
+              <label for="vs-game-select">Active Game Roster <button type="button" id="btn-load-all-games" class="mini-tool-btn" style="margin-left:6px;">Load All 240+ Games</button></label>
+              <select id="vs-game-select"></select>
+            </div>
+            <div>
+              <label for="vs-pack-select">Render Art Pack</label>
+              <select id="vs-pack-select"></select>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button type="button" id="btn-dl-pack" class="primary" style="height:33px;">⬇ Download Full Pack</button>
+              <button type="button" id="btn-upload-custom-char" style="height:33px;" title="Upload a custom transparent PNG for a character">⬆ Custom PNG</button>
+              <button type="button" id="btn-clear-pack" style="height:33px;" title="Clear local disk cache for this pack">🗑</button>
+              <input type="file" id="file-custom-char" accept="image/png,image/webp,image/jpeg" style="display:none;" />
+            </div>
+          </div>
+
+          <div class="asset-progress" id="vs-dl-progress">
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);">
+              <span id="vs-dl-text">Downloading...</span>
+              <b id="vs-dl-pct" style="color:#fff;">0%</b>
+            </div>
+            <div class="asset-progress-track"><div class="asset-progress-fill" id="vs-dl-fill"></div></div>
+          </div>
+
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px;">
+            <input type="text" id="vs-roster-search" placeholder="🔍 Filter game roster &amp; quick-assign to P1 / P2..." style="max-width:320px;padding:5px 9px;font-size:12px;" />
+            <span style="font-size:10px;color:var(--muted);">Source: community <code>StreamHelperAssets</code> · cached locally in <code>data/assets/</code></span>
+          </div>
+          <div class="roster-strip" id="vs-roster-strip"></div>
+        </div>
+      </section>
+    </div>
+
+    <!-- RIGHT SIDEBAR: VS SPLASH DESIGNS (Pinned right beside the 16:9 VS Preview!) -->
+    <aside class="card vs-designs-sidebar">
+      <div class="designs-head">
+        <h2>⚔️ VS Splash Designs <span class="designs-count-pill">6</span></h2>
+      </div>
+      <div class="vs-designs-scroll">
+        <div class="vs-design-grid" id="vs-design-grid"></div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- =========================================================================
+     WORKSPACE 3: TOURNAMENTS (Start.gg / Challonge / Demo + Match History & H2H)
+     ========================================================================= -->
+<div class="workspace-view" id="ws-tournaments">
+  <div class="trn-workspace-shell">
+    <section class="card">
+      <div class="tab-nav" id="trn-subtabs" style="margin-bottom:12px;">
+        <button type="button" class="active-chip" data-trnpane="bracket">🏆 Live Bracket &amp; Stream Queue (Start.gg / Challonge)</button>
+        <button type="button" data-trnpane="history">📜 Match History &amp; Head-to-Head (<span id="hist-count">0</span>)</button>
+      </div>
+
+      <!-- SUB-VIEW A: START.GG / CHALLONGE / DEMO -->
+      <div class="trn-sub-pane active" id="trnpane-bracket">
+        <div class="trn-top">
+          <div class="seg-bar" id="trn-provider-tabs">
+            <button type="button" data-prov="startgg" class="active-chip">🟣 Start.gg (GraphQL)</button>
+            <button type="button" data-prov="challonge">🟠 Challonge (API v1)</button>
+            <button type="button" data-prov="demo">⚡ Demo Tournament (No Token)</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <label class="toggle-item" style="padding:4px 8px;"><input type="checkbox" id="chk-trn-autosync" /> Auto-Sync (15s)</label>
+            <span id="trn-token-hint" style="font-size:11px;color:var(--muted);">Tokens stored locally on your PC only</span>
+          </div>
+        </div>
+
+        <div class="trn-connect-grid" id="trn-connect-form">
+          <div>
+            <label for="trn-url-input" id="trn-url-label">Tournament URL or Slug (start.gg)</label>
+            <input type="text" id="trn-url-input" placeholder="https://www.start.gg/tournament/your-tournament/event/tekken-8" />
+          </div>
+          <div>
+            <label for="trn-token-input" id="trn-token-label">
+              Free API Token (<a id="trn-token-link" href="https://start.gg/admin/profile/developer" target="_blank" rel="noopener" style="color:#60a5fa;">Get free token ↗</a>)
+            </label>
+            <input type="password" id="trn-token-input" autocomplete="off" placeholder="Paste your personal token (masked on stream)" />
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button type="button" id="btn-trn-connect" class="primary" style="height:33px;">🔌 Connect</button>
+            <button type="button" id="btn-trn-refresh" style="height:33px;" title="Refresh Stream Queue & Sets">↻</button>
+          </div>
+        </div>
+
+        <div class="trn-banner" id="trn-banner">
+          <div class="trn-banner-meta">
+            <strong id="trn-name-display">—</strong>
+            <span id="trn-meta-display">—</span>
+          </div>
+          <div class="trn-banner-controls">
+            <select id="trn-event-select" style="width:auto;min-width:175px;"></select>
+            <button type="button" id="btn-trn-import" title="Import entrants, sponsors, avatars, and country/region flags into your local roster">👥 Import Entrants</button>
+            <button type="button" id="btn-trn-load-next" class="primary">⏭ Load Next Set</button>
+          </div>
+        </div>
+
+        <div class="trn-filter-bar" id="trn-filter-bar" style="display:none;">
+          <div class="seg-bar" id="trn-set-filters">
+            <button type="button" data-sflt="stream" class="active-chip">📺 Stream Queue (<span id="cnt-stream">0</span>)</button>
+            <button type="button" data-sflt="open">🔥 Active / Open (<span id="cnt-open">0</span>)</button>
+            <button type="button" data-sflt="complete">✅ Completed (<span id="cnt-done">0</span>)</button>
+            <button type="button" data-sflt="all">All (<span id="cnt-all">0</span>)</button>
+          </div>
+          <input type="text" id="trn-set-search" placeholder="Filter sets by player or round..." style="width:230px;" />
+        </div>
+
+        <div class="trn-sets-grid" id="trn-sets-grid">
+          <div style="grid-column:1/-1;padding:18px;text-align:center;color:var(--muted);background:#0d1018;border:1px dashed var(--border);border-radius:8px;">
+            Connect a <b>start.gg</b> or <b>Challonge</b> tournament above, or click <b>⚡ Demo Tournament (No Token) → 🔌 Connect</b> to test Stream Queue, 1-click loading, automatic country/region flag detection, avatars, and result reporting offline.
+          </div>
+        </div>
+      </div>
+
+      <!-- SUB-VIEW B: LOCAL MATCH HISTORY & HEAD-TO-HEAD -->
+      <div class="trn-sub-pane" id="trnpane-history">
+        <div class="h2h-banner">
+          <div>
+            <strong id="h2h-title" style="font-size:13px;">⚔️ Current Head-to-Head</strong>
+            <div id="h2h-detail" style="font-size:11px;color:var(--muted);">No previous matches recorded between P1 and P2.</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button type="button" id="btn-hist-record" class="primary">💾 Save Current Set</button>
+            <button type="button" id="btn-hist-json">⬇ Export JSON</button>
+            <button type="button" id="btn-hist-csv">⬇ Export CSV</button>
+            <button type="button" id="btn-hist-clear">🗑 Clear</button>
+          </div>
+        </div>
+        <div class="history-list" id="history-list"></div>
+      </div>
+    </section>
+  </div>
 </div>
 
 <!-- VISUAL FLAG & REGION PICKER MODAL -->
@@ -3220,7 +3380,10 @@
   let currentCat = 'all';
   let themeSearch = '';
   let previewPinned = localStorage.getItem('fgc_preview_pinned') !== '0';
+  let vsPreviewPinned = localStorage.getItem('fgc_vs_preview_pinned') !== '0';
   let sidebarCollapsed = localStorage.getItem('fgc_sidebar_collapsed') === '1';
+  let activeWorkspace = localStorage.getItem('fgc_active_workspace') || 'scorebars';
+  if (!['scorebars', 'vs', 'tournaments'].includes(activeWorkspace)) activeWorkspace = 'scorebars';
   let pickerState = { open: false, side: 'p1', slot: 'flag', cat: 'world', query: '' };
 
   const $ = (id) => document.getElementById(id);
@@ -3663,6 +3826,24 @@
     `).join('') || '<div style="padding:18px;text-align:center;color:var(--muted);font-size:11px;">No designs matched that search.</div>';
   }
 
+  function setActiveWorkspace(ws) {
+    if (!['scorebars', 'vs', 'tournaments'].includes(ws)) ws = 'scorebars';
+    activeWorkspace = ws;
+    try { localStorage.setItem('fgc_active_workspace', ws); } catch {}
+    $('top-workspace-nav')?.querySelectorAll('button[data-ws]').forEach(b => {
+      b.classList.toggle('active-ws', b.dataset.ws === ws);
+    });
+    document.querySelectorAll('.workspace-view').forEach(v => {
+      v.classList.toggle('active', v.id === `ws-${ws}`);
+    });
+    const isVs = ws === 'vs';
+    $('hdr-group-scorebars')?.classList.toggle('hidden', isVs);
+    $('hdr-group-vs')?.classList.toggle('hidden', !isVs);
+    if ($('btn-am-go-scorebar')) $('btn-am-go-scorebar').style.display = ws === 'scorebars' ? 'none' : 'inline-flex';
+    syncWorkspaceLayout();
+    if (isVs) pushPreviewConfig();
+  }
+
   function syncWorkspaceLayout() {
     const isNarrow = window.innerWidth <= 1320;
     const useSidebar = !isNarrow && !sidebarCollapsed;
@@ -3674,7 +3855,7 @@
 
     shell.classList.toggle('sidebar-collapsed', !useSidebar);
     $('btn-toggle-sidebar').classList.toggle('active-chip', useSidebar);
-    $('btn-toggle-sidebar').style.display = isNarrow ? 'none' : 'inline-flex';
+    $('btn-toggle-sidebar').style.display = (activeWorkspace === 'scorebars' && !isNarrow) ? 'inline-flex' : 'none';
     tabBtn.style.display = useSidebar ? 'none' : 'inline-flex';
 
     if (useSidebar) {
@@ -3682,7 +3863,7 @@
       // If Designs tab was active before expanding back to sidebar, switch tab back to Style Studio
       if (tabHost.classList.contains('active')) {
         $('bottom-tabs').querySelectorAll('button').forEach(b => b.classList.toggle('active-chip', b.dataset.tab === 'tweaks'));
-        document.querySelectorAll('.tab-pane').forEach(p => p.classList.toggle('active', p.id === 'tab-tweaks'));
+        document.querySelectorAll('#ws-scorebars .tab-pane').forEach(p => p.classList.toggle('active', p.id === 'tab-tweaks'));
       }
     } else {
       if (body.parentElement !== tabHost) tabHost.appendChild(body);
@@ -3690,6 +3871,8 @@
 
     $('preview-card').classList.toggle('is-pinned', previewPinned);
     $('btn-pin-preview').classList.toggle('active-chip', previewPinned);
+    $('vs-preview-card')?.classList.toggle('is-pinned', vsPreviewPinned);
+    $('btn-pin-vs')?.classList.toggle('active-chip', vsPreviewPinned);
   }
 
   function renderPlayersDb() {
@@ -4208,12 +4391,34 @@
       toast(`🎨 Design applied: ${t.name} (${fsMap[pv.fs] || pv.fs} · ${csMap[pv.cs] || pv.lay})`);
     });
 
-    // Bottom tabs
+    // Top-level Workspace Navigation (Scorebars | VS Splash | Tournaments)
+    $('top-workspace-nav').addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-ws]');
+      if (!btn) return;
+      setActiveWorkspace(btn.dataset.ws);
+    });
+    $('btn-am-go-scorebar').addEventListener('click', () => setActiveWorkspace('scorebars'));
+    $('btn-pin-vs').addEventListener('click', () => {
+      vsPreviewPinned = !vsPreviewPinned;
+      try { localStorage.setItem('fgc_vs_preview_pinned', vsPreviewPinned ? '1' : '0'); } catch {}
+      syncWorkspaceLayout();
+      toast(vsPreviewPinned ? '📌 VS Preview pinned to top' : 'VS Preview unpinned');
+    });
+
+    // Tournaments Workspace sub-tabs (Bracket & Queue | Match History & H2H)
+    $('trn-subtabs').addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-trnpane]');
+      if (!btn) return;
+      $('trn-subtabs').querySelectorAll('button').forEach(b => b.classList.toggle('active-chip', b === btn));
+      document.querySelectorAll('.trn-sub-pane').forEach(p => p.classList.toggle('active', p.id === `trnpane-${btn.dataset.trnpane}`));
+    });
+
+    // Scorebars Bottom tabs
     $('bottom-tabs').addEventListener('click', (e) => {
       const btn = e.target.closest('button[data-tab]');
       if (!btn) return;
       $('bottom-tabs').querySelectorAll('button').forEach(b => b.classList.toggle('active-chip', b === btn));
-      document.querySelectorAll('.tab-pane').forEach(p => p.classList.toggle('active', p.id === `tab-${btn.dataset.tab}`));
+      document.querySelectorAll('#ws-scorebars .tab-pane').forEach(p => p.classList.toggle('active', p.id === `tab-${btn.dataset.tab}`));
     });
 
     // Style Studio Sub-tabs
@@ -4712,6 +4917,9 @@
     $('cnt-open').textContent = openList.length;
     $('cnt-done').textContent = doneList.length;
     $('cnt-all').textContent = (snap.sets || []).length;
+    if ($('trn-ws-badge')) {
+      $('trn-ws-badge').textContent = streamList.length ? `${streamList.length} Queue` : `${openList.length} Open`;
+    }
 
     let baseList = snap.sets || [];
     if (trnState.filter === 'stream') baseList = streamList;
@@ -5524,7 +5732,7 @@
      ========================================================================= */
   initSelects();
   renderThemeGallery();
-  syncWorkspaceLayout();
+  setActiveWorkspace(activeWorkspace);
   bindEvents();
   bindTournamentEvents();
   bindVsAndAssetEvents();
