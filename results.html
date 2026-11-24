@@ -453,6 +453,8 @@
     min-height: 24px;
   }
   .res-footer:empty { display: none; }
+  #res-stage[data-light="1"] .res-footer { color: #1e293b; }
+  #res-stage[data-light-card="1"] .res-stat-pill { background: rgba(15, 23, 42, 0.06); }
 
   /* =========================================================================
      3. 6 LAYOUT ARCHITECTURES (CHAMP-LEFT, PODIUM-TOP, ESPORTS-GRID, TOWER-LADDER, TOP4-QUAD, PODIUM-3)
@@ -672,17 +674,37 @@
     transform-origin: center center;
   }
 
-  /* Bottom Legibility Gradient Scrim */
+  /* Bottom Legibility Scrim (tight dark gradient for dark cards; clean studio footer dock with ZERO milky fog on light cards!) */
   .res-scrim {
     position: absolute;
     left: 0; right: 0; bottom: 0;
-    height: 62%;
+    height: 44%;
     z-index: 4;
-    background: linear-gradient(180deg, transparent 0%, rgba(5, 7, 14, 0.72) 48%, rgba(5, 7, 14, 0.96) 100%);
+    background: linear-gradient(180deg, transparent 0%, rgba(5, 7, 14, 0.14) 24%, rgba(5, 7, 14, 0.80) 64%, rgba(5, 7, 14, 0.96) 100%);
     pointer-events: none;
   }
-  #res-stage[data-light="1"] .res-scrim {
-    background: linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0.78) 52%, rgba(255, 255, 255, 0.97) 100%);
+  #res-stage[data-light-card="1"] .res-scrim {
+    display: none;
+  }
+  #res-stage[data-light-card="1"] .res-info {
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-top: 2px solid rgba(15, 23, 42, 0.12);
+    box-shadow: 0 -8px 22px rgba(15, 23, 42, 0.10);
+    padding: 10px 14px 12px;
+  }
+  #res-stage[data-light-card="1"] .res-card[data-idx="0"] .res-info,
+  #res-stage[data-light-card="1"] .res-champ-spotlight .res-info {
+    padding: 15px 22px 17px;
+    border-top: 3px solid var(--res-gold);
+  }
+  #res-stage[data-light-card="1"] .res-name { text-shadow: none; }
+  #res-stage[data-light-card="1"][data-layout="tower-ladder"] .res-card .res-info {
+    background: transparent;
+    backdrop-filter: none;
+    border-top: none;
+    box-shadow: none;
   }
 
   /* Placement Badge (1ST, 2ND, 3RD...) */
@@ -778,7 +800,7 @@
     text-overflow: ellipsis;
     text-shadow: 0 3px 10px rgba(0,0,0,0.65);
   }
-  #res-stage[data-light="1"] .res-name { text-shadow: none; }
+  #res-stage[data-light-card="1"] .res-name { text-shadow: none; }
   .res-card[data-idx="0"] .res-name,
   .res-champ-spotlight .res-name { font-size: 50px; }
   #res-stage[data-layout="podium-3"] .res-card[data-idx="0"] .res-name { font-size: 54px; }
@@ -1186,6 +1208,7 @@
     stage.dataset.cardIdle = effIdle;
     stage.dataset.crown = res.showCrown === false ? '0' : '1';
     stage.dataset.light = d.lightBg ? '1' : '0';
+    stage.dataset.lightCard = (d.lightCard !== undefined ? d.lightCard : false) ? '1' : '0';
 
     root.style.setProperty('--res-bg', d.bg);
     root.style.setProperty('--res-bg1', res.bgColor1 || '#1d356b');
@@ -1334,8 +1357,9 @@
     const accent = (res.accentColor && res.accentColor.trim()) ? res.accentColor : d.accent;
     const gold = (res.goldColor && res.goldColor.trim()) ? res.goldColor : d.gold;
 
+    const isLightCard = Boolean(d.lightCard);
     // Header
-    ctx.fillStyle = d.lightBg ? 'rgba(255,255,255,0.95)' : 'rgba(10,14,26,0.92)';
+    ctx.fillStyle = isLightCard ? 'rgba(255,255,255,0.96)' : 'rgba(10,14,26,0.92)';
     ctx.beginPath(); ctx.roundRect(56, 36, 1808, 108, 10); ctx.fill();
     ctx.fillStyle = accent; ctx.fillRect(56, 36, 8, 108);
 
@@ -1398,7 +1422,7 @@
       const rank = Number(pl.place || (i + 1));
       ctx.save();
       ctx.beginPath(); ctx.roundRect(r.x, r.y, r.w, r.h, 12); ctx.clip();
-      ctx.fillStyle = d.lightBg ? 'rgba(255,255,255,0.95)' : 'rgba(13,19,36,0.94)';
+      ctx.fillStyle = isLightCard ? '#f1f5f9' : 'rgba(13,19,36,0.94)';
       ctx.fillRect(r.x, r.y, r.w, r.h);
 
       const cim = charImgs[i];
@@ -1432,10 +1456,19 @@
         ctx.restore();
       }
 
-      const sc = ctx.createLinearGradient(0, r.y + r.h * 0.42, 0, r.y + r.h);
-      sc.addColorStop(0, 'rgba(5,7,14,0)');
-      sc.addColorStop(1, d.lightBg ? 'rgba(255,255,255,0.96)' : 'rgba(5,7,14,0.96)');
-      ctx.fillStyle = sc; ctx.fillRect(r.x, r.y, r.w, r.h);
+      if (isLightCard) {
+        const barH = i === 0 ? 124 : 104;
+        ctx.fillStyle = 'rgba(255,255,255,0.95)';
+        ctx.fillRect(r.x, r.y + r.h - barH, r.w, barH);
+        ctx.fillStyle = i === 0 ? gold : 'rgba(15,23,42,0.14)';
+        ctx.fillRect(r.x, r.y + r.h - barH, r.w, i === 0 ? 3 : 2);
+      } else {
+        const sc = ctx.createLinearGradient(0, r.y + r.h * 0.56, 0, r.y + r.h);
+        sc.addColorStop(0, 'rgba(5,7,14,0)');
+        sc.addColorStop(0.65, 'rgba(5,7,14,0.82)');
+        sc.addColorStop(1, 'rgba(5,7,14,0.96)');
+        ctx.fillStyle = sc; ctx.fillRect(r.x, r.y, r.w, r.h);
+      }
 
       // Rank pill
       ctx.fillStyle = rank === 1 ? gold : rank === 2 ? d.silver : rank === 3 ? d.bronze : 'rgba(8,10,18,0.88)';
