@@ -1,0 +1,2638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FGC Open Scorebars — Official Broadcast Hype Trailer Studio (EN / ES)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,800&family=Chakra+Petch:ital,wght@0,600;0,700;1,700&family=Inter:wght@500;700;800;900&family=Russo+One&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #04050a;
+    --gold: #fbbf24;
+    --crimson: #f41f64;
+    --cyan: #38bdf8;
+    --emerald: #22c55e;
+    --violet: #a855f7;
+    --hud-bg: rgba(9, 12, 22, 0.92);
+    --hud-border: rgba(148, 163, 184, 0.22);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 100%; height: 100%; overflow: hidden;
+    background: #020306; color: #f8fafc;
+    font-family: 'Inter', system-ui, sans-serif;
+    user-select: none;
+  }
+
+  /* =========================================================================
+     VIEWPORT & NATIVE 1920x1080 BROADCAST STAGE
+     ========================================================================= */
+  .viewport {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(circle at 50% 45%, #0c1020 0%, #020306 72%);
+  }
+  body.clean-mode .viewport { background: #000; }
+  body.clean-mode .director-hud,
+  body.clean-mode .top-bar { display: none !important; }
+
+  #stage-1080 {
+    position: relative;
+    width: 1920px; height: 1080px;
+    background: #04050a;
+    overflow: hidden;
+    transform-origin: center center;
+    box-shadow: 0 30px 90px rgba(0, 0, 0, 0.85);
+  }
+  body.clean-mode #stage-1080 { box-shadow: none; }
+
+  /* LAYER 0: PROCEDURAL ARENA CANVAS */
+  #fx-canvas {
+    position: absolute; inset: 0;
+    width: 1920px; height: 1080px;
+    z-index: 1;
+  }
+
+  /* LAYER 1: REAL LIVE OVERLAY IFRAMES (1920x1080 NATIVE) */
+  .overlay-slot {
+    position: absolute; inset: 0;
+    width: 1920px; height: 1080px;
+    z-index: 4;
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(1.04);
+    transition: opacity 0.34s cubic-bezier(.16, 1, .3, 1), transform 0.65s cubic-bezier(.16, 1, .3, 1);
+  }
+  .overlay-slot.active {
+    opacity: 1;
+    transform: scale(1);
+  }
+  .overlay-slot.zoom-drift {
+    animation: subtleZoom 9s ease-out forwards;
+  }
+  @keyframes subtleZoom {
+    from { transform: scale(1.03); }
+    to   { transform: scale(1.00); }
+  }
+  .overlay-slot iframe {
+    width: 1920px; height: 1080px;
+    border: 0; display: block;
+    background: transparent;
+  }
+
+  /* Simulated dark cinema backing behind Scorebars in Acts 3 & 4 for dramatic focus */
+  .scorebar-cinema-vignette {
+    position: absolute; inset: 0;
+    z-index: 5;
+    pointer-events: none;
+    opacity: 0;
+    background:
+      linear-gradient(180deg, rgba(4, 6, 12, 0.05) 0%, rgba(4, 6, 12, 0.0) 24%, rgba(4, 6, 12, 0.42) 62%, rgba(4, 6, 12, 0.94) 100%);
+    transition: opacity 0.35s ease;
+  }
+  .scorebar-cinema-vignette.active { opacity: 1; }
+
+  /* =========================================================================
+     LAYER 2: KINETIC CINEMA SCENES (ACTS 1, 2, 7, 8 + LOWER CALLOUTS)
+     ========================================================================= */
+  .scene {
+    position: absolute; inset: 0;
+    z-index: 10;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.26s ease;
+  }
+  .scene.active { opacity: 1; }
+
+  /* --- ACT 1: THE HOOK (PAYWALL SHATTER) --- */
+  .hook-wrap {
+    text-align: center;
+    max-width: 1580px;
+    padding: 0 60px;
+  }
+  .hook-eyebrow {
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 30px; font-weight: 700;
+    letter-spacing: 0.38em; text-transform: uppercase;
+    color: var(--crimson);
+    margin-bottom: 24px;
+    opacity: 0; transform: translateY(18px);
+    transition: all 0.38s cubic-bezier(.16,1,.3,1);
+  }
+  .hook-eyebrow.show { opacity: 1; transform: translateY(0); }
+
+  .hook-main {
+    font-family: 'Anton', sans-serif;
+    font-size: 132px; line-height: 1.02;
+    letter-spacing: 0.03em; text-transform: uppercase;
+    color: #fff;
+    text-shadow: 0 12px 50px rgba(0, 0, 0, 0.9), 0 0 60px rgba(244, 31, 100, 0.25);
+    opacity: 0; transform: scale(1.18);
+    transition: all 0.32s cubic-bezier(.16,1,.3,1);
+  }
+  .hook-main.show { opacity: 1; transform: scale(1); }
+  .hook-main.slam-red {
+    color: #fff;
+    text-shadow: 0 0 80px rgba(244, 31, 100, 0.9), 0 12px 40px #000;
+  }
+  .hook-main.slam-gold {
+    background: linear-gradient(180deg, #fffbeb 0%, #fde047 38%, #f59e0b 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 12px 38px rgba(245, 158, 11, 0.55));
+  }
+
+  .paywall-pills {
+    display: flex; gap: 28px; justify-content: center;
+    margin-top: 44px;
+    opacity: 0; transform: translateY(24px);
+    transition: all 0.35s ease;
+  }
+  .paywall-pills.show { opacity: 1; transform: translateY(0); }
+  .paywall-pill {
+    position: relative;
+    padding: 18px 34px;
+    border-radius: 14px;
+    background: rgba(244, 31, 100, 0.12);
+    border: 2px solid rgba(244, 31, 100, 0.55);
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 34px; font-weight: 700;
+    color: #fda4af;
+    letter-spacing: 0.05em;
+    transition: all 0.35s cubic-bezier(.16,1,.3,1);
+  }
+  .paywall-pill.slashed {
+    opacity: 0.32;
+    transform: scale(0.88) rotate(-4deg);
+    border-color: rgba(148, 163, 184, 0.3);
+    color: #64748b;
+  }
+  .paywall-pill.slashed::after {
+    content: '';
+    position: absolute; left: -10px; right: -10px; top: 50%;
+    height: 7px; background: #f41f64;
+    box-shadow: 0 0 24px #f41f64;
+    transform: translateY(-50%) rotate(-8deg);
+  }
+
+  /* --- ACT 2: TITLE SLAM --- */
+  .title-stage {
+    text-align: center;
+    position: relative;
+    padding: 0 80px;
+  }
+  .title-badge {
+    display: inline-flex; align-items: center; gap: 14px;
+    padding: 12px 32px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.18), rgba(244, 31, 100, 0.22));
+    border: 2px solid rgba(251, 191, 36, 0.72);
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 26px; font-weight: 700;
+    letter-spacing: 0.26em; text-transform: uppercase;
+    color: #fef08a;
+    margin-bottom: 34px;
+    box-shadow: 0 0 42px rgba(251, 191, 36, 0.28);
+    opacity: 0; transform: translateY(-22px);
+    transition: all 0.42s cubic-bezier(.16,1,.3,1);
+  }
+  .title-badge.show { opacity: 1; transform: translateY(0); }
+
+  .title-logo-word {
+    font-family: 'Russo One', sans-serif;
+    font-size: 146px; line-height: 0.96;
+    letter-spacing: 0.03em; text-transform: uppercase;
+    background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 44%, #94a3b8 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 18px 46px rgba(0, 0, 0, 0.92));
+    opacity: 0; transform: scale(1.42);
+    transition: all 0.42s cubic-bezier(.12, 1, .24, 1);
+  }
+  .title-logo-word.show { opacity: 1; transform: scale(1); }
+  .title-logo-word .accent {
+    background: linear-gradient(135deg, #fffbeb 0%, #fbbf24 38%, #f41f64 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 0 45px rgba(244, 31, 100, 0.65));
+  }
+
+  .title-sub {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 46px; font-weight: 700;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: #cbd5e1;
+    margin-top: 28px;
+    opacity: 0; transform: translateY(22px);
+    transition: all 0.45s cubic-bezier(.16,1,.3,1) 0.14s;
+  }
+  .title-sub.show { opacity: 1; transform: translateY(0); }
+
+  .title-stats {
+    display: flex; gap: 22px; justify-content: center; flex-wrap: wrap;
+    margin-top: 46px;
+    opacity: 0; transform: translateY(26px);
+    transition: all 0.48s cubic-bezier(.16,1,.3,1) 0.25s;
+  }
+  .title-stats.show { opacity: 1; transform: translateY(0); }
+  .stat-chip {
+    padding: 16px 30px;
+    border-radius: 12px;
+    background: rgba(15, 23, 42, 0.84);
+    border: 1px solid rgba(56, 189, 248, 0.45);
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 28px; font-weight: 700;
+    color: #e0f2fe;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+  }
+  .stat-chip b { color: var(--gold); margin-right: 6px; font-size: 32px; }
+
+  /* --- ACTS 3, 4, 5, 6: CINEMATIC BROADCAST CALLOUT BANNER --- */
+  .callout-banner {
+    position: absolute;
+    left: 72px; right: 72px; bottom: 58px;
+    z-index: 15;
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 32px;
+    opacity: 0; transform: translateY(42px);
+    pointer-events: none;
+    transition: all 0.38s cubic-bezier(.16, 1, .3, 1);
+  }
+  .callout-banner.active { opacity: 1; transform: translateY(0); }
+  .callout-banner.compact {
+    bottom: 26px; left: 42px; right: 42px;
+  }
+  .callout-banner.top-corners {
+    top: 24px; bottom: auto; left: 34px; right: 34px;
+    align-items: flex-start;
+    transform: translateY(-34px);
+  }
+  .callout-banner.top-corners.active {
+    transform: translateY(0);
+  }
+  .callout-banner.top-corners .callout-card {
+    padding: 14px 24px 14px 26px;
+    max-width: 640px;
+    background: rgba(7, 10, 18, 0.82);
+  }
+  .callout-banner.top-corners .callout-kicker { font-size: 16px; margin-bottom: 3px; }
+  .callout-banner.top-corners .callout-title { font-size: 32px; }
+  .callout-banner.top-corners .callout-sub { font-size: 20px; margin-top: 3px; }
+  .callout-banner.top-corners .callout-live-pill {
+    padding: 14px 22px; min-width: 310px;
+  }
+  .callout-banner.top-corners .callout-live-pill strong { font-size: 24px; }
+  .callout-banner.faded-out {
+    opacity: 0 !important;
+    transform: translateY(24px) !important;
+  }
+
+  .callout-card {
+    position: relative;
+    padding: 26px 40px 26px 46px;
+    background: linear-gradient(135deg, rgba(7, 10, 18, 0.92), rgba(15, 22, 38, 0.86));
+    border: 2px solid rgba(255, 255, 255, 0.16);
+    border-left: 8px solid var(--gold);
+    border-radius: 16px;
+    backdrop-filter: blur(18px);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.78);
+    max-width: 1260px;
+  }
+  .callout-card.theme-crimson { border-left-color: var(--crimson); }
+  .callout-card.theme-cyan { border-left-color: var(--cyan); }
+  .callout-card.theme-emerald { border-left-color: var(--emerald); }
+  .callout-card.theme-violet { border-left-color: var(--violet); }
+  .callout-banner.compact .callout-card {
+    padding: 18px 30px 18px 34px;
+    background: rgba(7, 10, 18, 0.84);
+  }
+
+  .callout-kicker {
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 24px; font-weight: 700;
+    letter-spacing: 0.24em; text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 6px;
+  }
+  .callout-card.theme-crimson .callout-kicker { color: #fb7185; }
+  .callout-card.theme-cyan .callout-kicker { color: #7dd3fc; }
+  .callout-card.theme-emerald .callout-kicker { color: #4ade80; }
+  .callout-card.theme-violet .callout-kicker { color: #d8b4fe; }
+  .callout-banner.compact .callout-kicker { font-size: 20px; }
+
+  .callout-title {
+    font-family: 'Russo One', sans-serif;
+    font-size: 64px; line-height: 1.04;
+    text-transform: uppercase; letter-spacing: 0.02em;
+    color: #fff;
+    text-shadow: 0 6px 24px rgba(0, 0, 0, 0.8);
+  }
+  .callout-banner.compact .callout-title { font-size: 46px; }
+
+  .callout-sub {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 32px; font-weight: 600;
+    letter-spacing: 0.06em;
+    color: #cbd5e1;
+    margin-top: 8px;
+  }
+  .callout-banner.compact .callout-sub { font-size: 26px; margin-top: 4px; }
+
+  .callout-live-pill {
+    padding: 18px 30px;
+    border-radius: 14px;
+    background: rgba(7, 10, 18, 0.9);
+    border: 2px solid rgba(251, 191, 36, 0.55);
+    backdrop-filter: blur(14px);
+    box-shadow: 0 18px 46px rgba(0, 0, 0, 0.72);
+    text-align: right;
+    min-width: 390px;
+  }
+  .callout-live-pill small {
+    display: block;
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 18px; font-weight: 700;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: #94a3b8;
+    margin-bottom: 4px;
+  }
+  .callout-live-pill strong {
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 32px; font-weight: 700;
+    color: #fef08a;
+  }
+
+  /* PNG Snapshot Shutter Overlay (end of Act 6) */
+  .png-badge-pop {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) scale(0.75);
+    z-index: 24;
+    padding: 28px 54px;
+    border-radius: 20px;
+    background: rgba(7, 10, 18, 0.94);
+    border: 3px solid var(--emerald);
+    box-shadow: 0 0 90px rgba(34, 197, 94, 0.5), 0 30px 80px rgba(0, 0, 0, 0.9);
+    text-align: center;
+    opacity: 0; pointer-events: none;
+    transition: all 0.28s cubic-bezier(.16, 1, .3, 1);
+  }
+  .png-badge-pop.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  .png-badge-pop strong {
+    display: block;
+    font-family: 'Russo One', sans-serif;
+    font-size: 52px; color: #4ade80;
+    letter-spacing: 0.04em;
+  }
+  .png-badge-pop span {
+    display: block; margin-top: 8px;
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 26px; color: #e2e8f0;
+  }
+
+  /* --- ACT 7: ECOSYSTEM BLITZ (4 LIVE FEATURE CARDS) --- */
+  .eco-stage {
+    width: 1760px;
+    padding: 0 20px;
+  }
+  .eco-header {
+    text-align: center;
+    margin-bottom: 42px;
+  }
+  .eco-header .kicker {
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 26px; font-weight: 700;
+    letter-spacing: 0.3em; text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 10px;
+  }
+  .eco-header h2 {
+    font-family: 'Russo One', sans-serif;
+    font-size: 76px; text-transform: uppercase;
+    color: #fff; letter-spacing: 0.02em;
+    text-shadow: 0 10px 36px rgba(0, 0, 0, 0.8);
+  }
+  .eco-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
+  }
+  .eco-card {
+    position: relative;
+    padding: 34px 38px;
+    border-radius: 22px;
+    background: linear-gradient(155deg, rgba(15, 23, 42, 0.92), rgba(7, 10, 18, 0.95));
+    border: 2px solid rgba(148, 163, 184, 0.22);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.72);
+    display: flex; align-items: center; gap: 30px;
+    min-height: 290px;
+    opacity: 0; transform: translateY(48px) scale(0.92);
+    transition: all 0.42s cubic-bezier(.16, 1, .3, 1);
+  }
+  .eco-card.show { opacity: 1; transform: translateY(0) scale(1); }
+  .eco-card.c-purple { border-color: rgba(168, 85, 247, 0.65); box-shadow: 0 24px 60px rgba(0,0,0,0.7), inset 0 0 40px rgba(168,85,247,0.12); }
+  .eco-card.c-cyan   { border-color: rgba(56, 189, 248, 0.65); box-shadow: 0 24px 60px rgba(0,0,0,0.7), inset 0 0 40px rgba(56,189,248,0.12); }
+  .eco-card.c-gold   { border-color: rgba(251, 191, 36, 0.65); box-shadow: 0 24px 60px rgba(0,0,0,0.7), inset 0 0 40px rgba(251,191,36,0.12); }
+  .eco-card.c-green  { border-color: rgba(34, 197, 94, 0.65);  box-shadow: 0 24px 60px rgba(0,0,0,0.7), inset 0 0 40px rgba(34,197,94,0.12); }
+
+  .eco-visual {
+    flex-shrink: 0;
+    width: 210px; height: 210px;
+    border-radius: 18px;
+    background: rgba(2, 6, 16, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .eco-qr-box {
+    background: #fff;
+    padding: 12px;
+    border-radius: 16px;
+    width: 204px; height: 204px;
+    box-shadow: 0 0 40px rgba(56, 189, 248, 0.35);
+  }
+  .eco-qr-box svg { width: 100%; height: 100%; display: block; }
+
+  .eco-flags-mosaic {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 8px; padding: 14px; width: 100%; height: 100%;
+    align-content: center;
+  }
+  .eco-flag-tile {
+    border-radius: 6px; overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.22);
+    aspect-ratio: 3/2;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  }
+  .eco-flag-tile svg { width: 100%; height: 100%; display: block; }
+
+  .eco-queue-mock {
+    width: 100%; padding: 14px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .eco-q-row {
+    padding: 10px 12px; border-radius: 10px;
+    background: rgba(168, 85, 247, 0.16);
+    border: 1px solid rgba(168, 85, 247, 0.45);
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 16px; font-weight: 700; color: #f3e8ff;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .eco-q-row .live-dot {
+    font-size: 12px; padding: 2px 7px; border-radius: 99px;
+    background: #22c55e; color: #052e16; font-weight: 900;
+  }
+  .eco-q-row.sec { background: rgba(56, 189, 248, 0.12); border-color: rgba(56, 189, 248, 0.35); color: #e0f2fe; }
+
+  .eco-lang-visual {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+    width: 100%; padding: 16px;
+  }
+  .eco-lang-pill {
+    display: flex; gap: 8px; padding: 8px;
+    border-radius: 14px; background: rgba(15, 23, 42, 0.95);
+    border: 2px solid rgba(34, 197, 94, 0.6);
+  }
+  .eco-lang-pill span {
+    padding: 10px 22px; border-radius: 9px;
+    font-family: 'Russo One', sans-serif; font-size: 28px;
+    color: #94a3b8; transition: all 0.25s ease;
+  }
+  .eco-lang-pill span.on {
+    background: linear-gradient(135deg, #22c55e, #0ea5e9);
+    color: #fff; box-shadow: 0 0 24px rgba(34, 197, 94, 0.45);
+  }
+  .eco-obs-badge {
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 18px; font-weight: 700; color: #86efac;
+    letter-spacing: 0.12em; text-transform: uppercase;
+  }
+
+  .eco-copy { flex: 1; }
+  .eco-copy .tag {
+    display: inline-block;
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 18px; font-weight: 700;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    padding: 5px 14px; border-radius: 99px;
+    background: rgba(255,255,255,0.08);
+    color: var(--gold); margin-bottom: 12px;
+  }
+  .eco-copy h3 {
+    font-family: 'Russo One', sans-serif;
+    font-size: 38px; line-height: 1.1; color: #fff;
+    margin-bottom: 10px;
+  }
+  .eco-copy p {
+    font-family: 'Inter', sans-serif;
+    font-size: 23px; line-height: 1.38; color: #cbd5e1;
+  }
+
+  /* --- ACT 8: GRAND FINALE & SOCIALS --- */
+  .finale-wrap {
+    text-align: center;
+    max-width: 1620px;
+    padding: 0 60px;
+  }
+  .finale-tag {
+    display: inline-block;
+    padding: 12px 34px; border-radius: 999px;
+    background: rgba(34, 197, 94, 0.16);
+    border: 2px solid rgba(74, 222, 128, 0.72);
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 28px; font-weight: 700;
+    letter-spacing: 0.28em; text-transform: uppercase;
+    color: #86efac;
+    margin-bottom: 30px;
+    box-shadow: 0 0 42px rgba(34, 197, 94, 0.28);
+    opacity: 0; transform: translateY(-20px);
+    transition: all 0.45s cubic-bezier(.16,1,.3,1);
+  }
+  .finale-tag.show { opacity: 1; transform: translateY(0); }
+
+  .finale-title {
+    font-family: 'Russo One', sans-serif;
+    font-size: 112px; line-height: 1.02;
+    text-transform: uppercase;
+    background: linear-gradient(180deg, #ffffff 0%, #fef08a 52%, #f59e0b 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 16px 46px rgba(245, 158, 11, 0.42));
+    opacity: 0; transform: scale(1.16);
+    transition: all 0.48s cubic-bezier(.16,1,.3,1) 0.08s;
+  }
+  .finale-title.show { opacity: 1; transform: scale(1); }
+
+  .finale-repo {
+    display: inline-flex; align-items: center; gap: 18px;
+    margin-top: 38px;
+    padding: 22px 46px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.94), rgba(30, 41, 59, 0.9));
+    border: 2px solid rgba(251, 191, 36, 0.75);
+    box-shadow: 0 0 60px rgba(251, 191, 36, 0.26), 0 24px 60px rgba(0, 0, 0, 0.8);
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 40px; font-weight: 700;
+    color: #fff; letter-spacing: 0.03em;
+    opacity: 0; transform: translateY(24px);
+    transition: all 0.48s cubic-bezier(.16,1,.3,1) 0.22s;
+  }
+  .finale-repo.show { opacity: 1; transform: translateY(0); }
+  .finale-repo .gh-badge {
+    padding: 6px 16px; border-radius: 10px;
+    background: #fbbf24; color: #090a0e;
+    font-weight: 900; font-size: 26px; letter-spacing: 0.1em;
+  }
+
+  .finale-socials {
+    display: flex; gap: 22px; justify-content: center; flex-wrap: wrap;
+    margin-top: 42px;
+    opacity: 0; transform: translateY(24px);
+    transition: all 0.48s cubic-bezier(.16,1,.3,1) 0.34s;
+  }
+  .finale-socials.show { opacity: 1; transform: translateY(0); }
+  .soc-pill {
+    padding: 14px 28px; border-radius: 12px;
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(148, 163, 184, 0.32);
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 26px; font-weight: 700; color: #e2e8f0;
+  }
+  .soc-pill.kofi {
+    background: rgba(255, 94, 91, 0.16);
+    border-color: rgba(255, 94, 91, 0.68);
+    color: #fecdd3;
+  }
+
+  .finale-foot {
+    margin-top: 30px;
+    font-family: 'Inter', sans-serif;
+    font-size: 24px; color: #94a3b8;
+    opacity: 0; transition: opacity 0.5s ease 0.48s;
+  }
+  .finale-foot.show { opacity: 1; }
+
+  /* =========================================================================
+     LAYER 3: FLASH, SLASH WIPE, VIGNETTE & FADE-TO-BLACK
+     ========================================================================= */
+  #flash-layer {
+    position: absolute; inset: 0; z-index: 30;
+    background: #fff; opacity: 0; pointer-events: none;
+    transition: opacity 0.22s ease-out;
+  }
+  #slash-wipe {
+    position: absolute; inset: -20%; z-index: 31;
+    pointer-events: none; opacity: 0;
+    background: linear-gradient(108deg, transparent 36%, rgba(244, 31, 100, 0.92) 48%, #ffffff 50%, rgba(251, 191, 36, 0.92) 52%, transparent 64%);
+    transform: translateX(-110%);
+  }
+  #slash-wipe.fire {
+    animation: slashPass 0.46s cubic-bezier(.12, 1, .28, 1) forwards;
+  }
+  @keyframes slashPass {
+    0%   { opacity: 1; transform: translateX(-110%); }
+    100% { opacity: 0.95; transform: translateX(110%); }
+  }
+  #fade-black {
+    position: absolute; inset: 0; z-index: 35;
+    background: #000; opacity: 0; pointer-events: none;
+    transition: opacity 0.65s ease;
+  }
+  #fade-black.solid { opacity: 1; }
+  .cinema-vignette {
+    position: absolute; inset: 0; z-index: 28;
+    pointer-events: none;
+    box-shadow: inset 0 0 150px rgba(0, 0, 0, 0.58);
+  }
+
+  /* =========================================================================
+     DIRECTOR STUDIO HUD (AUTOMATICALLY HIDDEN DURING RECORDING / OBS MODE)
+     ========================================================================= */
+  .top-bar {
+    position: fixed; top: 12px; left: 16px; right: 16px;
+    z-index: 100;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    pointer-events: none;
+  }
+  .top-bar > * { pointer-events: auto; }
+  .studio-badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 8px 14px; border-radius: 10px;
+    background: var(--hud-bg); border: 1px solid var(--hud-border);
+    backdrop-filter: blur(12px);
+    font-size: 12px; font-weight: 700; color: #e2e8f0;
+  }
+  .studio-badge .dot {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: #fbbf24; box-shadow: 0 0 10px #fbbf24;
+  }
+  .studio-badge.ready .dot { background: #22c55e; box-shadow: 0 0 10px #22c55e; }
+  .studio-badge.recording .dot { background: #ef4444; box-shadow: 0 0 12px #ef4444; animation: recPulse 0.8s infinite; }
+  @keyframes recPulse { 50% { opacity: 0.3; } }
+
+  .top-actions {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+
+  .director-hud {
+    position: fixed; left: 16px; right: 16px; bottom: 14px;
+    z-index: 100;
+    padding: 12px 16px;
+    border-radius: 14px;
+    background: var(--hud-bg);
+    border: 1px solid var(--hud-border);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.72);
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .hud-timeline-row {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .time-readout {
+    font-family: 'Chakra Petch', monospace;
+    font-size: 13px; font-weight: 700; color: #fef08a;
+    min-width: 108px;
+  }
+  .act-label-readout {
+    font-size: 11px; font-weight: 700; color: #94a3b8;
+    min-width: 195px; text-align: right;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .scrub-wrap {
+    position: relative; flex: 1; height: 22px;
+    display: flex; align-items: center; cursor: pointer;
+  }
+  .scrub-track {
+    position: relative; width: 100%; height: 8px;
+    border-radius: 99px; background: rgba(148, 163, 184, 0.22);
+    overflow: hidden;
+  }
+  .scrub-fill {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, #f41f64, #fbbf24, #38bdf8, #22c55e);
+    border-radius: 99px;
+  }
+  .scrub-ticks {
+    position: absolute; inset: 0; pointer-events: none;
+  }
+  .scrub-ticks i {
+    position: absolute; top: 0; bottom: 0; width: 1px;
+    background: rgba(255, 255, 255, 0.35);
+  }
+
+  .hud-controls {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 10px; flex-wrap: wrap;
+  }
+  .ctrl-group {
+    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  }
+
+  button, select {
+    font-family: inherit; font-size: 12px; font-weight: 700;
+    color: #f1f5f9;
+    background: rgba(30, 41, 59, 0.88);
+    border: 1px solid rgba(148, 163, 184, 0.32);
+    border-radius: 8px;
+    padding: 7px 12px;
+    cursor: pointer;
+    transition: all 0.16s ease;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  button:hover, select:hover {
+    background: rgba(51, 65, 85, 0.95);
+    border-color: rgba(148, 163, 184, 0.6);
+  }
+  button.primary {
+    background: linear-gradient(135deg, #2563eb, #0284c7);
+    border-color: rgba(56, 189, 248, 0.7);
+    color: #fff;
+  }
+  button.primary:hover { filter: brightness(1.12); }
+  button.rec {
+    background: linear-gradient(135deg, #dc2626, #be123c);
+    border-color: rgba(251, 113, 133, 0.8);
+    color: #fff;
+  }
+  button.rec:hover { filter: brightness(1.14); }
+  button.gold-btn {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(251, 191, 36, 0.16));
+    border-color: rgba(251, 191, 36, 0.62);
+    color: #fef08a;
+  }
+  button.active-chip {
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.34), rgba(37, 99, 235, 0.34));
+    border-color: #38bdf8; color: #fff;
+  }
+  .seg-pill {
+    display: inline-flex; gap: 2px; padding: 2px;
+    border-radius: 9px; background: rgba(2, 6, 23, 0.75);
+    border: 1px solid var(--hud-border);
+  }
+  .seg-pill button {
+    border-color: transparent; background: transparent;
+    padding: 5px 10px; border-radius: 6px;
+  }
+  .seg-pill button.active-chip {
+    background: linear-gradient(135deg, #0ea5e9, #2563eb);
+    border-color: rgba(125, 211, 252, 0.6);
+  }
+
+  .hud-toast {
+    position: fixed; top: 64px; left: 50%;
+    transform: translateX(-50%) translateY(-10px);
+    z-index: 200;
+    padding: 9px 18px; border-radius: 10px;
+    background: rgba(15, 23, 42, 0.96);
+    border: 1px solid rgba(56, 189, 248, 0.65);
+    color: #fff; font-size: 12px; font-weight: 700;
+    opacity: 0; pointer-events: none;
+    transition: all 0.22s ease;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.7);
+  }
+  .hud-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="viewport">
+  <div id="stage-1080">
+    <!-- LAYER 0: PROCEDURAL 60FPS ARENA CANVAS -->
+    <canvas id="fx-canvas" width="1920" height="1080"></canvas>
+
+    <!-- LAYER 1: LIVE REAL OVERLAY ENGINES -->
+    <div class="overlay-slot" id="slot-scorebar">
+      <iframe id="frame-scorebar" src="index.html?preview=1" title="Live Scorebar"></iframe>
+    </div>
+    <div class="scorebar-cinema-vignette" id="scorebar-vignette"></div>
+
+    <div class="overlay-slot" id="slot-vs">
+      <iframe id="frame-vs" src="vs.html?preview=1" title="Live VS Splash"></iframe>
+    </div>
+
+    <div class="overlay-slot" id="slot-results">
+      <iframe id="frame-results" src="results.html?preview=1" title="Live Results"></iframe>
+    </div>
+
+    <!-- LAYER 2: ACT 1 — HOOK -->
+    <section class="scene" id="scene-hook">
+      <div class="hook-wrap">
+        <div class="hook-eyebrow" id="hook-eyebrow">FGC BROADCASTING · 2026</div>
+        <div class="hook-main" id="hook-main">STILL PAYING FOR TOURNAMENT OVERLAYS?</div>
+        <div class="paywall-pills" id="paywall-pills">
+          <div class="paywall-pill" id="pw-1">$29 / MO</div>
+          <div class="paywall-pill" id="pw-2">CLOUD LOCK-IN</div>
+          <div class="paywall-pill" id="pw-3">WATERMARKS</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LAYER 2: ACT 2 — TITLE SLAM -->
+    <section class="scene" id="scene-title">
+      <div class="title-stage">
+        <div class="title-badge" id="title-badge">⚡ 100% FREE &amp; OPEN-SOURCE FOR THE FGC ⚡</div>
+        <div class="title-logo-word" id="title-logo">FGC <span class="accent">OPEN</span> SCOREBARS</div>
+        <div class="title-sub" id="title-sub">LOCAL BROADCAST SUITE · ZERO SUBSCRIPTIONS · ZERO CLOUD</div>
+        <div class="title-stats" id="title-stats">
+          <div class="stat-chip"><b>56</b> <span id="st-1">SCOREBARS</span></div>
+          <div class="stat-chip"><b>42</b> <span id="st-2">VS SPLASH</span></div>
+          <div class="stat-chip"><b>24</b> <span id="st-3">TOP 8 RESULTS</span></div>
+          <div class="stat-chip"><b>240+</b> <span id="st-4">FIGHTING GAMES</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LAYER 2: ACTS 3, 4, 5, 6 — BROADCAST LOWER CALLOUT -->
+    <div class="callout-banner" id="callout-banner">
+      <div class="callout-card" id="callout-card">
+        <div class="callout-kicker" id="callout-kicker">TEKKEN 8 · HUD-CALIBRATED</div>
+        <div class="callout-title" id="callout-title">56 BROADCAST SCOREBARS</div>
+        <div class="callout-sub" id="callout-sub">Native HUD alignment · Flag Fade Blend · Live Match Point FX</div>
+      </div>
+      <div class="callout-live-pill" id="callout-pill">
+        <small id="callout-pill-lbl">LIVE ENGINE</small>
+        <strong id="callout-pill-val">★ Tekken 8 Native HUD</strong>
+      </div>
+    </div>
+
+    <!-- PNG SNAPSHOT POP (ACT 6) -->
+    <div class="png-badge-pop" id="png-badge-pop">
+      <strong id="png-pop-title">⬇ 1920×1080 PNG EXPORTED</strong>
+      <span id="png-pop-sub">Ready for X / Twitter, Discord &amp; Instagram in 1 click</span>
+    </div>
+
+    <!-- LAYER 2: ACT 7 — ECOSYSTEM BLITZ -->
+    <section class="scene" id="scene-eco">
+      <div class="eco-stage">
+        <div class="eco-header">
+          <div class="kicker" id="eco-kicker">BUILT FOR REAL TOURNAMENTS</div>
+          <h2 id="eco-title">COMPLETE LIVE PRODUCTION SUITE</h2>
+        </div>
+        <div class="eco-grid">
+          <div class="eco-card c-purple" id="eco-1">
+            <div class="eco-visual">
+              <div class="eco-queue-mock">
+                <div class="eco-q-row"><span>GF · SHIN vs VOLT</span><span class="live-dot">LIVE</span></div>
+                <div class="eco-q-row sec"><span>WF · KURO vs NOVA</span><span>QUEUE</span></div>
+                <div class="eco-q-row sec"><span>LF · APEX vs RYU</span><span>READY</span></div>
+              </div>
+            </div>
+            <div class="eco-copy">
+              <span class="tag" id="eco-1-tag">START.GG &amp; CHALLONGE</span>
+              <h3 id="eco-1-title">1-Click Stream Queue</h3>
+              <p id="eco-1-desc">Auto-sync brackets, flags, avatars, H2H &amp; Top 8 standings — with RAM-only stream-safe token privacy.</p>
+            </div>
+          </div>
+
+          <div class="eco-card c-cyan" id="eco-2">
+            <div class="eco-visual">
+              <div class="eco-qr-box" id="eco-qr-box"></div>
+            </div>
+            <div class="eco-copy">
+              <span class="tag" id="eco-2-tag">MOBILE / TABLET LAN</span>
+              <h3 id="eco-2-title">Instant Offline QR Control</h3>
+              <p id="eco-2-desc">Scan from any phone or tablet on the same Wi-Fi to run scores live in under 5 ms. Zero apps required.</p>
+            </div>
+          </div>
+
+          <div class="eco-card c-gold" id="eco-3">
+            <div class="eco-visual">
+              <div class="eco-flags-mosaic" id="eco-flags-mosaic"></div>
+            </div>
+            <div class="eco-copy">
+              <span class="tag" id="eco-3-tag">114 VECTOR FLAGS</span>
+              <h3 id="eco-3-title">Country &amp; Region-Only</h3>
+              <p id="eco-3-desc">Dual flag slots, US States, UK Nations, Spain Regions &amp; smooth cubic Flag Fade-In / Fade-Out Studio.</p>
+            </div>
+          </div>
+
+          <div class="eco-card c-green" id="eco-4">
+            <div class="eco-visual">
+              <div class="eco-lang-visual">
+                <div class="eco-lang-pill">
+                  <span id="eco-pill-en" class="on">EN</span>
+                  <span id="eco-pill-es">ES</span>
+                </div>
+                <div class="eco-obs-badge" id="eco-obs-badge">OBS STINGER SYNC · 0 FLICKER</div>
+              </div>
+            </div>
+            <div class="eco-copy">
+              <span class="tag" id="eco-4-tag">BILINGUAL &amp; OBS NATIVE</span>
+              <h3 id="eco-4-title">English / Español + Dock</h3>
+              <p id="eco-4-desc">Instant 1-click language switch, custom OBS Browser Dock, hotkeys &amp; Stream Deck HTTP API.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LAYER 2: ACT 8 — GRAND FINALE -->
+    <section class="scene" id="scene-finale">
+      <div class="finale-wrap">
+        <div class="finale-tag" id="fin-tag">100% FREE · OPEN-SOURCE FOREVER</div>
+        <div class="finale-title" id="fin-title">BUILT FOR THE FGC.<br/>FREE FOREVER.</div>
+        <div class="finale-repo" id="fin-repo">
+          <span class="gh-badge">GITHUB</span>
+          <span>github.com/N5K-dev/fgc-open-scorebars</span>
+        </div>
+        <div class="finale-socials" id="fin-socials">
+          <div class="soc-pill">𝕏 @Nordi5ke</div>
+          <div class="soc-pill">▶ YouTube @nordi5ke</div>
+          <div class="soc-pill">🟣 Twitch Nordi5ke</div>
+          <div class="soc-pill kofi" id="fin-kofi">☕ ko-fi.com/nordi5ke (Optional)</div>
+        </div>
+        <div class="finale-foot" id="fin-foot">Zero paywalls · Runs 100% offline with Node.js + OBS Studio</div>
+      </div>
+    </section>
+
+    <!-- LAYER 3: CINEMA POLISH, FLASH, SLASH WIPE, FADE -->
+    <div class="cinema-vignette"></div>
+    <div id="flash-layer"></div>
+    <div id="slash-wipe"></div>
+    <div id="fade-black"></div>
+  </div>
+</div>
+
+<!-- TOP STUDIO BAR -->
+<div class="top-bar">
+  <div class="studio-badge" id="studio-status">
+    <span class="dot"></span>
+    <span id="studio-status-txt">Warming up 3 live 1080p overlay engines...</span>
+  </div>
+  <div class="top-actions">
+    <button type="button" id="btn-thumb-en" class="gold-btn" title="Download 1920x1080 YouTube/X Thumbnail (English)">🖼️ Thumbnail EN</button>
+    <button type="button" id="btn-thumb-es" class="gold-btn" title="Descargar Miniatura 1920x1080 YouTube/X (Español)">🖼️ Miniatura ES</button>
+    <button type="button" id="btn-copy-obs-url" title="Copy clean OBS Browser Source URL for lossless MP4 capture">📋 OBS URL</button>
+    <button type="button" id="btn-fullscreen" title="Clean Fullscreen (press H to toggle HUD)">⛶ Clean</button>
+    <a href="panel.html" style="text-decoration:none;"><button type="button">← Panel</button></a>
+  </div>
+</div>
+
+<!-- DIRECTOR HUD -->
+<div class="director-hud">
+  <div class="hud-timeline-row">
+    <span class="time-readout" id="time-readout">00:00.0 / 01:02.0</span>
+    <div class="scrub-wrap" id="scrub-wrap" title="Click or drag to scrub timeline">
+      <div class="scrub-track">
+        <div class="scrub-fill" id="scrub-fill"></div>
+        <div class="scrub-ticks" id="scrub-ticks"></div>
+      </div>
+    </div>
+    <span class="act-label-readout" id="act-readout">ACT 1 · THE HOOK</span>
+  </div>
+  <div class="hud-controls">
+    <div class="ctrl-group">
+      <button type="button" id="btn-play" class="primary">▶ Play Trailer</button>
+      <button type="button" id="btn-restart">↺ Restart</button>
+      <div class="seg-pill" id="seg-lang" title="Trailer Language (English / Español)">
+        <button type="button" data-lang="en" class="active-chip">🌐 EN</button>
+        <button type="button" data-lang="es">🇪🇸 ES</button>
+      </div>
+      <select id="sel-audio-mode" title="Audio Track Mode">
+        <option value="full">🎵 Synth OST + SFX (No Copyright)</option>
+        <option value="sfx">💥 SFX Only (For External Music)</option>
+        <option value="custom">📂 Custom MP3/WAV + SFX</option>
+        <option value="mute">🔇 Muted</option>
+      </select>
+      <input type="file" id="file-custom-audio" accept="audio/*" style="display:none;" />
+      <button type="button" id="btn-load-audio" style="display:none;">📂 Pick Audio</button>
+    </div>
+    <div class="ctrl-group">
+      <button type="button" id="btn-rec-en" class="rec" title="Record & auto-download full 1080p60 English trailer video">🔴 Record Video (EN)</button>
+      <button type="button" id="btn-rec-es" class="rec" title="Grabar y descargar automáticamente el tráiler completo 1080p60 en Español">🔴 Grabar Vídeo (ES)</button>
+    </div>
+  </div>
+</div>
+
+<div class="hud-toast" id="hud-toast"></div>
+
+<script src="flags.js"></script>
+<script src="qr.js"></script>
+<script>
+(() => {
+  'use strict';
+
+  /* =========================================================================
+     CONFIG & BILINGUAL SCRIPT (132 BPM · 34 BARS = 61.82s EXACT BEAT LOCK!)
+     ========================================================================= */
+  const BPM = 132;
+  const BEAT = 60 / BPM; // 0.454545s
+  const TOTAL_BEATS = 136; // 34 bars
+  const TOTAL_SEC = TOTAL_BEATS * BEAT; // ~61.82s
+
+  const qs = new URLSearchParams(location.search);
+  const isObsMode = qs.has('obs') || qs.has('clean');
+  let lang = (qs.get('lang') || 'en').toLowerCase() === 'es' ? 'es' : 'en';
+  let audioMode = qs.get('audio') || 'full';
+
+  if (isObsMode) document.body.classList.add('clean-mode');
+
+  const COPY = {
+    en: {
+      hookEyebrow: 'FGC BROADCASTING · 2026',
+      hook1: 'STILL PAYING FOR TOURNAMENT OVERLAYS?',
+      hook2: 'STOP.',
+      hook3: '100% FREE. ZERO PAYWALLS.',
+      pw: ['$29 / MO', 'CLOUD LOCK-IN', 'WATERMARKS'],
+      titleBadge: '⚡ 100% FREE & OPEN-SOURCE FOR THE FGC ⚡',
+      titleSub: 'LOCAL BROADCAST SUITE · ZERO SUBSCRIPTIONS · ZERO CLOUD',
+      stats: ['SCOREBARS', 'VS SPLASH', 'TOP 8 RESULTS', 'FIGHTING GAMES'],
+      act3Kicker: 'TEKKEN 8 & FGC · HUD-CALIBRATED',
+      act3Title: '56 BROADCAST SCOREBARS',
+      act3Sub: 'Native HUD alignment · Flag Fade Studio · Live Match Point & Stinger Sync',
+      act3PillLbl: 'LIVE OVERLAY',
+      act4Kicker: 'STREET FIGHTER 6 · 0 PX OVERLAP',
+      act4Title: '24 STREET FIGHTER 6 DESIGNS',
+      act4Sub: 'Engineered around Healthbars, Drive Gauges, Round Gems & [M]/[C] Icons',
+      act4PillLbl: 'SF6 SAFE HUD',
+      act5Kicker: '42 ANIMATED DESIGNS · 240+ GAMES',
+      act5Title: 'INTERACTIVE VS SPLASH STUDIO',
+      act5Sub: 'Click-to-Edit · Direct Drag · Scrolling Dividers · Offline Character Packs',
+      act5PillLbl: 'REAL-TIME VS',
+      act6Kicker: '24 TOP 8 & PODIUM LAYOUTS',
+      act6Title: 'FINAL RESULTS + 1080P PNG',
+      act6Sub: 'Live Confetti & Spotlight FX · Global & Per-Player Framing · Instant Social Export',
+      act6PillLbl: 'RESULTS STUDIO',
+      pngTitle: '⬇ 1920×1080 PNG EXPORTED',
+      pngSub: 'Ready for X / Twitter, Discord & Instagram in 1 click',
+      ecoKicker: 'BUILT FOR REAL TOURNAMENTS',
+      ecoTitle: 'COMPLETE LIVE PRODUCTION SUITE',
+      eco1Tag: 'START.GG & CHALLONGE',
+      eco1Title: '1-Click Stream Queue',
+      eco1Desc: 'Auto-sync brackets, flags, avatars, H2H & Top 8 standings — with RAM-only stream-safe token privacy.',
+      eco2Tag: 'MOBILE / TABLET LAN',
+      eco2Title: 'Instant Offline QR Control',
+      eco2Desc: 'Scan from any phone or tablet on the same Wi-Fi to run scores live in under 5 ms. Zero apps required.',
+      eco3Tag: '114 VECTOR FLAGS',
+      eco3Title: 'Country & Region-Only',
+      eco3Desc: 'Dual flag slots, US States, UK Nations, Spain Regions & smooth cubic Flag Fade-In / Fade-Out Studio.',
+      eco4Tag: 'BILINGUAL & OBS NATIVE',
+      eco4Title: 'English / Español + Dock',
+      eco4Desc: 'Instant 1-click language switch, custom OBS Browser Dock, hotkeys & Stream Deck HTTP API.',
+      ecoObsBadge: 'OBS STINGER SYNC · 0 FLICKER',
+      finTag: '100% FREE · OPEN-SOURCE FOREVER',
+      finTitle: 'BUILT FOR THE FGC.<br/>FREE FOREVER.',
+      finKofi: '☕ ko-fi.com/nordi5ke (Optional)',
+      finFoot: 'Zero paywalls · Runs 100% offline with Node.js + OBS Studio',
+      acts: [
+        'ACT 1 · THE HOOK',
+        'ACT 2 · TITLE SLAM',
+        'ACT 3 · 56 SCOREBARS (T8)',
+        'ACT 4 · 24 SF6 DESIGNS',
+        'ACT 5 · 42 VS SPLASH',
+        'ACT 6 · TOP 8 RESULTS & PNG',
+        'ACT 7 · ECOSYSTEM BLITZ',
+        'ACT 8 · FREE FOREVER FINALE'
+      ],
+      thumbTop: '100% FREE & OPEN-SOURCE · OBS BROADCAST SUITE',
+      thumbTitle1: 'FGC OPEN',
+      thumbTitle2: 'SCOREBARS',
+      thumbSub: '56 SCOREBARS  ·  42 VS SPLASH  ·  24 TOP 8 RESULTS  ·  START.GG & QR',
+      thumbPill: 'ZERO PAYWALLS · GITHUB'
+    },
+    es: {
+      hookEyebrow: 'RETRANSMISIÓN FGC · 2026',
+      hook1: '¿SIGUES PAGANDO POR OVERLAYS DE TORNEOS?',
+      hook2: 'BASTA.',
+      hook3: '100% GRATIS. SIN SUSCRIPCIONES.',
+      pw: ['29 € / MES', 'DEPENDENCIA NUBE', 'MARCAS DE AGUA'],
+      titleBadge: '⚡ 100% GRATIS Y OPEN-SOURCE PARA LA FGC ⚡',
+      titleSub: 'SUITE LOCAL DE EMISIÓN · CERO CUOTAS · CERO NUBE',
+      stats: ['MARCADORES', 'PANTALLAS VS', 'TOP 8 FINALES', 'JUEGOS DE LUCHA'],
+      act3Kicker: 'TEKKEN 8 Y FGC · CALIBRADOS AL HUD',
+      act3Title: '56 MARCADORES DE EMISIÓN',
+      act3Sub: 'Encaje nativo al HUD · Estudio Flag Fade · Match Point y Sincronía Stinger',
+      act3PillLbl: 'OVERLAY EN VIVO',
+      act4Kicker: 'STREET FIGHTER 6 · 0 PX SOLAPAMIENTO',
+      act4Title: '24 DISEÑOS DE STREET FIGHTER 6',
+      act4Sub: 'Calibrados sobre Barras de Vida, Drive Gauge, Rondas e Iconos [M]/[C]',
+      act4PillLbl: 'HUD SEGURO SF6',
+      act5Kicker: '42 DISEÑOS ANIMADOS · +240 JUEGOS',
+      act5Title: 'ESTUDIO PANTALLA VS INTERACTIVO',
+      act5Sub: 'Clic-para-Editar · Arrastre Directo · Divisores Animados · Packs Offline',
+      act5PillLbl: 'VS EN TIEMPO REAL',
+      act6Kicker: '24 DISEÑOS TOP 8 Y PODIO',
+      act6Title: 'RESULTADOS FINALES + PNG 1080P',
+      act6Sub: 'Confeti y Focos en Vivo · Encuadre Global e Individual · Exportación Social',
+      act6PillLbl: 'ESTUDIO RESULTADOS',
+      pngTitle: '⬇ PNG 1920×1080 EXPORTADO',
+      pngSub: 'Listo para publicar en X / Twitter, Discord e Instagram en 1 clic',
+      ecoKicker: 'HECHO PARA TORNEOS REALES',
+      ecoTitle: 'SUITE COMPLETA DE PRODUCCIÓN',
+      eco1Tag: 'START.GG Y CHALLONGE',
+      eco1Title: 'Cola de Stream en 1 Clic',
+      eco1Desc: 'Sincroniza cuadros, banderas, avatares, H2H y Top 8 — con privacidad de tokens solo en RAM.',
+      eco2Tag: 'MÓVIL / TABLET LAN',
+      eco2Title: 'Control Móvil con QR Offline',
+      eco2Desc: 'Escanea desde cualquier móvil o tablet en el mismo Wi-Fi y lleva el marcador en < 5 ms.',
+      eco3Tag: '114 BANDERAS VECTORIALES',
+      eco3Title: 'País y Modo Solo Región',
+      eco3Desc: 'Doble ranura, CC. AA. de España, Estados EE. UU., Reino Unido y Editor de Difuminado cúbico.',
+      eco4Tag: 'BILINGÜE Y NATIVO OBS',
+      eco4Title: 'Inglés / Español + Panel OBS',
+      eco4Desc: 'Cambio de idioma en 1 clic, Panel Integrado en OBS, atajos de teclado y API Stream Deck.',
+      ecoObsBadge: 'SINCRONÍA STINGER OBS · 0 PARPADEO',
+      finTag: '100% GRATIS · CÓDIGO ABIERTO SIEMPRE',
+      finTitle: 'HECHO PARA LA FGC.<br/>GRATIS PARA SIEMPRE.',
+      finKofi: '☕ ko-fi.com/nordi5ke (Opcional)',
+      finFoot: 'Sin cobros nunca · Funciona 100% offline con Node.js + OBS Studio',
+      acts: [
+        'ACTO 1 · GANCHO',
+        'ACTO 2 · IMPACTO TÍTULO',
+        'ACTO 3 · 56 MARCADORES (T8)',
+        'ACTO 4 · 24 DISEÑOS SF6',
+        'ACTO 5 · 42 PANTALLAS VS',
+        'ACTO 6 · TOP 8 Y PNG 1080P',
+        'ACTO 7 · ECOSISTEMA PRO',
+        'ACTO 8 · CIERRE GRATIS SIEMPRE'
+      ],
+      thumbTop: '100% GRATIS Y OPEN-SOURCE · SUITE PARA OBS STUDIO',
+      thumbTitle1: 'FGC OPEN',
+      thumbTitle2: 'SCOREBARS',
+      thumbSub: '56 MARCADORES  ·  42 PANTALLAS VS  ·  24 TOP 8  ·  START.GG Y QR',
+      thumbPill: 'GRATIS EN GITHUB'
+    }
+  };
+
+  /* =========================================================================
+     DEMO STATES FOR THE 3 REAL LIVE OVERLAY ENGINES (100% LOCAL RENDERS!)
+     ========================================================================= */
+  const BASE_STYLE = {
+    customColors: false, bgMode: 'gradient', fontName: 'theme', fontScore: 'theme',
+    fontScale: 100, letterSpacing: 0, italic: 'theme', scoreSlant: 'mirror',
+    textShadow: 'broadcast', uppercase: true, flagStyle: 'theme',
+    hudLayout: 'theme', plateShape: 'theme', centerStyle: 'theme',
+    outerBlade: 'theme', scorePos: 'theme', borderStyle: 'theme', showIso: 'theme',
+    glow: 'off', sheen: 'slow', borderAnim: 'off', texture: 'none',
+    sceneAnim: 't8-slash', sceneDelay: 0, animDuration: 520, scoreDuration: 420,
+    sceneStagger: true, sceneSheen: true, scoreAnim: 'pop',
+    mpStyle: 'fin', mpColor: 'fire', mpLabel: 'MATCH POINT',
+    flagFadeMode: 'out', flagFadeCurve: 'smooth', flagFadeIn: 0,
+    flagFadeStart: 32, flagFadeEnd: 96, flagFadeAngle: 22, flagFadeWidth: 118,
+    flagFadeOpacity: 100, flagFadeZoom: 112, flagFadeShiftX: 0,
+    flagFadeSat: 114, flagFadeBright: 98
+  };
+
+  function makeScorebarState(theme, overrides = {}) {
+    return {
+      theme,
+      visible: true,
+      round: overrides.round || 'GRAND FINALS',
+      format: overrides.format || 'FT3',
+      showFlags: overrides.showFlags || 'both',
+      showChars: true,
+      showMatchPoint: overrides.showMatchPoint !== false,
+      showCasters: Boolean(overrides.showCasters),
+      casters: { c1: 'NORDI5KE', c1Social: '@Nordi5ke', c2: 'ARENA_LIVE', c2Social: '@FGCBroadcast' },
+      p1: {
+        name: overrides.p1Name || 'SHIN_KAZAMA',
+        sponsor: overrides.p1Sp || 'APEX',
+        flag: overrides.p1Flag || 'JP',
+        region: overrides.p1Reg || '',
+        bracket: overrides.p1Br || 'W',
+        character: overrides.p1Char || 'Jin Kazama',
+        score: overrides.p1Score ?? 2
+      },
+      p2: {
+        name: overrides.p2Name || 'VOLT_ES',
+        sponsor: overrides.p2Sp || 'NOVA',
+        flag: overrides.p2Flag || 'ES',
+        region: overrides.p2Reg || 'ES-MD',
+        bracket: overrides.p2Br || 'L',
+        character: overrides.p2Char || 'Kazuya Mishima',
+        score: overrides.p2Score ?? 1
+      },
+      style: { ...BASE_STYLE, ...(overrides.style || {}) },
+      tweaks: { offsetY: 0, scale: 100, wingSpread: 0, opacity: 100 }
+    };
+  }
+
+  function makeVsState(design, opts = {}) {
+    return {
+      visible: true,
+      round: opts.round || 'WINNERS FINALS',
+      format: 'FT3',
+      p1: {
+        name: opts.p1Name || 'SHIN_KAZAMA',
+        sponsor: opts.p1Sp || 'APEX',
+        flag: opts.p1Flag || 'JP',
+        region: opts.p1Reg || '',
+        bracket: 'W',
+        character: opts.p1Char || 'Jin Kazama',
+        score: opts.p1Score ?? 2,
+        avatar: ''
+      },
+      p2: {
+        name: opts.p2Name || 'VOLT_ES',
+        sponsor: opts.p2Sp || 'NOVA',
+        flag: opts.p2Flag || 'ES',
+        region: opts.p2Reg || 'ES-MD',
+        bracket: 'W',
+        character: opts.p2Char || 'Kazuya Mishima',
+        score: opts.p2Score ?? 2,
+        avatar: ''
+      },
+      vs: {
+        visible: true,
+        design,
+        source: 'live',
+        game: 'tekken8',
+        pack: 'vs_renders',
+        eyebrow: 'WORLD CLASH FINALS 2026',
+        footerText: 'FGC OPEN SCOREBARS · 100% FREE',
+        bgMode: 'theme',
+        frameStyle: 'theme',
+        pattern: 'theme',
+        patternDir: 'diag',
+        patternSpeed: 48,
+        patternOpacity: -1,
+        patternScale: 100,
+        dividerStyle: opts.divider || 'theme',
+        dividerAnim: 'scroll-down',
+        dividerSpeed: 56,
+        dividerWidth: 0,
+        dividerTilt: -999,
+        emblemStyle: opts.emblem || 'theme',
+        emblemText: 'VS',
+        emblemAnim: 'float',
+        emblemScale: 104,
+        emblemOffsetY: 0,
+        plateStyle: 'theme',
+        plateFont: 'theme',
+        plateBottom: -1,
+        plateWidth: 790,
+        plateScale: 100,
+        plateOpacity: 96,
+        nameScale: 100,
+        flagMode: opts.flagMode || 'both',
+        flagSize: 105,
+        bgFlagOpacity: -1,
+        showH2H: true,
+        showSponsors: true,
+        showCharName: true,
+        showLogo: false,
+        avatarMode: 'badge',
+        charMotion: 'breathe',
+        charShadow: 62,
+        p1Zoom: 106, p2Zoom: 106,
+        p1OffsetX: 0, p2OffsetX: 0,
+        p1OffsetY: 0, p2OffsetY: 0,
+        p1Flip: false, p2Flip: false,
+        headerStyle: 'theme',
+        headerScale: 100,
+        headerOffsetY: 0,
+        entryAnim: opts.entryAnim || 'slam-split',
+        entrySpeed: 115,
+        ambientFx: opts.ambientFx || 'sparks'
+      }
+    };
+  }
+
+  const TOP8_PLAYERS = [
+    { place: 1, name: 'SHIN_KAZAMA', sponsor: 'APEX', flag: 'JP', region: '',      character: 'Reina',           handle: '@ShinFGC',    avatar: '', charZoom: 104, charX: 0, charY: 0, charFlip: false },
+    { place: 2, name: 'VOLT_ES',     sponsor: 'NOVA', flag: 'ES', region: 'ES-MD', character: 'Shaheen',         handle: '@VoltES',     avatar: '', charZoom: 102, charX: 0, charY: 0, charFlip: false },
+    { place: 3, name: 'KURO_T8',     sponsor: 'ZEN',  flag: 'KR', region: '',      character: 'Fahkumram',       handle: '@KuroT8',     avatar: '', charZoom: 102, charX: 0, charY: 0, charFlip: false },
+    { place: 4, name: 'SOLAR_MX',    sponsor: 'SOL',  flag: 'MX', region: '',      character: 'Ling Xiaoyu',     handle: '@SolarMX',    avatar: '', charZoom: 102, charX: 0, charY: 0, charFlip: false },
+    { place: 5, name: 'CAGE_US',     sponsor: 'WC',   flag: 'US', region: 'US-CA', character: 'Bryan Fury',      handle: '@CageWest',   avatar: '', charZoom: 102, charX: 0, charY: 0, charFlip: false },
+    { place: 5, name: 'KAZAMA_UK',   sponsor: 'SCT',  flag: 'GB', region: 'GB-SCT',character: 'Jun Kazama',      handle: '@KazamaUK',   avatar: '', charZoom: 102, charX: 0, charY: 0, charFlip: false },
+    { place: 7, name: 'DRAGON_FR',   sponsor: 'PAR',  flag: 'FR', region: '',      character: 'Jin Kazama',      handle: '@DragonFR',   avatar: '', charZoom: 102, charX: 0, charY: 0, charFlip: false },
+    { place: 7, name: 'IRON_BR',     sponsor: 'SA',   flag: 'BR', region: '',      character: 'Kazuya Mishima',  handle: '@IronBR',     avatar: '', charZoom: 102, charX: 0, charY: 0, charFlip: false }
+  ];
+
+  function makeResultsState(design, opts = {}) {
+    return {
+      visible: true,
+      results: {
+        visible: true,
+        design,
+        layout: 'theme',
+        cardStyle: 'theme',
+        title: opts.title || 'WORLD CLASH 2026 — TOP 8',
+        subtitle: 'TEKKEN 8 GRAND FINALS',
+        entrantsCount: '256',
+        footerText: 'FGC OPEN SCOREBARS · 100% FREE',
+        game: 'tekken8',
+        pack: 'vs_renders',
+        flagMode: 'both',
+        avatarMode: 'chars-only',
+        bgMode: 'theme',
+        showCrown: true,
+        showCharNames: true,
+        showHandles: true,
+        showEntrants: true,
+        showLogo: false,
+        charZoom: 100,
+        charOffsetX: 0,
+        charOffsetY: 0,
+        charFlipAll: false,
+        entryAnim: opts.entryAnim || 'cascade-slam',
+        entrySpeed: 120,
+        staggerMs: 65,
+        ambientFx: opts.ambientFx || 'confetti',
+        idleAnim: 'champ-glow',
+        pattern: 'theme',
+        patternDir: 'diag',
+        patternSpeed: 42,
+        patternOpacity: -1,
+        patternScale: 100,
+        placements: TOP8_PLAYERS
+      }
+    };
+  }
+
+  /* =========================================================================
+     PROCEDURAL 132 BPM FGC ARENA SOUNDTRACK & CINEMATIC SFX (WEB AUDIO API)
+     ========================================================================= */
+  class BroadcastAudioEngine {
+    constructor() {
+      this.ctx = null;
+      this.master = null;
+      this.musicBus = null;
+      this.sfxBus = null;
+      this.customEl = null;
+      this.customSrc = null;
+      this.noiseBuf = null;
+      this.lastStep = -1;
+      this.running = false;
+    }
+
+    ensure() {
+      if (this.ctx) {
+        if (this.ctx.state === 'suspended') this.ctx.resume().catch(() => {});
+        return;
+      }
+      const AC = window.AudioContext || window.webkitAudioContext;
+      this.ctx = new AC();
+      const comp = this.ctx.createDynamicsCompressor();
+      comp.threshold.value = -10;
+      comp.ratio.value = 5;
+      comp.attack.value = 0.004;
+      comp.release.value = 0.14;
+
+      this.master = this.ctx.createGain();
+      this.master.gain.value = 0.85;
+
+      this.musicBus = this.ctx.createGain();
+      this.sfxBus = this.ctx.createGain();
+
+      this.musicBus.connect(comp);
+      this.sfxBus.connect(comp);
+      comp.connect(this.master);
+      this.master.connect(this.ctx.destination);
+
+      // Shared white noise buffer for snares, hi-hats, risers & katana slashes
+      const len = this.ctx.sampleRate * 2;
+      this.noiseBuf = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
+      const data = this.noiseBuf.getChannelData(0);
+      for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+      this.updateVolumes();
+    }
+
+    updateVolumes() {
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+      const mVol = audioMode === 'full' ? 0.56 : 0;
+      const sVol = audioMode === 'mute' ? 0 : 0.82;
+      this.musicBus.gain.setTargetAtTime(mVol, now, 0.02);
+      this.sfxBus.gain.setTargetAtTime(sVol, now, 0.02);
+      if (this.customEl) {
+        this.customEl.muted = (audioMode !== 'custom');
+        this.customEl.volume = 0.72;
+      }
+    }
+
+    loadCustomFile(file) {
+      this.ensure();
+      if (this.customEl) {
+        this.customEl.pause();
+        URL.revokeObjectURL(this.customEl.src);
+      }
+      const url = URL.createObjectURL(file);
+      this.customEl = new Audio(url);
+      this.customEl.crossOrigin = 'anonymous';
+      this.customEl.volume = 0.72;
+      audioMode = 'custom';
+      document.getElementById('sel-audio-mode').value = 'custom';
+      this.updateVolumes();
+    }
+
+    syncCustom(timeSec, playing) {
+      if (!this.customEl) return;
+      if (audioMode !== 'custom' || !playing) {
+        if (!this.customEl.paused) this.customEl.pause();
+        return;
+      }
+      if (Math.abs(this.customEl.currentTime - timeSec) > 0.35) {
+        try { this.customEl.currentTime = Math.min(timeSec, this.customEl.duration || timeSec); } catch {}
+      }
+      if (this.customEl.paused) this.customEl.play().catch(() => {});
+    }
+
+    stopAll() {
+      this.lastStep = -1;
+      if (this.customEl && !this.customEl.paused) this.customEl.pause();
+    }
+
+    // --- SYNTH DRUMS & INSTRUMENTS ---
+    kick(t, gain = 0.92) {
+      const o = this.ctx.createOscillator();
+      const g = this.ctx.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(155, t);
+      o.frequency.exponentialRampToValueAtTime(42, t + 0.085);
+      g.gain.setValueAtTime(gain, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.24);
+      o.connect(g); g.connect(this.musicBus);
+      o.start(t); o.stop(t + 0.26);
+    }
+
+    snare(t, gain = 0.45) {
+      const n = this.ctx.createBufferSource();
+      n.buffer = this.noiseBuf;
+      const bp = this.ctx.createBiquadFilter();
+      bp.type = 'bandpass'; bp.frequency.value = 1850; bp.Q.value = 0.9;
+      const g = this.ctx.createGain();
+      g.gain.setValueAtTime(gain, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.16);
+      n.connect(bp); bp.connect(g); g.connect(this.musicBus);
+      n.start(t); n.stop(t + 0.18);
+
+      const o = this.ctx.createOscillator();
+      const og = this.ctx.createGain();
+      o.type = 'triangle';
+      o.frequency.setValueAtTime(210, t);
+      o.frequency.exponentialRampToValueAtTime(115, t + 0.06);
+      og.gain.setValueAtTime(gain * 0.7, t);
+      og.gain.exponentialRampToValueAtTime(0.001, t + 0.09);
+      o.connect(og); og.connect(this.musicBus);
+      o.start(t); o.stop(t + 0.1);
+    }
+
+    hat(t, gain = 0.14, open = false) {
+      const n = this.ctx.createBufferSource();
+      n.buffer = this.noiseBuf;
+      const hp = this.ctx.createBiquadFilter();
+      hp.type = 'highpass'; hp.frequency.value = 7800;
+      const g = this.ctx.createGain();
+      const dur = open ? 0.14 : 0.045;
+      g.gain.setValueAtTime(gain, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      n.connect(hp); hp.connect(g); g.connect(this.musicBus);
+      n.start(t); n.stop(t + dur + 0.01);
+    }
+
+    bass(t, freq, dur = 0.16, gain = 0.34, cutoff = 900) {
+      const o = this.ctx.createOscillator();
+      const o2 = this.ctx.createOscillator();
+      const f = this.ctx.createBiquadFilter();
+      const g = this.ctx.createGain();
+      o.type = 'sawtooth'; o.frequency.setValueAtTime(freq, t);
+      o2.type = 'square'; o2.frequency.setValueAtTime(freq * 0.5, t);
+      f.type = 'lowpass';
+      f.frequency.setValueAtTime(cutoff * 1.9, t);
+      f.frequency.exponentialRampToValueAtTime(cutoff * 0.45, t + dur);
+      f.Q.value = 4.2;
+      g.gain.setValueAtTime(gain, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      o.connect(f); o2.connect(f); f.connect(g); g.connect(this.musicBus);
+      o.start(t); o2.start(t); o.stop(t + dur + 0.02); o2.stop(t + dur + 0.02);
+    }
+
+    lead(t, freq, dur = 0.18, gain = 0.16) {
+      const o1 = this.ctx.createOscillator();
+      const o2 = this.ctx.createOscillator();
+      const f = this.ctx.createBiquadFilter();
+      const g = this.ctx.createGain();
+      o1.type = 'sawtooth'; o1.frequency.setValueAtTime(freq, t);
+      o2.type = 'sawtooth'; o2.frequency.setValueAtTime(freq * 1.006, t);
+      f.type = 'lowpass'; f.frequency.setValueAtTime(3400, t);
+      g.gain.setValueAtTime(0.001, t);
+      g.gain.linearRampToValueAtTime(gain, t + 0.012);
+      g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      o1.connect(f); o2.connect(f); f.connect(g); g.connect(this.musicBus);
+      o1.start(t); o2.start(t); o1.stop(t + dur + 0.02); o2.stop(t + dur + 0.02);
+    }
+
+    chordStab(t, freqs, dur = 0.65, gain = 0.14) {
+      const f = this.ctx.createBiquadFilter();
+      f.type = 'lowpass';
+      f.frequency.setValueAtTime(2600, t);
+      f.frequency.exponentialRampToValueAtTime(680, t + dur);
+      const g = this.ctx.createGain();
+      g.gain.setValueAtTime(0.001, t);
+      g.gain.linearRampToValueAtTime(gain, t + 0.015);
+      g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      f.connect(g); g.connect(this.musicBus);
+      for (const fr of freqs) {
+        const o = this.ctx.createOscillator();
+        o.type = 'sawtooth'; o.frequency.setValueAtTime(fr, t);
+        o.connect(f); o.start(t); o.stop(t + dur + 0.03);
+      }
+    }
+
+    // --- CINEMATIC SFX (PLAY IN BOTH 'full' AND 'sfx' MODES!) ---
+    sfxImpact(heavy = true) {
+      if (!this.ctx || audioMode === 'mute') return;
+      const t = this.ctx.currentTime;
+      const o = this.ctx.createOscillator();
+      const g = this.ctx.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(heavy ? 128 : 165, t);
+      o.frequency.exponentialRampToValueAtTime(28, t + (heavy ? 0.55 : 0.28));
+      g.gain.setValueAtTime(heavy ? 0.85 : 0.55, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + (heavy ? 0.65 : 0.34));
+      o.connect(g); g.connect(this.sfxBus);
+      o.start(t); o.stop(t + 0.7);
+
+      const n = this.ctx.createBufferSource();
+      n.buffer = this.noiseBuf;
+      const lp = this.ctx.createBiquadFilter();
+      lp.type = 'lowpass'; lp.frequency.setValueAtTime(2400, t);
+      lp.frequency.exponentialRampToValueAtTime(260, t + 0.35);
+      const ng = this.ctx.createGain();
+      ng.gain.setValueAtTime(heavy ? 0.42 : 0.25, t);
+      ng.gain.exponentialRampToValueAtTime(0.001, t + 0.38);
+      n.connect(lp); lp.connect(ng); ng.connect(this.sfxBus);
+      n.start(t); n.stop(t + 0.4);
+    }
+
+    sfxSlash() {
+      if (!this.ctx || audioMode === 'mute') return;
+      const t = this.ctx.currentTime;
+      const n = this.ctx.createBufferSource();
+      n.buffer = this.noiseBuf;
+      const bp = this.ctx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.setValueAtTime(900, t);
+      bp.frequency.exponentialRampToValueAtTime(5200, t + 0.14);
+      bp.frequency.exponentialRampToValueAtTime(1400, t + 0.32);
+      bp.Q.value = 3.2;
+      const g = this.ctx.createGain();
+      g.gain.setValueAtTime(0.001, t);
+      g.gain.linearRampToValueAtTime(0.5, t + 0.06);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.34);
+      n.connect(bp); bp.connect(g); g.connect(this.sfxBus);
+      n.start(t); n.stop(t + 0.36);
+
+      // Metallic clang harmonic
+      const o = this.ctx.createOscillator();
+      const og = this.ctx.createGain();
+      o.type = 'triangle';
+      o.frequency.setValueAtTime(2340, t + 0.04);
+      o.frequency.exponentialRampToValueAtTime(1480, t + 0.28);
+      og.gain.setValueAtTime(0.18, t + 0.04);
+      og.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+      o.connect(og); og.connect(this.sfxBus);
+      o.start(t + 0.04); o.stop(t + 0.32);
+    }
+
+    sfxChime(high = false) {
+      if (!this.ctx || audioMode === 'mute') return;
+      const t = this.ctx.currentTime;
+      const notes = high ? [587.33, 880, 1174.66] : [523.25, 659.25, 783.99];
+      notes.forEach((fr, idx) => {
+        const o = this.ctx.createOscillator();
+        const g = this.ctx.createGain();
+        o.type = 'triangle'; o.frequency.setValueAtTime(fr, t + idx * 0.035);
+        g.gain.setValueAtTime(0.22, t + idx * 0.035);
+        g.gain.exponentialRampToValueAtTime(0.001, t + idx * 0.035 + 0.42);
+        o.connect(g); g.connect(this.sfxBus);
+        o.start(t + idx * 0.035); o.stop(t + idx * 0.035 + 0.45);
+      });
+    }
+
+    sfxShutter() {
+      if (!this.ctx || audioMode === 'mute') return;
+      const t = this.ctx.currentTime;
+      [0, 0.055].forEach((off) => {
+        const n = this.ctx.createBufferSource();
+        n.buffer = this.noiseBuf;
+        const hp = this.ctx.createBiquadFilter();
+        hp.type = 'highpass'; hp.frequency.value = 3200;
+        const g = this.ctx.createGain();
+        g.gain.setValueAtTime(0.36, t + off);
+        g.gain.exponentialRampToValueAtTime(0.001, t + off + 0.045);
+        n.connect(hp); hp.connect(g); g.connect(this.sfxBus);
+        n.start(t + off); n.stop(t + off + 0.05);
+      });
+      this.sfxChime(true);
+    }
+
+    sfxRiser(dur = 1.6) {
+      if (!this.ctx || audioMode === 'mute') return;
+      const t = this.ctx.currentTime;
+      const n = this.ctx.createBufferSource();
+      n.buffer = this.noiseBuf;
+      const bp = this.ctx.createBiquadFilter();
+      bp.type = 'bandpass'; bp.Q.value = 2.5;
+      bp.frequency.setValueAtTime(280, t);
+      bp.frequency.exponentialRampToValueAtTime(4800, t + dur);
+      const g = this.ctx.createGain();
+      g.gain.setValueAtTime(0.01, t);
+      g.gain.linearRampToValueAtTime(0.35, t + dur * 0.92);
+      g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      n.connect(bp); bp.connect(g); g.connect(this.sfxBus);
+      n.start(t); n.stop(t + dur + 0.02);
+    }
+
+    // --- 16TH-NOTE GROOVE SEQUENCER (CALLED FROM MASTER CLOCK) ---
+    tickMusic(timeSec) {
+      if (!this.ctx || audioMode !== 'full') return;
+      const step = Math.floor(timeSec / (BEAT / 4)); // 16th-note index
+      if (step <= this.lastStep) return;
+      if (step - this.lastStep > 4) {
+        this.lastStep = step - 1; // jumped/scrubbed
+      }
+      const now = this.ctx.currentTime;
+      const beatNum = Math.floor(step / 4);
+      const inBar = step % 16; // 0..15
+
+      // Harmonic progression in D Minor -> F -> Bb -> C -> A (heroic FGC arena!)
+      const bar = Math.floor(step / 16);
+      const bassRoots = [73.42, 73.42, 58.27, 65.41]; // D2, D2, Bb1, C2
+      const triumphRoots = [87.31, 98.00, 110.00, 73.42]; // F2, G2, A2, D2
+      const root = (beatNum >= 84 && beatNum < 120) ? triumphRoots[bar % 4] : bassRoots[bar % 4];
+
+      // ACT 1 (beats 0..13): dark sub-pulse tension
+      if (beatNum < 12) {
+        if (inBar === 0 || inBar === 8) this.kick(now, 0.55);
+        if (inBar % 4 === 2) this.hat(now, 0.07);
+        if (inBar === 0) this.bass(now, 73.42, 0.35, 0.22, 420);
+      }
+      // Beats 12..13: dramatic silence before Title Slam drop!
+      else if (beatNum >= 14 && beatNum < 120) {
+        // FULL DRIVING 132 BPM GROOVE
+        // Kick pattern
+        if (inBar === 0 || inBar === 4 || inBar === 8 || inBar === 12 || (beatNum >= 62 && inBar === 14)) {
+          this.kick(now, 0.92);
+        }
+        // Snare on 2 & 4 (plus buildup roll in beats 116..119)
+        if (beatNum >= 116) {
+          if (inBar % 2 === 0 || beatNum >= 118) this.snare(now, 0.36 + (beatNum - 116) * 0.08);
+        } else if (inBar === 4 || inBar === 12) {
+          this.snare(now, 0.5);
+        }
+        // Crisp offbeat hi-hats
+        if (inBar % 2 === 0) this.hat(now, inBar % 4 === 2 ? 0.16 : 0.07, inBar === 10);
+
+        // Driving cyber bassline
+        const bassMult = (inBar === 3 || inBar === 11 || inBar === 15) ? 2 : 1;
+        if (inBar % 2 === 0 || inBar === 3 || inBar === 11 || inBar === 15) {
+          this.bass(now, root * bassMult, 0.13, 0.32, beatNum >= 62 ? 1450 : 980);
+        }
+
+        // Heroic arpeggio / lead motif (Acts 3..7)
+        if (beatNum >= 26) {
+          const arpDm = [293.66, 349.23, 440.00, 523.25, 587.33, 523.25, 440.00, 349.23];
+          const arpMaj = [349.23, 440.00, 523.25, 659.25, 698.46, 659.25, 523.25, 440.00];
+          const seq = (beatNum >= 84) ? arpMaj : arpDm;
+          if (inBar % 2 === 0) {
+            this.lead(now, seq[(inBar / 2) % seq.length], 0.17, beatNum >= 62 ? 0.15 : 0.11);
+          }
+        }
+
+        // Big chord stabs on bar downbeats
+        if (inBar === 0 && (bar % 2 === 0 || beatNum >= 84)) {
+          const chord = (beatNum >= 84)
+            ? [root * 2, root * 2.5, root * 3, root * 4]
+            : [root * 2, root * 2.378, root * 3, root * 4];
+          this.chordStab(now, chord, 0.72, 0.14);
+        }
+      }
+      // ACT 8 FINALE (beats 120..135): triumphant sustained championship resolve!
+      else if (beatNum === 120 && inBar === 0) {
+        this.chordStab(now, [146.83, 220.00, 293.66, 369.99, 440.00, 587.33], 3.8, 0.20);
+      } else if (beatNum === 128 && inBar === 0) {
+        this.chordStab(now, [146.83, 220.00, 293.66, 440.00, 587.33], 3.2, 0.14);
+      }
+
+      this.lastStep = step;
+    }
+  }
+
+  const audio = new BroadcastAudioEngine();
+
+  /* =========================================================================
+     PROCEDURAL 60FPS ARENA BACKGROUND CANVAS (SPOTLIGHTS, GRID, SPARKS, RINGS)
+     ========================================================================= */
+  const canvas = document.getElementById('fx-canvas');
+  const ctx2d = canvas.getContext('2d');
+  const particles = Array.from({ length: 85 }, () => ({
+    x: Math.random() * 1920,
+    y: Math.random() * 1080,
+    vx: (Math.random() - 0.5) * 0.9,
+    vy: -0.4 - Math.random() * 1.6,
+    r: 1.5 + Math.random() * 3.5,
+    hue: Math.random() < 0.5 ? 42 : (Math.random() < 0.5 ? 340 : 198),
+    a: 0.25 + Math.random() * 0.65
+  }));
+  const rings = [];
+
+  function spawnShockwave(color = '#fbbf24') {
+    rings.push({ r: 40, maxR: 1350, a: 0.9, color });
+  }
+
+  function renderArenaCanvas(tSec, actIdx) {
+    const W = 1920, H = 1080;
+    const beatPhase = (tSec / BEAT) % 1;
+    const pulse = Math.pow(1 - beatPhase, 3);
+
+    // Base radial arena backdrop (color shifts by Act mood)
+    const palettes = [
+      ['#18060e', '#04050a', '#f41f64'], // Act 1 Hook
+      ['#1c1108', '#04050a', '#fbbf24'], // Act 2 Title
+      ['#101526', '#04050a', '#f41f64'], // Act 3 T8
+      ['#061826', '#04050a', '#38bdf8'], // Act 4 SF6
+      ['#160726', '#04050a', '#a855f7'], // Act 5 VS
+      ['#1a1406', '#04050a', '#fbbf24'], // Act 6 Results
+      ['#071826', '#04050a', '#38bdf8'], // Act 7 Ecosystem
+      ['#191206', '#030408', '#fbbf24']  // Act 8 Finale
+    ];
+    const [c1, c2, acc] = palettes[Math.min(actIdx, palettes.length - 1)];
+    const grad = ctx2d.createRadialGradient(W / 2, H * 0.44, 60, W / 2, H / 2, 1180);
+    grad.addColorStop(0, c1);
+    grad.addColorStop(1, c2);
+    ctx2d.fillStyle = grad;
+    ctx2d.fillRect(0, 0, W, H);
+
+    // Sweeping stadium spotlights
+    ctx2d.save();
+    for (let i = 0; i < 2; i++) {
+      const ang = (i === 0 ? -0.35 : 0.35) + Math.sin(tSec * 0.7 + i * 2.1) * 0.24;
+      const sx = i === 0 ? 220 : W - 220;
+      ctx2d.save();
+      ctx2d.translate(sx, -80);
+      ctx2d.rotate(ang);
+      const sg = ctx2d.createLinearGradient(0, 0, 0, 1450);
+      sg.addColorStop(0, i === 0 ? 'rgba(244,31,100,0.16)' : 'rgba(56,189,248,0.16)');
+      sg.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx2d.fillStyle = sg;
+      ctx2d.beginPath();
+      ctx2d.moveTo(-40, 0); ctx2d.lineTo(40, 0);
+      ctx2d.lineTo(420, 1450); ctx2d.lineTo(-420, 1450);
+      ctx2d.closePath(); ctx2d.fill();
+      ctx2d.restore();
+    }
+    ctx2d.restore();
+
+    // Perspective synth grid on floor (Acts 1, 2, 7, 8)
+    if (actIdx === 0 || actIdx === 1 || actIdx === 6 || actIdx === 7) {
+      ctx2d.save();
+      ctx2d.strokeStyle = acc;
+      ctx2d.globalAlpha = 0.08 + pulse * 0.08;
+      ctx2d.lineWidth = 1.5;
+      const horizon = H * 0.64;
+      for (let i = -12; i <= 12; i++) {
+        ctx2d.beginPath();
+        ctx2d.moveTo(W / 2 + i * 75, horizon);
+        ctx2d.lineTo(W / 2 + i * 320, H);
+        ctx2d.stroke();
+      }
+      const scroll = (tSec * 1.4) % 1;
+      for (let r = 0; r < 10; r++) {
+        const p = Math.pow((r + scroll) / 10, 2.1);
+        const y = horizon + p * (H - horizon);
+        ctx2d.beginPath();
+        ctx2d.moveTo(0, y); ctx2d.lineTo(W, y);
+        ctx2d.stroke();
+      }
+      ctx2d.restore();
+    }
+
+    // Shockwave rings
+    for (let i = rings.length - 1; i >= 0; i--) {
+      const rg = rings[i];
+      rg.r += 34;
+      rg.a *= 0.91;
+      if (rg.a < 0.02 || rg.r > rg.maxR) { rings.splice(i, 1); continue; }
+      ctx2d.save();
+      ctx2d.strokeStyle = rg.color;
+      ctx2d.globalAlpha = rg.a;
+      ctx2d.lineWidth = 6 * rg.a + 1;
+      ctx2d.beginPath();
+      ctx2d.arc(W / 2, H / 2, rg.r, 0, Math.PI * 2);
+      ctx2d.stroke();
+      ctx2d.restore();
+    }
+
+    // Rising arena sparks
+    for (const p of particles) {
+      p.x += p.vx;
+      p.y += p.vy * (1 + pulse * 0.8);
+      if (p.y < -10) { p.y = H + 10; p.x = Math.random() * W; }
+      if (p.x < -10) p.x = W + 10;
+      if (p.x > W + 10) p.x = -10;
+      ctx2d.fillStyle = `hsla(${p.hue}, 95%, 68%, ${p.a * (0.65 + pulse * 0.35)})`;
+      ctx2d.beginPath();
+      ctx2d.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx2d.fill();
+    }
+  }
+
+  /* =========================================================================
+     POPULATE REAL LIVE QR & REAL VECTOR FLAGS IN ACT 7
+     ========================================================================= */
+  function initEcosystemVisuals() {
+    const qrBox = document.getElementById('eco-qr-box');
+    if (qrBox && window.FGC_QR) {
+      qrBox.innerHTML = window.FGC_QR.toSvg('https://github.com/N5K-dev/fgc-open-scorebars', { quietZone: 2 });
+    }
+    const mosaic = document.getElementById('eco-flags-mosaic');
+    if (mosaic && Array.isArray(window.FLAG_CATALOG)) {
+      const codes = ['JP', 'ES', 'ES-MD', 'US', 'US-CA', 'KR', 'GB-SCT', 'FR', 'MX'];
+      const map = Object.fromEntries(window.FLAG_CATALOG.map(f => [f.code, f]));
+      mosaic.innerHTML = codes.map(c => `<div class="eco-flag-tile">${map[c]?.svg || ''}</div>`).join('');
+    }
+  }
+
+  /* =========================================================================
+     APPLY LANGUAGE COPY (INSTANT EN <-> ES SWITCHING)
+     ========================================================================= */
+  function applyLangCopy() {
+    const c = COPY[lang];
+    document.documentElement.lang = lang;
+    document.querySelectorAll('#seg-lang button').forEach(b => b.classList.toggle('active-chip', b.dataset.lang === lang));
+
+    document.getElementById('hook-eyebrow').textContent = c.hookEyebrow;
+    document.getElementById('pw-1').textContent = c.pw[0];
+    document.getElementById('pw-2').textContent = c.pw[1];
+    document.getElementById('pw-3').textContent = c.pw[2];
+    document.getElementById('title-badge').textContent = c.titleBadge;
+    document.getElementById('title-sub').textContent = c.titleSub;
+    document.getElementById('st-1').textContent = c.stats[0];
+    document.getElementById('st-2').textContent = c.stats[1];
+    document.getElementById('st-3').textContent = c.stats[2];
+    document.getElementById('st-4').textContent = c.stats[3];
+    document.getElementById('png-pop-title').textContent = c.pngTitle;
+    document.getElementById('png-pop-sub').textContent = c.pngSub;
+    document.getElementById('eco-kicker').textContent = c.ecoKicker;
+    document.getElementById('eco-title').textContent = c.ecoTitle;
+    document.getElementById('eco-1-tag').textContent = c.eco1Tag;
+    document.getElementById('eco-1-title').textContent = c.eco1Title;
+    document.getElementById('eco-1-desc').textContent = c.eco1Desc;
+    document.getElementById('eco-2-tag').textContent = c.eco2Tag;
+    document.getElementById('eco-2-title').textContent = c.eco2Title;
+    document.getElementById('eco-2-desc').textContent = c.eco2Desc;
+    document.getElementById('eco-3-tag').textContent = c.eco3Tag;
+    document.getElementById('eco-3-title').textContent = c.eco3Title;
+    document.getElementById('eco-3-desc').textContent = c.eco3Desc;
+    document.getElementById('eco-4-tag').textContent = c.eco4Tag;
+    document.getElementById('eco-4-title').textContent = c.eco4Title;
+    document.getElementById('eco-4-desc').textContent = c.eco4Desc;
+    document.getElementById('eco-obs-badge').textContent = c.ecoObsBadge;
+    document.getElementById('fin-tag').textContent = c.finTag;
+    document.getElementById('fin-title').innerHTML = c.finTitle;
+    document.getElementById('fin-kofi').textContent = c.finKofi;
+    document.getElementById('fin-foot').textContent = c.finFoot;
+  }
+
+  /* =========================================================================
+     LIVE IFRAME DISPATCH HELPERS
+     ========================================================================= */
+  const frameScorebar = document.getElementById('frame-scorebar');
+  const frameVs = document.getElementById('frame-vs');
+  const frameResults = document.getElementById('frame-results');
+
+  let loadedCount = 0;
+  function markFrameReady() {
+    loadedCount++;
+    if (loadedCount >= 3) {
+      const st = document.getElementById('studio-status');
+      st.classList.add('ready');
+      document.getElementById('studio-status-txt').textContent =
+        lang === 'es' ? 'Listo · 3 motores 1080p en vivo preparados' : 'Ready · 3 live 1080p overlay engines warmed';
+      // Pre-push initial demo states so zero blank frames ever appear
+      pushScorebar(makeScorebarState('t8-native-hud'), 't8');
+      pushVs(makeVsState('t8-clash', { p1Char: 'Jin Kazama', p2Char: 'Kazuya Mishima' }), false);
+      pushResults(makeResultsState('res-evo-gold'), false);
+      if (isObsMode) {
+        setTimeout(() => startPlayback(0), 400);
+      }
+    }
+  }
+  frameScorebar.addEventListener('load', markFrameReady);
+  frameVs.addEventListener('load', markFrameReady);
+  frameResults.addEventListener('load', markFrameReady);
+
+  function pushScorebar(st, bg = 't8', triggerEntry = false, triggerPop = false) {
+    const win = frameScorebar.contentWindow;
+    if (!win) return;
+    win.postMessage({ type: 'preview-config', bg, guides: false }, '*');
+    win.postMessage({ type: 'state-update', state: st }, '*');
+    if (triggerEntry) setTimeout(() => win.postMessage({ type: 'test-entry-anim', useSceneDelay: false }, '*'), 40);
+    if (triggerPop) setTimeout(() => win.postMessage({ type: 'test-score-anim' }, '*'), 80);
+  }
+
+  function pushVs(st, triggerEntry = true) {
+    const win = frameVs.contentWindow;
+    if (!win) return;
+    win.postMessage({ type: 'vs-interactive-config', interactive: false, drag: false }, '*');
+    win.postMessage({ type: 'history-update', history: [
+      { p1: { name: st.p1.name, score: 3 }, p2: { name: st.p2.name, score: 2 }, winnerSide: 'p1' },
+      { p1: { name: st.p1.name, score: 2 }, p2: { name: st.p2.name, score: 3 }, winnerSide: 'p2' },
+      { p1: { name: st.p1.name, score: 3 }, p2: { name: st.p2.name, score: 1 }, winnerSide: 'p1' }
+    ] }, '*');
+    win.postMessage({ type: 'state-update', state: st }, '*');
+    if (triggerEntry) setTimeout(() => win.postMessage({ type: 'test-vs-entry' }, '*'), 50);
+  }
+
+  function pushResults(st, triggerEntry = true) {
+    const win = frameResults.contentWindow;
+    if (!win) return;
+    win.postMessage({ type: 'state-update', state: st }, '*');
+    if (triggerEntry) setTimeout(() => win.postMessage({ type: 'test-results-entry' }, '*'), 60);
+  }
+
+  /* =========================================================================
+     VISUAL EFFECTS TRIGGERS
+     ========================================================================= */
+  function flash(alpha = 0.72) {
+    const el = document.getElementById('flash-layer');
+    el.style.transition = 'none';
+    el.style.opacity = String(alpha);
+    requestAnimationFrame(() => {
+      el.style.transition = 'opacity 0.24s ease-out';
+      el.style.opacity = '0';
+    });
+  }
+
+  function slashWipe() {
+    const el = document.getElementById('slash-wipe');
+    el.classList.remove('fire');
+    void el.offsetWidth;
+    el.classList.add('fire');
+  }
+
+  function setActiveVisual(mode) {
+    document.getElementById('scene-hook').classList.toggle('active', mode === 'hook');
+    document.getElementById('scene-title').classList.toggle('active', mode === 'title');
+    document.getElementById('slot-scorebar').classList.toggle('active', mode === 'scorebar');
+    document.getElementById('scorebar-vignette').classList.toggle('active', mode === 'scorebar');
+    document.getElementById('slot-vs').classList.toggle('active', mode === 'vs');
+    document.getElementById('slot-results').classList.toggle('active', mode === 'results');
+    document.getElementById('scene-eco').classList.toggle('active', mode === 'eco');
+    document.getElementById('scene-finale').classList.toggle('active', mode === 'finale');
+  }
+
+  let calloutClearTimer = null;
+  function setCallout(show, opts = {}) {
+    clearTimeout(calloutClearTimer);
+    const b = document.getElementById('callout-banner');
+    const card = document.getElementById('callout-card');
+    b.classList.remove('faded-out');
+    b.classList.toggle('active', show);
+    b.classList.toggle('compact', Boolean(opts.compact));
+    b.classList.toggle('top-corners', Boolean(opts.topCorners));
+    if (!show) return;
+    card.className = 'callout-card ' + (opts.theme || '');
+    document.getElementById('callout-kicker').textContent = opts.kicker || '';
+    document.getElementById('callout-title').textContent = opts.title || '';
+    document.getElementById('callout-sub').textContent = opts.sub || '';
+    document.getElementById('callout-pill-lbl').textContent = opts.pillLbl || 'LIVE';
+    document.getElementById('callout-pill-val').textContent = opts.pillVal || '';
+    if (opts.autoHideMs) {
+      calloutClearTimer = setTimeout(() => b.classList.add('faded-out'), opts.autoHideMs);
+    }
+  }
+
+  /* =========================================================================
+     CHOREOGRAPHY CUE SHEET (EXACT BEAT TIMESTAMPS)
+     ========================================================================= */
+  const CUES = [
+    // --- ACT 1: THE HOOK (beats 0..14) ---
+    { beat: 0, act: 0, run: () => {
+      document.getElementById('fade-black').classList.remove('solid');
+      document.getElementById('png-badge-pop').classList.remove('show');
+      setActiveVisual('hook'); setCallout(false);
+      const hm = document.getElementById('hook-main');
+      hm.className = 'hook-main show';
+      hm.textContent = COPY[lang].hook1;
+      document.getElementById('hook-eyebrow').classList.add('show');
+      document.getElementById('paywall-pills').classList.add('show');
+      ['pw-1', 'pw-2', 'pw-3'].forEach(id => document.getElementById(id).classList.remove('slashed'));
+      audio.sfxImpact(false);
+    }},
+    { beat: 5, act: 0, run: () => {
+      document.getElementById('pw-1').classList.add('slashed');
+      audio.sfxSlash();
+    }},
+    { beat: 6.5, act: 0, run: () => {
+      document.getElementById('pw-2').classList.add('slashed');
+      audio.sfxSlash();
+    }},
+    { beat: 8, act: 0, run: () => {
+      document.getElementById('pw-3').classList.add('slashed');
+      const hm = document.getElementById('hook-main');
+      hm.textContent = COPY[lang].hook2;
+      hm.className = 'hook-main show slam-red';
+      flash(0.5); spawnShockwave('#f41f64'); audio.sfxImpact(true);
+    }},
+    { beat: 10.5, act: 0, run: () => {
+      const hm = document.getElementById('hook-main');
+      hm.textContent = COPY[lang].hook3;
+      hm.className = 'hook-main show slam-gold';
+      document.getElementById('paywall-pills').classList.remove('show');
+      audio.sfxRiser(BEAT * 3.4);
+    }},
+
+    // --- ACT 2: TITLE SLAM (beats 14..26) ---
+    { beat: 14, act: 1, run: () => {
+      setActiveVisual('title'); setCallout(false);
+      slashWipe(); flash(0.85); spawnShockwave('#fbbf24'); spawnShockwave('#f41f64');
+      audio.sfxImpact(true); audio.sfxSlash();
+      ['title-badge', 'title-logo', 'title-sub', 'title-stats'].forEach(id => document.getElementById(id).classList.add('show'));
+    }},
+
+    // --- ACT 3: 56 SCOREBARS — TEKKEN 8 LIVE ENGINE (beats 26..48) ---
+    { beat: 26, act: 2, run: () => {
+      setActiveVisual('scorebar');
+      slashWipe(); flash(0.55); audio.sfxImpact(true);
+      const c = COPY[lang];
+      setCallout(true, {
+        theme: 'theme-crimson', kicker: c.act3Kicker, title: c.act3Title, sub: c.act3Sub,
+        pillLbl: c.act3PillLbl, pillVal: '★ Tekken 8 Native HUD'
+      });
+      pushScorebar(makeScorebarState('t8-native-hud', { p1Score: 2, p2Score: 1, style: { sceneAnim: 't8-slash' } }), 't8', true, false);
+    }},
+    { beat: 32, act: 2, run: () => {
+      flash(0.32); audio.sfxSlash();
+      document.getElementById('callout-pill-val').textContent = '★ TWT 2026 Official Blade';
+      pushScorebar(makeScorebarState('t8-twt-2026-official', { p1Score: 2, p2Score: 2, showMatchPoint: true }), 't8', false, true);
+      audio.sfxChime(false);
+    }},
+    { beat: 38, act: 2, run: () => {
+      flash(0.32); audio.sfxSlash();
+      document.getElementById('callout-pill-val').textContent = 'EWC Obsidian Gold · Flag Fade';
+      pushScorebar(makeScorebarState('t8-ewc-riyadh', {
+        round: 'WINNERS FINALS', p1Name: 'KURO_T8', p1Sp: 'ZEN', p1Flag: 'KR', p1Char: 'Bryan Fury',
+        p2Name: 'CAGE_US', p2Sp: 'WC', p2Flag: 'US', p2Reg: 'US-CA', p2Char: 'Reina',
+        p1Score: 2, p2Score: 2, showCasters: true,
+        style: { flagStyle: 'fade', flagFadeMode: 'out', flagFadeStart: 30, flagFadeEnd: 96 }
+      }), 't8', false, false);
+    }},
+    { beat: 43, act: 2, run: () => {
+      flash(0.3); audio.sfxSlash();
+      document.getElementById('callout-pill-val').textContent = '★ Blade T8 Heat Dual · Match Point';
+      pushScorebar(makeScorebarState('t8-blade-heat-neon', {
+        round: 'GRAND FINALS RESET', p1Score: 2, p2Score: 2, showMatchPoint: true, showCasters: true
+      }), 't8', false, true);
+      audio.sfxChime(true);
+    }},
+
+    // --- ACT 4: 24 STREET FIGHTER 6 DESIGNS (beats 48..62) ---
+    { beat: 48, act: 3, run: () => {
+      setActiveVisual('scorebar');
+      slashWipe(); flash(0.6); audio.sfxImpact(true);
+      const c = COPY[lang];
+      setCallout(true, {
+        theme: 'theme-cyan', kicker: c.act4Kicker, title: c.act4Title, sub: c.act4Sub,
+        pillLbl: c.act4PillLbl, pillVal: '🥊 SF6 Native Drive HUD'
+      });
+      pushScorebar(makeScorebarState('sf6-native-drive', {
+        round: 'CAPCOM CUP TOP 8', p1Name: 'RYU_JP', p1Sp: 'DRG', p1Flag: 'JP', p1Char: 'Ryu',
+        p2Name: 'SOLAR_MX', p2Sp: 'SOL', p2Flag: 'MX', p2Char: 'Chun-Li', p1Score: 2, p2Score: 1,
+        style: { sceneAnim: 'split-wings' }
+      }), 'sf6', true, false);
+    }},
+    { beat: 53, act: 3, run: () => {
+      flash(0.28); audio.sfxSlash();
+      document.getElementById('callout-pill-val').textContent = '🥊 SF6 CPT Official Top Bar';
+      pushScorebar(makeScorebarState('sf6-cpt-official', {
+        round: 'WINNERS FINALS', p1Name: 'RYU_JP', p1Sp: 'DRG', p1Flag: 'JP', p1Char: 'Ryu',
+        p2Name: 'SOLAR_MX', p2Sp: 'SOL', p2Flag: 'MX', p2Char: 'Chun-Li', p1Score: 2, p2Score: 2
+      }), 'sf6', false, true);
+    }},
+    { beat: 57.5, act: 3, run: () => {
+      flash(0.28); audio.sfxSlash();
+      document.getElementById('callout-pill-val').textContent = '🥊 SF6 Drive Impact Graffiti';
+      pushScorebar(makeScorebarState('sf6-drive-impact', {
+        round: 'GRAND FINALS', p1Name: 'DRAGON_FR', p1Sp: 'PAR', p1Flag: 'FR', p1Char: 'Ken',
+        p2Name: 'VOLT_ES', p2Sp: 'NOVA', p2Flag: 'ES', p2Reg: 'ES-MD', p2Char: 'Juri', p1Score: 2, p2Score: 2
+      }), 'sf6', false, false);
+    }},
+
+    // --- ACT 5: 42 VS SPLASH ARENA (beats 62..84) ---
+    { beat: 62, act: 4, run: () => {
+      setActiveVisual('vs');
+      slashWipe(); flash(0.75); spawnShockwave('#a855f7'); audio.sfxImpact(true); audio.sfxSlash();
+      const c = COPY[lang];
+      setCallout(true, {
+        topCorners: true, theme: 'theme-violet', kicker: c.act5Kicker, title: c.act5Title, sub: c.act5Sub,
+        pillLbl: c.act5PillLbl, pillVal: 'Tekken 8 Heat Clash'
+      });
+      pushVs(makeVsState('t8-clash', {
+        round: 'GRAND FINALS', p1Char: 'Jin Kazama', p2Char: 'Kazuya Mishima',
+        entryAnim: 'slam-split', ambientFx: 'sparks'
+      }), true);
+    }},
+    { beat: 69, act: 4, run: () => {
+      flash(0.42); audio.sfxSlash();
+      document.getElementById('callout-pill-val').textContent = 'Arcade Pop Yellow · Scrolling × Tape';
+      pushVs(makeVsState('arcade-pop', {
+        round: 'WINNERS FINALS', p1Name: 'KURO_T8', p1Sp: 'ZEN', p1Flag: 'KR', p1Char: 'Fahkumram',
+        p2Name: 'VOLT_ES', p2Sp: 'NOVA', p2Flag: 'ES', p2Reg: 'ES-MD', p2Char: 'Shaheen',
+        entryAnim: 'katana-slash', ambientFx: 'sheen'
+      }), true);
+    }},
+    { beat: 76, act: 4, run: () => {
+      flash(0.45); audio.sfxImpact(false); audio.sfxSlash();
+      document.getElementById('callout-pill-val').textContent = 'EVO Championship · Region-Only Flags';
+      pushVs(makeVsState('evo-championship', {
+        round: 'TOP 8 SHOWCASE', p1Name: 'CAGE_US', p1Sp: 'WC', p1Flag: 'US', p1Reg: 'US-CA', p1Char: 'Reina',
+        p2Name: 'KAZAMA_UK', p2Sp: 'SCT', p2Flag: 'GB', p2Reg: 'GB-SCT', p2Char: 'Jun Kazama',
+        flagMode: 'region', entryAnim: 'zoom-burst', ambientFx: 'spotlights'
+      }), true);
+    }},
+
+    // --- ACT 6: 24 TOP 8 RESULTS & CONFETTI + PNG SNAP (beats 84..104) ---
+    { beat: 84, act: 5, run: () => {
+      setActiveVisual('results');
+      slashWipe(); flash(0.75); spawnShockwave('#fbbf24'); audio.sfxImpact(true); audio.sfxChime(true);
+      const c = COPY[lang];
+      setCallout(true, {
+        compact: true, autoHideMs: 2800, theme: '', kicker: c.act6Kicker, title: c.act6Title, sub: c.act6Sub,
+        pillLbl: c.act6PillLbl, pillVal: 'EVO Championship Gold'
+      });
+      pushResults(makeResultsState('res-evo-gold', { entryAnim: 'cascade-slam', ambientFx: 'confetti' }), true);
+    }},
+    { beat: 92, act: 5, run: () => {
+      flash(0.4); audio.sfxSlash();
+      document.getElementById('callout-pill-val').textContent = 'Grand Top 3 Podium · Confetti FX';
+      pushResults(makeResultsState('res-podium-trophy', { entryAnim: 'podium-rise', ambientFx: 'confetti' }), true);
+    }},
+    { beat: 98, act: 5, run: () => {
+      flash(0.38); audio.sfxSlash();
+      document.getElementById('callout-pill-val').textContent = 'Broadcast TV White Pro';
+      pushResults(makeResultsState('res-tv-prime-white', { entryAnim: 'diagonal-wipe', ambientFx: 'none' }), true);
+    }},
+    { beat: 101.5, act: 5, run: () => {
+      flash(0.92); audio.sfxShutter();
+      document.getElementById('png-badge-pop').classList.add('show');
+    }},
+
+    // --- ACT 7: ECOSYSTEM BLITZ (beats 104..120) ---
+    { beat: 104, act: 6, run: () => {
+      document.getElementById('png-badge-pop').classList.remove('show');
+      setActiveVisual('eco'); setCallout(false);
+      slashWipe(); flash(0.5); audio.sfxImpact(true);
+      ['eco-1', 'eco-2', 'eco-3', 'eco-4'].forEach(id => document.getElementById(id).classList.remove('show'));
+      setTimeout(() => document.getElementById('eco-1').classList.add('show'), 40);
+    }},
+    { beat: 107.5, act: 6, run: () => {
+      document.getElementById('eco-2').classList.add('show');
+      audio.sfxChime(false);
+    }},
+    { beat: 111, act: 6, run: () => {
+      document.getElementById('eco-3').classList.add('show');
+      audio.sfxChime(false);
+    }},
+    { beat: 114.5, act: 6, run: () => {
+      document.getElementById('eco-4').classList.add('show');
+      audio.sfxChime(true);
+      audio.sfxRiser(BEAT * 5.2);
+    }},
+    { beat: 117.5, act: 6, run: () => {
+      // Animate EN <-> ES pill flip!
+      document.getElementById('eco-pill-en').classList.toggle('on', lang === 'es');
+      document.getElementById('eco-pill-es').classList.toggle('on', lang === 'en');
+    }},
+
+    // --- ACT 8: GRAND FINALE (beats 120..136) ---
+    { beat: 120, act: 7, run: () => {
+      setActiveVisual('finale'); setCallout(false);
+      slashWipe(); flash(0.9); spawnShockwave('#fbbf24'); spawnShockwave('#22c55e');
+      audio.sfxImpact(true); audio.sfxChime(true);
+      ['fin-tag', 'fin-title', 'fin-repo', 'fin-socials', 'fin-foot'].forEach(id => document.getElementById(id).classList.add('show'));
+    }},
+    { beat: 133.5, act: 7, run: () => {
+      document.getElementById('fade-black').classList.add('solid');
+    }}
+  ];
+
+  // Add act dividers on scrubber
+  const ACT_STARTS = [0, 14, 26, 48, 62, 84, 104, 120];
+  document.getElementById('scrub-ticks').innerHTML = ACT_STARTS.slice(1).map(b =>
+    `<i style="left:${(b / TOTAL_BEATS * 100).toFixed(2)}%"></i>`
+  ).join('');
+
+  /* =========================================================================
+     PLAYBACK LOOP & TIMELINE SCRUBBING
+     ========================================================================= */
+  let playing = false;
+  let currentSec = 0;
+  let startPerf = 0;
+  let lastCueIdx = -1;
+  let currentAct = 0;
+  let onTrailerEnd = null;
+
+  function formatTime(s) {
+    const m = Math.floor(s / 60);
+    const rem = s % 60;
+    return `${String(m).padStart(2, '0')}:${rem < 10 ? '0' : ''}${rem.toFixed(1)}`;
+  }
+
+  function resetSceneClasses() {
+    ['title-badge', 'title-logo', 'title-sub', 'title-stats',
+     'eco-1', 'eco-2', 'eco-3', 'eco-4',
+     'fin-tag', 'fin-title', 'fin-repo', 'fin-socials', 'fin-foot',
+     'png-badge-pop'].forEach(id => document.getElementById(id)?.classList.remove('show'));
+    document.getElementById('fade-black').classList.remove('solid');
+  }
+
+  function seekTo(sec, keepPlaying = playing) {
+    currentSec = Math.max(0, Math.min(TOTAL_SEC, sec));
+    startPerf = performance.now() - currentSec * 1000;
+    resetSceneClasses();
+    audio.lastStep = Math.floor(currentSec / (BEAT / 4)) - 1;
+
+    // Replay cues up to currentSec silently (only the latest active state per act)
+    const targetBeat = currentSec / BEAT;
+    let targetCue = -1;
+    for (let i = 0; i < CUES.length; i++) {
+      if (CUES[i].beat <= targetBeat) targetCue = i;
+    }
+    const prevMode = audioMode;
+    audioMode = 'mute';
+    for (let i = 0; i <= targetCue; i++) {
+      // Only run state cues needed for the current act so scrubbing is crisp
+      if (CUES[i].act === (CUES[targetCue]?.act ?? 0)) {
+        CUES[i].run();
+      }
+    }
+    audioMode = prevMode;
+    audio.updateVolumes();
+    lastCueIdx = targetCue;
+    currentAct = CUES[targetCue]?.act ?? 0;
+    updateHudReadout();
+    playing = keepPlaying;
+    audio.syncCustom(currentSec, playing);
+  }
+
+  function startPlayback(fromSec = currentSec) {
+    audio.ensure();
+    if (fromSec >= TOTAL_SEC - 0.3) fromSec = 0;
+    if (fromSec === 0) {
+      resetSceneClasses();
+      lastCueIdx = -1;
+      currentAct = 0;
+      audio.lastStep = -1;
+    }
+    currentSec = fromSec;
+    startPerf = performance.now() - currentSec * 1000;
+    playing = true;
+    document.getElementById('btn-play').textContent = '⏸ Pause';
+    audio.syncCustom(currentSec, true);
+  }
+
+  function pausePlayback() {
+    playing = false;
+    document.getElementById('btn-play').textContent = '▶ Play Trailer';
+    audio.syncCustom(currentSec, false);
+  }
+
+  function updateHudReadout() {
+    document.getElementById('time-readout').textContent = `${formatTime(currentSec)} / ${formatTime(TOTAL_SEC)}`;
+    document.getElementById('scrub-fill').style.width = `${(currentSec / TOTAL_SEC * 100).toFixed(2)}%`;
+    document.getElementById('act-readout').textContent = COPY[lang].acts[currentAct] || '';
+  }
+
+  function frameLoop(now) {
+    if (playing) {
+      currentSec = (now - startPerf) / 1000;
+      if (currentSec >= TOTAL_SEC) {
+        currentSec = TOTAL_SEC;
+        pausePlayback();
+        audio.stopAll();
+        if (typeof onTrailerEnd === 'function') {
+          const cb = onTrailerEnd;
+          onTrailerEnd = null;
+          cb();
+        }
+      } else {
+        audio.tickMusic(currentSec);
+        const curBeat = currentSec / BEAT;
+        while (lastCueIdx + 1 < CUES.length && CUES[lastCueIdx + 1].beat <= curBeat) {
+          lastCueIdx++;
+          currentAct = CUES[lastCueIdx].act;
+          CUES[lastCueIdx].run();
+        }
+      }
+      updateHudReadout();
+    }
+    renderArenaCanvas(currentSec, currentAct);
+    requestAnimationFrame(frameLoop);
+  }
+
+  /* =========================================================================
+     ONE-CLICK 1080p60 VIDEO RECORDER (AUTO-DOWNLOADS WEBM / MP4!)
+     ========================================================================= */
+  let activeRecorder = null;
+  let activeStream = null;
+
+  async function recordTrailer(targetLang) {
+    if (activeRecorder) {
+      toast('Recording already in progress...');
+      return;
+    }
+    lang = targetLang;
+    applyLangCopy();
+    audio.ensure();
+
+    try {
+      toast(targetLang === 'es'
+        ? 'Selecciona ESTA PESTAÑA y marca "Compartir audio de la pestaña"'
+        : 'Select THIS TAB and enable "Share tab audio" to record 1080p60');
+
+      const stream = await navigator.mediaDevices.getDisplayMedia({
+        video: { width: { ideal: 1920 }, height: { ideal: 1080 }, frameRate: { ideal: 60 } },
+        audio: true,
+        preferCurrentTab: true
+      });
+      activeStream = stream;
+
+      const mimeCandidates = [
+        'video/mp4;codecs=avc1.640028,mp4a.40.2',
+        'video/webm;codecs=vp9,opus',
+        'video/webm;codecs=vp8,opus',
+        'video/webm'
+      ];
+      const mimeType = mimeCandidates.find(m => MediaRecorder.isTypeSupported(m)) || '';
+      const ext = mimeType.startsWith('video/mp4') ? 'mp4' : 'webm';
+      const chunks = [];
+
+      const rec = new MediaRecorder(stream, {
+        ...(mimeType ? { mimeType } : {}),
+        videoBitsPerSecond: 12_000_000,
+        audioBitsPerSecond: 192_000
+      });
+      activeRecorder = rec;
+
+      rec.ondataavailable = (ev) => { if (ev.data && ev.data.size > 0) chunks.push(ev.data); };
+      rec.onstop = () => {
+        document.body.classList.remove('clean-mode');
+        const st = document.getElementById('studio-status');
+        st.classList.remove('recording');
+        if (activeStream) { activeStream.getTracks().forEach(t => t.stop()); activeStream = null; }
+        activeRecorder = null;
+        if (chunks.length) {
+          const blob = new Blob(chunks, { type: mimeType || 'video/webm' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `FGC-Open-Scorebars-Trailer-${targetLang.toUpperCase()}-1080p60.${ext}`;
+          a.click();
+          setTimeout(() => URL.revokeObjectURL(url), 5000);
+          toast(`✅ Downloaded ${a.download}`);
+        }
+      };
+      stream.getVideoTracks()[0]?.addEventListener('ended', () => {
+        if (activeRecorder && activeRecorder.state !== 'inactive') activeRecorder.stop();
+        pausePlayback();
+      });
+
+      // Enter pure clean 1080p fullscreen stage
+      document.body.classList.add('clean-mode');
+      rescaleStage();
+      document.getElementById('studio-status').classList.add('recording');
+      document.getElementById('fade-black').classList.add('solid');
+
+      rec.start(500);
+      setTimeout(() => {
+        onTrailerEnd = () => {
+          setTimeout(() => {
+            if (activeRecorder && activeRecorder.state !== 'inactive') activeRecorder.stop();
+          }, 550);
+        };
+        startPlayback(0);
+      }, 380);
+    } catch (err) {
+      document.body.classList.remove('clean-mode');
+      rescaleStage();
+      toast('Recording cancelled');
+    }
+  }
+
+  /* =========================================================================
+     ONE-CLICK 1920x1080 YOUTUBE / X THUMBNAIL PNG GENERATOR (EN / ES)
+     ========================================================================= */
+  function exportThumbnailPng(targetLang) {
+    const c = COPY[targetLang];
+    const cv = document.createElement('canvas');
+    cv.width = 1920; cv.height = 1080;
+    const g = cv.getContext('2d');
+
+    // Deep arena gradient
+    const bg = g.createLinearGradient(0, 0, 1920, 1080);
+    bg.addColorStop(0, '#140612');
+    bg.addColorStop(0.5, '#070a14');
+    bg.addColorStop(1, '#041422');
+    g.fillStyle = bg; g.fillRect(0, 0, 1920, 1080);
+
+    // Diagonal glowing split accent
+    g.save();
+    g.fillStyle = 'rgba(244, 31, 100, 0.22)';
+    g.beginPath(); g.moveTo(0, 0); g.lineTo(1060, 0); g.lineTo(840, 1080); g.lineTo(0, 1080); g.closePath(); g.fill();
+    g.fillStyle = 'rgba(56, 189, 248, 0.20)';
+    g.beginPath(); g.moveTo(1080, 0); g.lineTo(1920, 0); g.lineTo(1920, 1080); g.lineTo(860, 1080); g.closePath(); g.fill();
+    // Bright energy slash
+    g.strokeStyle = '#fbbf24'; g.lineWidth = 8;
+    g.shadowColor = '#fbbf24'; g.shadowBlur = 32;
+    g.beginPath(); g.moveTo(1070, 0); g.lineTo(850, 1080); g.stroke();
+    g.restore();
+
+    // Outer championship frame
+    g.strokeStyle = 'rgba(251, 191, 36, 0.72)'; g.lineWidth = 10;
+    g.strokeRect(26, 26, 1868, 1028);
+
+    // Top Free Badge
+    g.save();
+    g.fillStyle = 'rgba(34, 197, 94, 0.22)';
+    g.strokeStyle = '#4ade80'; g.lineWidth = 4;
+    roundRect(g, 370, 128, 1180, 84, 42);
+    g.fill(); g.stroke();
+    g.fillStyle = '#86efac';
+    g.font = '800 34px "Chakra Petch", sans-serif';
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText(c.thumbTop, 960, 171);
+    g.restore();
+
+    // Giant Title
+    g.save();
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.shadowColor = 'rgba(0, 0, 0, 0.9)'; g.shadowBlur = 40; g.shadowOffsetY = 14;
+    g.fillStyle = '#ffffff';
+    g.font = '900 185px "Russo One", sans-serif';
+    g.fillText(c.thumbTitle1, 960, 395);
+
+    const tg = g.createLinearGradient(0, 480, 0, 680);
+    tg.addColorStop(0, '#fffbeb');
+    tg.addColorStop(0.45, '#fbbf24');
+    tg.addColorStop(1, '#f41f64');
+    g.fillStyle = tg;
+    g.font = '900 198px "Russo One", sans-serif';
+    g.fillText(c.thumbTitle2, 960, 590);
+    g.restore();
+
+    // Feature strip
+    g.save();
+    g.fillStyle = 'rgba(7, 10, 18, 0.88)';
+    g.strokeStyle = 'rgba(255, 255, 255, 0.22)'; g.lineWidth = 3;
+    roundRect(g, 130, 745, 1660, 96, 18);
+    g.fill(); g.stroke();
+    g.fillStyle = '#f8fafc';
+    g.font = '700 36px "Chakra Petch", sans-serif';
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText(c.thumbSub, 960, 795);
+    g.restore();
+
+    // Bottom CTA pill + Creator credit
+    g.save();
+    g.fillStyle = '#fbbf24';
+    roundRect(g, 610, 888, 700, 86, 16);
+    g.fill();
+    g.fillStyle = '#090a0e';
+    g.font = '900 40px "Chakra Petch", sans-serif';
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText(c.thumbPill, 960, 932);
+    g.fillStyle = '#94a3b8';
+    g.font = '700 26px "Inter", sans-serif';
+    g.textAlign = 'right';
+    g.fillText('by Nordi5ke · github.com/N5K-dev', 1850, 1018);
+    g.restore();
+
+    const a = document.createElement('a');
+    a.href = cv.toDataURL('image/png');
+    a.download = `FGC-Open-Scorebars-Thumbnail-${targetLang.toUpperCase()}-1080p.png`;
+    a.click();
+    toast(`🖼️ Downloaded ${a.download}`);
+  }
+
+  function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  /* =========================================================================
+     VIEWPORT AUTO-FIT (EXACT 1920x1080 ASPECT RATIO) & HUD WIRING
+     ========================================================================= */
+  function rescaleStage() {
+    const stage = document.getElementById('stage-1080');
+    const clean = document.body.classList.contains('clean-mode');
+    const padX = clean ? 0 : 24;
+    const padY = clean ? 0 : 148;
+    const s = Math.min((window.innerWidth - padX) / 1920, (window.innerHeight - padY) / 1080);
+    stage.style.transform = `scale(${Math.max(0.15, s)})`;
+    stage.style.marginBottom = clean ? '0' : '44px';
+  }
+  window.addEventListener('resize', rescaleStage);
+
+  function toast(msg) {
+    const t = document.getElementById('hud-toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  // Controls
+  document.getElementById('btn-play').addEventListener('click', () => {
+    if (playing) pausePlayback(); else startPlayback(currentSec);
+  });
+  document.getElementById('btn-restart').addEventListener('click', () => startPlayback(0));
+
+  document.getElementById('seg-lang').addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-lang]');
+    if (!b) return;
+    lang = b.dataset.lang;
+    applyLangCopy();
+    // Refresh current act callout copy live
+    seekTo(currentSec, playing);
+    toast(lang === 'es' ? '🇪🇸 Idioma del tráiler: Español' : '🌐 Trailer language: English');
+  });
+
+  document.getElementById('sel-audio-mode').addEventListener('change', (e) => {
+    audioMode = e.target.value;
+    document.getElementById('btn-load-audio').style.display = audioMode === 'custom' ? 'inline-flex' : 'none';
+    audio.ensure();
+    audio.updateVolumes();
+    audio.syncCustom(currentSec, playing);
+    if (audioMode === 'custom' && !audio.customEl) document.getElementById('file-custom-audio').click();
+  });
+  document.getElementById('btn-load-audio').addEventListener('click', () => document.getElementById('file-custom-audio').click());
+  document.getElementById('file-custom-audio').addEventListener('change', (e) => {
+    const f = e.target.files?.[0];
+    if (f) { audio.loadCustomFile(f); toast(`🎵 Loaded: ${f.name}`); }
+  });
+
+  document.getElementById('btn-rec-en').addEventListener('click', () => recordTrailer('en'));
+  document.getElementById('btn-rec-es').addEventListener('click', () => recordTrailer('es'));
+  document.getElementById('btn-thumb-en').addEventListener('click', () => exportThumbnailPng('en'));
+  document.getElementById('btn-thumb-es').addEventListener('click', () => exportThumbnailPng('es'));
+
+  document.getElementById('btn-copy-obs-url').addEventListener('click', () => {
+    const base = `${location.origin}${location.pathname}?obs=1&lang=${lang}`;
+    navigator.clipboard?.writeText(base).catch(() => {});
+    toast(`📋 Copied OBS URL (${lang.toUpperCase()}): ${base}`);
+  });
+
+  document.getElementById('btn-fullscreen').addEventListener('click', () => {
+    document.body.classList.toggle('clean-mode');
+    rescaleStage();
+    if (document.body.classList.contains('clean-mode')) {
+      document.documentElement.requestFullscreen?.().catch(() => {});
+      toast('Press H or Esc to show Director HUD');
+    } else if (document.fullscreenElement) {
+      document.exitFullscreen?.().catch(() => {});
+    }
+  });
+
+  // Scrubber drag/click
+  const scrubWrap = document.getElementById('scrub-wrap');
+  let scrubbing = false;
+  const handleScrub = (ev) => {
+    const r = scrubWrap.getBoundingClientRect();
+    const frac = Math.max(0, Math.min(1, (ev.clientX - r.left) / r.width));
+    seekTo(frac * TOTAL_SEC, playing);
+  };
+  scrubWrap.addEventListener('pointerdown', (e) => { scrubbing = true; handleScrub(e); });
+  window.addEventListener('pointermove', (e) => { if (scrubbing) handleScrub(e); });
+  window.addEventListener('pointerup', () => { scrubbing = false; });
+
+  // Keyboard shortcuts
+  window.addEventListener('keydown', (e) => {
+    if (e.code === 'Space') { e.preventDefault(); if (playing) pausePlayback(); else startPlayback(currentSec); }
+    else if (e.key === 'h' || e.key === 'H' || e.key === 'Escape') {
+      if (document.body.classList.contains('clean-mode') && !activeRecorder) {
+        document.body.classList.remove('clean-mode');
+        rescaleStage();
+      } else if (e.key === 'h' || e.key === 'H') {
+        document.body.classList.add('clean-mode');
+        rescaleStage();
+      }
+    } else if (e.key === 'r' || e.key === 'R') {
+      startPlayback(0);
+    }
+  });
+
+  // OBS Scene Activation Hook (when added as OBS Browser Source with ?obs=1)
+  window.addEventListener('obsSourceActiveChanged', (e) => {
+    if (e?.detail?.active) startPlayback(0);
+  });
+
+  // Boot
+  initEcosystemVisuals();
+  applyLangCopy();
+  rescaleStage();
+  seekTo(0, false);
+  requestAnimationFrame(frameLoop);
+})();
+</script>
+</body>
+</html>

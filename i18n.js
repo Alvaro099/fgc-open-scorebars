@@ -1105,6 +1105,8 @@
     'Share Open-Source Repository': 'Compartir Repositorio Open-Source',
     '📋 Copy Link': '📋 Copiar Enlace',
     '📢 Copy Share Post': '📢 Copiar Texto para Compartir',
+    '🎬 Trailer Studio ↗': '🎬 Estudio de Tráiler ↗',
+    'Open the 1080p60 Official Broadcast Hype Trailer Studio (EN / ES)': 'Abrir el Estudio del Tráiler Oficial 1080p60 (EN / ES)',
     '📱 Scan to Open Mobile / Tablet Control': '📱 Escanea para Abrir Control Móvil / Tablet',
     'Make sure your phone or tablet is on the same Wi-Fi / router network.': 'Asegúrate de que tu móvil o tablet esté en la misma red Wi-Fi / router.',
     '📋 Copy LAN URL': '📋 Copiar URL LAN',
