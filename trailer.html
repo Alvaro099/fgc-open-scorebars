@@ -1835,16 +1835,22 @@
      POPULATE REAL LIVE QR & REAL VECTOR FLAGS IN ACT 7
      ========================================================================= */
   function initEcosystemVisuals() {
-    const qrBox = document.getElementById('eco-qr-box');
-    if (qrBox && window.FGC_QR) {
-      qrBox.innerHTML = window.FGC_QR.toSvg('https://github.com/N5K-dev/fgc-open-scorebars', { quietZone: 2 });
-    }
-    const mosaic = document.getElementById('eco-flags-mosaic');
-    if (mosaic && Array.isArray(window.FLAG_CATALOG)) {
-      const codes = ['JP', 'ES', 'ES-MD', 'US', 'US-CA', 'KR', 'GB-SCT', 'FR', 'MX'];
-      const map = Object.fromEntries(window.FLAG_CATALOG.map(f => [f.code, f]));
-      mosaic.innerHTML = codes.map(c => `<div class="eco-flag-tile">${map[c]?.svg || ''}</div>`).join('');
-    }
+    try {
+      const qrBox = document.getElementById('eco-qr-box');
+      if (qrBox && window.FGC_QR && typeof window.FGC_QR.renderSvg === 'function') {
+        qrBox.innerHTML = window.FGC_QR.renderSvg('https://github.com/N5K-dev/fgc-open-scorebars', { quiet: 2 });
+      }
+    } catch (e) { console.warn('QR render warning:', e); }
+    try {
+      const mosaic = document.getElementById('eco-flags-mosaic');
+      const flagMap = window.FGC_FLAGS || (Array.isArray(window.FGC_FLAG_CATALOG)
+        ? Object.fromEntries(window.FGC_FLAG_CATALOG.map(f => [f.code, f]))
+        : null);
+      if (mosaic && flagMap) {
+        const codes = ['JP', 'ES', 'ES-MD', 'US', 'US-CA', 'KR', 'GB-SCT', 'FR', 'MX'];
+        mosaic.innerHTML = codes.map(c => `<div class="eco-flag-tile">${flagMap[c]?.svg || ''}</div>`).join('');
+      }
+    } catch (e) { console.warn('Flags mosaic warning:', e); }
   }
 
   /* =========================================================================
@@ -1895,26 +1901,40 @@
   const frameVs = document.getElementById('frame-vs');
   const frameResults = document.getElementById('frame-results');
 
-  let loadedCount = 0;
-  function markFrameReady() {
-    loadedCount++;
-    if (loadedCount >= 3) {
-      const st = document.getElementById('studio-status');
-      st.classList.add('ready');
-      document.getElementById('studio-status-txt').textContent =
-        lang === 'es' ? 'Listo · 3 motores 1080p en vivo preparados' : 'Ready · 3 live 1080p overlay engines warmed';
-      // Pre-push initial demo states so zero blank frames ever appear
-      pushScorebar(makeScorebarState('t8-native-hud'), 't8');
-      pushVs(makeVsState('t8-clash', { p1Char: 'Jin Kazama', p2Char: 'Kazuya Mishima' }), false);
-      pushResults(makeResultsState('res-evo-gold'), false);
-      if (isObsMode) {
-        setTimeout(() => startPlayback(0), 400);
-      }
+  const readyFrames = new Set();
+  let warmedUp = false;
+  function finishWarmup() {
+    if (warmedUp) return;
+    warmedUp = true;
+    const st = document.getElementById('studio-status');
+    st.classList.add('ready');
+    document.getElementById('studio-status-txt').textContent =
+      lang === 'es' ? 'Listo · 3 motores 1080p en vivo preparados' : 'Ready · 3 live 1080p overlay engines warmed';
+    // Pre-push initial demo states so zero blank frames ever appear
+    pushScorebar(makeScorebarState('t8-native-hud'), 't8');
+    pushVs(makeVsState('t8-clash', { p1Char: 'Jin Kazama', p2Char: 'Kazuya Mishima' }), false);
+    pushResults(makeResultsState('res-evo-gold'), false);
+    if (isObsMode) {
+      setTimeout(() => startPlayback(0), 400);
     }
   }
-  frameScorebar.addEventListener('load', markFrameReady);
-  frameVs.addEventListener('load', markFrameReady);
-  frameResults.addEventListener('load', markFrameReady);
+  function markFrameReady(key) {
+    readyFrames.add(key);
+    if (readyFrames.size >= 3) finishWarmup();
+  }
+  [
+    ['scorebar', frameScorebar],
+    ['vs', frameVs],
+    ['results', frameResults]
+  ].forEach(([key, el]) => {
+    el.addEventListener('load', () => markFrameReady(key));
+    try {
+      if (el.contentDocument && el.contentDocument.readyState === 'complete' && el.contentWindow?.location?.href !== 'about:blank') {
+        markFrameReady(key);
+      }
+    } catch {}
+  });
+  setTimeout(finishWarmup, 1600);
 
   function pushScorebar(st, bg = 't8', triggerEntry = false, triggerPop = false) {
     const win = frameScorebar.contentWindow;
