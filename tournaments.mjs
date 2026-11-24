@@ -281,6 +281,17 @@ function extractProfileAvatar(user) {
   return prof?.url ? String(prof.url).trim() : '';
 }
 
+function extractTournamentImages(t) {
+  const imgs = Array.isArray(t?.images) ? t.images.filter(i => i?.url) : [];
+  const profile = imgs.find(i => String(i.type || '').toLowerCase() === 'profile');
+  const banner = imgs.find(i => String(i.type || '').toLowerCase() === 'banner');
+  const fallback = imgs.find(i => String(i.type || '').toLowerCase() !== 'banner') || imgs[0];
+  return {
+    logoUrl: String(profile?.url || fallback?.url || '').trim(),
+    bannerUrl: String(banner?.url || '').trim()
+  };
+}
+
 function normalizeStartGGSlot(slot) {
   const entrant = slot?.entrant;
   if (!entrant) return null;
@@ -327,7 +338,7 @@ export async function connectStartGG(urlOrSlug, token) {
   const { tournamentSlug, eventSlug } = parseStartGGUrl(urlOrSlug);
   if (!tournamentSlug) throw new Error('Invalid start.gg URL or slug. Example: https://www.start.gg/tournament/my-tournament');
 
-  // 1. Ultra-lightweight metadata + events query (~30 objects, never hits 1000-object limit)
+  // 1. Ultra-lightweight metadata + events + tournament logo query (~35 objects, never hits 1000-object limit)
   const metaQuery = `
     query ConnectTournamentMeta($slug: String!) {
       tournament(slug: $slug) {
@@ -336,6 +347,10 @@ export async function connectStartGG(urlOrSlug, token) {
         slug
         city
         countryCode
+        images {
+          url
+          type
+        }
         events {
           id
           name
@@ -349,6 +364,7 @@ export async function connectStartGG(urlOrSlug, token) {
   const data = await startggQuery(token, metaQuery, { slug: tournamentSlug });
   const t = data?.tournament;
   if (!t) throw new Error(`Tournament "${tournamentSlug}" was not found on start.gg.`);
+  const { logoUrl, bannerUrl } = extractTournamentImages(t);
 
   const events = (t.events || []).map(ev => ({
     id: String(ev.id),
@@ -378,13 +394,34 @@ export async function connectStartGG(urlOrSlug, token) {
       id: String(t.id),
       name: t.name,
       slug: t.slug,
-      location: [t.city, t.countryCode].filter(Boolean).join(', ')
+      location: [t.city, t.countryCode].filter(Boolean).join(', '),
+      logoUrl,
+      bannerUrl
     },
     events,
     selectedEventId: selectedEvent?.id || null,
     streamQueue: streamSets,
     sets
   };
+}
+
+export async function fetchStartGGTournamentLogo(urlOrSlug, token) {
+  const { tournamentSlug } = parseStartGGUrl(urlOrSlug);
+  if (!tournamentSlug) throw new Error('Enter a valid start.gg tournament URL or slug first.');
+  const q = `
+    query TournamentLogoOnly($slug: String!) {
+      tournament(slug: $slug) {
+        id
+        name
+        slug
+        images { url type }
+      }
+    }`;
+  const data = await startggQuery(token, q, { slug: tournamentSlug });
+  const t = data?.tournament;
+  if (!t) throw new Error(`Tournament "${tournamentSlug}" not found on start.gg.`);
+  const { logoUrl, bannerUrl } = extractTournamentImages(t);
+  return { name: t.name, slug: t.slug, logoUrl, bannerUrl };
 }
 
 async function fetchStartGGStreamQueue(tournamentSlug, token, preferredEventId) {
@@ -716,13 +753,16 @@ export async function connectChallonge(urlOrSlug, apiKey) {
       };
     });
 
+  const challongeLogo = String(t.organization_logo_url || t.logo_url || t.avatar_url || t.image_url || '').trim();
+
   return {
     provider: 'challonge',
     tournament: {
       id: String(t.id),
       name: t.name,
       slug,
-      location: t.game_name || 'Challonge'
+      location: t.game_name || 'Challonge',
+      logoUrl: challongeLogo
     },
     events: [{ id: slug, name: t.game_name || t.name, slug, numEntrants: participantsList.length, game: t.game_name || '' }],
     selectedEventId: slug,
@@ -730,6 +770,19 @@ export async function connectChallonge(urlOrSlug, apiKey) {
     sets,
     participants: participantsList
   };
+}
+
+export async function fetchChallongeTournamentLogo(urlOrSlug, apiKey) {
+  const { slug } = parseChallongeUrl(urlOrSlug);
+  if (!slug) throw new Error('Enter a valid Challonge tournament URL or slug first.');
+  if (!apiKey || !String(apiKey).trim()) throw new Error('Missing Challonge API key.');
+  const url = `${CHALLONGE_BASE}/tournaments/${encodeURIComponent(slug)}.json?api_key=${encodeURIComponent(String(apiKey).trim())}`;
+  const res = await fetch(url, { headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(8000) });
+  const json = await res.json().catch(() => null);
+  if (!res.ok || !json?.tournament) throw new Error(`Challonge HTTP ${res.status}`);
+  const t = json.tournament;
+  const logoUrl = String(t.organization_logo_url || t.logo_url || t.avatar_url || t.image_url || '').trim();
+  return { name: t.name, slug, logoUrl };
 }
 
 export async function reportChallongeMatch({ tournamentSlug, matchId, winnerEntrantId, p1Score, p2Score, apiKey, liveOnly = false }) {
@@ -791,10 +844,18 @@ const DEMO_SETS = [
 
 let demoSetsLive = structuredClone(DEMO_SETS);
 
+const DEMO_EVENT_LOGO_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 84"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f97316"/><stop offset="50%" stop-color="#facc15"/><stop offset="100%" stop-color="#ef4444"/></linearGradient></defs><rect x="3" y="3" width="214" height="78" rx="14" fill="#0b0f1c" stroke="url(#g)" stroke-width="5"/><polygon points="22,42 36,20 50,42 36,64" fill="url(#g)"/><text x="64" y="40" fill="#ffffff" font-family="Arial Black,Impact,sans-serif" font-size="24" font-weight="900" letter-spacing="1">FGC OPEN</text><text x="65" y="62" fill="#facc15" font-family="Arial,sans-serif" font-size="13" font-weight="800" letter-spacing="3">CHAMPIONSHIP</text></svg>`)}`;
+
 export function getDemoTournament() {
   return {
     provider: 'demo',
-    tournament: { id: 'demo-open-t8', name: 'DEMO TOURNAMENT (Offline Test)', slug: 'demo-tournament', location: 'Offline Demo' },
+    tournament: {
+      id: 'demo-open-t8',
+      name: 'DEMO TOURNAMENT (Offline Test)',
+      slug: 'demo-tournament',
+      location: 'Offline Demo',
+      logoUrl: DEMO_EVENT_LOGO_SVG
+    },
     events: [{ id: 'demo-ev-t8', name: 'Tekken 8 Singles', slug: 'tekken-8', numEntrants: 8, game: 'Tekken 8' }],
     selectedEventId: 'demo-ev-t8',
     streamQueue: demoSetsLive.filter(s => s.state !== 'complete'),

@@ -496,6 +496,54 @@ export function createAssetManager(dataDir) {
     throw new Error(`Unsupported upload kind: ${kind}`);
   }
 
+  /**
+   * Downloads and caches an official tournament/event logo from Start.gg / Challonge
+   * into data/branding/ so VS Splash & 1920x1080 PNG export work 100% offline with zero CORS taint.
+   */
+  async function cacheRemoteBrandingLogo(remoteUrl, slugHint = 'event') {
+    const raw = String(remoteUrl || '').trim();
+    if (!raw) return null;
+    if (raw.startsWith('/media/') || raw.startsWith('data:image/')) {
+      return { url: raw };
+    }
+    let parsed;
+    try { parsed = new URL(raw); } catch { return null; }
+    const allowedHosts = [
+      'images.start.gg', 'www.start.gg', 'start.gg', 'images.smash.gg',
+      'challonge.com', 'assets.challonge.com', 's3.amazonaws.com', 'secure.gravatar.com'
+    ];
+    if (parsed.protocol !== 'https:' || !allowedHosts.some(h => parsed.hostname === h || parsed.hostname.endsWith(`.${h}`))) {
+      return null;
+    }
+
+    const res = await fetch(parsed.toString(), {
+      headers: { 'User-Agent': 'FGC-Open-Scorebars/1.1' },
+      signal: AbortSignal.timeout(8000)
+    });
+    if (!res.ok) return null;
+    const ct = (res.headers.get('content-type') || '').toLowerCase();
+    if (!ct.startsWith('image/')) return null;
+    const buf = Buffer.from(await res.arrayBuffer());
+    if (!buf.length || buf.length > 6 * 1024 * 1024) return null;
+
+    const ext =
+      ct.includes('png') ? '.png' :
+      ct.includes('webp') ? '.webp' :
+      ct.includes('svg') ? '.svg' : '.jpg';
+    const safeSlug = (norm(slugHint || 'event').replace(/\s+/g, '_') || 'event').slice(0, 48);
+    // Clean older extension for same tournament slug
+    for (const oldExt of ['.png', '.jpg', '.jpeg', '.webp', '.svg']) {
+      const oldFp = path.join(BRANDING_DIR, `event_${safeSlug}${oldExt}`);
+      if (fs.existsSync(oldFp)) { try { fs.unlinkSync(oldFp); } catch {} }
+    }
+    const fname = `event_${safeSlug}${ext}`;
+    const fp = path.join(BRANDING_DIR, fname);
+    const tmp = `${fp}.${process.pid}.${Date.now()}.tmp`;
+    fs.writeFileSync(tmp, buf);
+    fs.renameSync(tmp, fp);
+    return { url: `/media/branding/${encodeURIComponent(fname)}?v=${Date.now()}`, filePath: fp };
+  }
+
   function resolveMediaFile(kind, filename) {
     const cleanName = path.basename(decodeURIComponent(filename || ''));
     if (!cleanName || cleanName.includes('..') || cleanName.endsWith('.json')) return null;
@@ -517,6 +565,7 @@ export function createAssetManager(dataDir) {
     getDownloadStatus,
     clearPackCache,
     saveUploadedImage,
+    cacheRemoteBrandingLogo,
     resolveMediaFile
   };
 }

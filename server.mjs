@@ -23,8 +23,10 @@ import {
   connectStartGG,
   fetchStartGGEventSets,
   fetchStartGGEntrants,
+  fetchStartGGTournamentLogo,
   reportStartGGSet,
   connectChallonge,
+  fetchChallongeTournamentLogo,
   reportChallongeMatch,
   getDemoTournament,
   reportDemoSet
@@ -102,10 +104,13 @@ export const DEFAULT_VS = {
   showSponsor: true,
   showCharName: true,
   showLogo: true,
+  autoEventLogo: true,         // Auto-load tournament logo from Start.gg / Challonge / Demo
   showScore: false,
   logoUrl: '',
+  logoSource: '',              // '' | 'auto' | 'manual'
+  logoTournamentSlug: '',
   logoScale: 100,              // 50..180 %
-  logoPos: 'bottom-left',      // 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right'
+  logoPos: 'bottom-left',      // 'bottom-left' | 'bottom-right' | 'bottom-center' | 'top-left' | 'top-right'
   h2hOffsetY: 84,              // 20..240 px from bottom
   // Millimeter Character Framing
   p1Flip: false,
@@ -665,6 +670,17 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
+  // Helper: cache a tournament's remote logo locally into data/branding/ (zero CORS, works offline!)
+  async function attachCachedTournamentLogo(snapshot) {
+    const rawLogo = snapshot?.tournament?.logoUrl;
+    if (!rawLogo) return snapshot;
+    try {
+      const cached = await assets.cacheRemoteBrandingLogo(rawLogo, snapshot.tournament.slug || snapshot.tournament.name);
+      if (cached?.url) snapshot.tournament.cachedLogoUrl = cached.url;
+    } catch {}
+    return snapshot;
+  }
+
   // --- API: Connect / Refresh Tournament (Start.gg | Challonge | Demo) ---
   if (pathname === '/api/tournament/connect' && req.method === 'POST') {
     try {
@@ -673,7 +689,7 @@ const server = http.createServer(async (req, res) => {
       integrationsCfg.provider = provider;
 
       if (provider === 'demo') {
-        lastTournamentSnapshot = getDemoTournament();
+        lastTournamentSnapshot = await attachCachedTournamentLogo(getDemoTournament());
         return sendJson(res, 200, lastTournamentSnapshot);
       }
 
@@ -686,7 +702,7 @@ const server = http.createServer(async (req, res) => {
         if (body.token && body.token !== '__KEEP__') integrationsCfg.startggToken = token;
         writeJsonAtomic(INTEGRATIONS_FILE, integrationsCfg);
 
-        const data = await connectStartGG(url, token);
+        const data = await attachCachedTournamentLogo(await connectStartGG(url, token));
         lastTournamentSnapshot = data;
         return sendJson(res, 200, data);
       }
@@ -700,12 +716,83 @@ const server = http.createServer(async (req, res) => {
         if (body.token && body.token !== '__KEEP__') integrationsCfg.challongeKey = key;
         writeJsonAtomic(INTEGRATIONS_FILE, integrationsCfg);
 
-        const data = await connectChallonge(url, key);
+        const data = await attachCachedTournamentLogo(await connectChallonge(url, key));
         lastTournamentSnapshot = data;
         return sendJson(res, 200, data);
       }
 
       return sendJson(res, 400, { error: `Unknown provider: ${provider}` });
+    } catch (err) {
+      return sendJson(res, 400, { error: err.message });
+    }
+  }
+
+  // --- API: Pull & Cache Official Tournament / Event Logo (Start.gg | Challonge | Demo) ---
+  if (pathname === '/api/tournament/logo' && req.method === 'POST') {
+    try {
+      const body = await readBody(req).catch(() => ({}));
+      const provider = body.provider || lastTournamentSnapshot?.provider || integrationsCfg.provider || 'startgg';
+      let tName = '';
+      let tSlug = '';
+      let rawLogo = '';
+
+      if (lastTournamentSnapshot?.tournament?.cachedLogoUrl && (!body.provider || body.provider === lastTournamentSnapshot.provider)) {
+        return sendJson(res, 200, {
+          ok: true,
+          provider: lastTournamentSnapshot.provider,
+          tournamentName: lastTournamentSnapshot.tournament.name,
+          tournamentSlug: lastTournamentSnapshot.tournament.slug,
+          logoUrl: lastTournamentSnapshot.tournament.cachedLogoUrl
+        });
+      }
+
+      if (provider === 'demo') {
+        const demo = getDemoTournament();
+        tName = demo.tournament.name;
+        tSlug = demo.tournament.slug;
+        rawLogo = demo.tournament.logoUrl;
+      } else if (provider === 'startgg') {
+        const url = String(body.url || integrationsCfg.startggUrl || '').trim();
+        const token = (body.token && body.token !== '__KEEP__')
+          ? String(body.token).trim()
+          : integrationsCfg.startggToken;
+        if (!url || !token) {
+          return sendJson(res, 400, { error: 'Connect a start.gg tournament first in the Tournaments tab.' });
+        }
+        const meta = await fetchStartGGTournamentLogo(url, token);
+        tName = meta.name;
+        tSlug = meta.slug;
+        rawLogo = meta.logoUrl;
+      } else if (provider === 'challonge') {
+        const url = String(body.url || integrationsCfg.challongeUrl || '').trim();
+        const key = (body.token && body.token !== '__KEEP__')
+          ? String(body.token).trim()
+          : integrationsCfg.challongeKey;
+        if (!url || !key) {
+          return sendJson(res, 400, { error: 'Connect a Challonge tournament first in the Tournaments tab.' });
+        }
+        const meta = await fetchChallongeTournamentLogo(url, key);
+        tName = meta.name;
+        tSlug = meta.slug;
+        rawLogo = meta.logoUrl;
+      }
+
+      if (!rawLogo) {
+        return sendJson(res, 404, { error: `No official event logo was found on ${provider.toUpperCase()} for "${tName || 'this tournament'}". You can still upload a custom PNG.` });
+      }
+      const cached = await assets.cacheRemoteBrandingLogo(rawLogo, tSlug || tName || 'event');
+      const finalUrl = cached?.url || rawLogo;
+      if (lastTournamentSnapshot?.tournament && lastTournamentSnapshot.tournament.slug === tSlug) {
+        lastTournamentSnapshot.tournament.logoUrl = rawLogo;
+        lastTournamentSnapshot.tournament.cachedLogoUrl = finalUrl;
+      }
+      return sendJson(res, 200, {
+        ok: true,
+        provider,
+        tournamentName: tName,
+        tournamentSlug: tSlug,
+        logoUrl: finalUrl
+      });
     } catch (err) {
       return sendJson(res, 400, { error: err.message });
     }
@@ -924,7 +1011,7 @@ const server = http.createServer(async (req, res) => {
     try {
       const rawUrl = urlObj.searchParams.get('url') || '';
       const parsed = new URL(rawUrl);
-      const allowedHosts = ['images.start.gg', 'www.start.gg', 'start.gg', 'images.smash.gg', 'secure.gravatar.com', 's3.amazonaws.com'];
+      const allowedHosts = ['images.start.gg', 'www.start.gg', 'start.gg', 'images.smash.gg', 'challonge.com', 'assets.challonge.com', 'secure.gravatar.com', 's3.amazonaws.com'];
       if (parsed.protocol !== 'https:' || !allowedHosts.some(h => parsed.hostname === h || parsed.hostname.endsWith(`.${h}`))) {
         res.writeHead(403);
         return res.end('Host not allowed');

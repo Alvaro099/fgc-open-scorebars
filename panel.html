@@ -3563,12 +3563,18 @@
                 <option value="spotlight-sway">Sweeping Stadium Spotlights</option>
                 <option value="scanline-crt">Retro Arcade CRT Scanlines</option>
               </select>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:6px;padding:6px 8px;background:#0d1018;border:1px solid var(--border);border-radius:7px;">
+                <label class="toggle-item" style="padding:2px 4px;border:none;background:transparent;"><input type="checkbox" id="chk-vs-auto-logo" checked /> Auto-load Event Logo (Start.gg / Challonge)</label>
+                <button type="button" id="btn-vs-sync-logo" class="mini-tool-btn" title="Fetch &amp; apply the official event logo from your connected tournament">🔄 Pull Event Logo</button>
+              </div>
               <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px;">
+                <img id="vs-logo-thumb" alt="" style="display:none;width:30px;height:30px;object-fit:contain;border-radius:5px;background:#090b10;border:1px solid var(--border);padding:2px;" />
                 <button type="button" id="btn-vs-logo-upload" style="font-size:11px;">🏷️ Upload Logo</button>
                 <button type="button" id="btn-vs-logo-clear" style="font-size:11px;display:none;">✕</button>
                 <select id="vs-logoPos" style="width:auto;font-size:11px;padding:3px 6px;">
                   <option value="bottom-left">Bottom-Left</option>
                   <option value="bottom-right">Bottom-Right</option>
+                  <option value="bottom-center">Bottom-Center</option>
                   <option value="top-left">Top-Left</option>
                   <option value="top-right">Top-Right</option>
                 </select>
@@ -3672,6 +3678,7 @@
             <button type="button" data-prov="demo">⚡ Demo Tournament (No Token)</button>
           </div>
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <label class="toggle-item" style="padding:4px 8px;" title="Automatically load the tournament's official logo into the VS Splash on connect"><input type="checkbox" id="chk-trn-auto-logo" checked /> Auto Event Logo</label>
             <label class="toggle-item" style="padding:4px 8px;"><input type="checkbox" id="chk-trn-autosync" /> Auto-Sync (15s)</label>
             <span id="trn-token-hint" style="font-size:11px;color:var(--muted);">Tokens stored locally on your PC only</span>
           </div>
@@ -3695,12 +3702,16 @@
         </div>
 
         <div class="trn-banner" id="trn-banner">
-          <div class="trn-banner-meta">
-            <strong id="trn-name-display">—</strong>
-            <span id="trn-meta-display">—</span>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <img id="trn-logo-thumb" alt="" style="display:none;width:40px;height:40px;object-fit:contain;border-radius:7px;background:#090b10;border:1px solid var(--border);padding:3px;flex-shrink:0;" />
+            <div class="trn-banner-meta">
+              <strong id="trn-name-display">—</strong>
+              <span id="trn-meta-display">—</span>
+            </div>
           </div>
           <div class="trn-banner-controls">
             <select id="trn-event-select" style="width:auto;min-width:175px;"></select>
+            <button type="button" id="btn-trn-use-logo" style="display:none;" title="Apply this tournament's official logo to the VS Splash overlay">🏷️ Use Event Logo</button>
             <button type="button" id="btn-trn-import" title="Import entrants, sponsors, avatars, and country/region flags into your local roster">👥 Import Entrants</button>
             <button type="button" id="btn-trn-load-next" class="primary">⏭ Load Next Set</button>
           </div>
@@ -4051,8 +4062,11 @@
     showSponsor: true,
     showCharName: true,
     showLogo: true,
+    autoEventLogo: true,
     showScore: false,
     logoUrl: '',
+    logoSource: '',
+    logoTournamentSlug: '',
     logoScale: 100,
     logoPos: 'bottom-left',
     h2hOffsetY: 84,
@@ -5974,6 +5988,16 @@
     $('trn-filter-bar').style.display = 'flex';
     $('trn-name-display').textContent = `${snap.tournament.name}`;
     $('trn-meta-display').textContent = `${snap.provider.toUpperCase()} · ${snap.tournament.location || snap.tournament.slug} · ${snap.sets.length} sets loaded`;
+    const trnLogo = snap.tournament.cachedLogoUrl || snap.tournament.logoUrl || '';
+    const trnThumb = $('trn-logo-thumb');
+    if (trnLogo) {
+      trnThumb.src = trnLogo;
+      trnThumb.style.display = 'block';
+      $('btn-trn-use-logo').style.display = 'inline-flex';
+    } else {
+      trnThumb.style.display = 'none';
+      $('btn-trn-use-logo').style.display = 'none';
+    }
 
     $('trn-event-select').innerHTML = (snap.events || []).map(ev =>
       `<option value="${ev.id}" ${ev.id === snap.selectedEventId ? 'selected' : ''}>${ev.name}${ev.numEntrants ? ` (${ev.numEntrants})` : ''}</option>`
@@ -6130,11 +6154,83 @@
       }
       $('trn-set-filters').querySelectorAll('button').forEach(b => b.classList.toggle('active-chip', b.dataset.sflt === trnState.filter));
       renderTournamentSets();
-      if (!silent) toast(`🏆 Connected: ${data.tournament.name}`);
+
+      // Auto-load official event logo onto VS Splash when enabled!
+      const autoLogoUrl = data.tournament?.cachedLogoUrl || data.tournament?.logoUrl || '';
+      let logoApplied = false;
+      if (autoLogoUrl && state.vs?.autoEventLogo !== false) {
+        const isDifferentTourney = (data.tournament?.slug || '') !== (state.vs?.logoTournamentSlug || '');
+        const shouldApply = !silent || isDifferentTourney || state.vs?.logoSource !== 'manual';
+        if (shouldApply) {
+          commitState({
+            tournament: data.tournament?.name || state.tournament,
+            vs: {
+              logoUrl: autoLogoUrl,
+              showLogo: true,
+              logoSource: 'auto',
+              logoTournamentSlug: data.tournament?.slug || ''
+            }
+          }, true);
+          logoApplied = true;
+        }
+      } else if (data.tournament?.name && !silent) {
+        commitState({ tournament: data.tournament.name }, true);
+      }
+
+      if (!silent) toast(`🏆 Connected: ${data.tournament.name}${logoApplied ? ' · Event logo loaded' : ''}`);
     } catch (err) {
       if (!silent) toast(`⚠️ ${err.message}`);
     } finally {
       if (!silent) { btn.disabled = false; btn.textContent = '🔌 Connect'; }
+    }
+  }
+
+  async function syncEventLogoFromTournament(silent = false) {
+    if (!isHttp) return !silent && toast('Start the local server first');
+    const syncBtn = $('btn-vs-sync-logo');
+    if (!silent && syncBtn) { syncBtn.disabled = true; syncBtn.textContent = '⏳ Pulling...'; }
+    try {
+      const snapLogo = trnState.snapshot?.tournament?.cachedLogoUrl || trnState.snapshot?.tournament?.logoUrl || '';
+      if (snapLogo) {
+        commitState({
+          tournament: trnState.snapshot.tournament.name || state.tournament,
+          vs: {
+            logoUrl: snapLogo,
+            showLogo: true,
+            logoSource: 'auto',
+            logoTournamentSlug: trnState.snapshot.tournament.slug || ''
+          }
+        }, true);
+        if (!silent) toast(`🏷️ Event logo loaded (${trnState.snapshot.tournament.name})`);
+        return true;
+      }
+      const res = await fetch('/api/tournament/logo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          provider: trnState.provider || trnState.config?.provider || 'startgg',
+          url: $('trn-url-input')?.value?.trim() || '',
+          token: $('trn-token-input')?.value?.trim() || '__KEEP__'
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Could not fetch event logo');
+      commitState({
+        tournament: data.tournamentName || state.tournament,
+        vs: {
+          logoUrl: data.logoUrl,
+          showLogo: true,
+          logoSource: 'auto',
+          logoTournamentSlug: data.tournamentSlug || ''
+        }
+      }, true);
+      if (!silent) toast(`🏷️ Event logo loaded (${data.tournamentName || data.provider.toUpperCase()})`);
+      return true;
+    } catch (err) {
+      if (!silent) toast(`⚠️ ${err.message}`);
+      return false;
+    } finally {
+      if (!silent && syncBtn) { syncBtn.disabled = false; syncBtn.textContent = '🔄 Pull Event Logo'; }
     }
   }
 
@@ -6268,6 +6364,13 @@
       } catch (err) {
         toast(`⚠️ ${err.message}`);
       }
+    });
+    $('btn-trn-use-logo').addEventListener('click', () => syncEventLogoFromTournament(false));
+    $('chk-trn-auto-logo').addEventListener('change', (e) => {
+      const enabled = e.target.checked;
+      commitState({ vs: { autoEventLogo: enabled } }, true);
+      if (enabled) syncEventLogoFromTournament(true);
+      toast(enabled ? '🏷️ Auto-load Event Logo enabled' : 'Auto-load Event Logo paused');
     });
     $('btn-trn-load-next').addEventListener('click', loadNextQueuedSet);
     $('trn-set-filters').addEventListener('click', (e) => {
@@ -6553,7 +6656,18 @@
     $('val-vs-entrySpeed').textContent = `${vs.entrySpeed ?? 100}%`;
     $('vs-ambientAnim').value = vs.ambientAnim || 'theme';
     $('vs-logoPos').value = vs.logoPos || 'bottom-left';
-    $('vs-logo-status').textContent = vs.logoUrl ? '✅ Event logo loaded' : 'No event logo';
+    const autoLogoOn = vs.autoEventLogo !== false;
+    $('chk-vs-auto-logo').checked = autoLogoOn;
+    $('chk-trn-auto-logo').checked = autoLogoOn;
+    const logoThumb = $('vs-logo-thumb');
+    if (vs.logoUrl) {
+      if (logoThumb.getAttribute('src') !== vs.logoUrl) logoThumb.src = vs.logoUrl;
+      logoThumb.style.display = 'block';
+      $('vs-logo-status').textContent = vs.logoSource === 'auto' ? '✅ Auto Event Logo' : '✅ Custom Logo';
+    } else {
+      logoThumb.style.display = 'none';
+      $('vs-logo-status').textContent = autoLogoOn ? 'Auto (connect tournament)' : 'No event logo';
+    }
     $('btn-vs-logo-clear').style.display = vs.logoUrl ? 'inline-flex' : 'none';
     $('rng-vs-logoScale').value = vs.logoScale ?? 100;
     $('val-vs-logoScale').textContent = `${vs.logoScale ?? 100}%`;
@@ -6933,9 +7047,16 @@
     $('chk-vs-score').addEventListener('change', (e) => commitState({ vs: { showScore: e.target.checked } }, true));
     $('chk-vs-logo').addEventListener('change', (e) => commitState({ vs: { showLogo: e.target.checked } }, true));
 
+    $('chk-vs-auto-logo').addEventListener('change', (e) => {
+      const enabled = e.target.checked;
+      commitState({ vs: { autoEventLogo: enabled } }, true);
+      if (enabled) syncEventLogoFromTournament(true);
+      toast(enabled ? '🏷️ Auto-load Event Logo enabled' : 'Auto-load Event Logo paused');
+    });
+    $('btn-vs-sync-logo').addEventListener('click', () => syncEventLogoFromTournament(false));
     $('btn-vs-logo-upload').addEventListener('click', () => $('file-vs-logo').click());
     $('btn-vs-logo-clear').addEventListener('click', () => {
-      commitState({ vs: { logoUrl: '' } }, true);
+      commitState({ vs: { logoUrl: '', logoSource: 'manual' } }, true);
       toast('Event logo removed');
     });
     $('file-vs-logo').addEventListener('change', async (e) => {
@@ -6943,8 +7064,8 @@
       if (!file) return;
       try {
         const url = await uploadLocalImage(file, 'logo', 'tournament');
-        commitState({ vs: { logoUrl: url, showLogo: true } }, true);
-        toast('🏷️ Tournament logo uploaded');
+        commitState({ vs: { logoUrl: url, showLogo: true, logoSource: 'manual' } }, true);
+        toast('🏷️ Custom tournament logo uploaded');
       } catch (err) {
         toast(`⚠️ ${err.message}`);
       }
@@ -7116,7 +7237,7 @@
   bindVsAndAssetEvents();
 
   if (isHttp) {
-    fetch('/api/state').then(r => r.json()).then(s => {
+    const stateReady = fetch('/api/state').then(r => r.json()).then(s => {
       state = s;
       renderUI();
       pushPreviewConfig();
@@ -7125,10 +7246,20 @@
     fetch('/api/players').then(r => r.json()).then(list => { playersDb = list; renderPlayersDb(); }).catch(() => {});
     fetch('/api/presets').then(r => r.json()).then(list => { presetsDb = list; renderPresetsList(); }).catch(() => {});
     fetch('/api/history').then(r => r.json()).then(list => { historyDb = list; renderHistoryList(); pushPreviewConfig(); }).catch(() => {});
-    fetch('/api/integrations').then(r => r.json()).then(cfg => {
+    const cfgReady = fetch('/api/integrations').then(r => r.json()).then(cfg => {
       trnState.config = cfg;
       trnState.provider = cfg.provider || 'startgg';
       updateProviderFormUI();
+      return cfg;
+    }).catch(() => null);
+    Promise.all([stateReady, cfgReady]).then(([, cfg]) => {
+      if (!cfg) return;
+      const hasSavedTournament =
+        (cfg.provider === 'startgg' && cfg.startggUrl && cfg.hasStartggToken) ||
+        (cfg.provider === 'challonge' && cfg.challongeUrl && cfg.hasChallongeKey);
+      if (hasSavedTournament && state.vs?.autoEventLogo !== false && !state.vs?.logoUrl && state.vs?.logoSource !== 'manual') {
+        syncEventLogoFromTournament(true);
+      }
     }).catch(() => {});
 
     const refreshInfo = () => {

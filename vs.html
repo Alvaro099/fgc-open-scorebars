@@ -1095,11 +1095,12 @@
     transform: scale(var(--logo-scale, 1));
   }
   .vs-logo-slot.active { display: flex; }
-  .vs-logo-slot[data-pos="bottom-left"]  { left: 44px;  bottom: 24px; transform-origin: bottom left; }
-  .vs-logo-slot[data-pos="bottom-right"] { right: 44px; bottom: 56px; transform-origin: bottom right; }
-  .vs-logo-slot[data-pos="top-left"]     { left: 44px;  top: 24px;    transform-origin: top left; }
-  .vs-logo-slot[data-pos="top-right"]    { right: 44px; top: 24px;    transform-origin: top right; }
-  .vs-logo-slot img { max-width: 240px; max-height: 104px; object-fit: contain; filter: drop-shadow(0 6px 16px rgba(0,0,0,0.65)); }
+  .vs-logo-slot[data-pos="bottom-left"]   { left: 44px;  bottom: 24px; transform-origin: bottom left; }
+  .vs-logo-slot[data-pos="bottom-right"]  { right: 44px; bottom: 56px; transform-origin: bottom right; }
+  .vs-logo-slot[data-pos="bottom-center"] { left: 50%;   bottom: 20px; transform-origin: bottom center; transform: translateX(-50%) scale(var(--logo-scale, 1)); }
+  .vs-logo-slot[data-pos="top-left"]      { left: 44px;  top: 24px;    transform-origin: top left; }
+  .vs-logo-slot[data-pos="top-right"]     { right: 44px; top: 24px;    transform-origin: top right; }
+  .vs-logo-slot img { max-width: 240px; max-height: 104px; object-fit: contain; border-radius: 10px; filter: drop-shadow(0 6px 16px rgba(0,0,0,0.65)); }
 
   .vs-subtitle-slot {
     position: absolute;
@@ -1688,8 +1689,9 @@
     const logoSlot = $('vs-logo-slot');
     const logoImg = $('vs-logo-img');
     logoSlot.dataset.pos = vs.logoPos || 'bottom-left';
-    if (vs.showLogo !== false && vs.logoUrl) {
-      if (logoImg.getAttribute('src') !== vs.logoUrl) logoImg.src = vs.logoUrl;
+    const resolvedLogo = resolveAvatarSrc(vs.logoUrl);
+    if (vs.showLogo !== false && resolvedLogo) {
+      if (logoImg.getAttribute('src') !== resolvedLogo) logoImg.src = resolvedLogo;
       logoSlot.classList.add('active');
     } else {
       logoSlot.classList.remove('active');
@@ -1858,7 +1860,7 @@
       loadImg(buildCharRenderUrl(vs.game, vs.pack, p2.character)),
       loadImg(resolveAvatarSrc(p1.avatar)),
       loadImg(resolveAvatarSrc(p2.avatar)),
-      vs.showLogo !== false && vs.logoUrl ? loadImg(vs.logoUrl) : Promise.resolve(null)
+      vs.showLogo !== false && vs.logoUrl ? loadImg(resolveAvatarSrc(vs.logoUrl)) : Promise.resolve(null)
     ]);
 
     const drawChar = (im, cx, zoom, offX, offY, flip, dim) => {
@@ -1996,8 +1998,8 @@
       const scale = Math.min(220 / logoIm.naturalWidth, 96 / logoIm.naturalHeight, 1) * (Number(vs.logoScale ?? 100) / 100);
       const lw = logoIm.naturalWidth * scale, lh = logoIm.naturalHeight * scale;
       const pos = vs.logoPos || 'bottom-left';
-      const lx = pos.endsWith('right') ? (1920 - 44 - lw) : 44;
-      const ly = pos.startsWith('top') ? 24 : (1054 - lh);
+      const lx = pos === 'bottom-center' ? (960 - lw / 2) : (pos.endsWith('right') ? (1920 - 44 - lw) : 44);
+      const ly = pos.startsWith('top') ? 24 : (pos === 'bottom-right' ? (1024 - lh) : (1054 - lh));
       ctx.drawImage(logoIm, lx, ly, lw, lh);
     }
 
