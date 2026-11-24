@@ -499,7 +499,11 @@ const MIME_TYPES = {
   '.jpeg': 'image/jpeg',
   '.webp': 'image/webp',
   '.ico': 'image/x-icon',
-  '.woff2': 'font/woff2'
+  '.woff2': 'font/woff2',
+  '.mp3': 'audio/mpeg',
+  '.wav': 'audio/wav',
+  '.ogg': 'audio/ogg',
+  '.m4a': 'audio/mp4'
 };
 
 const VIRTUAL_IFACE_RE = /radmin|hamachi|tailscale|zerotier|wireguard|nordlynx|openvpn|proton|mullvad|wintun|vpn|vethernet|wsl|hyper-v|virtualbox|vmware|vbox|docker|loopback|bluetooth|npcap|tap-?windows|\btap\b|\btun\b/i;
@@ -1293,6 +1297,28 @@ const server = http.createServer(async (req, res) => {
       })),
       connectedClients: sseClients.size
     });
+  }
+
+  // --- API: Optional Local Trailer Soundtrack (gitignored data/mountain-man.* or data/trailer-audio.*) ---
+  if (pathname === '/api/trailer-audio' && (req.method === 'GET' || req.method === 'HEAD')) {
+    const candidates = [
+      'mountain-man.mp3', 'mountain-man.wav', 'mountain-man.m4a', 'mountain-man.ogg',
+      'trailer-audio.mp3', 'trailer-audio.wav', 'trailer-audio.m4a', 'trailer-audio.ogg'
+    ];
+    const found = candidates.map(f => path.join(DATA_DIR, f)).find(p => fs.existsSync(p));
+    if (!found) {
+      res.writeHead(404);
+      return res.end('No local trailer audio placed in data/');
+    }
+    const ext = path.extname(found).toLowerCase();
+    const stat = fs.statSync(found);
+    res.writeHead(200, {
+      'Content-Type': MIME_TYPES[ext] || 'audio/mpeg',
+      'Content-Length': stat.size,
+      'Cache-Control': 'no-store'
+    });
+    if (req.method === 'HEAD') return res.end();
+    return fs.createReadStream(found).pipe(res);
   }
 
   // --- Static file serving (strictly blocks /data/ so tokens/state JSON are never served publicly!) ---
