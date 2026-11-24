@@ -2548,6 +2548,154 @@
     background: rgba(255, 94, 91, 0.14);
   }
   .app-footer-links a.kofi-mini:hover { border-color: #ff5e5b; color: #fff; }
+
+  /* INTERACTIVE BROADCAST GUIDE MODAL (100% ENGLISH) */
+  .btn-guide-hdr {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.22), rgba(14, 165, 233, 0.16));
+    border-color: rgba(56, 189, 248, 0.52);
+    color: #e0f2fe;
+    font-weight: 700;
+  }
+  .btn-guide-hdr:hover {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.36), rgba(14, 165, 233, 0.28));
+    border-color: #38bdf8;
+    color: #fff;
+  }
+  .guide-modal {
+    width: min(1020px, 96vw);
+    height: min(740px, 90vh);
+    background: var(--panel);
+    border: 1px solid var(--border-hi);
+    border-radius: 14px;
+    box-shadow: 0 26px 68px rgba(0, 0, 0, 0.78);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .guide-body {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: 245px 1fr;
+  }
+  @media (max-width: 760px) {
+    .guide-body { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+  }
+  .guide-sidebar {
+    background: #0d1018;
+    border-right: 1px solid var(--border);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow-y: auto;
+  }
+  .guide-nav-btn {
+    width: 100%;
+    text-align: left;
+    justify-content: flex-start;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .guide-nav-btn:hover { background: #141a29; color: #fff; }
+  .guide-nav-btn.active {
+    background: rgba(37, 99, 235, 0.22);
+    border-color: rgba(59, 130, 246, 0.55);
+    color: #fff;
+  }
+  .guide-content {
+    padding: 18px 22px 24px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .guide-pane { display: none; flex-direction: column; gap: 13px; }
+  .guide-pane.active { display: flex; }
+  .guide-pane h3 {
+    font-size: 17px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+  }
+  .guide-card {
+    background: #0d1018;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .guide-card h4 { font-size: 13px; color: #93c5fd; margin: 0; }
+  .guide-card p, .guide-card li { font-size: 12px; color: #cbd5e1; line-height: 1.5; }
+  .guide-card ul, .guide-card ol { padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+  .guide-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  @media (max-width: 760px) { .guide-grid-2 { grid-template-columns: 1fr; } }
+  .guide-actions-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 2px;
+  }
+  .guide-copy-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 9px;
+    background: #080b12;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    font-family: ui-monospace, Consolas, monospace;
+    font-size: 11px;
+    color: #7dd3fc;
+  }
+  .guide-copy-row span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .guide-check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: #101522;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    font-size: 12px;
+    color: #e2e8f0;
+  }
+  .guide-check-item input { width: auto; margin-top: 2px; accent-color: var(--green); }
+  .guide-check-item.checked {
+    border-color: rgba(34, 197, 94, 0.48);
+    background: rgba(34, 197, 94, 0.08);
+    color: #bbf7d0;
+  }
+  .guide-callout {
+    padding: 9px 12px;
+    border-radius: 8px;
+    background: rgba(245, 185, 53, 0.1);
+    border: 1px solid rgba(245, 185, 53, 0.4);
+    font-size: 11.5px;
+    color: #fef3c7;
+    line-height: 1.45;
+  }
+  .guide-callout.safe {
+    background: rgba(34, 197, 94, 0.1);
+    border-color: rgba(34, 197, 94, 0.4);
+    color: #dcfce7;
+  }
 </style>
 </head>
 <body>
@@ -2596,6 +2744,7 @@
       <button type="button" id="btn-res-replay" class="primary">🎬 Results Intro</button>
       <button type="button" id="btn-res-vis" class="btn-vis">👁 Results ON</button>
     </div>
+    <button type="button" id="btn-open-guide" class="btn-guide-hdr" title="Interactive Broadcast Guide, OBS Setup, Hotkeys &amp; Pre-Event Checklist">📖 Guide</button>
     <button type="button" id="btn-open-share" class="btn-support-hdr" title="Creator socials, GitHub repository, share link &amp; optional Ko-fi support">☕ Share &amp; Support</button>
   </div>
 </header>
@@ -4587,6 +4736,276 @@
   </div>
 </div>
 
+<!-- INTERACTIVE BROADCAST GUIDE MODAL (100% ENGLISH) -->
+<div class="flag-modal-backdrop" id="guide-modal" role="dialog" aria-modal="true" aria-labelledby="guide-modal-title">
+  <div class="guide-modal">
+    <div class="flag-modal-head">
+      <div class="flag-modal-title">
+        <span style="padding:2px 8px;border-radius:5px;background:linear-gradient(135deg,#2563eb,#0ea5e9);color:#fff;font-size:11px;font-weight:800;">INTERACTIVE GUIDE</span>
+        <span id="guide-modal-title">FGC Open Scorebars — Complete Broadcast Handbook</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <input type="text" id="guide-search-input" placeholder="🔍 Search topics (OBS, SF6, Stinger, Token, PNG, Drag...)" style="width:280px;padding:4px 9px;font-size:11.5px;" />
+        <button type="button" id="btn-close-guide-modal" title="Close (Esc)">✕</button>
+      </div>
+    </div>
+    <div class="guide-body">
+      <nav class="guide-sidebar" id="guide-nav" aria-label="Guide Chapters">
+        <button type="button" class="guide-nav-btn active" data-gchap="obs">🚀 1. Quick Start &amp; OBS Setup</button>
+        <button type="button" class="guide-nav-btn" data-gchap="scorebars">🎛 2. Scorebars (56 + SF6)</button>
+        <button type="button" class="guide-nav-btn" data-gchap="vs">⚔️ 3. VS Splash &amp; 240+ Games</button>
+        <button type="button" class="guide-nav-btn" data-gchap="results">🏅 4. Results Top 8 &amp; PNG</button>
+        <button type="button" class="guide-nav-btn" data-gchap="tournaments">🏆 5. Start.gg, Challonge &amp; Privacy</button>
+        <button type="button" class="guide-nav-btn" data-gchap="api">⌨️ 6. Hotkeys &amp; Stream Deck API</button>
+        <button type="button" class="guide-nav-btn" data-gchap="checklist">✅ 7. Event Checklist &amp; Help</button>
+        <div style="margin-top:auto;padding-top:10px;border-top:1px solid var(--border);font-size:10.5px;color:var(--muted);line-height:1.4;">
+          <b style="color:#e2e8f0;">Status Indicator Tip:</b><br />
+          <code>Local Server OK · X overlay(s)</code> counts active real-time OBS sources + connected browsers/phones.
+        </div>
+      </nav>
+
+      <div class="guide-content" id="guide-content">
+        <!-- CHAPTER 1: QUICK START & OBS -->
+        <section class="guide-pane active" id="gchap-obs" data-gkeywords="obs browser source url setup dock mobile lan stinger transition 1920 1080 start server">
+          <h3>🚀 1. Quick Start &amp; OBS Studio Setup</h3>
+          <div class="guide-card">
+            <h4>Step 1 — Add the 3 Overlays as OBS Browser Sources (1920×1080)</h4>
+            <p>Add each URL to its own OBS Scene as a <b>Browser</b> source set to <b>Width: 1920</b>, <b>Height: 1080</b>, empty Custom CSS:</p>
+            <div class="guide-copy-row">
+              <span>🎛 Scorebar (Gameplay): <b id="g-url-obs">http://localhost:8787/</b></span>
+              <button type="button" data-guide-copy="obs" style="padding:3px 8px;font-size:10.5px;">📋 Copy</button>
+            </div>
+            <div class="guide-copy-row">
+              <span>⚔️ VS Splash (Up Next): <b id="g-url-vs">http://localhost:8787/vs.html</b></span>
+              <button type="button" data-guide-copy="vs" style="padding:3px 8px;font-size:10.5px;">📋 Copy</button>
+            </div>
+            <div class="guide-copy-row">
+              <span>🏅 Results (Top 8 / Podium): <b id="g-url-res">http://localhost:8787/results.html</b></span>
+              <button type="button" data-guide-copy="results" style="padding:3px 8px;font-size:10.5px;">📋 Copy</button>
+            </div>
+          </div>
+
+          <div class="guide-grid-2">
+            <div class="guide-card">
+              <h4>Step 2 — Zero-Flicker OBS Native Transitions</h4>
+              <ol>
+                <li><b>UNCHECK</b> <i>"Refresh browser when scene becomes active"</i>.</li>
+                <li><b>UNCHECK</b> <i>"Shutdown source when not visible"</i>.</li>
+                <li>Set <b>Page permissions</b> to <b>"Read access to OBS status information"</b>.</li>
+                <li>Adjust <b>Entry Delay (OBS Stinger Sync)</b> in Style Studio → FX &amp; Transitions so your overlay lands right after your stinger clears.</li>
+              </ol>
+            </div>
+            <div class="guide-card">
+              <h4>Step 3 — OBS Custom Dock &amp; Mobile LAN Control</h4>
+              <ul>
+                <li><b>OBS Dock:</b> <code>Docks → Custom Browser Docks…</code> → paste <code>http://localhost:8787/panel.html</code>. Narrow docks (<code>&le; 1320px</code>) automatically collapse the Designs sidebar into a tab.</li>
+                <li><b>Phone / Co-Producer LAN:</b> Share the Wi-Fi URL from the OBS tab so a caster or second PC can update scores live in under 5 ms.</li>
+              </ul>
+              <div class="guide-actions-row">
+                <button type="button" class="primary" data-guide-jump="scorebars:obs" style="padding:4px 9px;font-size:11px;">Open OBS &amp; LAN Tab →</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- CHAPTER 2: SCOREBARS -->
+        <section class="guide-pane" id="gchap-scorebars" data-gkeywords="scorebar design tekken sf6 street fighter hud guides flag fade match point style studio colors glass metallic fonts presets">
+          <h3>🎛 2. Scorebars Workspace (56 Designs · Tekken 8 &amp; Street Fighter 6)</h3>
+          <div class="guide-grid-2">
+            <div class="guide-card">
+              <h4>56 HUD-Calibrated Broadcast Designs</h4>
+              <ul>
+                <li><b>32 Tekken 8 &amp; FGC designs</b> (led by <i>Tekken 8 Native HUD</i>, TWT Blade, Crown, Split-Wing, Stepped Arch, Character Editions).</li>
+                <li><b>24 Street Fighter 6 designs</b> (filter <code>🥊 SF6</code>) engineered with 0 px overlap over SF6 healthbars, Round Win diamonds, Drive Gauges &amp; M/C icons.</li>
+                <li>Use <b>📐 HUD Guides</b> in the Live Preview toolbar to verify alignment on real T8 or SF6 gameplay.</li>
+              </ul>
+            </div>
+            <div class="guide-card">
+              <h4>Match Cockpit &amp; Smart Player Roster</h4>
+              <ul>
+                <li>Click P1/P2 Name to browse saved players with flags &amp; profile thumbnails. Switching players automatically loads their photo (or clears stale photos).</li>
+                <li><b>114 Offline Vector Flags:</b> Dual slots (Country + Region/State/CCAA) with bilingual search and <b>Region-Only</b> mode.</li>
+                <li><b>⇄ Swap Sides</b> flips everything and keeps Start.gg/Challonge bracket reporting accurate!</li>
+              </ul>
+            </div>
+          </div>
+          <div class="guide-card">
+            <h4>Style Studio (5 Sub-Tabs)</h4>
+            <ul>
+              <li><b>Colors &amp; Surfaces:</b> 5 modes (Gradient, Solid, Frosted Glass with Blur/Edge, Metallic, Theme BG) + 38 1-click palettes.</li>
+              <li><b>Typography &amp; Geometry:</b> 12 fonts, mirror/upright/italic score slant, custom shapes, outer blades, heights &amp; spacing.</li>
+              <li><b>Flag Fade Studio:</b> Live dedicated preview for Fade-In / Fade-Out, diagonal angle, vignette, zoom, saturation &amp; brightness.</li>
+              <li><b>FX, Transitions &amp; Match Point:</b> 8 entry animations, 5 score animations, exact ms durations, Stinger Delay &amp; 5 Match Point layouts.</li>
+              <li><b>Custom Presets:</b> Save unlimited custom styles and share them via JSON export/import.</li>
+            </ul>
+            <div class="guide-actions-row">
+              <button type="button" class="primary" data-guide-jump="scorebars:tweaks" style="padding:4px 9px;font-size:11px;">Open Scorebars →</button>
+              <button type="button" data-guide-jump="scorebars:flagfade" style="padding:4px 9px;font-size:11px;">Open Flag Fade Studio →</button>
+              <button type="button" data-guide-jump="scorebars:fx" style="padding:4px 9px;font-size:11px;">Open FX &amp; Stinger Sync →</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- CHAPTER 3: VS SPLASH -->
+        <section class="guide-pane" id="gchap-vs" data-gkeywords="vs splash click edit drag divider emblem pattern logo character packs streamhelperassets 240 games offline png up next">
+          <h3>⚔️ 3. VS Splash Studio (42 Designs · Click-to-Edit · 240+ Games)</h3>
+          <div class="guide-grid-2">
+            <div class="guide-card">
+              <h4>Interactive Click-to-Edit &amp; Direct Drag</h4>
+              <ul>
+                <li><b>🎯 Click-to-Edit:</b> Click any element directly on the VS preview (backdrop, divider, VS emblem, header, P1/P2 character, plates, flags, logo, H2H) to jump straight to its exact controls.</li>
+                <li><b>✋ Direct Drag:</b> Drag characters, VS emblem, header or nameplates right inside the canvas to position them to the millimeter.</li>
+                <li><b>3 Sources:</b> Live Current Match, Auto <b>Up Next (Queue)</b> from Start.gg/Challonge, or independent <b>Custom VS</b>.</li>
+              </ul>
+            </div>
+            <div class="guide-card">
+              <h4>240+ Fighting Games &amp; Offline Packs</h4>
+              <ul>
+                <li>Choose featured titles (T8, SF6, GGST, 2XKO, CotW, GBVSR, MK1, DBFZ, SSBU...) or click <b>Load All 240+ Games</b>.</li>
+                <li>Renders auto-cache locally in <code>data/assets/</code>. Click <b>⬇ Download Full Pack</b> before a tournament for 100% offline reliability!</li>
+                <li><b>Auto Event Logo:</b> Automatically fetches &amp; caches your tournament's official logo from Start.gg or Challonge.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="guide-card">
+            <h4>Deep Customization &amp; 1080p PNG Export</h4>
+            <p>Customize <b>10 animated center dividers</b> (scrolling chevrons, X-tape, hazard tape, lightning, beams), <b>10 centered VS emblems</b>, <b>9 frames</b>, <b>8 seamless scrolling patterns</b>, <b>Region-Only flags</b>, <b>10 entry choreographies</b>, and export a crisp <b>1920×1080 PNG</b> in 1 click.</p>
+            <div class="guide-actions-row">
+              <button type="button" class="primary" data-guide-jump="vs:backdrop" style="padding:4px 9px;font-size:11px;">Open VS Splash →</button>
+              <button type="button" data-guide-jump="vs:divider" style="padding:4px 9px;font-size:11px;">Divider &amp; VS Emblem →</button>
+              <button type="button" data-guide-jump="vs:assets" style="padding:4px 9px;font-size:11px;">Character Packs (240+ Games) →</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- CHAPTER 4: RESULTS -->
+        <section class="guide-pane" id="gchap-results" data-gkeywords="results top 8 top 4 podium standings png export framing global individual drag wheel confetti">
+          <h3>🏅 4. Tournament Final Results Studio (24 Designs · Top 8 / Top 4 / Podium)</h3>
+          <div class="guide-grid-2">
+            <div class="guide-card">
+              <h4>6 Broadcast Layouts &amp; 24 Designs</h4>
+              <ul>
+                <li><b>Champion Left Top 8</b> (1st hero left + 2nd–8th grid), <b>Elevated Top 3 Podium + 4th–8th</b>, <b>4×2 Esports Grid</b>, <b>Champion Spotlight + 8-Row Ladder</b>, <b>Top 4 Towers</b>, and <b>Grand Top 3 Podium</b>.</li>
+                <li><b>10 Staggered Entry Animations</b>, <b>8 Continuous Ambient FX</b> (Gold Confetti, Sparks, Spotlights, Sakura Petals, Aurora, Shimmer, CRT), and <b>1920×1080 PNG social export</b>.</li>
+              </ul>
+            </div>
+            <div class="guide-card">
+              <h4>Global + Per-Player Portrait Framing</h4>
+              <ul>
+                <li><b>Global Framing Bar:</b> Move <b>all 8 portraits together</b> vertically (Y), horizontally (X), Zoom, or Flip in real time.</li>
+                <li><b>Direct Canvas Drag &amp; Wheel:</b> Grab any individual player card right on the preview to slide them up/down/left/right, or scroll the mouse wheel to zoom!</li>
+                <li><b>Per-Row 🎯 Sliders:</b> Click <code>🎯</code> on any row for fine sliders + individual reset.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="guide-card">
+            <h4>Automatic Start.gg / Challonge Standings Sync</h4>
+            <p>With <b>Auto-Sync Standings</b> enabled, connecting, switching events, or reporting results automatically updates your Top 8 (showing <code>🔴 LIVE STANDINGS</code> mid-event or <code>✅ FINAL RESULTS</code> once complete) while keeping any characters and custom framing you already adjusted.</p>
+            <div class="guide-actions-row">
+              <button type="button" class="primary" data-guide-jump="results:players" style="padding:4px 9px;font-size:11px;">Open Results Studio →</button>
+              <button type="button" data-guide-jump="results:fx" style="padding:4px 9px;font-size:11px;">Open Animations &amp; Confetti FX →</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- CHAPTER 5: TOURNAMENTS & PRIVACY -->
+        <section class="guide-pane" id="gchap-tournaments" data-gkeywords="startgg start.gg challonge token security privacy api key stream queue report history h2h demo">
+          <h3>🏆 5. Start.gg, Challonge, Match History &amp; Token Privacy</h3>
+          <div class="guide-callout safe">
+            <b>🔒 Stream-Safe Token Privacy:</b> By default, API tokens live <b>only in RAM</b> for the current session and are never written to disk unless you explicitly check <b>Save Token on PC</b>. Zero token characters are ever displayed in the UI, <code>data/</code> is strictly gitignored, and <b>🗑 Clear Token</b> erases everything in 1 click.
+          </div>
+          <div class="guide-grid-2">
+            <div class="guide-card">
+              <h4>Start.gg &amp; Challonge Workflow</h4>
+              <ol>
+                <li>Get a free token from Start.gg Developer Settings or Challonge Developer Settings (or use <b>⚡ Demo Tournament</b> offline).</li>
+                <li>Paste your Tournament/Event URL + Token and click <b>🔌 Connect</b>.</li>
+                <li>Click <b>👥 Import Entrants</b> to cache all players, flags &amp; profile photos locally.</li>
+                <li>Load sets from <b>Stream Queue</b> in 1 click, update scores, and click <b>📤 Report Result</b> — side swaps are handled automatically!</li>
+              </ol>
+            </div>
+            <div class="guide-card">
+              <h4>Match History &amp; Head-to-Head</h4>
+              <ul>
+                <li>Every reported or saved set is recorded locally in <code>data/history.json</code>.</li>
+                <li>Live <b>Head-to-Head (H2H)</b> automatically appears on the Active Match Bar and inside the VS Splash screen.</li>
+                <li>Export full tournament match logs as <b>JSON</b> or <b>CSV</b> anytime.</li>
+              </ul>
+              <div class="guide-actions-row">
+                <button type="button" class="primary" data-guide-jump="tournaments:bracket" style="padding:4px 9px;font-size:11px;">Open Tournaments →</button>
+                <button type="button" data-guide-jump="tournaments:history" style="padding:4px 9px;font-size:11px;">Open Match History →</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- CHAPTER 6: HOTKEYS & API -->
+        <section class="guide-pane" id="gchap-api" data-gkeywords="hotkeys shortcuts keyboard alt stream deck bitfocus companion api http post json sse">
+          <h3>⌨️ 6. Keyboard Shortcuts &amp; Stream Deck / Companion API</h3>
+          <div class="guide-grid-2">
+            <div class="guide-card">
+              <h4>Global Panel &amp; OBS Dock Shortcuts</h4>
+              <div style="display:grid;gap:5px;font-size:12px;">
+                <div><span class="kbd">Alt + 1</span> / <span class="kbd">Alt + Shift + 1</span> → P1 Score +1 / -1</div>
+                <div><span class="kbd">Alt + 2</span> / <span class="kbd">Alt + Shift + 2</span> → P2 Score +1 / -1</div>
+                <div><span class="kbd">Alt + S</span> → Swap Sides P1 ⇄ P2 (report-safe)</div>
+                <div><span class="kbd">Alt + R</span> → Reset Score to 0 - 0</div>
+                <div><span class="kbd">Alt + H</span> → Show / Hide Scorebar Overlay</div>
+                <div><span class="kbd">Alt + E</span> → Replay Live Entry Intro in OBS</div>
+                <div><span class="kbd">Esc</span> → Close open modal</div>
+              </div>
+            </div>
+            <div class="guide-card">
+              <h4>Stream Deck / Bitfocus Companion Payloads</h4>
+              <p>Send <code>POST http://localhost:8787/api/state</code> with JSON body:</p>
+              <div class="guide-copy-row">
+                <span>{"visible": true}</span>
+                <button type="button" data-guide-copy-text='{"visible": true}' style="padding:2px 7px;font-size:10px;">Copy</button>
+              </div>
+              <div class="guide-copy-row">
+                <span>{"theme": "sf6-cpt-official"}</span>
+                <button type="button" data-guide-copy-text='{"theme": "sf6-cpt-official"}' style="padding:2px 7px;font-size:10px;">Copy</button>
+              </div>
+              <div class="guide-copy-row">
+                <span>{"vs": {"visible": true}}</span>
+                <button type="button" data-guide-copy-text='{"vs": {"visible": true}}' style="padding:2px 7px;font-size:10px;">Copy</button>
+              </div>
+              <div class="guide-copy-row">
+                <span>{"results": {"visible": true}}</span>
+                <button type="button" data-guide-copy-text='{"results": {"visible": true}}' style="padding:2px 7px;font-size:10px;">Copy</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- CHAPTER 7: CHECKLIST & TROUBLESHOOTING -->
+        <section class="guide-pane" id="gchap-checklist" data-gkeywords="checklist pre stream venue offline troubleshooting problem fix cache restart backup reset">
+          <h3>✅ 7. Interactive Pre-Event Checklist &amp; Troubleshooting</h3>
+          <div class="guide-card">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+              <h4>Tournament Day Readiness (<span id="guide-check-progress">0 / 6 Ready</span>)</h4>
+              <button type="button" id="btn-guide-reset-checks" style="padding:3px 8px;font-size:10.5px;">↺ Reset Checklist</button>
+            </div>
+            <label class="guide-check-item"><input type="checkbox" data-guide-check="c1" /><span><b>1. Server Running:</b> Green <code>Local Server OK</code> pill visible in top-right header.</span></label>
+            <label class="guide-check-item"><input type="checkbox" data-guide-check="c2" /><span><b>2. Offline Character Pack Cached:</b> Downloaded active game pack in <code>VS Splash → Character Packs</code> before heading to the venue.</span></label>
+            <label class="guide-check-item"><input type="checkbox" data-guide-check="c3" /><span><b>3. OBS Browser Sources Added (1920×1080):</b> Scorebar, VS Splash &amp; Results added with <i>Refresh on active</i> unchecked and <i>Read OBS status</i> enabled.</span></label>
+            <label class="guide-check-item"><input type="checkbox" data-guide-check="c4" /><span><b>4. Stinger Delay Calibrated:</b> Tested live scene switch so intro animations land right after your stinger clears.</span></label>
+            <label class="guide-check-item"><input type="checkbox" data-guide-check="c5" /><span><b>5. Tournament Connected &amp; Entrants Imported:</b> Start.gg/Challonge connected, official Event Logo loaded, entrants imported.</span></label>
+            <label class="guide-check-item"><input type="checkbox" data-guide-check="c6" /><span><b>6. Stream Safety Verified:</b> Token masked/session-only and HUD Guides checked against your game capture.</span></label>
+          </div>
+
+          <div class="guide-callout">
+            <b>🛠️ Quick Fixes:</b>
+            (1) After updating code, restart <code>Start_Scorebar.bat</code> once and press <code>Ctrl + F5</code>.
+            (2) If <code>Server offline</code> appears, reopen <code>Start_Scorebar.bat</code> (panel auto-reconnects in 2s).
+            (3) To move your setup to another PC, copy <code>data/players.json</code>, <code>data/presets.json</code>, and <code>data/assets/</code> (never share <code>data/integrations.json</code>).
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- SHARE, CREATOR SOCIALS & VOLUNTARY KO-FI SUPPORT MODAL -->
 <div class="flag-modal-backdrop" id="share-modal" role="dialog" aria-modal="true" aria-labelledby="share-modal-title">
   <div class="share-modal">
@@ -4676,6 +5095,7 @@
     <a href="https://www.twitch.tv/nordi5ke" target="_blank" rel="noopener noreferrer">Twitch</a>
     <a href="https://github.com/N5K-dev/fgc-open-scorebars" target="_blank" rel="noopener noreferrer">GitHub</a>
     <a href="https://ko-fi.com/nordi5ke" target="_blank" rel="noopener noreferrer" class="kofi-mini">☕ Ko-fi (Optional)</a>
+    <button type="button" id="btn-footer-guide" style="padding:3px 9px;font-size:11px;">📖 Guide</button>
     <button type="button" id="btn-footer-share" style="padding:3px 9px;font-size:11px;">🔗 Share</button>
   </div>
 </footer>
@@ -6368,7 +6788,117 @@
       if (e.key === 'Escape') {
         if (pickerState.open) closeFlagPicker();
         $('share-modal')?.classList.remove('open');
+        $('guide-modal')?.classList.remove('open');
       }
+    });
+
+    // Interactive Broadcast Guide Modal (Chapters, Search, 1-Click Jumps, Copy & Persisted Checklist)
+    const GUIDE_CHECK_KEY = 'fgc_guide_checklist_v1';
+    const syncGuideChecklist = () => {
+      let saved = {};
+      try { saved = JSON.parse(localStorage.getItem(GUIDE_CHECK_KEY) || '{}'); } catch {}
+      const boxes = $('guide-modal')?.querySelectorAll('input[data-guide-check]') || [];
+      let done = 0;
+      boxes.forEach(cb => {
+        cb.checked = Boolean(saved[cb.dataset.guideCheck]);
+        cb.closest('.guide-check-item')?.classList.toggle('checked', cb.checked);
+        if (cb.checked) done++;
+      });
+      if ($('guide-check-progress')) $('guide-check-progress').textContent = `${done} / ${boxes.length} Ready`;
+    };
+    const switchGuideChapter = (chapId) => {
+      $('guide-nav')?.querySelectorAll('.guide-nav-btn').forEach(b => b.classList.toggle('active', b.dataset.gchap === chapId));
+      $('guide-content')?.querySelectorAll('.guide-pane').forEach(p => p.classList.toggle('active', p.id === `gchap-${chapId}`));
+      if ($('guide-content')) $('guide-content').scrollTop = 0;
+    };
+    const openGuideModal = () => {
+      if ($('g-url-obs')) $('g-url-obs').textContent = $('obs-url-text')?.textContent || 'http://localhost:8787/';
+      if ($('g-url-vs')) $('g-url-vs').textContent = $('vs-url-text')?.textContent || 'http://localhost:8787/vs.html';
+      if ($('g-url-res')) $('g-url-res').textContent = $('results-url-text')?.textContent || 'http://localhost:8787/results.html';
+      syncGuideChecklist();
+      $('guide-modal')?.classList.add('open');
+    };
+    const closeGuideModal = () => $('guide-modal')?.classList.remove('open');
+    $('btn-open-guide')?.addEventListener('click', openGuideModal);
+    $('btn-footer-guide')?.addEventListener('click', openGuideModal);
+    $('btn-close-guide-modal')?.addEventListener('click', closeGuideModal);
+    $('guide-modal')?.addEventListener('click', (e) => { if (e.target === $('guide-modal')) closeGuideModal(); });
+    $('guide-nav')?.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-gchap]');
+      if (!btn) return;
+      $('guide-search-input').value = '';
+      switchGuideChapter(btn.dataset.gchap);
+    });
+    $('guide-search-input')?.addEventListener('input', (e) => {
+      const q = normText(e.target.value.trim());
+      const panes = [...($('guide-content')?.querySelectorAll('.guide-pane') || [])];
+      if (!q) {
+        const activeBtn = $('guide-nav')?.querySelector('.guide-nav-btn.active');
+        switchGuideChapter(activeBtn?.dataset.gchap || 'obs');
+        return;
+      }
+      let firstMatch = '';
+      panes.forEach(p => {
+        const hay = normText(`${p.dataset.gkeywords || ''} ${p.textContent || ''}`);
+        const match = hay.includes(q);
+        p.classList.toggle('active', match);
+        if (match && !firstMatch) firstMatch = p.id.replace('gchap-', '');
+      });
+      $('guide-nav')?.querySelectorAll('.guide-nav-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.gchap === firstMatch);
+      });
+    });
+    $('guide-content')?.addEventListener('click', (e) => {
+      const copyUrlBtn = e.target.closest('[data-guide-copy]');
+      if (copyUrlBtn) {
+        const k = copyUrlBtn.dataset.guideCopy;
+        const map = { obs: 'obs-url-text', vs: 'vs-url-text', results: 'results-url-text' };
+        const val = $(map[k])?.textContent || '';
+        navigator.clipboard?.writeText(val).then(() => toast(`📋 Copied ${val}`)).catch(() => toast(val));
+        return;
+      }
+      const copyTxtBtn = e.target.closest('[data-guide-copy-text]');
+      if (copyTxtBtn) {
+        const txt = copyTxtBtn.dataset.guideCopyText;
+        navigator.clipboard?.writeText(txt).then(() => toast('📋 JSON payload copied')).catch(() => toast(txt));
+        return;
+      }
+      const jumpBtn = e.target.closest('[data-guide-jump]');
+      if (jumpBtn) {
+        const [ws, sub] = String(jumpBtn.dataset.guideJump || '').split(':');
+        closeGuideModal();
+        setActiveWorkspace(ws);
+        if (ws === 'scorebars') {
+          if (sub === 'obs') {
+            $('bottom-tabs')?.querySelector('button[data-tab="obs"]')?.click();
+          } else if (sub === 'flagfade' || sub === 'fx' || sub === 'tweaks') {
+            $('bottom-tabs')?.querySelector('button[data-tab="tweaks"]')?.click();
+            if (sub === 'flagfade' || sub === 'fx') {
+              $('studio-subtabs')?.querySelector(`button[data-spane="${sub}"]`)?.click();
+            }
+          }
+        } else if (ws === 'vs' && sub) {
+          $('vs-insp-tabs')?.querySelector(`button[data-vspane="${sub}"]`)?.click();
+        } else if (ws === 'results' && sub) {
+          $('res-insp-tabs')?.querySelector(`button[data-respane="${sub}"]`)?.click();
+        } else if (ws === 'tournaments' && sub) {
+          $('trn-subtabs')?.querySelector(`button[data-trnpane="${sub}"]`)?.click();
+        }
+      }
+    });
+    $('guide-content')?.addEventListener('change', (e) => {
+      const cb = e.target.closest('input[data-guide-check]');
+      if (!cb) return;
+      let saved = {};
+      try { saved = JSON.parse(localStorage.getItem(GUIDE_CHECK_KEY) || '{}'); } catch {}
+      saved[cb.dataset.guideCheck] = cb.checked;
+      try { localStorage.setItem(GUIDE_CHECK_KEY, JSON.stringify(saved)); } catch {}
+      syncGuideChecklist();
+    });
+    $('btn-guide-reset-checks')?.addEventListener('click', () => {
+      try { localStorage.removeItem(GUIDE_CHECK_KEY); } catch {}
+      syncGuideChecklist();
+      toast('↺ Pre-event checklist reset');
     });
 
     // Share, Creator Socials & Optional Ko-fi Support Modal
