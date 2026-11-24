@@ -536,6 +536,21 @@
   }
   /* Arch layout: clear top bridge rail (y=0..11px) and stay above T8 orbs (y=38px) */
   #scorebar-root[data-mp-style="side-peek"][data-layout="arch"] .mp-tag { top: 5px; height: 22px; }
+  /* Hex wings taper to a 16px point, so tuck side-peek cleanly behind the hex tip with zero gap */
+  #scorebar-root[data-mp-style="side-peek"][data-shape="hex"] .sb-wing.p1 .mp-tag,
+  #scorebar-root[data-mp-style="side-peek"][data-theme="t8-mishima-electric"]:not([data-shape="flat"]):not([data-shape="rounded"]) .sb-wing.p1 .mp-tag,
+  #scorebar-root[data-mp-style="side-peek"][data-theme="t8-yakushima-jade"]:not([data-shape="flat"]):not([data-shape="rounded"]) .sb-wing.p1 .mp-tag,
+  #scorebar-root[data-mp-style="side-peek"][data-theme="fgc-metro-clash"]:not([data-shape="flat"]):not([data-shape="rounded"]) .sb-wing.p1 .mp-tag {
+    left: calc(100% - 18px);
+    padding: 0 14px 0 24px;
+  }
+  #scorebar-root[data-mp-style="side-peek"][data-shape="hex"] .sb-wing.p2 .mp-tag,
+  #scorebar-root[data-mp-style="side-peek"][data-theme="t8-mishima-electric"]:not([data-shape="flat"]):not([data-shape="rounded"]) .sb-wing.p2 .mp-tag,
+  #scorebar-root[data-mp-style="side-peek"][data-theme="t8-yakushima-jade"]:not([data-shape="flat"]):not([data-shape="rounded"]) .sb-wing.p2 .mp-tag,
+  #scorebar-root[data-mp-style="side-peek"][data-theme="fgc-metro-clash"]:not([data-shape="flat"]):not([data-shape="rounded"]) .sb-wing.p2 .mp-tag {
+    right: calc(100% - 18px);
+    padding: 0 24px 0 14px;
+  }
   /* Crown layout touches center banner, so auto-dock cleanly underneath the wing clear of T8 orbs & portraits! */
   #scorebar-root[data-mp-style="side-peek"][data-layout="crown"] .mp-tag {
     top: calc(100% + 1px);
@@ -802,31 +817,32 @@
     --score-bg-p2: linear-gradient(135deg, #5c3cff, #9f38ff);
   }
   #scorebar-root[data-theme="t8-heat-ignited"] .sb-wing.p1 .wing-plate {
-    clip-path: polygon(0 0, 100% 0, calc(100% - 14px) 100%, 14px 100%);
+    clip-path: polygon(0 0, calc(100% - var(--blade-slant, 14px)) 0, 100% 100%, var(--blade-slant, 14px) 100%);
     border-top: 2px solid rgba(255, 160, 60, 0.7);
     border-bottom: 3px solid var(--p1-accent);
-    box-shadow: 0 6px 24px rgba(255, 90, 20, 0.28), inset 0 1px 0 rgba(255,255,255,0.12);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
   }
   #scorebar-root[data-theme="t8-heat-ignited"] .sb-wing.p2 .wing-plate {
-    clip-path: polygon(0 0, 100% 0, calc(100% - 14px) 100%, 14px 100%);
+    clip-path: polygon(var(--blade-slant, 14px) 0, 100% 0, calc(100% - var(--blade-slant, 14px)) 100%, 0 100%);
     border-top: 2px solid rgba(168, 120, 255, 0.75);
     border-bottom: 3px solid var(--p2-accent);
-    box-shadow: 0 6px 24px rgba(120, 75, 255, 0.32), inset 0 1px 0 rgba(255,255,255,0.12);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
   }
   #scorebar-root[data-theme="t8-heat-ignited"] .sb-wing.p1 .score-box {
-    clip-path: polygon(12px 0, 100% 0, calc(100% - 12px) 100%, 0 100%);
-    width: 72px;
+    clip-path: polygon(0 0, calc(100% - var(--blade-slant, 14px)) 0, 100% 100%, var(--blade-slant, 14px) 100%);
+    width: calc(60px + var(--blade-slant, 14px));
   }
   #scorebar-root[data-theme="t8-heat-ignited"] .sb-wing.p2 .score-box {
-    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 100%, 12px 100%);
-    width: 72px;
+    clip-path: polygon(var(--blade-slant, 14px) 0, 100% 0, calc(100% - var(--blade-slant, 14px)) 100%, 0 100%);
+    width: calc(60px + var(--blade-slant, 14px));
   }
   #scorebar-root[data-theme="t8-heat-ignited"] .sb-center {
-    clip-path: polygon(0 0, 100% 0, calc(100% - 18px) 100%, 18px 100%);
+    clip-path: polygon(0 0, 100% 0, calc(100% - 16px) 100%, 16px 100%);
     border-bottom: 2.5px solid var(--center-accent);
-    box-shadow: 0 4px 18px rgba(255, 145, 30, 0.3);
+    filter: drop-shadow(0 4px 12px rgba(255, 145, 30, 0.35));
   }
-  #scorebar-root[data-theme="t8-heat-ignited"] .sb-wing { filter: drop-shadow(0 4px 12px rgba(0,0,0,0.75)); }
+  #scorebar-root[data-theme="t8-heat-ignited"] .sb-wing.p1 { filter: drop-shadow(0 4px 12px rgba(0,0,0,0.75)) drop-shadow(0 0 10px rgba(255, 90, 20, 0.28)); }
+  #scorebar-root[data-theme="t8-heat-ignited"] .sb-wing.p2 { filter: drop-shadow(0 4px 12px rgba(0,0,0,0.75)) drop-shadow(0 0 10px rgba(120, 75, 255, 0.32)); }
 
   /* 2. TEKKEN WORLD TOUR (TWT Official Crown) */
   #scorebar-root[data-theme="t8-twt-official"] {
@@ -842,12 +858,12 @@
   }
   #scorebar-root[data-theme="t8-twt-official"] .sb-wing { width: calc(648px + var(--wing-spread)) !important; }
   #scorebar-root[data-theme="t8-twt-official"] .sb-wing.p1 .wing-plate {
-    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 100%, 14px 100%);
+    clip-path: polygon(0 0, calc(100% - var(--blade-slant, 14px)) 0, 100% 100%, var(--blade-slant, 14px) 100%);
     padding-right: 12px;
     border-bottom: 2.5px solid var(--p1-accent);
   }
   #scorebar-root[data-theme="t8-twt-official"] .sb-wing.p2 .wing-plate {
-    clip-path: polygon(14px 0, 100% 0, calc(100% - 14px) 100%, 0 100%);
+    clip-path: polygon(var(--blade-slant, 14px) 0, 100% 0, calc(100% - var(--blade-slant, 14px)) 100%, 0 100%);
     padding-left: 12px;
     border-bottom: 2.5px solid var(--p2-accent);
   }
@@ -862,7 +878,7 @@
     text-shadow: none;
   }
   #scorebar-root[data-theme="t8-twt-official"] .sb-center {
-    clip-path: polygon(0 0, 100% 0, calc(100% - 14px) 100%, 14px 100%);
+    clip-path: polygon(0 0, 100% 0, calc(100% - var(--blade-slant, 14px)) 100%, var(--blade-slant, 14px) 100%);
     color: #fff;
     box-shadow: 0 4px 16px rgba(230, 30, 60, 0.45);
   }
@@ -885,33 +901,31 @@
     filter: drop-shadow(0 3px 10px rgba(0,0,0,0.85));
   }
   #scorebar-root[data-theme="t8-iron-fist-gold"] .sb-wing.p1 .wing-plate {
-    clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 100%, 18px 100%);
+    clip-path: polygon(0 0, calc(100% - var(--blade-slant, 16px)) 0, 100% 100%, var(--blade-slant, 16px) 100%);
     border-bottom: 3px solid var(--p1-accent);
-    box-shadow: inset 12px 0 0 -4px #e8c25a;
     padding-right: 12px;
   }
   #scorebar-root[data-theme="t8-iron-fist-gold"] .sb-wing.p2 .wing-plate {
-    clip-path: polygon(16px 0, 100% 0, calc(100% - 18px) 100%, 0 100%);
+    clip-path: polygon(var(--blade-slant, 16px) 0, 100% 0, calc(100% - var(--blade-slant, 16px)) 100%, 0 100%);
     border-bottom: 3px solid var(--p2-accent);
-    box-shadow: inset -12px 0 0 -4px #e8c25a;
     padding-left: 12px;
   }
   #scorebar-root[data-theme="t8-iron-fist-gold"] .sb-wing.p1 .score-box {
-    clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 100%, 16px 100%);
-    width: 72px;
+    clip-path: polygon(0 0, calc(100% - var(--blade-slant, 16px)) 0, 100% 100%, var(--blade-slant, 16px) 100%);
+    width: calc(56px + var(--blade-slant, 16px));
     text-shadow: 0 1px 0 rgba(255,255,255,0.45);
   }
   #scorebar-root[data-theme="t8-iron-fist-gold"] .sb-wing.p2 .score-box {
-    clip-path: polygon(16px 0, 100% 0, calc(100% - 16px) 100%, 0 100%);
-    width: 72px;
+    clip-path: polygon(var(--blade-slant, 16px) 0, 100% 0, calc(100% - var(--blade-slant, 16px)) 100%, 0 100%);
+    width: calc(56px + var(--blade-slant, 16px));
     text-shadow: 0 1px 0 rgba(255,255,255,0.45);
   }
   #scorebar-root[data-theme="t8-iron-fist-gold"] .sb-center {
-    clip-path: polygon(0 0, 100% 0, calc(100% - 16px) 100%, 16px 100%);
+    clip-path: polygon(0 0, 100% 0, calc(100% - var(--blade-slant, 16px)) 100%, var(--blade-slant, 16px) 100%);
     border-bottom: 3px solid var(--center-accent);
   }
 
-  /* 4. MISHIMA ELECTRIC (EWGF Lightning Split-Wing) */
+  /* 4. MISHIMA ELECTRIC (EWGF Lightning Hex Split-Wing) */
   #scorebar-root[data-theme="t8-mishima-electric"] {
     --p1-accent: #00d4ff;
     --p2-accent: #388bff;
@@ -922,22 +936,36 @@
     --score-bg-p1: linear-gradient(135deg, #00e1ff, #0066ff);
     --score-bg-p2: linear-gradient(135deg, #0077ff, #00d4ff);
   }
-  #scorebar-root[data-theme="t8-mishima-electric"] .sb-wing .wing-plate {
-    border: 1.5px solid rgba(0, 212, 255, 0.55);
-    border-bottom: 3px solid var(--p1-accent);
-    box-shadow: 0 0 22px rgba(0, 200, 255, 0.25), inset 0 0 18px rgba(0, 150, 255, 0.14);
+  #scorebar-root[data-theme="t8-mishima-electric"] .sb-wing.p1 {
+    filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.42)) drop-shadow(0 4px 12px rgba(0, 0, 0, 0.85));
   }
-  #scorebar-root[data-theme="t8-mishima-electric"] .sb-wing.p1 .wing-plate {
-    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+  #scorebar-root[data-theme="t8-mishima-electric"] .sb-wing.p2 {
+    filter: drop-shadow(0 0 10px rgba(56, 139, 255, 0.42)) drop-shadow(0 4px 12px rgba(0, 0, 0, 0.85));
+  }
+  #scorebar-root[data-theme="t8-mishima-electric"] .sb-wing .wing-plate {
+    clip-path: polygon(16px 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 16px 100%, 0 50%);
+    border: none;
+    border-top: 1.5px solid rgba(0, 212, 255, 0.65);
+    border-bottom: 3px solid var(--p1-accent);
+    box-shadow: inset 0 0 18px rgba(0, 150, 255, 0.2);
   }
   #scorebar-root[data-theme="t8-mishima-electric"] .sb-wing.p2 .wing-plate {
-    clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+    border-top-color: rgba(56, 139, 255, 0.7);
     border-bottom-color: var(--p2-accent);
   }
+  #scorebar-root[data-theme="t8-mishima-electric"] .sb-wing.p1 .score-box {
+    width: 78px;
+    padding-right: 12px;
+  }
+  #scorebar-root[data-theme="t8-mishima-electric"] .sb-wing.p2 .score-box {
+    width: 78px;
+    padding-left: 12px;
+  }
   #scorebar-root[data-theme="t8-mishima-electric"] .sb-center {
-    clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 14px) 100%, 14px 100%, 0 50%);
-    border-bottom: 2px solid var(--center-accent);
-    box-shadow: 0 0 18px rgba(0, 229, 255, 0.4);
+    clip-path: polygon(16px 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 16px 100%, 0 50%);
+    border-top: 1.5px solid rgba(0, 229, 255, 0.5);
+    border-bottom: 2.5px solid var(--center-accent);
+    filter: drop-shadow(0 0 12px rgba(0, 229, 255, 0.45));
   }
 
   /* 5. DEVIL GENE CRIMSON (Void & Hellfire Split-Wing) */
@@ -954,22 +982,30 @@
   }
   #scorebar-root[data-theme="t8-devil-gene"] .player-name { font-size: 36px; letter-spacing: 0.05em; }
   #scorebar-root[data-theme="t8-devil-gene"] .sponsor-tag { font-size: 26px; }
+  #scorebar-root[data-theme="t8-devil-gene"] .sb-wing.p1 { filter: drop-shadow(0 0 12px rgba(255, 0, 55, 0.42)) drop-shadow(0 4px 10px rgba(0,0,0,0.85)); }
+  #scorebar-root[data-theme="t8-devil-gene"] .sb-wing.p2 { filter: drop-shadow(0 0 12px rgba(213, 0, 249, 0.38)) drop-shadow(0 4px 10px rgba(0,0,0,0.85)); }
   #scorebar-root[data-theme="t8-devil-gene"] .sb-wing.p1 .wing-plate {
-    clip-path: polygon(0 0, 100% 0, calc(100% - 20px) 100%, 0 100%, 10px 50%);
+    clip-path: polygon(0 0, calc(100% - var(--blade-slant, 18px)) 0, 100% 100%, var(--blade-slant, 18px) 100%);
     border-top: 2px solid var(--p1-accent);
-    border-bottom: 2px solid rgba(255, 23, 68, 0.5);
-    box-shadow: 0 0 24px rgba(255, 0, 55, 0.35);
+    border-bottom: 2.5px solid rgba(255, 23, 68, 0.72);
   }
   #scorebar-root[data-theme="t8-devil-gene"] .sb-wing.p2 .wing-plate {
-    clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 50%, 100% 100%, 20px 100%);
+    clip-path: polygon(var(--blade-slant, 18px) 0, 100% 0, calc(100% - var(--blade-slant, 18px)) 100%, 0 100%);
     border-top: 2px solid var(--p2-accent);
-    border-bottom: 2px solid rgba(213, 0, 249, 0.45);
-    box-shadow: 0 0 24px rgba(200, 0, 180, 0.3);
+    border-bottom: 2.5px solid rgba(213, 0, 249, 0.72);
+  }
+  #scorebar-root[data-theme="t8-devil-gene"] .sb-wing.p1 .score-box {
+    clip-path: polygon(0 0, calc(100% - var(--blade-slant, 18px)) 0, 100% 100%, var(--blade-slant, 18px) 100%);
+    width: calc(60px + var(--blade-slant, 18px));
+  }
+  #scorebar-root[data-theme="t8-devil-gene"] .sb-wing.p2 .score-box {
+    clip-path: polygon(var(--blade-slant, 18px) 0, 100% 0, calc(100% - var(--blade-slant, 18px)) 100%, 0 100%);
+    width: calc(60px + var(--blade-slant, 18px));
   }
   #scorebar-root[data-theme="t8-devil-gene"] .sb-center {
-    clip-path: polygon(0 0, 100% 0, calc(100% - 22px) 100%, 22px 100%);
+    clip-path: polygon(0 0, 100% 0, calc(100% - 18px) 100%, 18px 100%);
     border-bottom: 2.5px solid var(--center-accent);
-    box-shadow: 0 4px 20px rgba(255, 23, 68, 0.5);
+    filter: drop-shadow(0 4px 14px rgba(255, 23, 68, 0.5));
   }
 
   /* 6. G-CORP ARMORED ARCH (Stepped Tactical Visor) */
@@ -987,19 +1023,30 @@
     background: linear-gradient(90deg, #dc2626 0%, #2a2f3a 15%, #2a2f3a 85%, #dc2626 100%);
     border-bottom: 2px solid rgba(239, 68, 68, 0.75);
   }
+  #scorebar-root[data-theme="t8-g-corp-tactical"] .sb-wing {
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.85));
+  }
   #scorebar-root[data-theme="t8-g-corp-tactical"] .sb-wing .wing-plate {
-    border: 1px solid rgba(255,255,255,0.14);
+    border-top: 1px solid rgba(255,255,255,0.18);
     border-bottom: 3px solid var(--p1-accent);
     background-image:
       repeating-linear-gradient(-45deg, rgba(255,255,255,0.025) 0 6px, transparent 6px 12px),
       linear-gradient(180deg, #22252d, #111318);
   }
   #scorebar-root[data-theme="t8-g-corp-tactical"] .sb-wing.p1 .wing-plate {
-    clip-path: polygon(0 0, 100% 0, calc(100% - 14px) 100%, 10px 100%);
+    clip-path: polygon(0 0, calc(100% - var(--blade-slant, 14px)) 0, 100% 100%, var(--blade-slant, 14px) 100%);
   }
   #scorebar-root[data-theme="t8-g-corp-tactical"] .sb-wing.p2 .wing-plate {
-    clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 14px 100%);
+    clip-path: polygon(var(--blade-slant, 14px) 0, 100% 0, calc(100% - var(--blade-slant, 14px)) 100%, 0 100%);
     border-bottom-color: var(--p2-accent);
+  }
+  #scorebar-root[data-theme="t8-g-corp-tactical"] .sb-wing.p1 .score-box {
+    clip-path: polygon(0 0, calc(100% - var(--blade-slant, 14px)) 0, 100% 100%, var(--blade-slant, 14px) 100%);
+    width: calc(60px + var(--blade-slant, 14px));
+  }
+  #scorebar-root[data-theme="t8-g-corp-tactical"] .sb-wing.p2 .score-box {
+    clip-path: polygon(var(--blade-slant, 14px) 0, 100% 0, calc(100% - var(--blade-slant, 14px)) 100%, 0 100%);
+    width: calc(60px + var(--blade-slant, 14px));
   }
   #scorebar-root[data-theme="t8-g-corp-tactical"] .sb-center {
     clip-path: polygon(0 0, 100% 0, calc(100% - 16px) 100%, 16px 100%);
@@ -1084,13 +1131,18 @@
     --score-bg-p1: linear-gradient(180deg, #10b981, #047857);
     --score-bg-p2: linear-gradient(180deg, #14b8a6, #0f766e);
   }
+  #scorebar-root[data-theme="t8-yakushima-jade"] .sb-wing {
+    filter: drop-shadow(0 5px 14px rgba(16, 185, 129, 0.3)) drop-shadow(0 3px 8px rgba(0, 0, 0, 0.85));
+  }
   #scorebar-root[data-theme="t8-yakushima-jade"] .sb-wing .wing-plate {
-    border: 1.5px solid rgba(212, 175, 55, 0.6);
+    border: none;
+    border-top: 1.5px solid rgba(212, 175, 55, 0.68);
     border-bottom: 3px solid var(--p1-accent);
-    clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 10px 100%, 0 50%);
-    box-shadow: 0 6px 22px rgba(16, 185, 129, 0.25);
+    clip-path: polygon(16px 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 16px 100%, 0 50%);
   }
   #scorebar-root[data-theme="t8-yakushima-jade"] .sb-wing.p2 .wing-plate { border-bottom-color: var(--p2-accent); }
+  #scorebar-root[data-theme="t8-yakushima-jade"] .sb-wing.p1 .score-box { width: 78px; padding-right: 12px; }
+  #scorebar-root[data-theme="t8-yakushima-jade"] .sb-wing.p2 .score-box { width: 78px; padding-left: 12px; }
   #scorebar-root[data-theme="t8-yakushima-jade"] .sb-center {
     clip-path: polygon(0 0, 100% 0, calc(100% - 15px) 100%, 15px 100%);
     border-bottom: 2.5px solid var(--center-accent);
@@ -1109,20 +1161,38 @@
     --score-text: #ffffff;
     --font-score: 'Orbitron', 'Chakra Petch', sans-serif;
   }
+  #scorebar-root[data-theme="t8-urban-square-neon"] .sb-wing {
+    width: calc(648px + var(--wing-spread)) !important;
+  }
+  #scorebar-root[data-theme="t8-urban-square-neon"] .sb-wing.p1 {
+    filter: drop-shadow(0 3px 12px rgba(255, 0, 127, 0.5));
+  }
+  #scorebar-root[data-theme="t8-urban-square-neon"] .sb-wing.p2 {
+    filter: drop-shadow(0 3px 12px rgba(0, 245, 212, 0.45));
+  }
   #scorebar-root[data-theme="t8-urban-square-neon"] .sb-wing.p1 .wing-plate {
     border-bottom: 2.5px solid var(--p1-accent);
-    box-shadow: 0 3px 16px rgba(255, 0, 127, 0.45);
-    clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 10px 100%);
+    clip-path: polygon(0 0, calc(100% - var(--blade-slant, 12px)) 0, 100% 100%, var(--blade-slant, 12px) 100%);
+    padding-right: 10px;
   }
   #scorebar-root[data-theme="t8-urban-square-neon"] .sb-wing.p2 .wing-plate {
     border-bottom: 2.5px solid var(--p2-accent);
-    box-shadow: 0 3px 16px rgba(0, 245, 212, 0.4);
-    clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 10px 100%);
+    clip-path: polygon(var(--blade-slant, 12px) 0, 100% 0, calc(100% - var(--blade-slant, 12px)) 100%, 0 100%);
+    padding-left: 10px;
   }
-  #scorebar-root[data-theme="t8-urban-square-neon"] .sb-wing.p2 .score-box { color: #06131a; text-shadow: none; }
+  #scorebar-root[data-theme="t8-urban-square-neon"] .sb-wing.p1 .score-box {
+    clip-path: polygon(0 0, calc(100% - var(--blade-slant, 12px)) 0, 100% 100%, var(--blade-slant, 12px) 100%);
+    width: calc(54px + var(--blade-slant, 12px));
+  }
+  #scorebar-root[data-theme="t8-urban-square-neon"] .sb-wing.p2 .score-box {
+    clip-path: polygon(var(--blade-slant, 12px) 0, 100% 0, calc(100% - var(--blade-slant, 12px)) 100%, 0 100%);
+    width: calc(54px + var(--blade-slant, 12px));
+    color: #06131a;
+    text-shadow: none;
+  }
   #scorebar-root[data-theme="t8-urban-square-neon"] .sb-center {
     border-bottom: 2.5px solid var(--center-accent);
-    clip-path: polygon(0 0, 100% 0, calc(100% - 12px) 100%, 12px 100%);
+    clip-path: polygon(0 0, 100% 0, calc(100% - var(--blade-slant, 12px)) 100%, var(--blade-slant, 12px) 100%);
   }
 
   /* 11. ARENA UNDERGROUND CAGE (Stepped Arch Titanium & Amber) */
@@ -1236,13 +1306,13 @@
   #scorebar-root[data-theme="fgc-strive-bolt"] .sb-wing.p2 .wing-plate { border-radius: 0 16px 16px 0; border-color: var(--p2-accent); }
   #scorebar-root[data-theme="fgc-strive-bolt"] .sb-wing .score-box { text-shadow: none; font-weight: 900; }
   #scorebar-root[data-theme="fgc-strive-bolt"] .sb-center {
-    clip-path: polygon(16px 0, calc(100% - 16px) 0, 100% 100%, 0 100%);
+    clip-path: polygon(0 0, 100% 0, calc(100% - 16px) 100%, 16px 100%);
     color: #160505;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.75);
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.75));
   }
   #scorebar-root[data-theme="fgc-strive-bolt"] .format-pill { background: #160505; color: #ffc426; }
 
-  /* 15. METRO NEON CLASH — SF6 STYLE (Split-Wing) */
+  /* 15. METRO NEON CLASH — SF6 STYLE (Hex Split-Wing) */
   #scorebar-root[data-theme="fgc-metro-clash"] {
     --p1-accent: #e11d48;
     --p2-accent: #2563eb;
@@ -1253,26 +1323,36 @@
     --score-bg-p1: linear-gradient(180deg, #9f1239, #4c0519);
     --score-bg-p2: linear-gradient(180deg, #1d4ed8, #172554);
   }
+  #scorebar-root[data-theme="fgc-metro-clash"] .sb-wing.p1 {
+    filter: drop-shadow(0 0 12px rgba(225, 29, 72, 0.5)) drop-shadow(0 4px 10px rgba(0,0,0,0.8));
+  }
+  #scorebar-root[data-theme="fgc-metro-clash"] .sb-wing.p2 {
+    filter: drop-shadow(0 0 12px rgba(37, 99, 235, 0.5)) drop-shadow(0 4px 10px rgba(0,0,0,0.8));
+  }
   #scorebar-root[data-theme="fgc-metro-clash"] .sb-wing.p1 .wing-plate {
     background: linear-gradient(90deg, rgba(110, 10, 35, 0.94), rgba(185, 22, 62, 0.94));
-    border: 2px solid #fb7185;
-    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 16px 100%);
-    box-shadow: 0 0 18px rgba(225, 29, 72, 0.45);
+    border-top: 2px solid #fb7185;
+    border-bottom: 2.5px solid #fb7185;
+    clip-path: polygon(16px 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 16px 100%, 0 50%);
   }
   #scorebar-root[data-theme="fgc-metro-clash"] .sb-wing.p2 .wing-plate {
     background: linear-gradient(270deg, rgba(16, 48, 128, 0.94), rgba(37, 99, 235, 0.94));
-    border: 2px solid #60a5fa;
-    clip-path: polygon(14px 0, 100% 0, calc(100% - 16px) 100%, 14px 100%, 0 50%);
-    box-shadow: 0 0 18px rgba(37, 99, 235, 0.45);
+    border-top: 2px solid #60a5fa;
+    border-bottom: 2.5px solid #60a5fa;
+    clip-path: polygon(16px 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 16px 100%, 0 50%);
   }
-  #scorebar-root[data-theme="fgc-metro-clash"] .sb-wing .score-box {
-    clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 12px 100%, 0 50%);
-    width: 68px;
+  #scorebar-root[data-theme="fgc-metro-clash"] .sb-wing.p1 .score-box {
+    width: 78px;
+    padding-right: 12px;
+  }
+  #scorebar-root[data-theme="fgc-metro-clash"] .sb-wing.p2 .score-box {
+    width: 78px;
+    padding-left: 12px;
   }
   #scorebar-root[data-theme="fgc-metro-clash"] .sb-center {
     clip-path: polygon(0 0, 100% 0, calc(100% - 18px) 100%, 18px 100%);
     border-bottom: 2px solid #d8b4fe;
-    box-shadow: 0 4px 18px rgba(147, 51, 234, 0.55);
+    filter: drop-shadow(0 4px 14px rgba(147, 51, 234, 0.55));
   }
   #scorebar-root[data-theme="fgc-metro-clash"] .format-pill { background: #fff; color: #581c87; }
 
@@ -1315,20 +1395,31 @@
     --score-bg-p2: linear-gradient(180deg, #ffffff, #e2e8f0);
     --score-text: #09090b;
   }
-  #scorebar-root[data-theme="fgc-hyper-flame"] .sb-wing { filter: drop-shadow(0 0 3px #ff5500) drop-shadow(0 3px 8px rgba(0,0,0,0.9)); }
+  #scorebar-root[data-theme="fgc-hyper-flame"] .sb-wing {
+    width: calc(648px + var(--wing-spread)) !important;
+    filter: drop-shadow(0 0 3px #ff5500) drop-shadow(0 3px 8px rgba(0,0,0,0.9));
+  }
   #scorebar-root[data-theme="fgc-hyper-flame"] .sb-wing.p1 .wing-plate {
-    clip-path: polygon(16px 0, 100% 0, calc(100% - 16px) 100%, 0 100%);
+    clip-path: polygon(0 0, calc(100% - var(--blade-slant, 16px)) 0, 100% 100%, var(--blade-slant, 16px) 100%);
+    padding-right: 12px;
     border-bottom: 2.5px solid var(--p1-accent);
   }
   #scorebar-root[data-theme="fgc-hyper-flame"] .sb-wing.p2 .wing-plate {
-    clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 100%, 16px 100%);
+    clip-path: polygon(var(--blade-slant, 16px) 0, 100% 0, calc(100% - var(--blade-slant, 16px)) 100%, 0 100%);
+    padding-left: 12px;
     border-bottom: 2.5px solid var(--p2-accent);
   }
-  #scorebar-root[data-theme="fgc-hyper-flame"] .sb-wing .score-box { text-shadow: none; width: 64px; }
-  #scorebar-root[data-theme="fgc-hyper-flame"] .sb-wing.p1 .score-box { clip-path: polygon(14px 0, 100% 0, calc(100% - 14px) 100%, 0 100%); }
-  #scorebar-root[data-theme="fgc-hyper-flame"] .sb-wing.p2 .score-box { clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 100%, 14px 100%); }
+  #scorebar-root[data-theme="fgc-hyper-flame"] .sb-wing .score-box { text-shadow: none; }
+  #scorebar-root[data-theme="fgc-hyper-flame"] .sb-wing.p1 .score-box {
+    clip-path: polygon(0 0, calc(100% - var(--blade-slant, 16px)) 0, 100% 100%, var(--blade-slant, 16px) 100%);
+    width: calc(54px + var(--blade-slant, 16px));
+  }
+  #scorebar-root[data-theme="fgc-hyper-flame"] .sb-wing.p2 .score-box {
+    clip-path: polygon(var(--blade-slant, 16px) 0, 100% 0, calc(100% - var(--blade-slant, 16px)) 100%, 0 100%);
+    width: calc(54px + var(--blade-slant, 16px));
+  }
   #scorebar-root[data-theme="fgc-hyper-flame"] .sb-center {
-    clip-path: polygon(22px 0, calc(100% - 22px) 0, 100% 100%, 0 100%);
+    clip-path: polygon(0 0, 100% 0, calc(100% - var(--blade-slant, 16px)) 100%, var(--blade-slant, 16px) 100%);
     border-bottom: 2.5px solid var(--center-accent);
     filter: drop-shadow(0 0 3px #ff5500);
   }
@@ -1401,22 +1492,30 @@
     background: linear-gradient(90deg, #00b4ff 0%, #ffd75e 50%, #ff2e55 100%);
     height: 4px;
   }
+  #scorebar-root[data-theme="t8-evo-grand-finals"] .sb-wing.p1 { filter: drop-shadow(0 5px 14px rgba(0, 149, 255, 0.3)) drop-shadow(0 3px 8px rgba(0,0,0,0.85)); }
+  #scorebar-root[data-theme="t8-evo-grand-finals"] .sb-wing.p2 { filter: drop-shadow(0 5px 14px rgba(255, 46, 85, 0.3)) drop-shadow(0 3px 8px rgba(0,0,0,0.85)); }
   #scorebar-root[data-theme="t8-evo-grand-finals"] .sb-wing.p1 .wing-plate {
-    clip-path: polygon(0 0, 100% 0, calc(100% - 16px) 100%, 12px 100%);
+    clip-path: polygon(0 0, calc(100% - var(--blade-slant, 16px)) 0, 100% 100%, var(--blade-slant, 16px) 100%);
     border-top: 2px solid var(--p1-accent);
-    border-bottom: 2.5px solid rgba(255, 215, 94, 0.75);
-    box-shadow: 0 6px 24px rgba(0, 149, 255, 0.25);
+    border-bottom: 2.5px solid rgba(255, 215, 94, 0.78);
   }
   #scorebar-root[data-theme="t8-evo-grand-finals"] .sb-wing.p2 .wing-plate {
-    clip-path: polygon(0 0, 100% 0, calc(100% - 12px) 100%, 16px 100%);
+    clip-path: polygon(var(--blade-slant, 16px) 0, 100% 0, calc(100% - var(--blade-slant, 16px)) 100%, 0 100%);
     border-top: 2px solid var(--p2-accent);
-    border-bottom: 2.5px solid rgba(255, 215, 94, 0.75);
-    box-shadow: 0 6px 24px rgba(255, 46, 85, 0.25);
+    border-bottom: 2.5px solid rgba(255, 215, 94, 0.78);
+  }
+  #scorebar-root[data-theme="t8-evo-grand-finals"] .sb-wing.p1 .score-box {
+    clip-path: polygon(0 0, calc(100% - var(--blade-slant, 16px)) 0, 100% 100%, var(--blade-slant, 16px) 100%);
+    width: calc(60px + var(--blade-slant, 16px));
+  }
+  #scorebar-root[data-theme="t8-evo-grand-finals"] .sb-wing.p2 .score-box {
+    clip-path: polygon(var(--blade-slant, 16px) 0, 100% 0, calc(100% - var(--blade-slant, 16px)) 100%, 0 100%);
+    width: calc(60px + var(--blade-slant, 16px));
   }
   #scorebar-root[data-theme="t8-evo-grand-finals"] .sb-center {
     clip-path: polygon(0 0, 100% 0, calc(100% - 18px) 100%, 18px 100%);
     border-bottom: 3px solid var(--center-accent);
-    box-shadow: 0 6px 24px rgba(255, 215, 94, 0.35);
+    filter: drop-shadow(0 5px 14px rgba(255, 215, 94, 0.35));
   }
 
   /* 21. TWT FINALS PRO — 1:1 TRIBUTE TO OFFICIAL TEKKEN WORLD TOUR GRAND FINALS! */
@@ -1480,7 +1579,7 @@
   #scorebar-root[data-theme="t8-ewc-riyadh"] .sb-wing.p2 .wing-plate { border-bottom-color: var(--p2-accent); }
   #scorebar-root[data-theme="t8-ewc-riyadh"] .sb-wing .score-box { text-shadow: none; }
   #scorebar-root[data-theme="t8-ewc-riyadh"] .sb-center {
-    clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 100%, 0 100%);
+    clip-path: polygon(0 0, 100% 0, calc(100% - 14px) 100%, 14px 100%);
     border-bottom: 2.5px solid var(--center-accent);
   }
 
@@ -1495,17 +1594,25 @@
     --score-bg-p1: linear-gradient(135deg, #ff1e1e, #ff8800);
     --score-bg-p2: linear-gradient(135deg, #ff7b00, #c81414);
   }
+  #scorebar-root[data-theme="t8-jin-flame"] .sb-wing.p1 { filter: drop-shadow(0 5px 14px rgba(255, 46, 31, 0.4)) drop-shadow(0 3px 8px rgba(0,0,0,0.85)); }
+  #scorebar-root[data-theme="t8-jin-flame"] .sb-wing.p2 { filter: drop-shadow(0 5px 14px rgba(255, 140, 26, 0.4)) drop-shadow(0 3px 8px rgba(0,0,0,0.85)); }
   #scorebar-root[data-theme="t8-jin-flame"] .sb-wing.p1 .wing-plate {
-    clip-path: polygon(0 0, 100% 0, calc(100% - 18px) 100%, 0 100%);
+    clip-path: polygon(0 0, calc(100% - var(--blade-slant, 18px)) 0, 100% 100%, var(--blade-slant, 18px) 100%);
+    border-top: 2px solid rgba(255, 255, 255, 0.8);
     border-bottom: 3.5px solid #ff3b1f;
-    border-left: 4px solid #fff;
-    box-shadow: 0 6px 22px rgba(255, 46, 31, 0.35);
   }
   #scorebar-root[data-theme="t8-jin-flame"] .sb-wing.p2 .wing-plate {
-    clip-path: polygon(0 0, 100% 0, 100% 100%, 18px 100%);
+    clip-path: polygon(var(--blade-slant, 18px) 0, 100% 0, calc(100% - var(--blade-slant, 18px)) 100%, 0 100%);
+    border-top: 2px solid rgba(255, 255, 255, 0.8);
     border-bottom: 3.5px solid #ff8c1a;
-    border-right: 4px solid #fff;
-    box-shadow: 0 6px 22px rgba(255, 140, 26, 0.35);
+  }
+  #scorebar-root[data-theme="t8-jin-flame"] .sb-wing.p1 .score-box {
+    clip-path: polygon(0 0, calc(100% - var(--blade-slant, 18px)) 0, 100% 100%, var(--blade-slant, 18px) 100%);
+    width: calc(60px + var(--blade-slant, 18px));
+  }
+  #scorebar-root[data-theme="t8-jin-flame"] .sb-wing.p2 .score-box {
+    clip-path: polygon(var(--blade-slant, 18px) 0, 100% 0, calc(100% - var(--blade-slant, 18px)) 100%, 0 100%);
+    width: calc(60px + var(--blade-slant, 18px));
   }
   #scorebar-root[data-theme="t8-jin-flame"] .sb-center {
     clip-path: polygon(0 0, 100% 0, calc(100% - 16px) 100%, 16px 100%);
@@ -1523,19 +1630,27 @@
     --score-bg-p1: linear-gradient(135deg, #e11d48, #6b0220);
     --score-bg-p2: linear-gradient(135deg, #9333ea, #3b0764);
   }
+  #scorebar-root[data-theme="t8-kazuya-crimson"] .sb-wing.p1 { filter: drop-shadow(0 0 12px rgba(190, 18, 60, 0.45)) drop-shadow(0 4px 10px rgba(0,0,0,0.85)); }
+  #scorebar-root[data-theme="t8-kazuya-crimson"] .sb-wing.p2 { filter: drop-shadow(0 0 12px rgba(126, 34, 206, 0.45)) drop-shadow(0 4px 10px rgba(0,0,0,0.85)); }
   #scorebar-root[data-theme="t8-kazuya-crimson"] .sb-wing .wing-plate {
-    border: 1.5px solid rgba(244, 63, 94, 0.45);
+    border-top: 1.5px solid rgba(244, 63, 94, 0.55);
     border-bottom: 3px solid var(--p1-accent);
-    box-shadow: 0 0 24px rgba(190, 18, 60, 0.35);
   }
   #scorebar-root[data-theme="t8-kazuya-crimson"] .sb-wing.p1 .wing-plate {
-    clip-path: polygon(12px 0, 100% 0, calc(100% - 14px) 100%, 0 100%);
+    clip-path: polygon(0 0, calc(100% - var(--blade-slant, 14px)) 0, 100% 100%, var(--blade-slant, 14px) 100%);
   }
   #scorebar-root[data-theme="t8-kazuya-crimson"] .sb-wing.p2 .wing-plate {
-    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 100%, 14px 100%);
-    border-color: rgba(168, 85, 247, 0.5);
+    clip-path: polygon(var(--blade-slant, 14px) 0, 100% 0, calc(100% - var(--blade-slant, 14px)) 100%, 0 100%);
+    border-top-color: rgba(168, 85, 247, 0.6);
     border-bottom-color: var(--p2-accent);
-    box-shadow: 0 0 24px rgba(126, 34, 206, 0.4);
+  }
+  #scorebar-root[data-theme="t8-kazuya-crimson"] .sb-wing.p1 .score-box {
+    clip-path: polygon(0 0, calc(100% - var(--blade-slant, 14px)) 0, 100% 100%, var(--blade-slant, 14px) 100%);
+    width: calc(60px + var(--blade-slant, 14px));
+  }
+  #scorebar-root[data-theme="t8-kazuya-crimson"] .sb-wing.p2 .score-box {
+    clip-path: polygon(var(--blade-slant, 14px) 0, 100% 0, calc(100% - var(--blade-slant, 14px)) 100%, 0 100%);
+    width: calc(60px + var(--blade-slant, 14px));
   }
   #scorebar-root[data-theme="t8-kazuya-crimson"] .sb-center {
     clip-path: polygon(0 0, 100% 0, calc(100% - 18px) 100%, 18px 100%);
@@ -1933,7 +2048,7 @@
   #scorebar-root[data-flag-style="twt-code"] .flags-group.is-dual .flag-wrap {
     width: calc(var(--flag-w, 62px) * 0.78 + var(--blade-slant, 22px)) !important;
   }
-  /* Exact parallel diagonal parallelogram cuts */
+  /* Exact parallel diagonal cuts — outer edge conforms cleanly to ANY wing shape (hex, flat, rounded, blade) when outer-blade is off! */
   #scorebar-root[data-flag-style="blade-twt"] .sb-wing.p1 .flag-wrap,
   #scorebar-root[data-flag-style="twt-code"] .sb-wing.p1 .flag-wrap {
     clip-path: polygon(0 0, calc(100% - var(--blade-slant, 22px)) 0, 100% 100%, var(--blade-slant, 22px) 100%);
@@ -1941,6 +2056,18 @@
   #scorebar-root[data-flag-style="blade-twt"] .sb-wing.p2 .flag-wrap,
   #scorebar-root[data-flag-style="twt-code"] .sb-wing.p2 .flag-wrap {
     clip-path: polygon(var(--blade-slant, 22px) 0, 100% 0, calc(100% - var(--blade-slant, 22px)) 100%, 0 100%);
+  }
+  #scorebar-root[data-flag-style="blade-twt"][data-outer-blade="off"] .sb-wing.p1 .flag-primary,
+  #scorebar-root[data-flag-style="twt-code"][data-outer-blade="off"] .sb-wing.p1 .flag-primary,
+  #scorebar-root[data-flag-style="blade-twt"][data-outer-blade="off"] .sb-wing.p1 .flags-group:not(.is-dual) .flag-region,
+  #scorebar-root[data-flag-style="twt-code"][data-outer-blade="off"] .sb-wing.p1 .flags-group:not(.is-dual) .flag-region {
+    clip-path: polygon(0 0, calc(100% - var(--blade-slant, 22px)) 0, 100% 100%, 0 100%);
+  }
+  #scorebar-root[data-flag-style="blade-twt"][data-outer-blade="off"] .sb-wing.p2 .flag-primary,
+  #scorebar-root[data-flag-style="twt-code"][data-outer-blade="off"] .sb-wing.p2 .flag-primary,
+  #scorebar-root[data-flag-style="blade-twt"][data-outer-blade="off"] .sb-wing.p2 .flags-group:not(.is-dual) .flag-region,
+  #scorebar-root[data-flag-style="twt-code"][data-outer-blade="off"] .sb-wing.p2 .flags-group:not(.is-dual) .flag-region {
+    clip-path: polygon(var(--blade-slant, 22px) 0, 100% 0, 100% 100%, 0 100%);
   }
   /* Seamless 3px parallel interlock between Country Flag & CCAA/Region Flag! */
   #scorebar-root[data-flag-style="blade-twt"] .sb-wing.p1 .flags-group.is-dual .flag-region,
@@ -2011,6 +2138,7 @@
   #scorebar-root[data-theme="t8-mishima-electric"],
   #scorebar-root[data-theme="t8-g-corp-tactical"],
   #scorebar-root[data-theme="t8-evo-grand-finals"],
+  #scorebar-root[data-theme="t8-jin-flame"],
   #scorebar-root[data-theme="t8-kazuya-crimson"],
   #scorebar-root[data-theme="t8-yakushima-jade"],
   #scorebar-root[data-theme="t8-urban-square-neon"],
@@ -2064,53 +2192,64 @@
     order: 3;
   }
 
-  /* MODE B: fade-blend (Full-Height Flag Melting Smoothly Into the Dark Scorebar!) */
+  /* MODE B: fade-blend (Full-Height Flag Melting Smoothly Into the Scorebar — Cubic Multi-Stop Fade-In / Fade-Out Engine!) */
   #scorebar-root[data-flag-style="fade-blend"] .flags-group {
     height: 100%;
     align-items: stretch;
     gap: 0;
     padding: 0 !important;
+    overflow: hidden;
+    -webkit-mask-image: var(--flag-mask-p1, linear-gradient(90deg, #000 0%, #000 34%, transparent 98%));
+    mask-image: var(--flag-mask-p1, linear-gradient(90deg, #000 0%, #000 34%, transparent 98%));
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+  }
+  #scorebar-root[data-flag-style="fade-blend"] .sb-wing.p2 .flags-group {
+    -webkit-mask-image: var(--flag-mask-p2, linear-gradient(270deg, #000 0%, #000 34%, transparent 98%));
+    mask-image: var(--flag-mask-p2, linear-gradient(270deg, #000 0%, #000 34%, transparent 98%));
   }
   #scorebar-root[data-flag-style="fade-blend"][data-outer-blade="on"] .sb-wing.p1 .flags-group { margin-left: 7px; }
   #scorebar-root[data-flag-style="fade-blend"][data-outer-blade="on"] .sb-wing.p2 .flags-group { margin-right: 7px; }
   #scorebar-root[data-flag-style="fade-blend"] .flag-wrap {
     height: 100% !important;
-    width: calc(var(--flag-w, 62px) + var(--blade-slant, 22px) + 14px) !important;
+    width: calc(var(--flag-w, 62px) + 38px) !important;
     border-radius: 0 !important;
     box-shadow: none !important;
+    clip-path: none !important;
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
   }
   #scorebar-root[data-flag-style="fade-blend"] .flags-group.is-dual .flag-wrap {
-    width: calc(var(--flag-w, 62px) * 0.8 + var(--blade-slant, 22px) + 8px) !important;
+    width: calc(var(--flag-w, 62px) * 0.78 + 22px) !important;
   }
-  #scorebar-root[data-flag-style="fade-blend"] .sb-wing.p1 .flag-primary {
-    clip-path: polygon(0 0, 100% 0, 100% 100%, var(--blade-slant, 22px) 100%);
-    -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 58%, transparent 100%);
-    mask-image: linear-gradient(90deg, #000 0%, #000 58%, transparent 100%);
-  }
-  #scorebar-root[data-flag-style="fade-blend"] .sb-wing.p1 .flags-group.is-dual .flag-primary {
-    clip-path: polygon(0 0, calc(100% - var(--blade-slant, 22px)) 0, 100% 100%, var(--blade-slant, 22px) 100%);
-    -webkit-mask-image: none; mask-image: none;
-  }
+  /* Seamless soft crossfade between Country & Region when both are shown in fade-blend */
   #scorebar-root[data-flag-style="fade-blend"] .sb-wing.p1 .flags-group.is-dual .flag-region {
-    margin-left: calc(var(--blade-slant, 22px) * -1 + 2px);
-    clip-path: polygon(0 0, 100% 0, 100% 100%, var(--blade-slant, 22px) 100%);
-    -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 54%, transparent 100%);
-    mask-image: linear-gradient(90deg, #000 0%, #000 54%, transparent 100%);
-  }
-  #scorebar-root[data-flag-style="fade-blend"] .sb-wing.p2 .flag-primary {
-    clip-path: polygon(0 0, 100% 0, calc(100% - var(--blade-slant, 22px)) 100%, 0 100%);
-    -webkit-mask-image: linear-gradient(270deg, #000 0%, #000 58%, transparent 100%);
-    mask-image: linear-gradient(270deg, #000 0%, #000 58%, transparent 100%);
-  }
-  #scorebar-root[data-flag-style="fade-blend"] .sb-wing.p2 .flags-group.is-dual .flag-primary {
-    clip-path: polygon(var(--blade-slant, 22px) 0, 100% 0, calc(100% - var(--blade-slant, 22px)) 100%, 0 100%);
-    -webkit-mask-image: none; mask-image: none;
+    margin-left: -14px;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.45) 14%, #000 30%, #000 100%) !important;
+    mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.45) 14%, #000 30%, #000 100%) !important;
   }
   #scorebar-root[data-flag-style="fade-blend"] .sb-wing.p2 .flags-group.is-dual .flag-region {
-    margin-right: calc(var(--blade-slant, 22px) * -1 + 2px);
-    clip-path: polygon(0 0, 100% 0, calc(100% - var(--blade-slant, 22px)) 100%, 0 100%);
-    -webkit-mask-image: linear-gradient(270deg, #000 0%, #000 54%, transparent 100%);
-    mask-image: linear-gradient(270deg, #000 0%, #000 54%, transparent 100%);
+    margin-right: -14px;
+    -webkit-mask-image: linear-gradient(270deg, transparent 0%, rgba(0,0,0,0.45) 14%, #000 30%, #000 100%) !important;
+    mask-image: linear-gradient(270deg, transparent 0%, rgba(0,0,0,0.45) 14%, #000 30%, #000 100%) !important;
+  }
+  #scorebar-root[data-flag-style="fade-blend"] .flag-wrap svg {
+    width: 100%;
+    height: 100%;
+    transform: scale(var(--flag-zoom, 1.08)) translateX(var(--flag-shift-x, 0%));
+    filter: saturate(var(--flag-sat, 1)) brightness(var(--flag-bright, 0.96));
+    transform-origin: center center;
+  }
+  #scorebar-root[data-flag-style="fade-blend"] .sb-wing.p2 .flag-wrap svg {
+    transform: scale(var(--flag-zoom, 1.08)) translateX(calc(var(--flag-shift-x, 0%) * -1));
+  }
+  #scorebar-root[data-flag-style="fade-blend"] .sb-wing.p1 .flags-group:not(.hidden-el) ~ .player-info {
+    padding-left: 6px;
+  }
+  #scorebar-root[data-flag-style="fade-blend"] .sb-wing.p2 .flags-group:not(.hidden-el) ~ .player-info {
+    padding-right: 6px;
   }
 
   /* MODE C: split-dual (Country Top + CCAA/Region Bottom inside ONE Single Slanted Blade!) */
@@ -2193,24 +2332,30 @@
     backdrop-filter: blur(12px);
   }
 
-  /* --- 3. Shape Overrides (Dynamic --blade-slant works on ANY theme!) --- */
+  /* --- 3. Shape Overrides (Dynamic --blade-slant & matching score-box on ANY theme!) --- */
   #scorebar-root[data-shape="blade-slant"] .sb-wing.p1 .wing-plate { clip-path: polygon(0 0, calc(100% - var(--blade-slant, 24px)) 0, 100% 100%, var(--blade-slant, 24px) 100%) !important; border-radius: 0 !important; transform: none !important; }
   #scorebar-root[data-shape="blade-slant"] .sb-wing.p2 .wing-plate { clip-path: polygon(var(--blade-slant, 24px) 0, 100% 0, calc(100% - var(--blade-slant, 24px)) 100%, 0 100%) !important; border-radius: 0 !important; transform: none !important; }
-  #scorebar-root[data-shape="blade-slant"] .sb-wing.p1 .score-box { width: calc(60px + var(--blade-slant, 24px)) !important; clip-path: polygon(0 0, calc(100% - var(--blade-slant, 24px)) 0, 100% 100%, var(--blade-slant, 24px) 100%) !important; }
-  #scorebar-root[data-shape="blade-slant"] .sb-wing.p2 .score-box { width: calc(60px + var(--blade-slant, 24px)) !important; clip-path: polygon(var(--blade-slant, 24px) 0, 100% 0, calc(100% - var(--blade-slant, 24px)) 100%, 0 100%) !important; }
+  #scorebar-root[data-shape="blade-slant"] .sb-wing.p1 .score-box { width: calc(60px + var(--blade-slant, 24px)) !important; padding: 0 !important; clip-path: polygon(0 0, calc(100% - var(--blade-slant, 24px)) 0, 100% 100%, var(--blade-slant, 24px) 100%) !important; }
+  #scorebar-root[data-shape="blade-slant"] .sb-wing.p2 .score-box { width: calc(60px + var(--blade-slant, 24px)) !important; padding: 0 !important; clip-path: polygon(var(--blade-slant, 24px) 0, 100% 0, calc(100% - var(--blade-slant, 24px)) 100%, 0 100%) !important; }
 
   #scorebar-root[data-shape="diagonal"] .sb-wing.p1 .wing-plate { clip-path: polygon(0 0, calc(100% - var(--blade-slant, 16px)) 0, 100% 100%, var(--blade-slant, 16px) 100%) !important; border-radius: 0 !important; transform: none !important; }
   #scorebar-root[data-shape="diagonal"] .sb-wing.p2 .wing-plate { clip-path: polygon(var(--blade-slant, 16px) 0, 100% 0, calc(100% - var(--blade-slant, 16px)) 100%, 0 100%) !important; border-radius: 0 !important; transform: none !important; }
+  #scorebar-root[data-shape="diagonal"] .sb-wing.p1 .score-box { width: calc(58px + var(--blade-slant, 16px)) !important; padding: 0 !important; clip-path: polygon(0 0, calc(100% - var(--blade-slant, 16px)) 0, 100% 100%, var(--blade-slant, 16px) 100%) !important; }
+  #scorebar-root[data-shape="diagonal"] .sb-wing.p2 .score-box { width: calc(58px + var(--blade-slant, 16px)) !important; padding: 0 !important; clip-path: polygon(var(--blade-slant, 16px) 0, 100% 0, calc(100% - var(--blade-slant, 16px)) 100%, 0 100%) !important; }
   #scorebar-root[data-shape="diagonal"] .sb-center { clip-path: polygon(0 0, 100% 0, calc(100% - var(--blade-slant, 16px)) 100%, var(--blade-slant, 16px) 100%) !important; border-radius: 0 !important; }
 
   #scorebar-root[data-shape="bevel"] .sb-wing .wing-plate { clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px) !important; border-radius: 0 !important; transform: none !important; }
+  #scorebar-root[data-shape="bevel"] .sb-wing .score-box { clip-path: none !important; width: 68px !important; padding: 0 !important; }
   #scorebar-root[data-shape="bevel"] .sb-center { clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 10px)) !important; border-radius: 0 !important; }
 
-  #scorebar-root[data-shape="hex"] .sb-wing .wing-plate { clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 14px 100%, 0 50%) !important; border-radius: 0 !important; transform: none !important; }
+  #scorebar-root[data-shape="hex"] .sb-wing .wing-plate { clip-path: polygon(16px 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 16px 100%, 0 50%) !important; border-radius: 0 !important; transform: none !important; }
+  #scorebar-root[data-shape="hex"] .sb-wing.p1 .score-box { clip-path: none !important; width: 78px !important; padding-right: 12px !important; padding-left: 0 !important; }
+  #scorebar-root[data-shape="hex"] .sb-wing.p2 .score-box { clip-path: none !important; width: 78px !important; padding-left: 12px !important; padding-right: 0 !important; }
   #scorebar-root[data-shape="hex"] .sb-center { clip-path: polygon(16px 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 16px 100%, 0 50%) !important; border-radius: 0 !important; }
 
   #scorebar-root[data-shape="skew"] .sb-wing.p1 .wing-plate { clip-path: none !important; border-radius: 4px !important; transform: skewX(-14deg) !important; }
   #scorebar-root[data-shape="skew"] .sb-wing.p2 .wing-plate { clip-path: none !important; border-radius: 4px !important; transform: skewX(14deg) !important; }
+  #scorebar-root[data-shape="skew"] .sb-wing .score-box { clip-path: none !important; width: 64px !important; padding: 0 !important; }
   #scorebar-root[data-shape="skew"] .sb-wing.p1 .player-info,
   #scorebar-root[data-shape="skew"] .sb-wing.p1 .score-num { transform: skewX(14deg); }
   #scorebar-root[data-shape="skew"] .sb-wing.p2 .player-info,
@@ -2218,8 +2363,12 @@
 
   #scorebar-root[data-shape="flat"] .sb-wing .wing-plate,
   #scorebar-root[data-shape="flat"] .sb-center { clip-path: none !important; border-radius: 0 !important; transform: none !important; }
+  #scorebar-root[data-shape="flat"] .sb-wing .score-box { clip-path: none !important; width: 64px !important; padding: 0 !important; }
+  #scorebar-root[data-shape="flat"][data-layout="crown"] .sb-wing .score-box { width: 54px !important; }
 
   #scorebar-root[data-shape="rounded"] .sb-wing .wing-plate { clip-path: none !important; border-radius: 12px !important; transform: none !important; }
+  #scorebar-root[data-shape="rounded"] .sb-wing .score-box { clip-path: none !important; width: 64px !important; padding: 0 !important; }
+  #scorebar-root[data-shape="rounded"][data-layout="crown"] .sb-wing .score-box { width: 54px !important; }
   #scorebar-root[data-shape="rounded"] .sb-center { clip-path: none !important; border-radius: 0 0 12px 12px !important; }
 
   /* --- 4. Border Overrides --- */
@@ -2664,7 +2813,7 @@
     't8-heat-ignited':       { layout: 'split', scorePos: 'inner', flagStyle: 'blade-twt',  centerStyle: 'trapezoid', outerBlade: 'off', slant: 14 },
     't8-twt-official':       { layout: 'crown', scorePos: 'inner', flagStyle: 'blade-twt',  centerStyle: 'trapezoid', outerBlade: 'off', slant: 14 },
     't8-iron-fist-gold':     { layout: 'crown', scorePos: 'inner', flagStyle: 'blade-twt',  centerStyle: 'trapezoid', outerBlade: 'off', slant: 16 },
-    't8-ewc-riyadh':         { layout: 'crown', scorePos: 'inner', flagStyle: 'fade-blend', centerStyle: 'theme',     outerBlade: 'off', slant: 14 },
+    't8-ewc-riyadh':         { layout: 'crown', scorePos: 'inner', flagStyle: 'fade-blend', centerStyle: 'trapezoid', outerBlade: 'off', slant: 14 },
     't8-mishima-electric':   { layout: 'split', scorePos: 'inner', flagStyle: 'fade-blend', centerStyle: 'hex',       outerBlade: 'off', slant: 16 },
     't8-devil-gene':         { layout: 'split', scorePos: 'inner', flagStyle: 'blade-twt',  centerStyle: 'trapezoid', outerBlade: 'off', slant: 18 },
     't8-g-corp-tactical':    { layout: 'arch',  scorePos: 'inner', flagStyle: 'blade-twt',  centerStyle: 'trapezoid', outerBlade: 'off', slant: 14 },
@@ -2682,10 +2831,10 @@
     't8-prism-holo':         { layout: 'split', scorePos: 'inner', flagStyle: 'bezel',      centerStyle: 'pill',      outerBlade: 'off', slant: 12 },
     't8-sakura-dojo':        { layout: 'split', scorePos: 'inner', flagStyle: 'fade-blend', centerStyle: 'pill',      outerBlade: 'off', slant: 14 },
     'fgc-hex-arcane':        { layout: 'crown', scorePos: 'outer', flagStyle: 'bezel',      centerStyle: 'hex',       outerBlade: 'off', slant: 12 },
-    'fgc-strive-bolt':       { layout: 'split', scorePos: 'inner', flagStyle: 'bezel',      centerStyle: 'theme',     outerBlade: 'off', slant: 12 },
+    'fgc-strive-bolt':       { layout: 'split', scorePos: 'inner', flagStyle: 'bezel',      centerStyle: 'trapezoid', outerBlade: 'off', slant: 12 },
     'fgc-metro-clash':       { layout: 'split', scorePos: 'inner', flagStyle: 'blade-twt',  centerStyle: 'trapezoid', outerBlade: 'off', slant: 16 },
     'fgc-clean-major':       { layout: 'crown', scorePos: 'outer', flagStyle: 'classic',    centerStyle: 'theme',     outerBlade: 'off', slant: 10 },
-    'fgc-hyper-flame':       { layout: 'crown', scorePos: 'inner', flagStyle: 'blade-twt',  centerStyle: 'theme',     outerBlade: 'off', slant: 16 },
+    'fgc-hyper-flame':       { layout: 'crown', scorePos: 'inner', flagStyle: 'blade-twt',  centerStyle: 'trapezoid', outerBlade: 'off', slant: 16 },
     't8-glass-minimal':      { layout: 'split', scorePos: 'inner', flagStyle: 'bezel',      centerStyle: 'pill',      outerBlade: 'off', slant: 12 },
     't8-arcade-1997':        { layout: 'crown', scorePos: 'inner', flagStyle: 'classic',    centerStyle: 'theme',     outerBlade: 'off', slant: 10 }
   };
@@ -2712,6 +2861,70 @@
     const g = parseInt(full.slice(2, 4), 16) || 0;
     const b = parseInt(full.slice(4, 6), 16) || 0;
     return `rgba(${r}, ${g}, ${b}, ${alpha01.toFixed(2)})`;
+  }
+
+  /* Cubic-Eased Multi-Stop Flag Fade-In / Fade-Out Mask Generator */
+  function buildFlagFadeMask(side, st) {
+    const mode = st.flagFadeMode || 'fade-out';
+    const curve = st.flagFadeCurve || 'smooth';
+    const rawIn = Math.max(0, Math.min(45, Number(st.flagFadeIn ?? 0)));
+    const fadeIn = (mode === 'both' || mode === 'fade-in') ? Math.max(rawIn, 4) : rawIn;
+    const fadeEnd = Math.max(30, Math.min(100, Number(st.flagFadeEnd ?? 98)));
+    const fadeStart = Math.max(fadeIn + 2, Math.min(fadeEnd - 4, Number(st.flagFadeStart ?? 34)));
+    const rawAngle = Math.max(-35, Math.min(35, Number(st.flagFadeAngle ?? 0)));
+    const effTilt = mode === 'diagonal' ? (rawAngle || 18) : rawAngle;
+
+    const ease = (t) => {
+      const c = Math.max(0, Math.min(1, t));
+      if (curve === 'linear') return c;
+      if (curve === 'soft') return Math.pow(c, 1.85);
+      if (curve === 'sharp') return c < 0.5 ? 2 * c * c : 1 - Math.pow(-2 * c + 2, 2) / 2;
+      return c * c * (3 - 2 * c);
+    };
+
+    if (mode === 'vignette') {
+      const cx = side === 'p1' ? 42 : 58;
+      const innerR = Math.max(18, Math.min(68, fadeStart * 0.85));
+      const outerR = Math.max(innerR + 12, Math.min(100, fadeEnd));
+      const stops = [`rgba(0,0,0,1) 0%`, `rgba(0,0,0,1) ${innerR.toFixed(1)}%`];
+      const steps = 6;
+      for (let i = 1; i <= steps; i++) {
+        const u = i / steps;
+        const pct = innerR + (outerR - innerR) * u;
+        stops.push(`rgba(0,0,0,${ease(1 - u).toFixed(3)}) ${pct.toFixed(1)}%`);
+      }
+      if (outerR < 100) stops.push(`rgba(0,0,0,0) 100%`);
+      return `radial-gradient(ellipse 88% 125% at ${cx}% 50%, ${stops.join(', ')})`;
+    }
+
+    // CSS gradient normal perpendicular to blade slant: P1 = 90 - tilt (\), P2 = 270 + tilt (/)
+    const deg = side === 'p1' ? (90 - effTilt) : (270 + effTilt);
+    const stops = [];
+
+    if (fadeIn > 0) {
+      const inSteps = 5;
+      for (let i = 0; i <= inSteps; i++) {
+        const u = i / inSteps;
+        stops.push(`rgba(0,0,0,${ease(u).toFixed(3)}) ${(fadeIn * u).toFixed(1)}%`);
+      }
+    } else {
+      stops.push(`rgba(0,0,0,1) 0%`);
+    }
+
+    if (mode === 'fade-in') {
+      stops.push(`rgba(0,0,0,1) 100%`);
+    } else {
+      stops.push(`rgba(0,0,0,1) ${fadeStart.toFixed(1)}%`);
+      const outSteps = 7;
+      for (let i = 1; i <= outSteps; i++) {
+        const u = i / outSteps;
+        const pct = fadeStart + (fadeEnd - fadeStart) * u;
+        stops.push(`rgba(0,0,0,${ease(1 - u).toFixed(3)}) ${pct.toFixed(1)}%`);
+      }
+      if (fadeEnd < 100) stops.push(`rgba(0,0,0,0) 100%`);
+    }
+
+    return `linear-gradient(${deg}deg, ${stops.join(', ')})`;
   }
 
   /* Offline Vector SVG Flag Registry loaded from flags.js (114+ flags) */
@@ -3043,6 +3256,12 @@
     }
     els.root.style.setProperty('--flag-w', `${Number(st.flagWidth || 62)}px`);
     els.root.style.setProperty('--flag-opacity', (Number(st.flagOpacity ?? 100) / 100).toFixed(2));
+    els.root.style.setProperty('--flag-mask-p1', buildFlagFadeMask('p1', st));
+    els.root.style.setProperty('--flag-mask-p2', buildFlagFadeMask('p2', st));
+    els.root.style.setProperty('--flag-zoom', (Number(st.flagZoom ?? 108) / 100).toFixed(2));
+    els.root.style.setProperty('--flag-shift-x', `${Number(st.flagShiftX ?? 0)}%`);
+    els.root.style.setProperty('--flag-sat', (Number(st.flagSaturation ?? 100) / 100).toFixed(2));
+    els.root.style.setProperty('--flag-bright', (Number(st.flagBrightness ?? 96) / 100).toFixed(2));
 
     // Typography variables
     if (st.fontName && st.fontName !== 'theme' && FONT_STACKS[st.fontName]) {

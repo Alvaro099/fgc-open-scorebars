@@ -1278,15 +1278,19 @@
   .mt-flags.fs-blade .mt-flag { width: 24px; }
   .mt-wing.p1 .mt-flags.fs-blade .mt-flag { clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 100%, 7px 100%); }
   .mt-wing.p2 .mt-flags.fs-blade .mt-flag { clip-path: polygon(7px 0, 100% 0, calc(100% - 7px) 100%, 0 100%); }
+  .mt-wing.sh-hex.p1 .mt-flags.fs-blade .mt-flag:first-child,
+  .mt-wing.sh-flat.p1 .mt-flags.fs-blade .mt-flag:first-child { clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 100%, 0 100%); }
+  .mt-wing.sh-hex.p2 .mt-flags.fs-blade .mt-flag:first-child,
+  .mt-wing.sh-flat.p2 .mt-flags.fs-blade .mt-flag:first-child { clip-path: polygon(7px 0, 100% 0, 100% 100%, 0 100%); }
   .mt-wing.p1 .mt-flags.fs-blade .mt-flag + .mt-flag { margin-left: -6px; }
   .mt-wing.p2 .mt-flags.fs-blade .mt-flag + .mt-flag { margin-right: -6px; }
   .mt-slash { width: 9px; height: 100%; flex-shrink: 0; }
   .mt-wing.p1 .mt-slash { margin-left: -6px; clip-path: polygon(0 0, 2.5px 0, 9px 100%, 6.5px 100%); }
   .mt-wing.p2 .mt-slash { margin-right: -6px; clip-path: polygon(6.5px 0, 9px 0, 2.5px 100%, 0 100%); }
 
-  .mt-flags.fs-fade .mt-flag { width: 26px; }
-  .mt-wing.p1 .mt-flags.fs-fade .mt-flag:last-child { -webkit-mask-image: linear-gradient(90deg, #000 45%, transparent 100%); mask-image: linear-gradient(90deg, #000 45%, transparent 100%); }
-  .mt-wing.p2 .mt-flags.fs-fade .mt-flag:last-child { -webkit-mask-image: linear-gradient(270deg, #000 45%, transparent 100%); mask-image: linear-gradient(270deg, #000 45%, transparent 100%); }
+  .mt-flags.fs-fade .mt-flag { width: 28px; }
+  .mt-wing.p1 .mt-flags.fs-fade { -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 32%, rgba(0,0,0,0.65) 58%, rgba(0,0,0,0.18) 82%, transparent 100%); mask-image: linear-gradient(90deg, #000 0%, #000 32%, rgba(0,0,0,0.65) 58%, rgba(0,0,0,0.18) 82%, transparent 100%); }
+  .mt-wing.p2 .mt-flags.fs-fade { -webkit-mask-image: linear-gradient(270deg, #000 0%, #000 32%, rgba(0,0,0,0.65) 58%, rgba(0,0,0,0.18) 82%, transparent 100%); mask-image: linear-gradient(270deg, #000 0%, #000 32%, rgba(0,0,0,0.65) 58%, rgba(0,0,0,0.18) 82%, transparent 100%); }
 
   .mt-flags.fs-bezel, .mt-flags.fs-classic { padding: 0 4px; gap: 2.5px; }
   .mt-flags.fs-bezel .mt-flag, .mt-flags.fs-classic .mt-flag {
@@ -1909,6 +1913,167 @@
   }
   .roster-chip-btns { display: flex; gap: 3px; flex-shrink: 0; }
   .roster-chip-btns button { padding: 2px 5px; font-size: 10px; border-radius: 4px; }
+
+  /* FLAG FADE-IN / FADE-OUT STUDIO EDITOR */
+  .ff-status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 9px 12px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    background: #101626;
+    border: 1px solid rgba(56, 189, 248, 0.42);
+  }
+  .ff-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 3px 9px;
+    border-radius: 99px;
+    background: rgba(34, 197, 94, 0.16);
+    border: 1px solid rgba(34, 197, 94, 0.5);
+    color: #86efac;
+  }
+  .ff-pill.inactive {
+    background: rgba(245, 158, 11, 0.16);
+    border-color: rgba(245, 158, 11, 0.55);
+    color: #fcd34d;
+  }
+  .ff-live-card {
+    padding: 12px;
+    border-radius: 9px;
+    background: radial-gradient(circle at 50% 0%, #141c30 0%, #090c14 100%);
+    border: 1px solid var(--border-hi);
+    margin-bottom: 10px;
+  }
+  .ff-live-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .ff-live-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  @media (max-width: 720px) { .ff-live-row { grid-template-columns: 1fr; } }
+  .ff-wing {
+    position: relative;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    background: linear-gradient(180deg, #131a2c 0%, #070a12 100%);
+    border-top: 1px solid rgba(56, 189, 248, 0.45);
+    border-bottom: 2.5px solid #38bdf8;
+    border-radius: 6px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.65);
+  }
+  .ff-wing.p2 {
+    flex-direction: row-reverse;
+    border-top-color: rgba(168, 85, 247, 0.5);
+    border-bottom-color: #8b5cf6;
+  }
+  .ff-flags-wrap {
+    display: inline-flex;
+    align-items: stretch;
+    height: 100%;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  .ff-wing.p2 .ff-flags-wrap { flex-direction: row-reverse; }
+  .ff-flag-item {
+    height: 100%;
+    overflow: hidden;
+    flex-shrink: 0;
+    display: inline-flex;
+  }
+  .ff-flag-item svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    transform-origin: center center;
+  }
+  .ff-wing-name {
+    flex: 1;
+    min-width: 0;
+    padding: 0 12px;
+    font: 800 17px/1 'Barlow Condensed', 'Bahnschrift', sans-serif;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .ff-wing.p2 .ff-wing-name { text-align: right; }
+  .ff-wing-score {
+    width: 44px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font: 900 20px/1 'Chakra Petch', sans-serif;
+    color: #fff;
+    background: linear-gradient(135deg, #00d4ff, #0066ff);
+    flex-shrink: 0;
+  }
+  .ff-wing.p2 .ff-wing-score {
+    background: linear-gradient(135deg, #7c3aed, #2563eb);
+  }
+  .ff-env-wrap {
+    margin-top: 9px;
+  }
+  .ff-env-bar {
+    display: flex;
+    width: 100%;
+    height: 9px;
+    border-radius: 99px;
+    overflow: hidden;
+    background: #141926;
+    border: 1px solid var(--border);
+  }
+  .ff-env-in { background: linear-gradient(90deg, rgba(56,189,248,0.15), #38bdf8); transition: width 0.12s; }
+  .ff-env-solid { background: linear-gradient(90deg, #38bdf8, #22c55e); transition: width 0.12s; }
+  .ff-env-out { background: linear-gradient(90deg, #22c55e, rgba(34,197,94,0.08)); transition: width 0.12s; }
+  .ff-env-caption {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 4px;
+    font-family: ui-monospace, monospace;
+  }
+  .ff-preset-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .ff-preset-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    gap: 2px;
+    padding: 7px 9px;
+    background: #0f1422;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    cursor: pointer;
+  }
+  .ff-preset-btn:hover { border-color: #38bdf8; background: #141d31; }
+  .ff-preset-btn strong { font-size: 11px; color: #fff; }
+  .ff-preset-btn small { font-size: 9.5px; color: var(--muted); line-height: 1.25; }
 </style>
 </head>
 <body>
@@ -2213,6 +2378,7 @@
           <button type="button" class="active-chip" data-spane="colors">🎨 Colors &amp; Surfaces</button>
           <button type="button" data-spane="fonts">🔤 Typography (12 Fonts)</button>
           <button type="button" data-spane="shape">📐 Shape, Flags &amp; HUD</button>
+          <button type="button" data-spane="flagfade">🌊 Flag Fade Editor</button>
           <button type="button" data-spane="fx">✨ FX &amp; Transitions</button>
           <button type="button" data-spane="presets">💾 My Presets (JSON)</button>
         </div>
@@ -2372,7 +2538,10 @@
       <!-- SUB-PANE 3: SHAPE, INTEGRATED FLAGS & HUD GEOMETRY -->
       <div class="studio-pane" id="spane-shape">
         <div class="studio-box" style="margin-bottom:10px;border-color:rgba(244,63,94,0.45);background:#101320;">
-          <h3>🏳️ Flag Integration Styles (6 Broadcast Modes)</h3>
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
+            <h3 style="margin:0;">🏳️ Flag Integration Styles (6 Broadcast Modes)</h3>
+            <button type="button" id="btn-open-flagfade" style="padding:3px 9px;font-size:11px;border-color:rgba(56,189,248,0.6);color:#7dd3fc;">🌊 Open Flag Fade-In / Fade-Out Editor →</button>
+          </div>
           <div class="seg-bar" id="seg-flagStyle" style="margin-bottom:10px;">
             <button type="button" data-val="theme" class="active-chip">Theme</button>
             <button type="button" data-val="blade-twt">⚡ TWT Integrated Blade</button>
@@ -2389,11 +2558,11 @@
             </div>
             <div class="slider-box">
               <div class="slider-head"><span>Integrated Flag Width</span><b id="val-flagWidth">62 px</b></div>
-              <input type="range" id="rng-flagWidth" min="40" max="96" step="2" value="62" />
+              <input type="range" id="rng-flagWidth" min="40" max="140" step="2" value="62" />
             </div>
             <div class="slider-box">
               <div class="slider-head"><span>Flag Intensity / Opacity</span><b id="val-flagOpacity">100%</b></div>
-              <input type="range" id="rng-flagOpacity" min="40" max="100" step="2" value="100" />
+              <input type="range" id="rng-flagOpacity" min="25" max="100" step="2" value="100" />
             </div>
             <div class="slider-box">
               <div class="slider-head"><span>Scorebar Height (0 = Auto)</span><b id="val-barHeight">Auto</b></div>
@@ -2522,6 +2691,150 @@
           <div class="slider-box">
             <div class="slider-head"><span>Overlay Opacity</span><b id="val-opacity">100%</b></div>
             <input type="range" id="rng-opacity" min="40" max="100" step="2" value="100" />
+          </div>
+        </div>
+      </div>
+
+      <!-- SUB-PANE 3B: DEDICATED FLAG FADE-IN / FADE-OUT & BLEND EDITOR -->
+      <div class="studio-pane" id="spane-flagfade">
+        <div class="ff-status-bar">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span class="ff-pill" id="ff-status-pill">● Fade Blend Active</span>
+            <span style="font-size:11px;color:var(--muted);">Adjusting any control below automatically applies smooth cubic Fade-In / Fade-Out to your overlay.</span>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button type="button" id="btn-ff-enable" class="primary" style="display:none;padding:4px 10px;font-size:11px;">🌊 Activate Fade Blend</button>
+            <button type="button" id="btn-ff-reset" style="padding:4px 10px;font-size:11px;">↺ Reset Fade</button>
+          </div>
+        </div>
+
+        <!-- LIVE INTERACTIVE FADE MONITOR + ENVELOPE VISUALIZER -->
+        <div class="ff-live-card">
+          <div class="ff-live-head">
+            <strong style="color:#93c5fd;letter-spacing:.05em;text-transform:uppercase;">Live Flag Fade-In / Fade-Out Monitor</strong>
+            <span id="ff-sample-note">Synced with current match flags</span>
+          </div>
+          <div class="ff-live-row">
+            <div class="ff-wing p1">
+              <div class="ff-flags-wrap" id="ff-live-p1-flags"></div>
+              <span class="ff-wing-name" id="ff-live-p1-name">PLAYER 1</span>
+              <span class="ff-wing-score">2</span>
+            </div>
+            <div class="ff-wing p2">
+              <div class="ff-flags-wrap" id="ff-live-p2-flags"></div>
+              <span class="ff-wing-name" id="ff-live-p2-name">PLAYER 2</span>
+              <span class="ff-wing-score">1</span>
+            </div>
+          </div>
+          <div class="ff-env-wrap">
+            <div class="ff-env-bar">
+              <div class="ff-env-in" id="ff-env-in" style="width:0%"></div>
+              <div class="ff-env-solid" id="ff-env-solid" style="width:34%"></div>
+              <div class="ff-env-out" id="ff-env-out" style="width:64%"></div>
+            </div>
+            <div class="ff-env-caption" id="ff-env-caption">
+              <span>Outer Edge 0%</span>
+              <span>Solid Hold: 0% → 34%</span>
+              <span>Fade-Out: 34% → 98%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 1-CLICK BROADCAST FADE PRESETS -->
+        <label>Quick Flag Fade Presets (1-click)</label>
+        <div class="ff-preset-grid" id="ff-presets">
+          <button type="button" class="ff-preset-btn" data-ff-preset="smooth-melt">
+            <strong>🌊 Smooth TV Melt</strong>
+            <small>Crisp outer edge, silky cubic fade-out into dark bar.</small>
+          </button>
+          <button type="button" class="ff-preset-btn" data-ff-preset="dual-fade">
+            <strong>⇄ Fade In + Fade Out</strong>
+            <small>Soft outer entry + silky inner dissolve (great on Hex).</small>
+          </button>
+          <button type="button" class="ff-preset-btn" data-ff-preset="diag-blade">
+            <strong>⧸ Diagonal Blade Melt</strong>
+            <small>Angled 22° fade parallel to TWT blade &amp; diagonal cuts.</small>
+          </button>
+          <button type="button" class="ff-preset-btn" data-ff-preset="watermark">
+            <strong>👻 Ghost Watermark</strong>
+            <small>Wide translucent flag aura melting gently behind edge.</small>
+          </button>
+          <button type="button" class="ff-preset-btn" data-ff-preset="vignette">
+            <strong>◎ Vignette Spotlight</strong>
+            <small>Elliptical spotlight softening all 4 sides of the flag.</small>
+          </button>
+        </div>
+
+        <div class="studio-grid" style="margin-bottom:10px;">
+          <div class="studio-box">
+            <h3>Fade Direction &amp; Mode</h3>
+            <label>Mask Style</label>
+            <div class="seg-bar" id="seg-flagFadeMode" style="margin-bottom:10px;">
+              <button type="button" data-val="fade-out" class="active-chip">Fade Out →</button>
+              <button type="button" data-val="both">⇄ Fade In + Out</button>
+              <button type="button" data-val="fade-in">← Fade In</button>
+              <button type="button" data-val="diagonal">⧸ Diagonal</button>
+              <button type="button" data-val="vignette">◎ Vignette</button>
+            </div>
+            <label>Alpha Easing Curve</label>
+            <div class="seg-bar" id="seg-flagFadeCurve">
+              <button type="button" data-val="smooth" class="active-chip">Smooth (Cubic)</button>
+              <button type="button" data-val="soft">Velvet Soft</button>
+              <button type="button" data-val="sharp">Crisp S-Curve</button>
+              <button type="button" data-val="linear">Linear</button>
+            </div>
+          </div>
+
+          <div class="studio-box">
+            <h3>Fade-In / Fade-Out Envelope</h3>
+            <div class="sliders-grid" style="grid-template-columns:1fr 1fr;">
+              <div class="slider-box">
+                <div class="slider-head"><span>Fade-In (Outer Edge)</span><b id="val-flagFadeIn">0%</b></div>
+                <input type="range" id="rng-flagFadeIn" min="0" max="45" step="1" value="0" />
+              </div>
+              <div class="slider-box">
+                <div class="slider-head"><span>Solid Hold (Fade Start)</span><b id="val-flagFadeStart">34%</b></div>
+                <input type="range" id="rng-flagFadeStart" min="10" max="85" step="1" value="34" />
+              </div>
+              <div class="slider-box">
+                <div class="slider-head"><span>Fade-Out Reach (0% Alpha)</span><b id="val-flagFadeEnd">98%</b></div>
+                <input type="range" id="rng-flagFadeEnd" min="40" max="100" step="1" value="98" />
+              </div>
+              <div class="slider-box">
+                <div class="slider-head"><span>Fade Tilt Angle</span><b id="val-flagFadeAngle">0°</b></div>
+                <input type="range" id="rng-flagFadeAngle" min="-35" max="35" step="1" value="0" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="studio-box">
+          <h3>Flag Framing, Crest Alignment &amp; Color Blend</h3>
+          <div class="sliders-grid">
+            <div class="slider-box">
+              <div class="slider-head"><span>Fade Window Width</span><b id="val-ff-flagWidth">62 px</b></div>
+              <input type="range" id="rng-ff-flagWidth" min="40" max="140" step="2" value="62" />
+            </div>
+            <div class="slider-box">
+              <div class="slider-head"><span>Flag Opacity</span><b id="val-ff-flagOpacity">100%</b></div>
+              <input type="range" id="rng-ff-flagOpacity" min="25" max="100" step="2" value="100" />
+            </div>
+            <div class="slider-box">
+              <div class="slider-head"><span>Flag Zoom (Scale)</span><b id="val-flagZoom">108%</b></div>
+              <input type="range" id="rng-flagZoom" min="100" max="180" step="2" value="108" />
+            </div>
+            <div class="slider-box">
+              <div class="slider-head"><span>Horizontal Crest Shift</span><b id="val-flagShiftX">0%</b></div>
+              <input type="range" id="rng-flagShiftX" min="-30" max="30" step="1" value="0" />
+            </div>
+            <div class="slider-box">
+              <div class="slider-head"><span>Color Saturation</span><b id="val-flagSaturation">100%</b></div>
+              <input type="range" id="rng-flagSaturation" min="30" max="160" step="5" value="100" />
+            </div>
+            <div class="slider-box">
+              <div class="slider-head"><span>Brightness Blend</span><b id="val-flagBrightness">96%</b></div>
+              <input type="range" id="rng-flagBrightness" min="50" max="135" step="5" value="96" />
+            </div>
           </div>
         </div>
       </div>
@@ -3264,7 +3577,10 @@
   const DEFAULT_STYLE = {
     fontName: 'theme', fontScore: 'theme', fontScale: 100, letterSpacing: 4, italic: 'theme', uppercase: true,
     layoutOverride: 'theme', scorePosOverride: 'theme', shape: 'theme', flagStyle: 'theme', borderStyle: 'theme',
-    centerStyle: 'theme', outerBlade: 'theme', bladeSlant: 22, barHeight: 0, flagWidth: 62, flagOpacity: 100, showIsoCode: 'theme',
+    centerStyle: 'theme', outerBlade: 'theme', bladeSlant: 22, barHeight: 0, flagWidth: 62, flagOpacity: 100,
+    flagFadeMode: 'fade-out', flagFadeCurve: 'smooth', flagFadeIn: 0, flagFadeStart: 34, flagFadeEnd: 98,
+    flagFadeAngle: 0, flagZoom: 108, flagShiftX: 0, flagSaturation: 100, flagBrightness: 96,
+    showIsoCode: 'theme',
     customColors: false, fillMode: 'gradient', bgColor1: '#121520', bgColor2: '#07080d', bgAngle: 180, bgAlpha: 94, glassBlur: 14, glassBorder: 22,
     p1Color1: '#ff512f', p1Color2: '#dd2476', p2Color1: '#2563eb', p2Color2: '#7c3aed',
     centerColor1: '#1b1f2e', centerColor2: '#0c0e16', centerAccent: '#ffd24d', textColor: '#ffffff', sponsorColor: '#ffbe4f',
@@ -3272,6 +3588,25 @@
     entryAnim: 'split-wings', scoreAnim: 'pop', animSpeed: 'normal', animDuration: 450, scoreAnimDuration: 450,
     sceneAutoIntro: true, sceneDelay: 250, introStagger: true, introFlash: true, introOnSetChange: false,
     mpStyle: 'side-peek', mpColor: 'fire', mpText: 'MATCH POINT'
+  };
+
+  const FLAG_FADE_PRESETS = {
+    'smooth-melt': { name: 'Smooth TV Melt',     flagFadeMode: 'fade-out', flagFadeCurve: 'smooth', flagFadeIn: 0,  flagFadeStart: 34, flagFadeEnd: 98,  flagFadeAngle: 0,  flagWidth: 66,  flagOpacity: 96, flagZoom: 108, flagShiftX: 0, flagSaturation: 100, flagBrightness: 96 },
+    'dual-fade':   { name: 'Fade In + Fade Out', flagFadeMode: 'both',     flagFadeCurve: 'smooth', flagFadeIn: 20, flagFadeStart: 52, flagFadeEnd: 98,  flagFadeAngle: 0,  flagWidth: 82,  flagOpacity: 96, flagZoom: 112, flagShiftX: 0, flagSaturation: 100, flagBrightness: 96 },
+    'diag-blade':  { name: 'Diagonal Blade Melt',flagFadeMode: 'diagonal', flagFadeCurve: 'smooth', flagFadeIn: 6,  flagFadeStart: 38, flagFadeEnd: 96,  flagFadeAngle: 22, flagWidth: 74,  flagOpacity: 96, flagZoom: 110, flagShiftX: 0, flagSaturation: 105, flagBrightness: 98 },
+    'watermark':   { name: 'Ghost Watermark',    flagFadeMode: 'both',     flagFadeCurve: 'soft',   flagFadeIn: 24, flagFadeStart: 42, flagFadeEnd: 100, flagFadeAngle: 12, flagWidth: 112, flagOpacity: 58, flagZoom: 124, flagShiftX: 0, flagSaturation: 70,  flagBrightness: 88 },
+    'vignette':    { name: 'Vignette Spotlight', flagFadeMode: 'vignette', flagFadeCurve: 'smooth', flagFadeIn: 16, flagFadeStart: 48, flagFadeEnd: 96,  flagFadeAngle: 0,  flagWidth: 80,  flagOpacity: 94, flagZoom: 112, flagShiftX: 0, flagSaturation: 105, flagBrightness: 96 }
+  };
+
+  const THEME_SLANTS = {
+    't8-native-hud': 26, 't8-twt-2026-official': 26, 't8-twt-finals-pro': 14, 't8-blade-cyber-gold': 26,
+    't8-blade-heat-neon': 24, 't8-heat-ignited': 14, 't8-twt-official': 14, 't8-iron-fist-gold': 16,
+    't8-ewc-riyadh': 14, 't8-mishima-electric': 16, 't8-devil-gene': 18, 't8-g-corp-tactical': 14,
+    't8-evo-grand-finals': 16, 't8-jin-flame': 18, 't8-kazuya-crimson': 14, 't8-kazama-sanctuary': 12,
+    't8-reina-thunder': 16, 't8-king-lucha': 12, 't8-victor-paris': 14, 't8-yakushima-jade': 12,
+    't8-urban-square-neon': 12, 't8-arena-cage': 14, 't8-zaibatsu-obsidian': 12, 't8-prism-holo': 12,
+    't8-sakura-dojo': 14, 'fgc-hex-arcane': 12, 'fgc-strive-bolt': 12, 'fgc-metro-clash': 16,
+    'fgc-clean-major': 10, 'fgc-hyper-flame': 16, 't8-glass-minimal': 12, 't8-arcade-1997': 10
   };
 
   const DEFAULT_VS = {
@@ -3597,6 +3932,173 @@
     $('wrap-c1').style.display = isTheme ? 'none' : 'flex';
     $('wrap-c2').style.display = (isGrad || isMetal) ? 'flex' : 'none';
     $('lbl-c1').textContent = isSolid ? 'BG' : isGlass ? 'Tint' : 'BG A';
+  }
+
+  function buildPanelFlagFadeMask(side, st) {
+    const mode = st.flagFadeMode || 'fade-out';
+    const curve = st.flagFadeCurve || 'smooth';
+    const rawIn = Math.max(0, Math.min(45, Number(st.flagFadeIn ?? 0)));
+    const fadeIn = (mode === 'both' || mode === 'fade-in') ? Math.max(rawIn, 4) : rawIn;
+    const fadeEnd = Math.max(30, Math.min(100, Number(st.flagFadeEnd ?? 98)));
+    const fadeStart = Math.max(fadeIn + 2, Math.min(fadeEnd - 4, Number(st.flagFadeStart ?? 34)));
+    const rawAngle = Math.max(-35, Math.min(35, Number(st.flagFadeAngle ?? 0)));
+    const effTilt = mode === 'diagonal' ? (rawAngle || 18) : rawAngle;
+
+    const ease = (t) => {
+      const c = Math.max(0, Math.min(1, t));
+      if (curve === 'linear') return c;
+      if (curve === 'soft') return Math.pow(c, 1.85);
+      if (curve === 'sharp') return c < 0.5 ? 2 * c * c : 1 - Math.pow(-2 * c + 2, 2) / 2;
+      return c * c * (3 - 2 * c);
+    };
+
+    if (mode === 'vignette') {
+      const cx = side === 'p1' ? 42 : 58;
+      const innerR = Math.max(18, Math.min(68, fadeStart * 0.85));
+      const outerR = Math.max(innerR + 12, Math.min(100, fadeEnd));
+      const stops = [`rgba(0,0,0,1) 0%`, `rgba(0,0,0,1) ${innerR.toFixed(1)}%`];
+      for (let i = 1; i <= 6; i++) {
+        const u = i / 6;
+        stops.push(`rgba(0,0,0,${ease(1 - u).toFixed(3)}) ${(innerR + (outerR - innerR) * u).toFixed(1)}%`);
+      }
+      if (outerR < 100) stops.push(`rgba(0,0,0,0) 100%`);
+      return `radial-gradient(ellipse 88% 125% at ${cx}% 50%, ${stops.join(', ')})`;
+    }
+
+    const deg = side === 'p1' ? (90 - effTilt) : (270 + effTilt);
+    const stops = [];
+    if (fadeIn > 0) {
+      for (let i = 0; i <= 5; i++) {
+        const u = i / 5;
+        stops.push(`rgba(0,0,0,${ease(u).toFixed(3)}) ${(fadeIn * u).toFixed(1)}%`);
+      }
+    } else {
+      stops.push(`rgba(0,0,0,1) 0%`);
+    }
+    if (mode === 'fade-in') {
+      stops.push(`rgba(0,0,0,1) 100%`);
+    } else {
+      stops.push(`rgba(0,0,0,1) ${fadeStart.toFixed(1)}%`);
+      for (let i = 1; i <= 7; i++) {
+        const u = i / 7;
+        stops.push(`rgba(0,0,0,${ease(1 - u).toFixed(3)}) ${(fadeStart + (fadeEnd - fadeStart) * u).toFixed(1)}%`);
+      }
+      if (fadeEnd < 100) stops.push(`rgba(0,0,0,0) 100%`);
+    }
+    return `linear-gradient(${deg}deg, ${stops.join(', ')})`;
+  }
+
+  function isFadeBlendEffective(st) {
+    if (st.flagStyle && st.flagStyle !== 'theme') return st.flagStyle === 'fade-blend';
+    const activeT = THEMES.find(t => t.id === state.theme);
+    return activeT?.pv?.fs === 'fade';
+  }
+
+  function renderFlagFadeEditor(st) {
+    const activeFade = isFadeBlendEffective(st);
+    const activeT = THEMES.find(t => t.id === state.theme);
+    const pill = $('ff-status-pill');
+    const enableBtn = $('btn-ff-enable');
+    if (activeFade) {
+      pill.textContent = '● Fade Blend Active on Overlay';
+      pill.classList.remove('inactive');
+      enableBtn.style.display = 'none';
+    } else {
+      const modeName = (st.flagStyle && st.flagStyle !== 'theme') ? st.flagStyle : (activeT?.pv?.fs || 'blade');
+      pill.textContent = `● Current Flag Mode: ${modeName} (not Fade Blend)`;
+      pill.classList.add('inactive');
+      enableBtn.style.display = 'inline-flex';
+    }
+
+    const mode = st.flagFadeMode || 'fade-out';
+    const rawIn = Math.max(0, Math.min(45, Number(st.flagFadeIn ?? 0)));
+    const effIn = (mode === 'both' || mode === 'fade-in') ? Math.max(rawIn, 4) : rawIn;
+    const fadeEnd = Math.max(30, Math.min(100, Number(st.flagFadeEnd ?? 98)));
+    const fadeStart = Math.max(effIn + 2, Math.min(fadeEnd - 4, Number(st.flagFadeStart ?? 34)));
+    const angle = Number(st.flagFadeAngle ?? 0);
+    const width = Number(st.flagWidth ?? 62);
+    const opacity = Number(st.flagOpacity ?? 100);
+    const zoom = Number(st.flagZoom ?? 108);
+    const shiftX = Number(st.flagShiftX ?? 0);
+    const sat = Number(st.flagSaturation ?? 100);
+    const bright = Number(st.flagBrightness ?? 96);
+
+    $('rng-flagFadeIn').value = rawIn;
+    $('val-flagFadeIn').textContent = `${rawIn}%`;
+    $('rng-flagFadeStart').value = Number(st.flagFadeStart ?? 34);
+    $('val-flagFadeStart').textContent = `${Number(st.flagFadeStart ?? 34)}%`;
+    $('rng-flagFadeEnd').value = fadeEnd;
+    $('val-flagFadeEnd').textContent = `${fadeEnd}%`;
+    $('rng-flagFadeAngle').value = angle;
+    $('val-flagFadeAngle').textContent = `${angle}°`;
+    $('rng-ff-flagWidth').value = width;
+    $('val-ff-flagWidth').textContent = `${width} px`;
+    $('rng-ff-flagOpacity').value = opacity;
+    $('val-ff-flagOpacity').textContent = `${opacity}%`;
+    $('rng-flagZoom').value = zoom;
+    $('val-flagZoom').textContent = `${zoom}%`;
+    $('rng-flagShiftX').value = shiftX;
+    $('val-flagShiftX').textContent = `${shiftX > 0 ? '+' : ''}${shiftX}%`;
+    $('rng-flagSaturation').value = sat;
+    $('val-flagSaturation').textContent = `${sat}%`;
+    $('rng-flagBrightness').value = bright;
+    $('val-flagBrightness').textContent = `${bright}%`;
+
+    // Envelope bar visualizer
+    const inW = mode === 'vignette' ? Math.max(10, Math.round((100 - fadeStart) * 0.35)) : effIn;
+    const solidW = mode === 'fade-in' ? Math.max(0, 100 - inW) : Math.max(0, fadeStart - inW);
+    const outW = mode === 'fade-in' ? 0 : Math.max(0, fadeEnd - fadeStart);
+    $('ff-env-in').style.width = `${inW}%`;
+    $('ff-env-solid').style.width = `${solidW}%`;
+    $('ff-env-out').style.width = `${outW}%`;
+    $('ff-env-caption').innerHTML = mode === 'fade-in'
+      ? `<span>Fade-In: 0% → ${effIn}%</span><span>Solid: ${effIn}% → 100%</span><span>No Fade-Out</span>`
+      : mode === 'vignette'
+        ? `<span>Soft Vignette Spotlight</span><span>Core: ${Math.round(fadeStart * 0.85)}%</span><span>Outer Falloff: ${fadeEnd}%</span>`
+        : `<span>Fade-In: 0% → ${effIn}%</span><span>Solid: ${effIn}% → ${fadeStart}%</span><span>Fade-Out: ${fadeStart}% → ${fadeEnd}%</span>`;
+
+    // Live interactive P1 / P2 mini monitor
+    const fMode = state.flagMode || 'both';
+    const resolveSideFlags = (p, fallbackCode) => {
+      const f1 = (fMode !== 'region' && p?.flag && FLAGS_MAP[p.flag]) ? FLAGS_MAP[p.flag].svg : '';
+      const f2 = (fMode !== 'country' && p?.region && FLAGS_MAP[p.region] && p.region !== p.flag) ? FLAGS_MAP[p.region].svg : '';
+      const list = [f1, f2].filter(Boolean);
+      if (list.length) return { list, sample: false };
+      return { list: [FLAGS_MAP[fallbackCode]?.svg || ''].filter(Boolean), sample: true };
+    };
+    const r1 = resolveSideFlags(state.p1, 'KR');
+    const r2 = resolveSideFlags(state.p2, 'ES');
+    $('ff-sample-note').textContent = (r1.sample || r2.sample)
+      ? 'Showing sample flags (pick player flags above to preview yours)'
+      : 'Synced live with your current match flags';
+    $('ff-live-p1-name').textContent = state.p1?.name || 'PLAYER 1';
+    $('ff-live-p2-name').textContent = state.p2?.name || 'PLAYER 2';
+
+    const renderDemoSide = (el, side, flags) => {
+      const mask = buildPanelFlagFadeMask(side, st);
+      const isDual = flags.length > 1;
+      const itemW = isDual ? Math.round(width * 0.65 + 16) : Math.round(width * 0.85 + 30);
+      el.style.opacity = (opacity / 100).toFixed(2);
+      el.style.webkitMaskImage = mask;
+      el.style.maskImage = mask;
+      el.style.webkitMaskRepeat = 'no-repeat';
+      el.style.maskRepeat = 'no-repeat';
+      el.style.webkitMaskSize = '100% 100%';
+      el.style.maskSize = '100% 100%';
+      const sx = side === 'p1' ? shiftX : -shiftX;
+      const svgStyle = `transform:scale(${(zoom / 100).toFixed(2)}) translateX(${sx}%);filter:saturate(${(sat / 100).toFixed(2)}) brightness(${(bright / 100).toFixed(2)});`;
+      el.innerHTML = flags.map((svg, idx) => {
+        let extra = `width:${itemW}px;`;
+        if (isDual && idx === 1) {
+          const dir = side === 'p1' ? '90deg' : '270deg';
+          extra += side === 'p1' ? 'margin-left:-12px;' : 'margin-right:-12px;';
+          extra += `-webkit-mask-image:linear-gradient(${dir},transparent 0%,rgba(0,0,0,0.45) 14%,#000 30%,#000 100%);mask-image:linear-gradient(${dir},transparent 0%,rgba(0,0,0,0.45) 14%,#000 30%,#000 100%);`;
+        }
+        return `<span class="ff-flag-item" style="${extra}">${svg.replace('<svg ', `<svg style="${svgStyle}" `)}</span>`;
+      }).join('');
+    };
+    renderDemoSide($('ff-live-p1-flags'), 'p1', r1.list);
+    renderDemoSide($('ff-live-p2-flags'), 'p2', r2.list);
   }
 
   function populateCharSelects(charsList, gameLabel) {
@@ -4126,6 +4628,8 @@
     };
     syncSeg('seg-fill-mode', st.fillMode);
     syncSeg('seg-flagStyle', st.flagStyle === 'twt-slant' ? 'blade-twt' : (st.flagStyle || 'theme'));
+    syncSeg('seg-flagFadeMode', st.flagFadeMode || 'fade-out');
+    syncSeg('seg-flagFadeCurve', st.flagFadeCurve || 'smooth');
     syncSeg('seg-italic', st.italic);
     syncSeg('seg-textShadow', st.textShadow);
     syncSeg('seg-glow', st.glow);
@@ -4135,6 +4639,7 @@
     syncSeg('seg-mpStyle', st.mpStyle || 'side-peek');
     syncSeg('seg-mpColor', st.mpColor || 'fire');
     setIfNotFocused($('st-mpText'), st.mpText || 'MATCH POINT');
+    renderFlagFadeEditor(st);
 
     const cm = state.commentators || {};
     setIfNotFocused($('c1-name'), cm.c1Name);
@@ -4358,7 +4863,6 @@
       };
       const fsMap = { blade: 'blade-twt', fade: 'fade-blend', bezel: 'bezel', classic: 'classic' };
       const csMap = { float: 'floating', trap: 'trapezoid', hex: 'hex', pill: 'pill', flat: 'theme' };
-      const slantMap = { blade: 26, crown: 14, split: 14, arch: 14 };
       // Reset stale custom overrides AND sync Studio pickers to this theme's exact palette & geometry!
       commitState({
         theme: t.id,
@@ -4374,7 +4878,7 @@
           outerBlade: 'theme',
           showIsoCode: 'theme',
           barHeight: 0,
-          bladeSlant: slantMap[pv.lay] ?? 16,
+          bladeSlant: THEME_SLANTS[t.id] ?? 16,
           bgColor1: pickHex(pv.bg1 || pv.bg, '#121520'),
           bgColor2: pickHex(pv.bg2 || pv.bg, '#07080d'),
           p1Color1: pickHex(pv.p1, '#ff512f'),
@@ -4553,6 +5057,101 @@
       const v = Number(e.target.value);
       commitState({ style: { barHeight: v < 30 ? 0 : v } });
     });
+
+    // Dedicated Flag Fade-In / Fade-Out Studio Editor Bindings
+    const openStudioSubpane = (paneId) => {
+      $('studio-subtabs').querySelectorAll('button').forEach(b => b.classList.toggle('active-chip', b.dataset.spane === paneId));
+      document.querySelectorAll('.studio-pane').forEach(p => p.classList.toggle('active', p.id === `spane-${paneId}`));
+    };
+    $('btn-open-flagfade').addEventListener('click', () => openStudioSubpane('flagfade'));
+
+    const commitFlagFade = (patch, immediate = false) => {
+      const st = { ...DEFAULT_STYLE, ...(state.style || {}) };
+      const next = { ...patch };
+      if (!isFadeBlendEffective(st)) next.flagStyle = 'fade-blend';
+      commitState({ style: next }, immediate);
+    };
+    $('btn-ff-enable').addEventListener('click', () => {
+      commitState({ style: { flagStyle: 'fade-blend' } }, true);
+      toast('🌊 Fade Blend activated on overlay');
+    });
+    $('btn-ff-reset').addEventListener('click', () => {
+      commitState({
+        style: {
+          flagFadeMode: DEFAULT_STYLE.flagFadeMode,
+          flagFadeCurve: DEFAULT_STYLE.flagFadeCurve,
+          flagFadeIn: DEFAULT_STYLE.flagFadeIn,
+          flagFadeStart: DEFAULT_STYLE.flagFadeStart,
+          flagFadeEnd: DEFAULT_STYLE.flagFadeEnd,
+          flagFadeAngle: DEFAULT_STYLE.flagFadeAngle,
+          flagWidth: DEFAULT_STYLE.flagWidth,
+          flagOpacity: DEFAULT_STYLE.flagOpacity,
+          flagZoom: DEFAULT_STYLE.flagZoom,
+          flagShiftX: DEFAULT_STYLE.flagShiftX,
+          flagSaturation: DEFAULT_STYLE.flagSaturation,
+          flagBrightness: DEFAULT_STYLE.flagBrightness
+        }
+      }, true);
+      toast('↺ Flag Fade settings reset to defaults');
+    });
+    $('ff-presets').addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-ff-preset]');
+      if (!btn) return;
+      const p = FLAG_FADE_PRESETS[btn.dataset.ffPreset];
+      if (!p) return;
+      const { name, ...fields } = p;
+      commitFlagFade(fields, true);
+      toast(`🌊 Flag Fade preset: ${name}`);
+    });
+    $('seg-flagFadeMode').addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-val]');
+      if (!btn) return;
+      const val = btn.dataset.val;
+      const st = { ...DEFAULT_STYLE, ...(state.style || {}) };
+      const patch = { flagFadeMode: val };
+      if ((val === 'both' || val === 'fade-in') && Number(st.flagFadeIn ?? 0) < 6) patch.flagFadeIn = 18;
+      if (val === 'diagonal' && Number(st.flagFadeAngle ?? 0) === 0) patch.flagFadeAngle = 20;
+      if (val === 'fade-out' && Number(st.flagFadeIn ?? 0) > 0 && st.flagFadeMode === 'both') patch.flagFadeIn = 0;
+      commitFlagFade(patch, true);
+    });
+    $('seg-flagFadeCurve').addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-val]');
+      if (!btn) return;
+      commitFlagFade({ flagFadeCurve: btn.dataset.val }, true);
+    });
+    const bindFadeRange = (id, key) => {
+      $(id).addEventListener('input', (e) => {
+        const val = Number(e.target.value);
+        const st = { ...DEFAULT_STYLE, ...(state.style || {}) };
+        const patch = { [key]: val };
+        // Keep Fade-In < Solid Hold < Fade-Out Reach automatically and keep mode chip synced!
+        if (key === 'flagFadeIn') {
+          if (val > 0 && (st.flagFadeMode || 'fade-out') === 'fade-out') patch.flagFadeMode = 'both';
+          else if (val === 0 && st.flagFadeMode === 'both') patch.flagFadeMode = 'fade-out';
+          if (val >= Number(st.flagFadeStart ?? 34) - 4) {
+            patch.flagFadeStart = Math.min(85, val + 10);
+            if (patch.flagFadeStart >= Number(st.flagFadeEnd ?? 98) - 4) patch.flagFadeEnd = Math.min(100, patch.flagFadeStart + 10);
+          }
+        }
+        if (key === 'flagFadeStart' && val >= Number(st.flagFadeEnd ?? 98) - 4) {
+          patch.flagFadeEnd = Math.min(100, val + 8);
+        }
+        if (key === 'flagFadeEnd' && val <= Number(st.flagFadeStart ?? 34) + 4) {
+          patch.flagFadeStart = Math.max(10, val - 8);
+        }
+        commitFlagFade(patch);
+      });
+    };
+    bindFadeRange('rng-flagFadeIn', 'flagFadeIn');
+    bindFadeRange('rng-flagFadeStart', 'flagFadeStart');
+    bindFadeRange('rng-flagFadeEnd', 'flagFadeEnd');
+    bindFadeRange('rng-flagFadeAngle', 'flagFadeAngle');
+    bindFadeRange('rng-ff-flagWidth', 'flagWidth');
+    bindFadeRange('rng-ff-flagOpacity', 'flagOpacity');
+    bindFadeRange('rng-flagZoom', 'flagZoom');
+    bindFadeRange('rng-flagShiftX', 'flagShiftX');
+    bindFadeRange('rng-flagSaturation', 'flagSaturation');
+    bindFadeRange('rng-flagBrightness', 'flagBrightness');
 
     const bindStyleSelect = (id, key) => {
       $(id).addEventListener('change', (e) => commitState({ style: { [key]: e.target.value } }, true));

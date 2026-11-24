@@ -103,8 +103,19 @@ export const DEFAULT_STYLE = {
   outerBlade: 'theme',       // 'theme' | 'on' | 'off'
   bladeSlant: 22,            // 0..38 px diagonal blade angle
   barHeight: 0,              // 0 = theme default, else 32..64 px
-  flagWidth: 62,             // 40..96 px integrated flag width
-  flagOpacity: 100,          // 40..100 % flag intensity
+  flagWidth: 62,             // 40..140 px integrated flag width
+  flagOpacity: 100,          // 25..100 % flag intensity
+  // Flag Fade-In / Fade-Out Studio
+  flagFadeMode: 'fade-out',  // 'fade-out' | 'both' | 'fade-in' | 'diagonal' | 'vignette'
+  flagFadeCurve: 'smooth',   // 'smooth' | 'soft' | 'sharp' | 'linear'
+  flagFadeIn: 0,             // 0..45 % outer edge fade-in distance
+  flagFadeStart: 34,         // 10..85 % where solid plateau ends and fade-out begins
+  flagFadeEnd: 98,           // 40..100 % where fade-out reaches 0% alpha
+  flagFadeAngle: 0,          // -35..35 deg tilt angle on the fade gradient
+  flagZoom: 108,             // 100..180 % vector zoom inside flag fade window
+  flagShiftX: 0,             // -30..30 % horizontal shift inside flag fade window
+  flagSaturation: 100,       // 30..160 % flag color vibrancy
+  flagBrightness: 96,        // 50..135 % flag brightness match
   showIsoCode: 'theme',      // 'theme' | 'on' | 'off' (PHL/ESP/MAD tag)
   // Colors, Surfaces & Gradients
   customColors: false,
