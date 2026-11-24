@@ -274,6 +274,13 @@ async function startggQuery(token, query, variables = {}) {
   return json.data;
 }
 
+function extractProfileAvatar(user) {
+  const imgs = user?.images;
+  if (!Array.isArray(imgs) || !imgs.length) return '';
+  const prof = imgs.find(i => i?.type === 'profile' && i?.url) || imgs.find(i => i?.url);
+  return prof?.url ? String(prof.url).trim() : '';
+}
+
 function normalizeStartGGSlot(slot) {
   const entrant = slot?.entrant;
   if (!entrant) return null;
@@ -282,6 +289,7 @@ function normalizeStartGGSlot(slot) {
   const { sponsor, name } = splitSponsorAndName(rawName, part?.prefix);
   const loc = part?.user?.location || {};
   const { flag, region } = mapLocationToFlags(loc.country, loc.state, loc.city);
+  const avatar = extractProfileAvatar(part?.user);
   const scoreVal = slot?.standing?.stats?.score?.value;
   return {
     entrantId: entrant.id,
@@ -289,6 +297,7 @@ function normalizeStartGGSlot(slot) {
     sponsor,
     flag,
     region,
+    avatar,
     seed: slot?.seed?.seedNum || null,
     score: (typeof scoreVal === 'number' && scoreVal >= 0) ? scoreVal : 0
   };
@@ -399,7 +408,10 @@ async function fetchStartGGStreamQueue(tournamentSlug, token, preferredEventId) 
                 participants {
                   gamerTag
                   prefix
-                  user { location { country state city } }
+                  user {
+                    location { country state city }
+                    images(type: "profile") { url type }
+                  }
                 }
               }
             }
@@ -485,7 +497,7 @@ export async function fetchStartGGEventSets(eventId, token) {
                 participants {
                   gamerTag
                   prefix
-                  ${includeLocation ? 'user { location { country state city } }' : ''}
+                  ${includeLocation ? 'user { location { country state city } images(type: "profile") { url type } }' : ''}
                 }
               }
             }
@@ -533,7 +545,7 @@ export async function fetchStartGGEntrants(eventId, token) {
             participants {
               gamerTag
               prefix
-              ${includeLocation ? 'user { location { country state city } }' : ''}
+              ${includeLocation ? 'user { location { country state city } images(type: "profile") { url type } }' : ''}
             }
           }
         }
@@ -562,7 +574,8 @@ export async function fetchStartGGEntrants(eventId, token) {
       const { sponsor, name } = splitSponsorAndName(p?.gamerTag || ent.name, p?.prefix);
       const loc = p?.user?.location || {};
       const { flag, region } = mapLocationToFlags(loc.country, loc.state, loc.city);
-      if (name) results.push({ name, sponsor, flag, region, character: '' });
+      const avatar = extractProfileAvatar(p?.user);
+      if (name) results.push({ name, sponsor, flag, region, avatar, character: '' });
     }
     if (!conn?.pageInfo?.totalPages || page >= conn.pageInfo.totalPages) break;
   }

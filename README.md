@@ -23,6 +23,10 @@ Built on pure HTML/CSS/JS and a lightweight native Node.js HTTP/SSE server — *
   - Precision **Animation Duration** (`0.15s–2.50s`) and **Score Pop Duration** (`0.20s–1.50s`) sliders.
   - Staggered choreography (`Center → Wings`), metallic landing sheen, and live OBS replay (`Alt+E`).
 - **Customizable Match Point Indicator**: 5 layouts (default **Side Fin Beside Score** engineered to stay inside the `1920×1080` frame and above Tekken 8 round orbs), 5 color modes, and customizable badge text.
+- **Full-Screen VS / "Up Next" Match Splash (`vs.html`)** with **6 Broadcast Layouts** (`Arcade Pop Split`, `Tekken 8 Clash`, `TWT Broadcast`, `Player Spotlight`, `Cyber Manga Neon`, `Liquid Frosted Glass`):
+  - **Multi-Game Character Asset Manager (`assets.mjs`):** Browse and cache transparent character renders for **Tekken 8, Street Fighter 6, Guilty Gear -STRIVE-, 2XKO, Fatal Fury: CotW, Granblue Fantasy Versus: Rising, DNF Duel, DBFZ, UNI2, UMvC3, MK1, SSBU** — plus **240+ fighting games** via the open community `StreamHelperAssets` catalog. Auto-downloads on demand or pre-caches entire game packs locally in `data/assets/` for 100% offline tournaments.
+  - **Player Profile Photos (Dual Modes):** Automatically pulls Start.gg profile avatars or accepts local photo uploads, displaying them either as a crisp nameplate medallion alongside the character render (`Badge + Char` / `Auto Fallback`) or front-and-center in a framed portrait spotlight (`Photo Spotlight`).
+  - **Live Match, Auto "Up Next" Queue, or Custom VS** modes, Tournament Logo upload, OBS native scene-entry animations, P1/P2 flip/zoom/offset framing, and **1-click 1920×1080 PNG export** for X/Twitter/Discord.
 - **Native Start.gg (GraphQL v4) & Challonge (API v1) Integration**:
   - Automatic Stream Queue & set loading in 1 click, complexity-safe pagination, entrant roster import with automatic country/region flag detection, side-swap-aware result reporting, live score sync (Challonge), **Local Match History & H2H** (JSON & CSV export), and a 100% offline **Demo Tournament** mode.
 - **LAN Mobile/Tablet Control + OBS Dock**: Share the local Wi-Fi URL from the panel so a co-producer or phone can update scores in real time via Server-Sent Events (SSE).
@@ -45,7 +49,8 @@ Built on pure HTML/CSS/JS and a lightweight native Node.js HTTP/SSE server — *
 ```bash
 node server.mjs
 ```
-- **Overlay URL (OBS Browser Source):** `http://localhost:8787/`
+- **Scorebar Overlay URL (OBS Browser Source):** `http://localhost:8787/`
+- **VS Match Splash URL (OBS Browser Source):** `http://localhost:8787/vs.html`
 - **Control Panel URL:** `http://localhost:8787/panel.html`
 
 > You can customize the port with `PORT=9090 node server.mjs`.
@@ -109,10 +114,12 @@ Available whenever the Control Panel window or OBS Dock has focus:
 
 | File | Purpose |
 | :--- | :--- |
-| [`index.html`](index.html) | `1920×1080` OBS Browser Source overlay (32 themes, adaptive surfaces, Match Point, OBS native transitions, SSE + BroadcastChannel client). |
-| [`panel.html`](panel.html) | 2-column Broadcast Control Panel with pinned live preview, Style Studio, Designs sidebar, Flag Picker, Tournament sync, and H2H History. |
-| [`server.mjs`](server.mjs) | Zero-dependency Node.js HTTP & Server-Sent Events (SSE) server with local JSON persistence in `data/`. |
-| [`tournaments.mjs`](tournaments.mjs) | Native Start.gg GraphQL v4 client, Challonge REST API v1 client, country/region flag resolver, and offline Demo generator. |
+| [`index.html`](index.html) | `1920×1080` OBS Browser Source scorebar overlay (32 themes, adaptive surfaces, Match Point, OBS native transitions, SSE + BroadcastChannel client). |
+| [`vs.html`](vs.html) | `1920×1080` OBS Browser Source VS / Up Next Match Splash overlay (6 layouts, character renders, player avatars, H2H, tournament logo, 1920×1080 PNG exporter). |
+| [`panel.html`](panel.html) | 2-column Broadcast Control Panel with pinned live preview, Style Studio, VS Splash Studio, Multi-Game Asset Manager, Designs sidebar, Flag Picker, Tournament sync, and H2H History. |
+| [`server.mjs`](server.mjs) | Zero-dependency Node.js HTTP & Server-Sent Events (SSE) server with local JSON persistence and secure media/asset caching in `data/`. |
+| [`assets.mjs`](assets.mjs) | Multi-game character render & local cache manager powered by `StreamHelperAssets` (on-demand caching, 1-click full pack downloads, custom PNG/avatar/logo uploads). |
+| [`tournaments.mjs`](tournaments.mjs) | Native Start.gg GraphQL v4 client (with profile avatars), Challonge REST API v1 client, country/region flag resolver, and offline Demo generator. |
 | [`flags.js`](flags.js) | 114 offline vector SVG flags with bilingual search aliases (World FGC, Europe & Regions, US States, Spain Regions). |
 | [`Start_Scorebar.bat`](Start_Scorebar.bat) | 1-click Windows launcher with Node.js 18+ check and auto-install prompt. |
 | [`Install_NodeJS.bat`](Install_NodeJS.bat) | Standalone Windows Node.js LTS installer (`winget` + official `nodejs.org` MSI fallback). |
@@ -139,6 +146,12 @@ Because everything runs over clean local JSON endpoints, you can integrate Strea
 | `/api/tournament/sets` | `POST` | Fetch sets for a specific event ID. |
 | `/api/tournament/import-players` | `POST` | Import tournament entrants and auto-mapped flags into local players DB. |
 | `/api/tournament/report` | `POST` | Report final match score (or live Challonge progress) back to the bracket. |
+| `/api/assets/games` | `GET` | List featured fighting games (or `?all=1` for all 240+ games) and local cache counts. |
+| `/api/assets/roster` | `GET` | Return character roster, eyesight framing metadata, and local cache status for `?game=&pack=`. |
+| `/api/assets/render` | `GET` | Serve cached character PNG for `?game=&pack=&char=` (auto-downloads & caches on demand). |
+| `/api/assets/download-pack` | `POST` | Pre-download an entire game/pack character render set for 100% offline use. |
+| `/api/assets/download-status` | `GET` | Poll live pack download progress (`done`, `total`, `currentChar`). |
+| `/api/upload` | `POST` | Upload local Player Profile Photo, Tournament Logo, or Custom Character PNG into `data/`. |
 
 ---
 

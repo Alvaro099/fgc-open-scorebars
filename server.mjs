@@ -29,6 +29,7 @@ import {
   getDemoTournament,
   reportDemoSet
 } from './tournaments.mjs';
+import { createAssetManager } from './assets.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -43,6 +44,46 @@ const INTEGRATIONS_FILE = path.join(DATA_DIR, 'integrations.json');
 const HISTORY_FILE = path.join(DATA_DIR, 'history.json');
 
 fs.mkdirSync(DATA_DIR, { recursive: true });
+const assets = createAssetManager(DATA_DIR);
+
+export const DEFAULT_VS = {
+  visible: true,
+  source: 'current',           // 'current' | 'next' | 'custom'
+  design: 'arcade-pop',        // 'arcade-pop' | 't8-clash' | 'twt-clean' | 'portrait-cards' | 'cyber-neon' | 'glass-pro'
+  game: 'tekken8',
+  pack: 'full',
+  avatarMode: 'hero-fallback', // 'badge' | 'hero-fallback' | 'portrait-hero' | 'off'
+  bgMode: 'theme',             // 'theme' | 'custom' | 'transparent'
+  bgColor1: '#f5b800',
+  bgColor2: '#10131e',
+  p1Color: '#ff512f',
+  p2Color: '#2563eb',
+  pattern: 'symbols',          // 'symbols' | 'grid' | 'halftone' | 'diagonal' | 'none'
+  eyebrow: 'UP NEXT',
+  subtitle: '',
+  showFlags: true,
+  showH2H: true,
+  showSponsor: true,
+  showCharName: true,
+  showLogo: true,
+  showScore: false,
+  logoUrl: '',
+  p1Flip: false,
+  p2Flip: true,
+  p1Zoom: 100,
+  p2Zoom: 100,
+  p1OffsetY: 0,
+  p2OffsetY: 0,
+  entryAnim: 'slam-split',     // 'slam-split' | 'curtain' | 'zoom-burst' | 'fade'
+  introNonce: 0,
+  customMatch: {
+    round: 'GRAND FINALS',
+    format: 'FT3',
+    p1: { name: 'PLAYER 1', sponsor: '', flag: '', region: '', bracket: '', character: '', avatar: '', score: 0 },
+    p2: { name: 'PLAYER 2', sponsor: '', flag: '', region: '', bracket: '', character: '', avatar: '', score: 0 }
+  },
+  nextMatch: null
+};
 
 export const DEFAULT_STYLE = {
   // Typography
@@ -128,7 +169,8 @@ export const DEFAULT_STATE = {
     flag: '',
     region: '',
     bracket: '', // '', 'W', 'L'
-    character: ''
+    character: '',
+    avatar: ''
   },
   p2: {
     name: 'PLAYER 2',
@@ -137,7 +179,8 @@ export const DEFAULT_STATE = {
     flag: '',
     region: '',
     bracket: '',
-    character: ''
+    character: '',
+    avatar: ''
   },
   commentators: {
     c1Name: 'CASTER 1',
@@ -156,6 +199,7 @@ export const DEFAULT_STATE = {
     centerColor: '#ffd24d'
   },
   style: structuredClone(DEFAULT_STYLE),
+  vs: structuredClone(DEFAULT_VS),
   activeMatch: null,
   lastEvent: {
     type: 'init',
@@ -193,6 +237,16 @@ currentState.p2 = { ...DEFAULT_STATE.p2, ...(currentState.p2 || {}) };
 currentState.commentators = { ...DEFAULT_STATE.commentators, ...(currentState.commentators || {}) };
 currentState.tweaks = { ...DEFAULT_STATE.tweaks, ...(currentState.tweaks || {}) };
 currentState.style = { ...DEFAULT_STYLE, ...(currentState.style || {}) };
+currentState.vs = {
+  ...structuredClone(DEFAULT_VS),
+  ...(currentState.vs || {}),
+  customMatch: {
+    ...structuredClone(DEFAULT_VS.customMatch),
+    ...(currentState.vs?.customMatch || {}),
+    p1: { ...DEFAULT_VS.customMatch.p1, ...(currentState.vs?.customMatch?.p1 || {}) },
+    p2: { ...DEFAULT_VS.customMatch.p2, ...(currentState.vs?.customMatch?.p2 || {}) }
+  }
+};
 
 let playersDb = readJsonSafe(PLAYERS_FILE, DEFAULT_PLAYERS);
 let presetsDb = readJsonSafe(PRESETS_FILE, []);
@@ -222,17 +276,19 @@ function mergeImportedPlayers(list) {
       sponsor: String(item.sponsor || '').trim(),
       flag: String(item.flag || '').trim().toUpperCase(),
       region: String(item.region || '').trim().toUpperCase(),
-      character: String(item.character || '').trim()
+      character: String(item.character || '').trim(),
+      avatar: String(item.avatar || '').trim()
     };
     const idx = playersDb.findIndex(p => p.name.toLowerCase() === clean.name.toLowerCase());
     if (idx >= 0) {
-      // Preserve existing character/region if incoming doesn't specify one
+      // Preserve existing character/region/avatar if incoming doesn't specify one
       playersDb[idx] = {
         ...playersDb[idx],
         sponsor: clean.sponsor || playersDb[idx].sponsor,
         flag: clean.flag || playersDb[idx].flag,
         region: clean.region || playersDb[idx].region,
-        character: clean.character || playersDb[idx].character
+        character: clean.character || playersDb[idx].character,
+        avatar: clean.avatar || playersDb[idx].avatar || ''
       };
     } else {
       playersDb.unshift(clean);
@@ -307,12 +363,12 @@ function sendJson(res, status, data) {
   res.end(body);
 }
 
-function readBody(req) {
+function readBody(req, maxBytes = 512 * 1024) {
   return new Promise((resolve, reject) => {
     let data = '';
     req.on('data', chunk => {
       data += chunk;
-      if (data.length > 512 * 1024) {
+      if (data.length > maxBytes) {
         req.destroy();
         reject(new Error('Payload too large'));
       }
@@ -329,6 +385,25 @@ function readBody(req) {
 }
 
 function deepMergeState(prev, patch) {
+  let nextVs = prev.vs || structuredClone(DEFAULT_VS);
+  if (patch.vs) {
+    nextVs = {
+      ...nextVs,
+      ...patch.vs,
+      customMatch: patch.vs.customMatch
+        ? {
+            ...(nextVs.customMatch || DEFAULT_VS.customMatch),
+            ...patch.vs.customMatch,
+            p1: patch.vs.customMatch.p1
+              ? { ...(nextVs.customMatch?.p1 || DEFAULT_VS.customMatch.p1), ...patch.vs.customMatch.p1 }
+              : (nextVs.customMatch?.p1 || DEFAULT_VS.customMatch.p1),
+            p2: patch.vs.customMatch.p2
+              ? { ...(nextVs.customMatch?.p2 || DEFAULT_VS.customMatch.p2), ...patch.vs.customMatch.p2 }
+              : (nextVs.customMatch?.p2 || DEFAULT_VS.customMatch.p2)
+          }
+        : nextVs.customMatch
+    };
+  }
   const next = {
     ...prev,
     ...patch,
@@ -339,6 +414,7 @@ function deepMergeState(prev, patch) {
       : prev.commentators,
     tweaks: patch.tweaks ? { ...prev.tweaks, ...patch.tweaks } : prev.tweaks,
     style: patch.style ? { ...prev.style, ...patch.style } : prev.style,
+    vs: nextVs,
     updatedAt: Date.now()
   };
   return next;
@@ -418,7 +494,8 @@ const server = http.createServer(async (req, res) => {
             sponsor: String(body.sponsor || '').trim(),
             flag: String(body.flag || '').trim().toUpperCase(),
             region: String(body.region || '').trim().toUpperCase(),
-            character: String(body.character || '').trim()
+            character: String(body.character || '').trim(),
+            avatar: String(body.avatar || '').trim()
           };
           const idx = playersDb.findIndex(
             p => p.name.toLowerCase() === entry.name.toLowerCase()
@@ -671,22 +748,167 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
+  // --- API: Multi-Game Character Assets & Local Cache (StreamHelperAssets) ---
+  if (pathname === '/api/assets/games' && req.method === 'GET') {
+    try {
+      const includeAll = urlObj.searchParams.get('all') === '1';
+      return sendJson(res, 200, await assets.listGames(includeAll));
+    } catch (err) {
+      return sendJson(res, 500, { error: err.message });
+    }
+  }
+
+  if (pathname === '/api/assets/roster' && req.method === 'GET') {
+    try {
+      const game = urlObj.searchParams.get('game') || currentState.vs?.game || 'tekken8';
+      const pack = urlObj.searchParams.get('pack') || currentState.vs?.pack || 'full';
+      return sendJson(res, 200, await assets.getRoster(game, pack));
+    } catch (err) {
+      return sendJson(res, 400, { error: err.message });
+    }
+  }
+
+  if (pathname === '/api/assets/render' && req.method === 'GET') {
+    try {
+      const game = urlObj.searchParams.get('game') || 'tekken8';
+      const pack = urlObj.searchParams.get('pack') || 'full';
+      const charName = urlObj.searchParams.get('char') || '';
+      const skin = Math.max(0, Number(urlObj.searchParams.get('skin') || 0) || 0);
+      if (!charName.trim()) {
+        res.writeHead(404);
+        return res.end('No character specified');
+      }
+      const resolved = await assets.ensureCharacterRender(game, pack, charName, skin);
+      if (!resolved?.filePath || !fs.existsSync(resolved.filePath)) {
+        res.writeHead(404);
+        return res.end('Character render not found');
+      }
+      const ext = path.extname(resolved.filePath).toLowerCase();
+      res.writeHead(200, {
+        'Content-Type': MIME_TYPES[ext] || 'image/png',
+        'Access-Control-Allow-Origin': '*',
+        'Cache-Control': 'public, max-age=86400'
+      });
+      return fs.createReadStream(resolved.filePath).pipe(res);
+    } catch (err) {
+      res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+      return res.end(err.message);
+    }
+  }
+
+  if (pathname === '/api/assets/download-pack' && req.method === 'POST') {
+    try {
+      const body = await readBody(req);
+      const status = await assets.startPackDownload(body.game || 'tekken8', body.pack || 'full');
+      return sendJson(res, 200, status);
+    } catch (err) {
+      return sendJson(res, 400, { error: err.message });
+    }
+  }
+
+  if (pathname === '/api/assets/download-status' && req.method === 'GET') {
+    return sendJson(res, 200, assets.getDownloadStatus());
+  }
+
+  if (pathname === '/api/assets/clear-pack' && req.method === 'POST') {
+    try {
+      const body = await readBody(req);
+      return sendJson(res, 200, assets.clearPackCache(body.game, body.pack));
+    } catch (err) {
+      return sendJson(res, 400, { error: err.message });
+    }
+  }
+
+  // --- API: Upload Local Player Avatar, Tournament Logo, or Custom Character PNG ---
+  if (pathname === '/api/upload' && req.method === 'POST') {
+    try {
+      const body = await readBody(req, 9 * 1024 * 1024);
+      const saved = assets.saveUploadedImage({
+        kind: body.kind,
+        name: body.name,
+        dataUrl: body.dataUrl,
+        game: body.game
+      });
+      return sendJson(res, 200, { ok: true, url: saved.url });
+    } catch (err) {
+      return sendJson(res, 400, { error: err.message });
+    }
+  }
+
+  // --- API: Same-origin Avatar Proxy for Start.gg / Challonge external profile photos (zero CORS canvas taint) ---
+  if (pathname === '/api/avatar-proxy' && req.method === 'GET') {
+    try {
+      const rawUrl = urlObj.searchParams.get('url') || '';
+      const parsed = new URL(rawUrl);
+      const allowedHosts = ['images.start.gg', 'www.start.gg', 'start.gg', 'images.smash.gg', 'secure.gravatar.com', 's3.amazonaws.com'];
+      if (parsed.protocol !== 'https:' || !allowedHosts.some(h => parsed.hostname === h || parsed.hostname.endsWith(`.${h}`))) {
+        res.writeHead(403);
+        return res.end('Host not allowed');
+      }
+      const upstream = await fetch(parsed.toString(), { headers: { 'User-Agent': 'FGC-Open-Scorebars/1.1' } });
+      if (!upstream.ok) {
+        res.writeHead(404);
+        return res.end('Avatar unavailable');
+      }
+      const ct = upstream.headers.get('content-type') || 'image/jpeg';
+      if (!ct.startsWith('image/')) {
+        res.writeHead(415);
+        return res.end('Not an image');
+      }
+      const buf = Buffer.from(await upstream.arrayBuffer());
+      res.writeHead(200, {
+        'Content-Type': ct,
+        'Access-Control-Allow-Origin': '*',
+        'Cache-Control': 'public, max-age=86400'
+      });
+      return res.end(buf);
+    } catch {
+      res.writeHead(404);
+      return res.end('Avatar error');
+    }
+  }
+
+  // --- Local Uploaded Media Serving (/media/avatars|branding|custom/filename) ---
+  const mediaMatch = pathname.match(/^\/media\/(avatars|branding|custom)\/(.+)$/);
+  if (mediaMatch && req.method === 'GET') {
+    const fp = assets.resolveMediaFile(mediaMatch[1], mediaMatch[2]);
+    if (!fp) {
+      res.writeHead(404);
+      return res.end('Media not found');
+    }
+    const ext = path.extname(fp).toLowerCase();
+    res.writeHead(200, {
+      'Content-Type': MIME_TYPES[ext] || 'application/octet-stream',
+      'Access-Control-Allow-Origin': '*',
+      'Cache-Control': 'public, max-age=86400'
+    });
+    return fs.createReadStream(fp).pipe(res);
+  }
+
   // --- API: Server Info (URLs, LAN IPs, client count) ---
   if (pathname === '/api/info' && req.method === 'GET') {
     const lanIps = getLanIps();
     return sendJson(res, 200, {
       port: PORT,
       overlayUrl: `http://localhost:${PORT}/`,
+      vsOverlayUrl: `http://localhost:${PORT}/vs.html`,
       panelUrl: `http://localhost:${PORT}/panel.html`,
       lanPanelUrls: lanIps.map(ip => `http://${ip}:${PORT}/panel.html`),
       connectedClients: sseClients.size
     });
   }
 
-  // --- Static file serving ---
-  let relPath = pathname === '/' ? '/index.html' : pathname === '/panel' ? '/panel.html' : pathname;
+  // --- Static file serving (strictly blocks /data/ so tokens/state JSON are never served publicly!) ---
+  let relPath =
+    pathname === '/' ? '/index.html' :
+    pathname === '/panel' ? '/panel.html' :
+    pathname === '/vs' ? '/vs.html' : pathname;
   relPath = decodeURIComponent(relPath);
   const safePath = path.normalize(relPath).replace(/^(\.\.[/\\])+/, '');
+  if (/^[/\\]?data([/\\]|$)/i.test(safePath)) {
+    res.writeHead(403);
+    return res.end('Forbidden');
+  }
   const fullPath = path.join(__dirname, safePath);
 
   if (!fullPath.startsWith(__dirname)) {
@@ -713,7 +935,8 @@ server.listen(PORT, HOST, () => {
   console.log('\n=======================================================');
   console.log('  FGC OPEN SCOREBARS — LOCAL SERVER RUNNING (0 deps)');
   console.log('=======================================================');
-  console.log(`  OBS Overlay (1920x1080):  http://localhost:${PORT}/`);
+  console.log(`  Scorebar Overlay (OBS):   http://localhost:${PORT}/`);
+  console.log(`  VS Splash Overlay (OBS):  http://localhost:${PORT}/vs.html`);
   console.log(`  Local Control Panel:      http://localhost:${PORT}/panel.html`);
   if (lanIps.length) {
     console.log(`  Mobile / Tablet LAN UI:   http://${lanIps[0]}:${PORT}/panel.html`);

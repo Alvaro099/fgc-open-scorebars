@@ -1,0 +1,1519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>VS Match Splash — FGC Open Scorebars (1920x1080)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,800;0,900;1,800;1,900&family=Chakra+Petch:ital,wght@0,700;1,700&family=Orbitron:wght@700;900&family=Russo+One&family=Teko:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --vs-bg1: #f5b800;
+    --vs-bg2: #10131e;
+    --vs-p1: #ff512f;
+    --vs-p2: #2563eb;
+    --vs-accent: #facc15;
+    --vs-font: 'Barlow Condensed', 'Segoe UI', sans-serif;
+    --vs-font-display: 'Russo One', 'Barlow Condensed', sans-serif;
+    --p1-zoom: 1;
+    --p2-zoom: 1;
+    --p1-y: 0px;
+    --p2-y: 0px;
+    --p1-flip: 1;
+    --p2-flip: -1;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    background: transparent;
+    font-family: var(--vs-font);
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+  }
+  body.preview-mode {
+    width: 100vw;
+    height: 100vh;
+    background: #090b12;
+  }
+
+  #vs-scaler {
+    width: 1920px;
+    height: 1080px;
+    position: relative;
+    transform-origin: top left;
+    overflow: hidden;
+  }
+
+  #vs-stage {
+    position: relative;
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    opacity: 1;
+    transition: opacity 0.32s ease;
+  }
+  #vs-stage.is-hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* =========================================================================
+     BACKDROP LAYERS & ANIMATED PATTERNS
+     ========================================================================= */
+  .vs-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+  }
+  .vs-bg-half {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 50%;
+    transition: background 0.35s ease;
+  }
+  .vs-bg-half.left { left: 0; }
+  .vs-bg-half.right { right: 0; }
+
+  .vs-pattern {
+    position: absolute;
+    inset: -120px;
+    z-index: 2;
+    pointer-events: none;
+    opacity: 0.2;
+    will-change: transform;
+  }
+  .vs-pattern[data-pat="none"] { display: none; }
+  .vs-pattern[data-pat="symbols"] {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cg fill='none' stroke='%23000000' stroke-width='4' stroke-opacity='0.34'%3E%3Cpolygon points='35,18 51,46 19,46'/%3E%3Ccircle cx='105' cy='32' r='14'/%3E%3Crect x='21' y='90' width='26' height='26'/%3E%3Cpath d='M92,90 L118,116 M118,90 L92,116'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: 140px 140px;
+    animation: patDrift 26s linear infinite;
+  }
+  .vs-pattern[data-pat="grid"] {
+    background-image:
+      linear-gradient(rgba(255,255,255,0.14) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.14) 1px, transparent 1px);
+    background-size: 56px 56px;
+    animation: patDrift 22s linear infinite;
+  }
+  .vs-pattern[data-pat="halftone"] {
+    background-image: radial-gradient(rgba(0,0,0,0.34) 22%, transparent 25%);
+    background-size: 24px 24px;
+    animation: patDrift 20s linear infinite;
+  }
+  .vs-pattern[data-pat="diagonal"] {
+    background-image: repeating-linear-gradient(
+      -45deg,
+      rgba(255,255,255,0.09) 0 18px,
+      transparent 18px 46px
+    );
+    animation: patDrift 18s linear infinite;
+  }
+  @keyframes patDrift {
+    0%   { transform: translate3d(0, 0, 0); }
+    100% { transform: translate3d(140px, 140px, 0); }
+  }
+
+  /* Giant Flag Watermarks behind characters (subtle by default, prominent in twt-clean) */
+  .vs-flag-wm {
+    position: absolute;
+    top: 120px;
+    width: 820px;
+    height: 540px;
+    z-index: 3;
+    opacity: 0;
+    pointer-events: none;
+    overflow: hidden;
+    filter: saturate(1.1);
+    transition: opacity 0.35s ease;
+  }
+  .vs-flag-wm.left { left: 40px; mask-image: radial-gradient(ellipse at 45% 50%, #000 18%, transparent 74%); -webkit-mask-image: radial-gradient(ellipse at 45% 50%, #000 18%, transparent 74%); }
+  .vs-flag-wm.right { right: 40px; mask-image: radial-gradient(ellipse at 55% 50%, #000 18%, transparent 74%); -webkit-mask-image: radial-gradient(ellipse at 55% 50%, #000 18%, transparent 74%); }
+  .vs-flag-wm svg { width: 100%; height: 100%; display: block; object-fit: cover; }
+
+  /* Center vertical / diagonal divider */
+  .vs-divider {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 24px;
+    transform: translateX(-50%);
+    z-index: 5;
+    pointer-events: none;
+  }
+
+  /* =========================================================================
+     CHARACTER RENDER + HERO PORTRAIT STAGE
+     ========================================================================= */
+  .vs-side {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 960px;
+    z-index: 6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+  .vs-side.left { left: 0; }
+  .vs-side.right { right: 0; }
+
+  .vs-char-wrap {
+    position: absolute;
+    inset: 40px 24px 36px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
+  }
+  .vs-char-img {
+    max-width: 94%;
+    max-height: 98%;
+    width: auto;
+    height: 920px;
+    object-fit: contain;
+    display: none;
+    filter: drop-shadow(0 18px 28px rgba(0, 0, 0, 0.55));
+    transform-origin: center center;
+    transition: opacity 0.25s ease;
+    will-change: transform;
+  }
+  .vs-char-img.loaded { display: block; }
+  #p1-char-img { transform: translateY(var(--p1-y)) scale(var(--p1-zoom)) scaleX(var(--p1-flip)); }
+  #p2-char-img { transform: translateY(var(--p2-y)) scale(var(--p2-zoom)) scaleX(var(--p2-flip)); }
+
+  /* Hero Profile Avatar Card (shown in portrait-hero OR hero-fallback when no character is set) */
+  .vs-hero-avatar {
+    display: none;
+    position: relative;
+    width: 440px;
+    height: 440px;
+    margin-bottom: 120px;
+    border-radius: 26px;
+    overflow: hidden;
+    background: #10131e;
+    border: 6px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65);
+    z-index: 8;
+  }
+  .vs-hero-avatar.active { display: block; }
+  .vs-hero-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .vs-side.has-hero-avatar .vs-char-img.loaded {
+    opacity: 0.26;
+    filter: blur(2px) saturate(1.1) drop-shadow(0 18px 28px rgba(0, 0, 0, 0.5));
+  }
+
+  /* Clean Monogram Emblem fallback when neither character nor profile avatar is set */
+  .vs-fallback-emblem {
+    display: none;
+    width: 340px;
+    height: 340px;
+    margin-bottom: 120px;
+    border-radius: 50%;
+    background: rgba(12, 15, 24, 0.55);
+    border: 5px solid rgba(255, 255, 255, 0.22);
+    backdrop-filter: blur(8px);
+    align-items: center;
+    justify-content: center;
+    font-family: var(--vs-font-display);
+    font-size: 132px;
+    color: rgba(255, 255, 255, 0.85);
+    letter-spacing: 0.04em;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+  }
+  .vs-fallback-emblem.active { display: flex; }
+
+  /* =========================================================================
+     TOP / BOTTOM ARCHITECTURAL FRAME BARS
+     ========================================================================= */
+  .vs-frame-top, .vs-frame-bot {
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: 12;
+    pointer-events: none;
+  }
+  .vs-frame-top {
+    top: 0;
+    height: 112px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+  }
+  .vs-frame-bot {
+    bottom: 0;
+    height: 76px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 42px;
+  }
+
+  .vs-top-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 12px 58px 14px;
+    background: #0a0c13;
+    color: #fff;
+    clip-path: polygon(0 0, 100% 0, calc(100% - 34px) 100%, 34px 100%);
+    border-bottom: 4px solid var(--vs-accent);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55);
+  }
+  .vs-eyebrow {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--vs-accent);
+    line-height: 1;
+  }
+  .vs-eyebrow:empty { display: none; }
+  .vs-round-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .vs-round-text {
+    font-family: var(--vs-font-display);
+    font-size: 40px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #fff;
+    line-height: 1.05;
+    text-shadow: 0 3px 10px rgba(0, 0, 0, 0.6);
+  }
+  .vs-format-pill {
+    padding: 3px 12px;
+    border-radius: 5px;
+    background: var(--vs-accent);
+    color: #090b10;
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+  }
+  .vs-format-pill:empty { display: none; }
+
+  /* Center VS Emblem */
+  .vs-emblem {
+    position: absolute;
+    left: 50%;
+    top: 47%;
+    transform: translate(-50%, -50%);
+    z-index: 16;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    pointer-events: none;
+  }
+  .vs-emblem-wings {
+    width: 112px;
+    height: 28px;
+    position: relative;
+  }
+  .vs-emblem-wings::before,
+  .vs-emblem-wings::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 7px;
+    background: #fff;
+    border: 2px solid #090b10;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+  }
+  .vs-emblem-wings::before { top: 2px; transform: skewX(-28deg); }
+  .vs-emblem-wings::after { bottom: 2px; width: 72%; transform: skewX(-28deg); }
+  .vs-emblem-wings.left::after { left: auto; right: 0; }
+  .vs-emblem-wings.right::before, .vs-emblem-wings.right::after { transform: skewX(28deg); }
+  .vs-emblem-text {
+    font-family: var(--vs-font-display);
+    font-size: 108px;
+    font-weight: 900;
+    font-style: italic;
+    color: #ffffff;
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    -webkit-text-stroke: 6px #0a0c12;
+    paint-order: stroke fill;
+    filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.7));
+  }
+
+  /* =========================================================================
+     PLAYER NAMEPLATES (OVERLAPPING LOWER STAGE) + AVATAR MEDALLION + FLAGS
+     ========================================================================= */
+  .vs-plate {
+    position: absolute;
+    bottom: 184px;
+    width: 790px;
+    min-height: 138px;
+    z-index: 15;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 16px 28px;
+    background: rgba(8, 10, 16, 0.94);
+    border: 3px solid rgba(255, 255, 255, 0.16);
+    box-shadow: 0 22px 48px rgba(0, 0, 0, 0.72);
+    color: #fff;
+  }
+  .vs-plate.left {
+    left: 62px;
+    border-left: 10px solid var(--vs-p1);
+  }
+  .vs-plate.right {
+    right: 62px;
+    flex-direction: row-reverse;
+    text-align: right;
+    border-right: 10px solid var(--vs-p2);
+  }
+
+  .vs-avatar-badge {
+    display: none;
+    flex: 0 0 98px;
+    width: 98px;
+    height: 98px;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 3px solid rgba(255, 255, 255, 0.85);
+    background: #141926;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.55);
+  }
+  .vs-avatar-badge.active { display: block; }
+  .vs-avatar-badge img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .vs-plate-body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .vs-plate.right .vs-plate-body { align-items: flex-end; }
+
+  .vs-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .vs-plate.right .vs-meta-row { justify-content: flex-end; }
+
+  .vs-sponsor {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--vs-accent);
+  }
+  .vs-sponsor:empty { display: none; }
+
+  .vs-bracket {
+    padding: 2px 9px;
+    border-radius: 4px;
+    font-size: 20px;
+    font-weight: 900;
+    background: rgba(255, 255, 255, 0.14);
+    color: #fff;
+  }
+  .vs-bracket:empty { display: none; }
+  .vs-bracket.W { background: rgba(34, 197, 94, 0.22); color: #86efac; border: 1px solid rgba(34, 197, 94, 0.45); }
+  .vs-bracket.L { background: rgba(239, 68, 68, 0.22); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.45); }
+
+  .vs-flags {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .vs-flags:empty { display: none; }
+  .vs-flag-box {
+    width: 44px;
+    height: 29px;
+    border-radius: 3px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    display: inline-block;
+  }
+  .vs-flag-box svg { width: 100%; height: 100%; display: block; }
+
+  .vs-player-name {
+    font-family: var(--vs-font-display);
+    font-size: 62px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    text-shadow: 0 4px 14px rgba(0, 0, 0, 0.75);
+  }
+  .vs-char-sub {
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.72);
+  }
+  .vs-char-sub:empty { display: none; }
+
+  .vs-score-box {
+    display: none;
+    flex: 0 0 84px;
+    height: 94px;
+    border-radius: 10px;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--vs-font-display);
+    font-size: 58px;
+    font-weight: 900;
+    color: #fff;
+    background: var(--vs-p1);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+  }
+  .vs-plate.right .vs-score-box { background: var(--vs-p2); }
+  .vs-score-box.active { display: flex; }
+
+  /* Bottom H2H Pill + Tournament Logo + Subtitle */
+  .vs-h2h-pill {
+    position: absolute;
+    left: 50%;
+    bottom: 84px;
+    transform: translateX(-50%);
+    z-index: 16;
+    display: none;
+    align-items: center;
+    gap: 14px;
+    padding: 8px 28px;
+    border-radius: 999px;
+    background: rgba(8, 10, 18, 0.92);
+    border: 2px solid var(--vs-accent);
+    color: #fff;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.65);
+  }
+  .vs-h2h-pill.active { display: flex; }
+  .vs-h2h-pill b { color: var(--vs-accent); font-size: 30px; }
+
+  .vs-logo-slot {
+    position: absolute;
+    left: 44px;
+    bottom: 24px;
+    z-index: 18;
+    display: none;
+    align-items: center;
+    gap: 12px;
+    max-width: 280px;
+    max-height: 112px;
+  }
+  .vs-logo-slot.active { display: flex; }
+  .vs-logo-slot img {
+    max-width: 240px;
+    max-height: 104px;
+    object-fit: contain;
+    filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.65));
+  }
+
+  .vs-subtitle-slot {
+    position: absolute;
+    right: 48px;
+    bottom: 22px;
+    z-index: 18;
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.86);
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+  }
+  .vs-subtitle-slot:empty { display: none; }
+
+  /* =========================================================================
+     DESIGN 1: ARCADE POP SPLIT (Bold Yellow/Black Geometric Split — Default!)
+     ========================================================================= */
+  #vs-stage[data-design="arcade-pop"] .vs-bg-half.left,
+  #vs-stage[data-design="arcade-pop"] .vs-bg-half.right {
+    background: radial-gradient(circle at 50% 44%, #ffd82b 0%, var(--vs-bg1) 72%, #d99b00 100%);
+  }
+  #vs-stage[data-design="arcade-pop"]::before,
+  #vs-stage[data-design="arcade-pop"]::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    pointer-events: none;
+  }
+  #vs-stage[data-design="arcade-pop"]::before {
+    top: 0;
+    height: 68px;
+    background: #0a0b10;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 91% 100%, 88% 58%, 63% 58%, 60% 100%, 40% 100%, 37% 58%, 12% 58%, 9% 100%, 0 100%);
+    border-bottom: 5px solid #fff;
+  }
+  #vs-stage[data-design="arcade-pop"]::after {
+    bottom: 0;
+    height: 62px;
+    background: #0a0b10;
+    clip-path: polygon(0 0, 9% 0, 12% 45%, 37% 45%, 40% 0, 60% 0, 63% 45%, 88% 45%, 91% 0, 100% 0, 100% 100%, 0 100%);
+  }
+  #vs-stage[data-design="arcade-pop"] .vs-divider {
+    width: 26px;
+    background: #ffffff;
+    border-left: 3px solid #0a0b10;
+    border-right: 3px solid #0a0b10;
+  }
+  #vs-stage[data-design="arcade-pop"] .vs-divider::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='28' viewBox='0 0 20 28'%3E%3Cpath d='M5,9 L15,19 M15,9 L5,19' stroke='%230a0b10' stroke-width='3'/%3E%3C/svg%3E");
+    background-repeat: repeat-y;
+    background-position: center;
+  }
+  #vs-stage[data-design="arcade-pop"] .vs-plate {
+    background: linear-gradient(180deg, rgba(16, 15, 14, 0.96), rgba(6, 6, 8, 0.98));
+    border: 3px solid #000;
+    border-top: 4px solid rgba(255, 255, 255, 0.9);
+    border-radius: 6px;
+    box-shadow: 0 16px 0 rgba(0, 0, 0, 0.25), 0 24px 50px rgba(0, 0, 0, 0.65);
+  }
+  #vs-stage[data-design="arcade-pop"] .vs-plate.left { border-left: 10px solid #ffffff; }
+  #vs-stage[data-design="arcade-pop"] .vs-plate.right { border-right: 10px solid #ffffff; }
+  #vs-stage[data-design="arcade-pop"] .vs-top-header {
+    background: #0a0b10;
+    border-bottom: 4px solid #ffffff;
+    padding: 8px 66px 12px;
+  }
+
+  /* =========================================================================
+     DESIGN 2: TEKKEN 8 CINEMATIC CLASH (Obsidian + Molten Heat vs Electric Violet)
+     ========================================================================= */
+  #vs-stage[data-design="t8-clash"] .vs-bg-half.left {
+    width: 56%;
+    clip-path: polygon(0 0, 100% 0, 86% 100%, 0 100%);
+    background: radial-gradient(circle at 38% 42%, rgba(255, 115, 20, 0.68) 0%, rgba(145, 22, 8, 0.72) 42%, #0a080d 86%);
+  }
+  #vs-stage[data-design="t8-clash"] .vs-bg-half.right {
+    width: 56%;
+    clip-path: polygon(14% 0, 100% 0, 100% 100%, 0 100%);
+    background: radial-gradient(circle at 62% 42%, rgba(124, 58, 237, 0.72) 0%, rgba(28, 36, 125, 0.74) 44%, #080914 86%);
+  }
+  #vs-stage[data-design="t8-clash"] .vs-divider {
+    width: 10px;
+    transform: translateX(-50%) skewX(-8deg);
+    background: linear-gradient(180deg, #fff8c7, #ff9d1c 45%, #7c3aed 75%, #fff);
+    box-shadow: 0 0 36px rgba(255, 160, 40, 0.9), 0 0 60px rgba(124, 58, 237, 0.8);
+  }
+  #vs-stage[data-design="t8-clash"] .vs-pattern { opacity: 0.14; filter: invert(1); }
+  #vs-stage[data-design="t8-clash"] .vs-top-header {
+    background: linear-gradient(180deg, rgba(24, 18, 28, 0.96), rgba(10, 8, 14, 0.98));
+    border-bottom: 4px solid #ffae19;
+  }
+  #vs-stage[data-design="t8-clash"] .vs-plate {
+    background: linear-gradient(180deg, rgba(24, 20, 32, 0.94), rgba(10, 8, 15, 0.97));
+    border: 2px solid rgba(255, 215, 150, 0.35);
+    clip-path: polygon(22px 0, 100% 0, calc(100% - 22px) 100%, 0 100%);
+    padding: 16px 40px;
+  }
+  #vs-stage[data-design="t8-clash"] .vs-plate.left {
+    border-left: none;
+    border-bottom: 5px solid #ff8c1a;
+    box-shadow: 0 16px 46px rgba(255, 90, 20, 0.35);
+  }
+  #vs-stage[data-design="t8-clash"] .vs-plate.right {
+    border-right: none;
+    border-bottom: 5px solid #8b5cf6;
+    box-shadow: 0 16px 46px rgba(124, 58, 237, 0.35);
+  }
+  #vs-stage[data-design="t8-clash"] .vs-emblem-text {
+    background: linear-gradient(180deg, #fffbe0 10%, #ffbe26 52%, #e64500 95%);
+    -webkit-background-clip: text;
+    color: transparent;
+    -webkit-text-stroke: 4px #180804;
+    filter: drop-shadow(0 0 28px rgba(255, 140, 20, 0.85));
+  }
+
+  /* =========================================================================
+     DESIGN 3: TWT CHAMPIONSHIP BROADCAST (Carbon + Giant Flag Watermarks)
+     ========================================================================= */
+  #vs-stage[data-design="twt-clean"] .vs-bg-half.left {
+    background: linear-gradient(135deg, #1b1118 0%, #10131c 58%, #090b10 100%);
+  }
+  #vs-stage[data-design="twt-clean"] .vs-bg-half.right {
+    background: linear-gradient(225deg, #10192b 0%, #10131c 58%, #090b10 100%);
+  }
+  #vs-stage[data-design="twt-clean"] .vs-flag-wm { opacity: 0.24; }
+  #vs-stage[data-design="twt-clean"] .vs-pattern { opacity: 0.08; filter: invert(1); }
+  #vs-stage[data-design="twt-clean"] .vs-divider {
+    width: 4px;
+    background: linear-gradient(180deg, transparent 5%, rgba(255,255,255,0.45) 50%, transparent 95%);
+  }
+  #vs-stage[data-design="twt-clean"] .vs-top-header {
+    background: #d41634;
+    border-bottom: 4px solid #ffffff;
+  }
+  #vs-stage[data-design="twt-clean"] .vs-eyebrow { color: #ffe4e6; }
+  #vs-stage[data-design="twt-clean"] .vs-plate {
+    bottom: 148px;
+    background: rgba(14, 17, 26, 0.94);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-top: 4px solid #f41f64;
+  }
+  #vs-stage[data-design="twt-clean"] .vs-plate.left { border-left: 8px solid #f41f64; border-top-color: #f41f64; }
+  #vs-stage[data-design="twt-clean"] .vs-plate.right { border-right: 8px solid #2474f5; border-top-color: #2474f5; }
+  #vs-stage[data-design="twt-clean"] .vs-emblem-wings { display: none; }
+  #vs-stage[data-design="twt-clean"] .vs-emblem-text {
+    font-size: 86px;
+    padding: 10px 26px;
+    background: #0d1018;
+    border: 3px solid rgba(255, 255, 255, 0.85);
+    border-radius: 10px;
+    -webkit-text-stroke: 0;
+  }
+
+  /* =========================================================================
+     DESIGN 4: PLAYER SPOTLIGHT CARDS (Profile Photos Front & Center!)
+     ========================================================================= */
+  #vs-stage[data-design="portrait-cards"] .vs-bg-half.left {
+    background: radial-gradient(circle at 35% 40%, rgba(255, 92, 40, 0.34), #0c0f18 72%);
+  }
+  #vs-stage[data-design="portrait-cards"] .vs-bg-half.right {
+    background: radial-gradient(circle at 65% 40%, rgba(59, 130, 246, 0.36), #0c0f18 72%);
+  }
+  #vs-stage[data-design="portrait-cards"] .vs-flag-wm { opacity: 0.16; }
+  #vs-stage[data-design="portrait-cards"] .vs-pattern { opacity: 0.1; filter: invert(1); }
+  #vs-stage[data-design="portrait-cards"] .vs-divider {
+    width: 3px;
+    background: linear-gradient(180deg, transparent, rgba(255,255,255,0.28), transparent);
+  }
+  #vs-stage[data-design="portrait-cards"] .vs-hero-avatar {
+    width: 470px;
+    height: 470px;
+    border-radius: 30px;
+    border-width: 5px;
+    border-color: var(--vs-p1);
+    box-shadow: 0 0 0 10px rgba(255, 255, 255, 0.06), 0 28px 65px rgba(0, 0, 0, 0.72);
+  }
+  #vs-stage[data-design="portrait-cards"] .vs-side.right .vs-hero-avatar {
+    border-color: var(--vs-p2);
+  }
+  #vs-stage[data-design="portrait-cards"] .vs-plate {
+    bottom: 152px;
+    border-radius: 16px;
+    background: rgba(13, 17, 28, 0.92);
+    backdrop-filter: blur(14px);
+  }
+
+  /* =========================================================================
+     DESIGN 5: CYBER MANGA HALFTONE (Vibrant Duotone Anime Fighting Energy)
+     ========================================================================= */
+  #vs-stage[data-design="cyber-neon"] .vs-bg-half.left {
+    width: 55%;
+    clip-path: polygon(0 0, 100% 0, 88% 100%, 0 100%);
+    background: linear-gradient(135deg, #ff006e 0%, #9b0047 68%, #28041c 100%);
+  }
+  #vs-stage[data-design="cyber-neon"] .vs-bg-half.right {
+    width: 55%;
+    clip-path: polygon(12% 0, 100% 0, 100% 100%, 0 100%);
+    background: linear-gradient(225deg, #00d4ff 0%, #0058b8 68%, #07122e 100%);
+  }
+  #vs-stage[data-design="cyber-neon"] .vs-divider {
+    width: 14px;
+    transform: translateX(-50%) skewX(-7deg);
+    background: #ffe600;
+    box-shadow: 0 0 28px rgba(255, 230, 0, 0.85);
+  }
+  #vs-stage[data-design="cyber-neon"] .vs-plate {
+    background: rgba(8, 6, 18, 0.95);
+    border: 3px solid #ffe600;
+    transform: skewX(-6deg);
+  }
+  #vs-stage[data-design="cyber-neon"] .vs-plate > * { transform: skewX(6deg); }
+  #vs-stage[data-design="cyber-neon"] .vs-top-header {
+    background: #0d071c;
+    border-bottom: 4px solid #ffe600;
+  }
+
+  /* =========================================================================
+     DESIGN 6: LIQUID FROSTED ESPORTS (Modern Translucent Glass)
+     ========================================================================= */
+  #vs-stage[data-design="glass-pro"] .vs-bg-half.left {
+    background: radial-gradient(circle at 28% 35%, rgba(56, 189, 248, 0.28), rgba(10, 14, 24, 0.88) 70%);
+  }
+  #vs-stage[data-design="glass-pro"] .vs-bg-half.right {
+    background: radial-gradient(circle at 72% 35%, rgba(251, 113, 133, 0.28), rgba(10, 14, 24, 0.88) 70%);
+  }
+  #vs-stage[data-design="glass-pro"] .vs-pattern { opacity: 0.08; filter: invert(1); }
+  #vs-stage[data-design="glass-pro"] .vs-divider {
+    width: 2px;
+    background: linear-gradient(180deg, transparent, rgba(255,255,255,0.35), transparent);
+  }
+  #vs-stage[data-design="glass-pro"] .vs-plate {
+    border-radius: 18px;
+    background: rgba(15, 22, 36, 0.68);
+    backdrop-filter: blur(20px) saturate(145%);
+    border: 1.5px solid rgba(255, 255, 255, 0.24);
+    border-left-width: 6px;
+  }
+  #vs-stage[data-design="glass-pro"] .vs-plate.right { border-left-width: 1.5px; border-right-width: 6px; }
+  #vs-stage[data-design="glass-pro"] .vs-avatar-badge { border-radius: 50%; }
+  #vs-stage[data-design="glass-pro"] .vs-top-header {
+    border-radius: 0 0 22px 22px;
+    clip-path: none;
+    background: rgba(15, 22, 36, 0.78);
+    backdrop-filter: blur(18px);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    border-top: none;
+  }
+
+  /* Custom Background Color Mode & Transparent Mode */
+  #vs-stage[data-bg-mode="custom"] .vs-bg-half.left {
+    background: radial-gradient(circle at 42% 45%, var(--vs-p1) 0%, var(--vs-bg1) 64%, var(--vs-bg2) 100%) !important;
+  }
+  #vs-stage[data-bg-mode="custom"] .vs-bg-half.right {
+    background: radial-gradient(circle at 58% 45%, var(--vs-p2) 0%, var(--vs-bg1) 64%, var(--vs-bg2) 100%) !important;
+  }
+  #vs-stage[data-bg-mode="transparent"] .vs-bg,
+  #vs-stage[data-bg-mode="transparent"] .vs-pattern {
+    display: none !important;
+  }
+
+  /* =========================================================================
+     DRAMATIC OBS SCENE-ENTRY CHOREOGRAPHY
+     ========================================================================= */
+  #vs-stage.anim-slam-split .vs-side.left { animation: vsSlamLeft 0.68s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  #vs-stage.anim-slam-split .vs-side.right { animation: vsSlamRight 0.68s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  #vs-stage.anim-slam-split .vs-plate.left { animation: vsPlateLeft 0.58s 0.18s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  #vs-stage.anim-slam-split .vs-plate.right { animation: vsPlateRight 0.58s 0.18s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  #vs-stage.anim-slam-split .vs-emblem { animation: vsEmblemSlam 0.62s 0.24s cubic-bezier(0.18, 1.28, 0.32, 1) both; }
+  #vs-stage.anim-slam-split .vs-top-header { animation: vsTopDrop 0.52s 0.08s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+  #vs-stage.anim-curtain .vs-bg-half.left { animation: vsSlamLeft 0.6s ease-out both; }
+  #vs-stage.anim-curtain .vs-bg-half.right { animation: vsSlamRight 0.6s ease-out both; }
+  #vs-stage.anim-curtain .vs-side { animation: vsFadeUp 0.62s 0.16s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  #vs-stage.anim-curtain .vs-plate { animation: vsFadeUp 0.54s 0.26s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  #vs-stage.anim-curtain .vs-emblem { animation: vsEmblemSlam 0.55s 0.3s ease-out both; }
+
+  #vs-stage.anim-zoom-burst .vs-side { animation: vsZoomIn 0.64s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  #vs-stage.anim-zoom-burst .vs-emblem { animation: vsEmblemSlam 0.58s 0.16s cubic-bezier(0.18, 1.35, 0.32, 1) both; }
+  #vs-stage.anim-zoom-burst .vs-plate { animation: vsFadeUp 0.55s 0.22s ease-out both; }
+
+  #vs-stage.anim-fade { animation: vsSimpleFade 0.55s ease both; }
+
+  @keyframes vsSlamLeft {
+    from { opacity: 0; transform: translate3d(-240px, 0, 0) scale(1.06); }
+    to   { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+  }
+  @keyframes vsSlamRight {
+    from { opacity: 0; transform: translate3d(240px, 0, 0) scale(1.06); }
+    to   { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+  }
+  @keyframes vsPlateLeft {
+    from { opacity: 0; transform: translate3d(-120px, 24px, 0); }
+    to   { opacity: 1; transform: translate3d(0, 0, 0); }
+  }
+  @keyframes vsPlateRight {
+    from { opacity: 0; transform: translate3d(120px, 24px, 0); }
+    to   { opacity: 1; transform: translate3d(0, 0, 0); }
+  }
+  @keyframes vsEmblemSlam {
+    0%   { opacity: 0; transform: translate(-50%, -50%) scale(2.3) rotate(-8deg); }
+    70%  { opacity: 1; transform: translate(-50%, -50%) scale(0.94) rotate(1deg); }
+    100% { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0); }
+  }
+  @keyframes vsTopDrop {
+    from { opacity: 0; transform: translate3d(0, -100%, 0); }
+    to   { opacity: 1; transform: translate3d(0, 0, 0); }
+  }
+  @keyframes vsFadeUp {
+    from { opacity: 0; transform: translate3d(0, 46px, 0); }
+    to   { opacity: 1; transform: translate3d(0, 0, 0); }
+  }
+  @keyframes vsZoomIn {
+    from { opacity: 0; transform: scale(1.22); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  @keyframes vsSimpleFade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+</style>
+</head>
+<body>
+<div id="vs-scaler">
+  <div id="vs-stage" data-design="arcade-pop" data-bg-mode="theme">
+    <!-- Background Halves & Pattern -->
+    <div class="vs-bg">
+      <div class="vs-bg-half left"></div>
+      <div class="vs-bg-half right"></div>
+    </div>
+    <div class="vs-pattern" id="vs-pattern" data-pat="symbols"></div>
+
+    <!-- Subtle Giant Flag Watermarks -->
+    <div class="vs-flag-wm left" id="p1-flag-wm"></div>
+    <div class="vs-flag-wm right" id="p2-flag-wm"></div>
+
+    <!-- Center Divider -->
+    <div class="vs-divider"></div>
+
+    <!-- Top Architectural Header -->
+    <div class="vs-frame-top">
+      <div class="vs-top-header">
+        <div class="vs-eyebrow" id="vs-eyebrow">UP NEXT</div>
+        <div class="vs-round-row">
+          <div class="vs-round-text" id="vs-round">ROUND 1</div>
+          <div class="vs-format-pill" id="vs-format">FT3</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- P1 Character & Hero Portrait Stage -->
+    <div class="vs-side left" id="p1-side">
+      <div class="vs-char-wrap">
+        <img class="vs-char-img" id="p1-char-img" alt="" crossorigin="anonymous" />
+      </div>
+      <div class="vs-hero-avatar" id="p1-hero-avatar"><img id="p1-hero-avatar-img" alt="" crossorigin="anonymous" /></div>
+      <div class="vs-fallback-emblem" id="p1-fallback">P1</div>
+    </div>
+
+    <!-- P2 Character & Hero Portrait Stage -->
+    <div class="vs-side right" id="p2-side">
+      <div class="vs-char-wrap">
+        <img class="vs-char-img" id="p2-char-img" alt="" crossorigin="anonymous" />
+      </div>
+      <div class="vs-hero-avatar" id="p2-hero-avatar"><img id="p2-hero-avatar-img" alt="" crossorigin="anonymous" /></div>
+      <div class="vs-fallback-emblem" id="p2-fallback">P2</div>
+    </div>
+
+    <!-- Center VS Impact Emblem -->
+    <div class="vs-emblem" id="vs-emblem">
+      <div class="vs-emblem-wings left"></div>
+      <div class="vs-emblem-text">VS</div>
+      <div class="vs-emblem-wings right"></div>
+    </div>
+
+    <!-- P1 Nameplate -->
+    <div class="vs-plate left" id="p1-plate">
+      <div class="vs-avatar-badge" id="p1-avatar-badge"><img id="p1-avatar-badge-img" alt="" crossorigin="anonymous" /></div>
+      <div class="vs-plate-body">
+        <div class="vs-meta-row">
+          <span class="vs-flags" id="p1-flags"></span>
+          <span class="vs-sponsor" id="p1-sponsor"></span>
+          <span class="vs-bracket" id="p1-bracket"></span>
+        </div>
+        <div class="vs-player-name" id="p1-name">PLAYER 1</div>
+        <div class="vs-char-sub" id="p1-char-sub"></div>
+      </div>
+      <div class="vs-score-box" id="p1-score">0</div>
+    </div>
+
+    <!-- P2 Nameplate -->
+    <div class="vs-plate right" id="p2-plate">
+      <div class="vs-avatar-badge" id="p2-avatar-badge"><img id="p2-avatar-badge-img" alt="" crossorigin="anonymous" /></div>
+      <div class="vs-plate-body">
+        <div class="vs-meta-row">
+          <span class="vs-bracket" id="p2-bracket"></span>
+          <span class="vs-sponsor" id="p2-sponsor"></span>
+          <span class="vs-flags" id="p2-flags"></span>
+        </div>
+        <div class="vs-player-name" id="p2-name">PLAYER 2</div>
+        <div class="vs-char-sub" id="p2-char-sub"></div>
+      </div>
+      <div class="vs-score-box" id="p2-score">0</div>
+    </div>
+
+    <!-- Head-to-Head Pill -->
+    <div class="vs-h2h-pill" id="vs-h2h-pill">
+      <span>HEAD-TO-HEAD</span>
+      <b id="vs-h2h-score">0 - 0</b>
+    </div>
+
+    <!-- Tournament Brand Logo + Event Subtitle -->
+    <div class="vs-logo-slot" id="vs-logo-slot">
+      <img id="vs-logo-img" alt="" crossorigin="anonymous" />
+    </div>
+    <div class="vs-subtitle-slot" id="vs-subtitle"></div>
+  </div>
+</div>
+
+<script src="flags.js"></script>
+<script>
+(() => {
+  const FLAGS_MAP = window.FGC_FLAGS || {};
+  const qs = new URLSearchParams(location.search);
+  const isPreview = qs.has('preview');
+  const isHttp = location.protocol === 'http:' || location.protocol === 'https:';
+  const $ = (id) => document.getElementById(id);
+
+  if (isPreview) {
+    document.body.classList.add('preview-mode');
+    const rescale = () => {
+      const s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+      $('vs-scaler').style.transform = `scale(${s})`;
+    };
+    window.addEventListener('resize', rescale);
+    rescale();
+  }
+
+  let currentState = null;
+  let historyDb = [];
+  let lastIntroNonce = 0;
+  let lastImgSrc = { p1Char: '', p2Char: '', p1Av: '', p2Av: '' };
+
+  function norm(s) {
+    return String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  }
+
+  function resolveAvatarSrc(raw) {
+    const u = String(raw || '').trim();
+    if (!u) return '';
+    if (u.startsWith('/media/') || u.startsWith('data:')) return u;
+    if (/^https?:\/\//i.test(u) && isHttp) {
+      return `/api/avatar-proxy?url=${encodeURIComponent(u)}`;
+    }
+    return u;
+  }
+
+  function buildCharRenderUrl(game, pack, charName) {
+    if (!charName || !String(charName).trim() || !isHttp) return '';
+    return `/api/assets/render?game=${encodeURIComponent(game || 'tekken8')}&pack=${encodeURIComponent(pack || 'full')}&char=${encodeURIComponent(charName.trim())}`;
+  }
+
+  function getActiveMatchData(st) {
+    const vs = st.vs || {};
+    if (vs.source === 'next' && vs.nextMatch?.p1?.name) {
+      return {
+        round: vs.nextMatch.roundText || vs.nextMatch.round || st.round || 'UP NEXT',
+        format: st.format || 'FT3',
+        p1: vs.nextMatch.p1,
+        p2: vs.nextMatch.p2
+      };
+    }
+    if (vs.source === 'custom' && vs.customMatch) {
+      return {
+        round: vs.customMatch.round || 'GRAND FINALS',
+        format: vs.customMatch.format ?? st.format ?? 'FT3',
+        p1: vs.customMatch.p1 || st.p1,
+        p2: vs.customMatch.p2 || st.p2
+      };
+    }
+    return {
+      round: st.round || 'ROUND 1',
+      format: st.format || '',
+      p1: st.p1 || {},
+      p2: st.p2 || {}
+    };
+  }
+
+  function computeH2H(nameA, nameB) {
+    const a = norm(nameA);
+    const b = norm(nameB);
+    if (!a || !b || a === b) return { winsA: 0, winsB: 0, total: 0 };
+    let winsA = 0, winsB = 0;
+    for (const h of historyDb) {
+      const p1 = norm(h.p1?.name);
+      const p2 = norm(h.p2?.name);
+      if (p1 === a && p2 === b) {
+        if (h.winnerSide === 'p1') winsA++; else winsB++;
+      } else if (p1 === b && p2 === a) {
+        if (h.winnerSide === 'p1') winsB++; else winsA++;
+      }
+    }
+    return { winsA, winsB, total: winsA + winsB };
+  }
+
+  function renderSideFlags(containerId, wmId, player, showFlags) {
+    const cont = $(containerId);
+    const wm = $(wmId);
+    if (!showFlags) {
+      cont.innerHTML = '';
+      wm.innerHTML = '';
+      return;
+    }
+    const f1 = player.flag && FLAGS_MAP[String(player.flag).toUpperCase()] ? FLAGS_MAP[String(player.flag).toUpperCase()] : null;
+    const f2 = player.region && FLAGS_MAP[String(player.region).toUpperCase()] && player.region !== player.flag
+      ? FLAGS_MAP[String(player.region).toUpperCase()] : null;
+    const list = [f1, f2].filter(Boolean);
+    cont.innerHTML = list.map(f => `<span class="vs-flag-box">${f.svg}</span>`).join('');
+    wm.innerHTML = (f1 || f2) ? (f1 || f2).svg : '';
+  }
+
+  function updateSideVisuals(side, player, vs) {
+    const charImg = $(`${side}-char-img`);
+    const sideEl = $(`${side}-side`);
+    const heroAvBox = $(`${side}-hero-avatar`);
+    const heroAvImg = $(`${side}-hero-avatar-img`);
+    const badgeAvBox = $(`${side}-avatar-badge`);
+    const badgeAvImg = $(`${side}-avatar-badge-img`);
+    const fallbackEl = $(`${side}-fallback`);
+
+    const charName = String(player.character || '').trim();
+    const charUrl = buildCharRenderUrl(vs.game || 'tekken8', vs.pack || 'full', charName);
+    const avUrl = resolveAvatarSrc(player.avatar);
+    const avMode = vs.design === 'portrait-cards' && vs.avatarMode === 'badge'
+      ? 'portrait-hero'
+      : (vs.avatarMode || 'hero-fallback');
+
+    const applyAvatarVisibility = () => {
+      const hasCharLoaded = Boolean(charUrl && charImg.classList.contains('loaded'));
+      const hasAv = Boolean(avUrl);
+      const showHeroAv = hasAv && (
+        avMode === 'portrait-hero' ||
+        (avMode === 'hero-fallback' && !hasCharLoaded) ||
+        (vs.design === 'portrait-cards' && avMode !== 'off')
+      );
+      const showBadgeAv = hasAv && !showHeroAv && (avMode === 'badge' || avMode === 'hero-fallback');
+
+      heroAvBox.classList.toggle('active', showHeroAv);
+      sideEl.classList.toggle('has-hero-avatar', showHeroAv);
+      badgeAvBox.classList.toggle('active', showBadgeAv);
+      fallbackEl.classList.toggle('active', !hasCharLoaded && !showHeroAv);
+    };
+
+    // Update avatar image URLs
+    const avKey = `${side}Av`;
+    if (lastImgSrc[avKey] !== avUrl) {
+      lastImgSrc[avKey] = avUrl;
+      if (avUrl) {
+        heroAvImg.src = avUrl;
+        badgeAvImg.src = avUrl;
+      } else {
+        heroAvImg.removeAttribute('src');
+        badgeAvImg.removeAttribute('src');
+      }
+    }
+
+    // Update character render image URL
+    const chKey = `${side}Char`;
+    if (lastImgSrc[chKey] !== charUrl) {
+      lastImgSrc[chKey] = charUrl;
+      if (charUrl) {
+        charImg.onload = () => { charImg.classList.add('loaded'); applyAvatarVisibility(); };
+        charImg.onerror = () => { charImg.classList.remove('loaded'); applyAvatarVisibility(); };
+        charImg.src = charUrl;
+      } else {
+        charImg.classList.remove('loaded');
+        charImg.removeAttribute('src');
+      }
+    }
+
+    // Monogram fallback text
+    const initials = (String(player.name || side.toUpperCase()).trim().slice(0, 2) || side.toUpperCase()).toUpperCase();
+    fallbackEl.textContent = initials;
+    applyAvatarVisibility();
+  }
+
+  function triggerEntryAnim(animName) {
+    const stage = $('vs-stage');
+    stage.classList.remove('anim-slam-split', 'anim-curtain', 'anim-zoom-burst', 'anim-fade');
+    void stage.offsetWidth;
+    stage.classList.add(`anim-${animName || 'slam-split'}`);
+  }
+
+  function render(st) {
+    if (!st) return;
+    currentState = st;
+    const vs = st.vs || {};
+    const stage = $('vs-stage');
+    const root = document.documentElement;
+
+    stage.classList.toggle('is-hidden', vs.visible === false);
+    stage.dataset.design = vs.design || 'arcade-pop';
+    stage.dataset.bgMode = vs.bgMode || 'theme';
+    $('vs-pattern').dataset.pat = vs.pattern || 'symbols';
+
+    root.style.setProperty('--vs-bg1', vs.bgColor1 || '#f5b800');
+    root.style.setProperty('--vs-bg2', vs.bgColor2 || '#10131e');
+    root.style.setProperty('--vs-p1', vs.p1Color || '#ff512f');
+    root.style.setProperty('--vs-p2', vs.p2Color || '#2563eb');
+    root.style.setProperty('--p1-zoom', String((Number(vs.p1Zoom ?? 100)) / 100));
+    root.style.setProperty('--p2-zoom', String((Number(vs.p2Zoom ?? 100)) / 100));
+    root.style.setProperty('--p1-y', `${Number(vs.p1OffsetY ?? 0)}px`);
+    root.style.setProperty('--p2-y', `${Number(vs.p2OffsetY ?? 0)}px`);
+    root.style.setProperty('--p1-flip', vs.p1Flip ? '-1' : '1');
+    root.style.setProperty('--p2-flip', vs.p2Flip === false ? '1' : '-1');
+
+    const match = getActiveMatchData(st);
+    const p1 = match.p1 || {};
+    const p2 = match.p2 || {};
+
+    $('vs-eyebrow').textContent = vs.eyebrow ?? 'UP NEXT';
+    $('vs-round').textContent = match.round || 'ROUND 1';
+    $('vs-format').textContent = (st.showFormat !== false && match.format) ? match.format : '';
+
+    $('p1-name').textContent = p1.name || 'PLAYER 1';
+    $('p2-name').textContent = p2.name || 'PLAYER 2';
+    $('p1-sponsor').textContent = vs.showSponsor !== false ? (p1.sponsor || '') : '';
+    $('p2-sponsor').textContent = vs.showSponsor !== false ? (p2.sponsor || '') : '';
+
+    const b1 = $('p1-bracket');
+    b1.textContent = p1.bracket ? `[${p1.bracket}]` : '';
+    b1.className = `vs-bracket ${p1.bracket || ''}`;
+    const b2 = $('p2-bracket');
+    b2.textContent = p2.bracket ? `[${p2.bracket}]` : '';
+    b2.className = `vs-bracket ${p2.bracket || ''}`;
+
+    $('p1-char-sub').textContent = vs.showCharName !== false ? (p1.character || '') : '';
+    $('p2-char-sub').textContent = vs.showCharName !== false ? (p2.character || '') : '';
+
+    const sc1 = $('p1-score');
+    const sc2 = $('p2-score');
+    sc1.textContent = p1.score ?? 0;
+    sc2.textContent = p2.score ?? 0;
+    sc1.classList.toggle('active', Boolean(vs.showScore));
+    sc2.classList.toggle('active', Boolean(vs.showScore));
+
+    renderSideFlags('p1-flags', 'p1-flag-wm', p1, vs.showFlags !== false);
+    renderSideFlags('p2-flags', 'p2-flag-wm', p2, vs.showFlags !== false);
+
+    updateSideVisuals('p1', p1, vs);
+    updateSideVisuals('p2', p2, vs);
+
+    // Head-to-head pill
+    const h2h = computeH2H(p1.name, p2.name);
+    const h2hPill = $('vs-h2h-pill');
+    if (vs.showH2H !== false && h2h.total > 0) {
+      $('vs-h2h-score').textContent = `${h2h.winsA} - ${h2h.winsB}`;
+      h2hPill.classList.add('active');
+    } else {
+      h2hPill.classList.remove('active');
+    }
+
+    // Tournament Logo & Subtitle
+    const logoSlot = $('vs-logo-slot');
+    const logoImg = $('vs-logo-img');
+    if (vs.showLogo !== false && vs.logoUrl) {
+      if (logoImg.getAttribute('src') !== vs.logoUrl) logoImg.src = vs.logoUrl;
+      logoSlot.classList.add('active');
+    } else {
+      logoSlot.classList.remove('active');
+    }
+    $('vs-subtitle').textContent = vs.subtitle || st.tournament || '';
+
+    // Replay OBS entry animation on nonce change
+    if (vs.introNonce && vs.introNonce !== lastIntroNonce) {
+      lastIntroNonce = vs.introNonce;
+      triggerEntryAnim(vs.entryAnim);
+    }
+  }
+
+  /* =========================================================================
+     PURE HTML5 CANVAS 1920x1080 PNG GRAPHIC EXPORTER (For Social Media / Discord!)
+     ========================================================================= */
+  async function loadImg(src) {
+    if (!src) return null;
+    return new Promise((resolve) => {
+      const im = new Image();
+      im.crossOrigin = 'anonymous';
+      im.onload = () => resolve(im);
+      im.onerror = () => resolve(null);
+      im.src = src;
+    });
+  }
+
+  async function loadSvgAsImg(svgText) {
+    if (!svgText) return null;
+    const blob = new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const im = await loadImg(url);
+    URL.revokeObjectURL(url);
+    return im;
+  }
+
+  async function exportPngGraphic() {
+    if (!currentState) return;
+    const st = currentState;
+    const vs = st.vs || {};
+    const match = getActiveMatchData(st);
+    const p1 = match.p1 || {};
+    const p2 = match.p2 || {};
+    const design = vs.design || 'arcade-pop';
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 1920;
+    canvas.height = 1080;
+    const ctx = canvas.getContext('2d');
+
+    // 1. Background
+    if (vs.bgMode !== 'transparent') {
+      if (design === 'arcade-pop' && vs.bgMode !== 'custom') {
+        const g = ctx.createRadialGradient(960, 480, 120, 960, 540, 1180);
+        g.addColorStop(0, '#ffd82b');
+        g.addColorStop(0.7, vs.bgColor1 || '#f5b800');
+        g.addColorStop(1, '#d99b00');
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, 1920, 1080);
+      } else if (design === 't8-clash' && vs.bgMode !== 'custom') {
+        const g1 = ctx.createRadialGradient(420, 460, 60, 480, 540, 950);
+        g1.addColorStop(0, '#c84b10');
+        g1.addColorStop(1, '#09070d');
+        ctx.fillStyle = g1;
+        ctx.fillRect(0, 0, 960, 1080);
+        const g2 = ctx.createRadialGradient(1500, 460, 60, 1440, 540, 950);
+        g2.addColorStop(0, '#5b21b6');
+        g2.addColorStop(1, '#080914');
+        ctx.fillStyle = g2;
+        ctx.fillRect(960, 0, 960, 1080);
+      } else if (design === 'cyber-neon' && vs.bgMode !== 'custom') {
+        const g1 = ctx.createLinearGradient(0, 0, 960, 1080);
+        g1.addColorStop(0, '#ff006e'); g1.addColorStop(1, '#28041c');
+        ctx.fillStyle = g1; ctx.fillRect(0, 0, 960, 1080);
+        const g2 = ctx.createLinearGradient(1920, 0, 960, 1080);
+        g2.addColorStop(0, '#00d4ff'); g2.addColorStop(1, '#07122e');
+        ctx.fillStyle = g2; ctx.fillRect(960, 0, 960, 1080);
+      } else {
+        const g1 = ctx.createRadialGradient(480, 460, 80, 480, 540, 960);
+        g1.addColorStop(0, vs.bgMode === 'custom' ? (vs.p1Color || '#ff512f') : '#1e2436');
+        g1.addColorStop(1, vs.bgColor2 || '#0b0e16');
+        ctx.fillStyle = g1; ctx.fillRect(0, 0, 960, 1080);
+        const g2 = ctx.createRadialGradient(1440, 460, 80, 1440, 540, 960);
+        g2.addColorStop(0, vs.bgMode === 'custom' ? (vs.p2Color || '#2563eb') : '#18243d');
+        g2.addColorStop(1, vs.bgColor2 || '#0b0e16');
+        ctx.fillStyle = g2; ctx.fillRect(960, 0, 960, 1080);
+      }
+
+      // Subtle center divider
+      ctx.fillStyle = design === 'arcade-pop' ? '#ffffff' : 'rgba(255,255,255,0.35)';
+      ctx.fillRect(design === 'arcade-pop' ? 950 : 958, 0, design === 'arcade-pop' ? 20 : 4, 1080);
+    }
+
+    // 2. Character Renders & Profile Avatars
+    const [p1CharIm, p2CharIm, p1AvIm, p2AvIm, logoIm] = await Promise.all([
+      loadImg(buildCharRenderUrl(vs.game, vs.pack, p1.character)),
+      loadImg(buildCharRenderUrl(vs.game, vs.pack, p2.character)),
+      loadImg(resolveAvatarSrc(p1.avatar)),
+      loadImg(resolveAvatarSrc(p2.avatar)),
+      vs.showLogo !== false && vs.logoUrl ? loadImg(vs.logoUrl) : Promise.resolve(null)
+    ]);
+
+    const drawChar = (im, cx, zoom, offY, flip, dim) => {
+      if (!im) return;
+      const targetH = 900 * (zoom / 100);
+      const scale = targetH / im.naturalHeight;
+      const w = im.naturalWidth * scale;
+      const h = im.naturalHeight * scale;
+      ctx.save();
+      ctx.globalAlpha = dim ? 0.25 : 1;
+      ctx.translate(cx, 540 + offY);
+      ctx.scale(flip ? -1 : 1, 1);
+      ctx.shadowColor = 'rgba(0,0,0,0.55)';
+      ctx.shadowBlur = 28;
+      ctx.shadowOffsetY = 16;
+      ctx.drawImage(im, -w / 2, -h / 2, w, h);
+      ctx.restore();
+    };
+
+    const drawHeroAv = (im, cx, borderColor) => {
+      if (!im) return;
+      const sz = 440;
+      const x = cx - sz / 2;
+      const y = 210;
+      ctx.save();
+      ctx.beginPath();
+      ctx.roundRect(x, y, sz, sz, 26);
+      ctx.closePath();
+      ctx.clip();
+      const s = Math.max(sz / im.naturalWidth, sz / im.naturalHeight);
+      const dw = im.naturalWidth * s;
+      const dh = im.naturalHeight * s;
+      ctx.drawImage(im, cx - dw / 2, y + sz / 2 - dh / 2, dw, dh);
+      ctx.restore();
+      ctx.lineWidth = 8;
+      ctx.strokeStyle = borderColor;
+      ctx.beginPath();
+      ctx.roundRect(x, y, sz, sz, 26);
+      ctx.stroke();
+    };
+
+    const avMode = design === 'portrait-cards' && vs.avatarMode === 'badge' ? 'portrait-hero' : (vs.avatarMode || 'hero-fallback');
+    const p1Hero = Boolean(p1AvIm && (avMode === 'portrait-hero' || (avMode === 'hero-fallback' && !p1CharIm)));
+    const p2Hero = Boolean(p2AvIm && (avMode === 'portrait-hero' || (avMode === 'hero-fallback' && !p2CharIm)));
+
+    drawChar(p1CharIm, 480, Number(vs.p1Zoom ?? 100), Number(vs.p1OffsetY ?? 0), Boolean(vs.p1Flip), p1Hero);
+    drawChar(p2CharIm, 1440, Number(vs.p2Zoom ?? 100), Number(vs.p2OffsetY ?? 0), vs.p2Flip !== false, p2Hero);
+    if (p1Hero) drawHeroAv(p1AvIm, 480, vs.p1Color || '#ff512f');
+    if (p2Hero) drawHeroAv(p2AvIm, 1440, vs.p2Color || '#2563eb');
+
+    // 3. Top Header Banner
+    ctx.save();
+    ctx.fillStyle = design === 'twt-clean' ? '#d41634' : '#0a0c13';
+    ctx.beginPath();
+    ctx.moveTo(640, 0); ctx.lineTo(1280, 0); ctx.lineTo(1240, 108); ctx.lineTo(680, 108); ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.moveTo(680, 108); ctx.lineTo(1240, 108); ctx.stroke();
+    ctx.textAlign = 'center';
+    if (vs.eyebrow) {
+      ctx.fillStyle = '#facc15';
+      ctx.font = '800 22px "Barlow Condensed", sans-serif';
+      ctx.fillText(String(vs.eyebrow).toUpperCase(), 960, 34);
+    }
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '900 42px "Russo One", "Barlow Condensed", sans-serif';
+    const roundTitle = `${(match.round || 'ROUND 1').toUpperCase()}${(st.showFormat !== false && match.format) ? `  ·  ${match.format}` : ''}`;
+    ctx.fillText(roundTitle, 960, 84);
+    ctx.restore();
+
+    // 4. Center VS Emblem
+    ctx.save();
+    ctx.font = 'italic 900 112px "Russo One", "Barlow Condensed", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.lineWidth = 14;
+    ctx.strokeStyle = '#090b10';
+    ctx.strokeText('VS', 960, 505);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('VS', 960, 505);
+    ctx.restore();
+
+    // 5. Player Nameplates + Avatar Badges + Flags
+    const drawPlate = async (side, player, avIm, isHero) => {
+      const isLeft = side === 'p1';
+      const x = isLeft ? 62 : 1068;
+      const y = 758;
+      const w = 790;
+      const h = 142;
+      ctx.save();
+      ctx.fillStyle = 'rgba(8, 10, 16, 0.95)';
+      ctx.shadowColor = 'rgba(0,0,0,0.65)';
+      ctx.shadowBlur = 32;
+      ctx.beginPath();
+      ctx.roundRect(x, y, w, h, 8);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = isLeft ? (vs.p1Color || '#ff512f') : (vs.p2Color || '#2563eb');
+      ctx.fillRect(isLeft ? x : x + w - 10, y, 10, h);
+
+      const showBadge = Boolean(avIm && !isHero && avMode !== 'off');
+      let textX = isLeft ? x + 32 : x + w - 32;
+      if (showBadge) {
+        const bx = isLeft ? x + 28 : x + w - 126;
+        const by = y + 22;
+        ctx.save();
+        ctx.beginPath(); ctx.roundRect(bx, by, 98, 98, 12); ctx.clip();
+        const s = Math.max(98 / avIm.naturalWidth, 98 / avIm.naturalHeight);
+        ctx.drawImage(avIm, bx + 49 - (avIm.naturalWidth * s) / 2, by + 49 - (avIm.naturalHeight * s) / 2, avIm.naturalWidth * s, avIm.naturalHeight * s);
+        ctx.restore();
+        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.roundRect(bx, by, 98, 98, 12); ctx.stroke();
+        textX = isLeft ? x + 146 : x + w - 146;
+      }
+
+      // Draw Country Flag if enabled
+      let metaOffset = 0;
+      if (vs.showFlags !== false && player.flag && FLAGS_MAP[String(player.flag).toUpperCase()]) {
+        const flagIm = await loadSvgAsImg(FLAGS_MAP[String(player.flag).toUpperCase()].svg);
+        if (flagIm) {
+          const fx = isLeft ? textX : textX - 44;
+          ctx.drawImage(flagIm, fx, y + 18, 44, 29);
+          metaOffset = 54;
+        }
+      }
+
+      ctx.textAlign = isLeft ? 'left' : 'right';
+      const metaLabel = [vs.showSponsor !== false ? player.sponsor : '', player.bracket ? `[${player.bracket}]` : ''].filter(Boolean).join('  ');
+      if (metaLabel) {
+        ctx.fillStyle = '#facc15';
+        ctx.font = '800 26px "Barlow Condensed", sans-serif';
+        ctx.fillText(metaLabel.toUpperCase(), isLeft ? textX + metaOffset : textX - metaOffset, y + 41);
+      }
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '900 58px "Russo One", "Barlow Condensed", sans-serif';
+      ctx.fillText((player.name || (isLeft ? 'PLAYER 1' : 'PLAYER 2')).slice(0, 22), textX, y + 98);
+
+      if (vs.showCharName !== false && player.character) {
+        ctx.fillStyle = 'rgba(255,255,255,0.75)';
+        ctx.font = '800 23px "Barlow Condensed", sans-serif';
+        ctx.fillText(String(player.character).toUpperCase(), textX, y + 128);
+      }
+      ctx.restore();
+    };
+
+    await drawPlate('p1', p1, p1AvIm, p1Hero);
+    await drawPlate('p2', p2, p2AvIm, p2Hero);
+
+    // 6. Tournament Logo
+    if (logoIm) {
+      const scale = Math.min(220 / logoIm.naturalWidth, 96 / logoIm.naturalHeight, 1);
+      const lw = logoIm.naturalWidth * scale;
+      const lh = logoIm.naturalHeight * scale;
+      ctx.drawImage(logoIm, 44, 1054 - lh, lw, lh);
+    }
+
+    const a = document.createElement('a');
+    const safeName = `${(p1.name || 'p1')}-vs-${(p2.name || 'p2')}`.toLowerCase().replace(/[^a-z0-9-]+/g, '-');
+    a.download = `vs-splash-${safeName}.png`;
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+  }
+
+  /* =========================================================================
+     SYNC ENGINE: SSE + BroadcastChannel + Panel postMessage + OBS Scene Hooks
+     ========================================================================= */
+  window.addEventListener('message', (ev) => {
+    const d = ev.data;
+    if (!d) return;
+    if (d.type === 'state-update' && d.state) render(d.state);
+    else if (d.type === 'history-update' && Array.isArray(d.history)) { historyDb = d.history; if (currentState) render(currentState); }
+    else if (d.type === 'test-vs-entry') triggerEntryAnim(currentState?.vs?.entryAnim || 'slam-split');
+    else if (d.type === 'export-vs-png') exportPngGraphic();
+  });
+
+  // OBS Browser Source native scene activation replay
+  const onSceneShow = () => {
+    if (currentState?.vs?.visible !== false) triggerEntryAnim(currentState?.vs?.entryAnim || 'slam-split');
+  };
+  window.addEventListener('obsSourceActiveChanged', (e) => { if (e?.detail?.active) onSceneShow(); });
+  window.addEventListener('obsSourceVisibleChanged', (e) => { if (e?.detail?.visible) onSceneShow(); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) onSceneShow(); });
+
+  try {
+    const bc = new BroadcastChannel('fgc_open_scorebar');
+    bc.onmessage = (ev) => {
+      if (ev.data?.type === 'state' && ev.data.payload) render(ev.data.payload);
+    };
+  } catch {}
+
+  if (isHttp) {
+    fetch('/api/history').then(r => r.json()).then(list => { historyDb = list; if (currentState) render(currentState); }).catch(() => {});
+    fetch('/api/state').then(r => r.json()).then(st => {
+      render(st);
+      if (!isPreview && st?.vs?.visible !== false) triggerEntryAnim(st?.vs?.entryAnim || 'slam-split');
+    }).catch(() => {});
+
+    const es = new EventSource('/api/events');
+    es.addEventListener('state', (ev) => {
+      try { render(JSON.parse(ev.data)); } catch {}
+    });
+  }
+})();
+</script>
+</body>
+</html>
