@@ -1157,7 +1157,7 @@
           onReady: () => {
             ytReady = true;
             document.getElementById('yt-status').textContent = 'Ready ✓';
-            if (isObsMode && playing) syncAudio(currentSec, true);
+            if (playing) syncAudio(currentSec, true);
           },
           onError: () => {
             document.getElementById('yt-status').textContent = 'Use Local MP3';
