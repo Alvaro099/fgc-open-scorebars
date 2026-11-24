@@ -24,11 +24,14 @@ import {
   fetchStartGGEventSets,
   fetchStartGGEntrants,
   fetchStartGGTournamentLogo,
+  fetchStartGGStandings,
   reportStartGGSet,
   connectChallonge,
   fetchChallongeTournamentLogo,
+  fetchChallongeStandings,
   reportChallongeMatch,
   getDemoTournament,
+  getDemoStandings,
   reportDemoSet
 } from './tournaments.mjs';
 import { createAssetManager } from './assets.mjs';
@@ -211,6 +214,61 @@ export const DEFAULT_STYLE = {
   mpText: 'MATCH POINT'
 };
 
+export const DEFAULT_RESULTS = {
+  visible: true,
+  design: 'res-evo-gold',
+  layoutOverride: 'theme',   // 'theme' | 'champ-left' | 'podium-top' | 'esports-grid' | 'tower-ladder' | 'top4-quad' | 'podium-3'
+  cardStyle: 'theme',        // 'theme' | 'angled' | 'chamfer' | 'sharp' | 'glass' | 'comic' | 'minimal'
+  game: 'tekken8',
+  pack: 'full',
+  // Event Header & Branding
+  title: 'TOP 8 RESULTS',
+  subtitle: 'TOURNAMENT FINALS',
+  entrantsCount: '',
+  footerText: '',
+  logoUrl: '',               // '' = auto-inherit state.vs.logoUrl when showLogo is true
+  showLogo: true,
+  showCrown: true,
+  showFlags: true,
+  flagMode: 'both',          // 'both' | 'country' | 'region' | 'none'
+  avatarMode: 'badge',       // 'badge' | 'fallback' | 'avatar-only' | 'char-only'
+  showSponsor: true,
+  showCharName: true,
+  showHandles: true,
+  showEntrants: true,
+  // Colors, Typography & Pattern Studio
+  bgMode: 'theme',           // 'theme' | 'custom' | 'transparent'
+  bgColor1: '#1d356b',
+  bgColor2: '#060912',
+  accentColor: '',
+  goldColor: '',
+  fontDisplay: 'theme',
+  pattern: 'theme',          // 'theme' | 'symbols' | 'grid' | 'halftone' | 'diagonal' | 'hex' | 'chevrons' | 'rings' | 'stars' | 'none'
+  patternSpeed: 38,
+  patternDir: 'diag-dr',
+  patternOpacity: -1,
+  patternScale: 100,
+  // Animations & Ambient FX
+  entryAnim: 'theme',        // 'theme' | 'cascade-slam' | 'podium-rise' | 'diag-wipe' | 'zoom-punch' | 'slide-ladder' | 'curtain-rise' | 'pop-bounce' | 'cyber-glitch' | 'shatter-drop' | 'clean-fade'
+  entrySpeed: 100,
+  staggerMs: 85,
+  ambientAnim: 'theme',      // 'theme' | 'none' | 'confetti-gold' | 'energy-sparks' | 'spotlight-sweep' | 'petals-drift' | 'shimmer-wave' | 'aurora-glow' | 'scanline-crt'
+  cardIdleAnim: 'theme',     // 'theme' | 'none' | 'champ-glow' | 'float-wave' | 'sheen-loop'
+  charZoom: 100,
+  charOffsetY: 0,
+  introNonce: 0,
+  placements: [
+    { place: 1, name: 'PLAYER 1', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '' },
+    { place: 2, name: 'PLAYER 2', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '' },
+    { place: 3, name: 'PLAYER 3', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '' },
+    { place: 4, name: 'PLAYER 4', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '' },
+    { place: 5, name: 'PLAYER 5', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '' },
+    { place: 5, name: 'PLAYER 6', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '' },
+    { place: 7, name: 'PLAYER 7', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '' },
+    { place: 7, name: 'PLAYER 8', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '' }
+  ]
+};
+
 export const DEFAULT_STATE = {
   version: 1,
   updatedAt: Date.now(),
@@ -264,6 +322,7 @@ export const DEFAULT_STATE = {
   },
   style: structuredClone(DEFAULT_STYLE),
   vs: structuredClone(DEFAULT_VS),
+  results: structuredClone(DEFAULT_RESULTS),
   activeMatch: null,
   lastEvent: {
     type: 'init',
@@ -310,6 +369,13 @@ currentState.vs = {
     p1: { ...DEFAULT_VS.customMatch.p1, ...(currentState.vs?.customMatch?.p1 || {}) },
     p2: { ...DEFAULT_VS.customMatch.p2, ...(currentState.vs?.customMatch?.p2 || {}) }
   }
+};
+currentState.results = {
+  ...structuredClone(DEFAULT_RESULTS),
+  ...(currentState.results || {}),
+  placements: Array.isArray(currentState.results?.placements) && currentState.results.placements.length
+    ? currentState.results.placements.slice(0, 8).map((p, i) => ({ ...DEFAULT_RESULTS.placements[i], ...(p || {}) }))
+    : structuredClone(DEFAULT_RESULTS.placements)
 };
 
 let playersDb = readJsonSafe(PLAYERS_FILE, DEFAULT_PLAYERS);
@@ -488,6 +554,18 @@ function deepMergeState(prev, patch) {
         : nextVs.customMatch
     };
   }
+  const nextResults = patch.results
+    ? {
+        ...(prev.results || structuredClone(DEFAULT_RESULTS)),
+        ...patch.results,
+        placements: Array.isArray(patch.results.placements)
+          ? patch.results.placements.slice(0, 8).map((p, i) => ({
+              ...(prev.results?.placements?.[i] || DEFAULT_RESULTS.placements[i] || { place: i + 1 }),
+              ...(p || {})
+            }))
+          : (prev.results?.placements || structuredClone(DEFAULT_RESULTS.placements))
+      }
+    : (prev.results || structuredClone(DEFAULT_RESULTS));
   const next = {
     ...prev,
     ...patch,
@@ -499,6 +577,7 @@ function deepMergeState(prev, patch) {
     tweaks: patch.tweaks ? { ...prev.tweaks, ...patch.tweaks } : prev.tweaks,
     style: patch.style ? { ...prev.style, ...patch.style } : prev.style,
     vs: nextVs,
+    results: nextResults,
     updatedAt: Date.now()
   };
   return next;
@@ -827,6 +906,56 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
+  // --- API: Pull Final Tournament Standings (Top 8) from Start.gg / Challonge / Demo ---
+  if (pathname === '/api/tournament/standings' && req.method === 'POST') {
+    try {
+      const body = await readBody(req).catch(() => ({}));
+      const provider = body.provider || lastTournamentSnapshot?.provider || integrationsCfg.provider || 'startgg';
+      let result = null;
+      if (provider === 'demo') {
+        result = getDemoStandings();
+      } else if (provider === 'startgg') {
+        let eventId = body.eventId || lastTournamentSnapshot?.selectedEventId;
+        const token = (body.token && body.token !== '__KEEP__') ? String(body.token).trim() : integrationsCfg.startggToken;
+        const url = String(body.url || integrationsCfg.startggUrl || '').trim();
+        if (!eventId && url && token) {
+          const snap = await attachCachedTournamentLogo(await connectStartGG(url, token));
+          lastTournamentSnapshot = snap;
+          eventId = snap.selectedEventId;
+        }
+        if (!eventId) throw new Error('Connect a start.gg event first in the Tournaments tab.');
+        result = await fetchStartGGStandings(eventId, token);
+      } else if (provider === 'challonge') {
+        const url = String(body.url || integrationsCfg.challongeUrl || '').trim();
+        const key = (body.token && body.token !== '__KEEP__') ? String(body.token).trim() : integrationsCfg.challongeKey;
+        if (!url || !key) throw new Error('Connect a Challonge tournament first in the Tournaments tab.');
+        result = await fetchChallongeStandings(url, key);
+      } else {
+        throw new Error(`Unsupported provider: ${provider}`);
+      }
+      if (result?.logoUrl) {
+        try {
+          const cached = await assets.cacheRemoteBrandingLogo(result.logoUrl, result.tournamentSlug || result.tournamentName);
+          if (cached?.url) result.cachedLogoUrl = cached.url;
+        } catch {}
+      }
+      // Enrich characters/flags/avatars from saved local playersDb when missing
+      for (const pl of (result.placements || [])) {
+        const saved = playersDb.find(p => p.name.toLowerCase() === String(pl.name || '').toLowerCase());
+        if (saved) {
+          if (!pl.character && saved.character) pl.character = saved.character;
+          if (!pl.sponsor && saved.sponsor) pl.sponsor = saved.sponsor;
+          if (!pl.flag && saved.flag) pl.flag = saved.flag;
+          if (!pl.region && saved.region) pl.region = saved.region;
+          if (!pl.avatar && saved.avatar) pl.avatar = saved.avatar;
+        }
+      }
+      return sendJson(res, 200, { ok: true, ...result });
+    } catch (err) {
+      return sendJson(res, 400, { error: err.message });
+    }
+  }
+
   // --- API: Import Tournament Participants into local players.json ---
   if (pathname === '/api/tournament/import-players' && req.method === 'POST') {
     try {
@@ -1066,6 +1195,7 @@ const server = http.createServer(async (req, res) => {
       port: PORT,
       overlayUrl: `http://localhost:${PORT}/`,
       vsOverlayUrl: `http://localhost:${PORT}/vs.html`,
+      resultsOverlayUrl: `http://localhost:${PORT}/results.html`,
       panelUrl: `http://localhost:${PORT}/panel.html`,
       lanPanelUrls: lanIps.map(ip => `http://${ip}:${PORT}/panel.html`),
       connectedClients: sseClients.size
@@ -1076,7 +1206,8 @@ const server = http.createServer(async (req, res) => {
   let relPath =
     pathname === '/' ? '/index.html' :
     pathname === '/panel' ? '/panel.html' :
-    pathname === '/vs' ? '/vs.html' : pathname;
+    pathname === '/vs' ? '/vs.html' :
+    pathname === '/results' ? '/results.html' : pathname;
   relPath = decodeURIComponent(relPath);
   const safePath = path.normalize(relPath).replace(/^(\.\.[/\\])+/, '');
   if (/^[/\\]?data([/\\]|$)/i.test(safePath)) {

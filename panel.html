@@ -2245,6 +2245,90 @@
   .ff-preset-btn:hover { border-color: #38bdf8; background: #141d31; }
   .ff-preset-btn strong { font-size: 11px; color: #fff; }
   .ff-preset-btn small { font-size: 9.5px; color: var(--muted); line-height: 1.25; }
+
+  /* =========================================================================
+     WORKSPACE 4: TOURNAMENT FINAL RESULTS (TOP 8 / PODIUM) STUDIO
+     ========================================================================= */
+  .res-insp-pane { display: none; }
+  .res-insp-pane.active { display: block; }
+  .res-players-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .res-player-row {
+    display: grid;
+    grid-template-columns: 62px 72px minmax(110px, 1.15fr) 82px minmax(115px, 1fr) minmax(95px, 0.85fr) auto;
+    gap: 6px;
+    align-items: center;
+    padding: 6px 8px;
+    background: #0d1018;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    transition: border-color 0.14s, background 0.14s;
+  }
+  .res-player-row:hover { border-color: var(--border-hi); background: #111623; }
+  .res-player-row[data-rank="1"] { border-left: 3px solid #facc15; background: linear-gradient(90deg, rgba(250,204,21,0.08), #0d1018 40%); }
+  .res-player-row[data-rank="2"] { border-left: 3px solid #cbd5e1; }
+  .res-player-row[data-rank="3"] { border-left: 3px solid #f97316; }
+  @media (max-width: 1080px) {
+    .res-player-row { grid-template-columns: 60px 72px 1fr 82px; }
+  }
+  .res-player-row input, .res-player-row select {
+    padding: 4px 7px;
+    font-size: 11.5px;
+    height: 29px;
+  }
+  .res-rank-sel {
+    font-weight: 800;
+    text-align: center;
+    padding: 4px 2px !important;
+  }
+  .res-flag-btns {
+    display: flex;
+    gap: 4px;
+  }
+  .res-mini-flag-btn {
+    flex: 1;
+    height: 29px;
+    padding: 2px 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #141926;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    font-size: 10px;
+    color: var(--muted);
+    overflow: hidden;
+  }
+  .res-mini-flag-btn:hover { border-color: #60a5fa; color: #fff; }
+  .res-mini-flag-btn svg { width: 22px; height: 15px; display: block; border-radius: 2px; }
+  .res-row-actions {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+  .res-row-actions button {
+    height: 29px;
+    padding: 0 6px;
+    font-size: 11px;
+  }
+  .res-av-btn.has-av {
+    border-color: #22c55e;
+    color: #86efac;
+    background: rgba(34, 197, 94, 0.14);
+  }
+  .res-layout-badge {
+    font-size: 9px;
+    font-weight: 800;
+    padding: 1px 5px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.08);
+    color: #cbd5e1;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
 </style>
 </head>
 <body>
@@ -2254,7 +2338,7 @@
     <div class="brand-logo">T8</div>
     <div>
       <h1>FGC Open Scorebars</h1>
-      <small>Local Broadcast Suite · Scorebars · VS Splash · Tournaments</small>
+      <small>Local Broadcast Suite · Scorebars · VS Splash · Results · Tournaments</small>
     </div>
   </div>
 
@@ -2262,6 +2346,7 @@
   <nav class="top-workspace-nav" id="top-workspace-nav" aria-label="Broadcast Workspaces">
     <button type="button" data-ws="scorebars" class="active-ws">🎛 Scorebars</button>
     <button type="button" data-ws="vs">⚔️ VS Splash</button>
+    <button type="button" data-ws="results">🏅 Results</button>
     <button type="button" data-ws="tournaments">🏆 Tournaments <span class="ws-badge" id="trn-ws-badge">Start.gg / Challonge</span></button>
   </nav>
 
@@ -2284,6 +2369,13 @@
       <button type="button" id="btn-open-vs" title="Open vs.html in a new tab">↗ Open VS</button>
       <button type="button" id="btn-vs-replay" class="primary">🎬 VS Intro</button>
       <button type="button" id="btn-vs-vis" class="btn-vis">👁 VS ON</button>
+    </div>
+    <!-- Contextual actions for Tournament Results workspace -->
+    <div class="hdr-ws-group hidden" id="hdr-group-results">
+      <button type="button" id="btn-copy-results" title="Copy Tournament Results Browser Source URL for OBS">📋 Copy Results URL</button>
+      <button type="button" id="btn-open-results" title="Open results.html in a new tab">↗ Open Results</button>
+      <button type="button" id="btn-res-replay" class="primary">🎬 Results Intro</button>
+      <button type="button" id="btn-res-vis" class="btn-vis">👁 Results ON</button>
     </div>
   </div>
 </header>
@@ -3199,12 +3291,17 @@
             <span id="vs-url-text">http://localhost:8787/vs.html</span>
             <button id="copy-vs-2" style="padding:3px 8px;font-size:11px;">Copy</button>
           </div>
-          <label style="margin-top:10px;">3. Built-in OBS Custom Browser Dock (Docks → Custom Browser Docks)</label>
+          <label style="margin-top:10px;">3. OBS Studio Tournament Final Results URL (Browser Source 1920x1080)</label>
+          <div class="code-line">
+            <span id="results-url-text">http://localhost:8787/results.html</span>
+            <button id="copy-results-2" style="padding:3px 8px;font-size:11px;">Copy</button>
+          </div>
+          <label style="margin-top:10px;">4. Built-in OBS Custom Browser Dock (Docks → Custom Browser Docks)</label>
           <div class="code-line">
             <span id="dock-url-text">http://localhost:8787/panel.html</span>
             <button id="copy-dock" style="padding:3px 8px;font-size:11px;">Copy</button>
           </div>
-          <label style="margin-top:10px;">4. Mobile / Tablet LAN Remote Control (same Wi-Fi network)</label>
+          <label style="margin-top:10px;">5. Mobile / Tablet LAN Remote Control (same Wi-Fi network)</label>
           <div class="code-line">
             <span id="lan-url-text">Detecting local IP...</span>
             <button id="copy-lan" style="padding:3px 8px;font-size:11px;">Copy</button>
@@ -3863,6 +3960,324 @@
   </div>
 </div>
 
+<!-- =========================================================================
+     WORKSPACE 4: TOURNAMENT FINAL RESULTS STUDIO (TOP 8 / TOP 4 / PODIUM)
+     ========================================================================= -->
+<div class="workspace-view" id="ws-results">
+  <div class="vs-workspace-shell">
+    <div class="main-column">
+      <!-- PINNED 16:9 TOURNAMENT RESULTS LIVE PREVIEW -->
+      <section class="vs-preview-card is-pinned" id="res-preview-card">
+        <div class="preview-toolbar">
+          <div class="preview-toolbar-group">
+            <button type="button" id="btn-res-pull" class="primary" title="Pull final Top 8 standings, flags, avatars &amp; logo from connected Start.gg / Challonge tournament">🔄 Pull Standings</button>
+            <button type="button" id="btn-res-demo" title="Load a clean Demo Top 8 standings set to preview layouts &amp; animations">⚡ Demo Top 8</button>
+            <button type="button" id="btn-res-test-anim" title="Replay the staggered entry animation on the live preview">🎬 Replay Intro</button>
+          </div>
+          <div class="preview-toolbar-group">
+            <button type="button" id="btn-res-export-png" title="Render &amp; download a 1920x1080 PNG graphic for Twitter/X, Discord &amp; Instagram">⬇ Export 1080p PNG</button>
+            <button type="button" id="btn-res-reset" title="Reset Results visual overrides back to active design defaults">↺ Reset Style</button>
+            <button type="button" id="btn-pin-res" class="active-chip" title="Keep the Results Live Preview pinned at the top while scrolling">📌 Pin</button>
+          </div>
+        </div>
+        <div class="vs-preview-stage">
+          <iframe id="results-preview-frame" src="results.html?preview=1"></iframe>
+        </div>
+      </section>
+
+      <!-- RESULTS STUDIO INSPECTOR TABS -->
+      <section class="card">
+        <div class="tab-nav" id="res-insp-tabs" style="margin-bottom:12px;">
+          <button type="button" class="active-chip" data-respane="players">🏅 Top 8 Players</button>
+          <button type="button" data-respane="style">🎨 Layout, Colors &amp; Style</button>
+          <button type="button" data-respane="fx">✨ Animations, Pattern &amp; FX</button>
+          <button type="button" data-respane="header">🏷️ Header, Logo &amp; Game</button>
+        </div>
+
+        <!-- PANE 1: TOP 8 PLAYERS EDITOR -->
+        <div class="res-insp-pane active" id="respane-players">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+            <span style="font-size:11px;color:var(--muted);">Edit placements, tags, country/region flags, characters, handles &amp; avatars — or pull directly from Start.gg / Challonge.</span>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button type="button" id="btn-res-from-match" title="Assign current Scorebar winner to 1st place and runner-up to 2nd place">🏆 Fill 1st/2nd from Match</button>
+              <button type="button" id="btn-res-clear-players" title="Reset all 8 placements to clean placeholders">🗑 Reset Names</button>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:62px 72px minmax(110px,1.15fr) 82px minmax(115px,1fr) minmax(95px,0.85fr) auto;gap:6px;padding:0 8px 4px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);">
+            <span>Rank</span><span>Sponsor</span><span>Player Name</span><span>Flags</span><span>Character</span><span>@Handle</span><span>Actions</span>
+          </div>
+          <div class="res-players-list" id="res-players-editor"></div>
+          <input type="file" id="file-res-avatar" accept="image/png,image/jpeg,image/webp" style="display:none;" />
+        </div>
+
+        <!-- PANE 2: LAYOUT, COLORS & STYLE -->
+        <div class="res-insp-pane" id="respane-style">
+          <div class="studio-grid">
+            <div class="studio-box">
+              <h3>📐 Layout Architecture &amp; Card Style</h3>
+              <div class="row">
+                <div>
+                  <label for="res-layoutOverride">Layout Mode</label>
+                  <select id="res-layoutOverride">
+                    <option value="theme">— From Active Design —</option>
+                    <option value="champ-left">🏆 Champion Left + Top 8 Grid (1 + 7)</option>
+                    <option value="podium-top">🥇 Elevated Top 3 Podium + 4th–8th</option>
+                    <option value="esports-grid">📺 4×2 Broadcast Esports Grid (Top 8)</option>
+                    <option value="tower-ladder">📋 Champion Spotlight + 8-Row Ladder</option>
+                    <option value="top4-quad">⚡ Top 4 Vertical Showcase Towers</option>
+                    <option value="podium-3">👑 Grand Top 3 Podium (1st / 2nd / 3rd)</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="res-cardStyle">Card Geometry</label>
+                  <select id="res-cardStyle">
+                    <option value="theme">— From Active Design —</option>
+                    <option value="angled">Angled Broadcast Slant</option>
+                    <option value="chamfer">Chamfered Octagon Cut</option>
+                    <option value="sharp">Sharp Editorial Box</option>
+                    <option value="glass">Liquid Frosted Glass</option>
+                    <option value="comic">Manga / Comic Hard Ink</option>
+                    <option value="minimal">Clean Minimalist Frame</option>
+                  </select>
+                </div>
+              </div>
+              <div class="row" style="margin-top:8px;">
+                <div>
+                  <label for="res-fontDisplay">Display Typography</label>
+                  <select id="res-fontDisplay"></select>
+                </div>
+                <div>
+                  <label>Flag Mode (Supports Region-Only!)</label>
+                  <div class="seg-bar" id="seg-res-flagMode">
+                    <button type="button" data-val="both" class="active-chip">Both</button>
+                    <button type="button" data-val="country">Country</button>
+                    <button type="button" data-val="region">Region Only</button>
+                    <button type="button" data-val="none">Off</button>
+                  </div>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <label>Character Art &amp; Player Avatar Mode</label>
+                <div class="seg-bar" id="seg-res-avatarMode">
+                  <button type="button" data-val="badge" class="active-chip">Char + Avatar Badge</button>
+                  <button type="button" data-val="fallback">Avatar Fallback</button>
+                  <button type="button" data-val="avatar-only">Player Photos Only</button>
+                  <button type="button" data-val="char-only">Characters Only</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="studio-box">
+              <h3>🎨 Backdrop, Accent Colors &amp; Framing</h3>
+              <label>Backdrop Mode</label>
+              <div class="seg-bar" id="seg-res-bgMode" style="margin-bottom:8px;">
+                <button type="button" data-val="theme" class="active-chip">Theme Default</button>
+                <button type="button" data-val="custom">Custom Gradient</button>
+                <button type="button" data-val="transparent">Transparent (OBS Cam)</button>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px;">
+                <div><label for="res-bg1">BG Color 1</label><input type="color" id="res-bg1" value="#1d356b" /></div>
+                <div><label for="res-bg2">BG Color 2</label><input type="color" id="res-bg2" value="#060912" /></div>
+                <div>
+                  <label for="res-accent">Accent <button type="button" id="btn-res-accent-auto" style="padding:0 4px;font-size:9px;margin-left:2px;">Auto</button></label>
+                  <input type="color" id="res-accent" value="#facc15" />
+                </div>
+                <div>
+                  <label for="res-gold">1st Gold <button type="button" id="btn-res-gold-auto" style="padding:0 4px;font-size:9px;margin-left:2px;">Auto</button></label>
+                  <input type="color" id="res-gold" value="#facc15" />
+                </div>
+              </div>
+              <div class="slider-row">
+                <div class="slider-head"><span>Character Render Zoom</span><b id="val-res-charZoom">100%</b></div>
+                <input type="range" id="rng-res-charZoom" min="60" max="160" step="2" value="100" />
+              </div>
+              <div class="slider-row">
+                <div class="slider-head"><span>Character Vertical Shift (Y)</span><b id="val-res-charY">0 px</b></div>
+                <input type="range" id="rng-res-charY" min="-120" max="120" step="2" value="0" />
+              </div>
+              <div class="toggles-row" style="margin-top:8px;">
+                <label class="toggle-item"><input type="checkbox" id="chk-res-crown" checked /> 1st Crown</label>
+                <label class="toggle-item"><input type="checkbox" id="chk-res-sponsor" checked /> Sponsors</label>
+                <label class="toggle-item"><input type="checkbox" id="chk-res-charname" checked /> Char Names</label>
+                <label class="toggle-item"><input type="checkbox" id="chk-res-handles" checked /> @Handles</label>
+                <label class="toggle-item"><input type="checkbox" id="chk-res-entrants" checked /> Entrants Pill</label>
+                <label class="toggle-item"><input type="checkbox" id="chk-res-logo" checked /> Event Logo</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PANE 3: ANIMATIONS, PATTERN & AMBIENT FX -->
+        <div class="res-insp-pane" id="respane-fx">
+          <div class="studio-grid">
+            <div class="studio-box">
+              <h3>🎬 Staggered Entry &amp; Continuous Ambient FX</h3>
+              <div style="display:flex;gap:6px;align-items:end;">
+                <div style="flex:1;">
+                  <label for="res-entryAnim">Entry Choreography (10 Styles)</label>
+                  <select id="res-entryAnim">
+                    <option value="theme">— From Active Design —</option>
+                    <option value="cascade-slam">💥 Cascade Slam (1st → 8th)</option>
+                    <option value="podium-rise">🏆 Dramatic Podium Rise (8th → 1st)</option>
+                    <option value="diag-wipe">⚡ Diagonal Broadcast Wipe</option>
+                    <option value="zoom-punch">🎯 Impact Zoom Punch</option>
+                    <option value="slide-ladder">📋 Side Slide Ladder</option>
+                    <option value="curtain-rise">✨ Luxury Curtain Rise</option>
+                    <option value="pop-bounce">🕹 Arcade Pop Bounce</option>
+                    <option value="cyber-glitch">📡 Cyber Digital Glitch</option>
+                    <option value="shatter-drop">🔥 Top Shatter Drop</option>
+                    <option value="clean-fade">🌊 Smooth Broadcast Fade</option>
+                  </select>
+                </div>
+                <button type="button" id="btn-res-test-entry2" class="primary" style="height:33px;">▶ Test</button>
+              </div>
+              <div class="slider-row" style="margin-top:8px;">
+                <div class="slider-head"><span>Entry Animation Speed</span><b id="val-res-entrySpeed">100%</b></div>
+                <input type="range" id="rng-res-entrySpeed" min="40" max="200" step="5" value="100" />
+              </div>
+              <div class="slider-row">
+                <div class="slider-head"><span>Card Cascade Stagger Delay</span><b id="val-res-staggerMs">85 ms</b></div>
+                <input type="range" id="rng-res-staggerMs" min="0" max="220" step="5" value="85" />
+              </div>
+              <div style="margin-top:8px;">
+                <label for="res-ambientAnim">Continuous Ambient FX</label>
+                <select id="res-ambientAnim">
+                  <option value="theme">— From Active Design —</option>
+                  <option value="none">None (Clean)</option>
+                  <option value="confetti-gold">🎊 Championship Gold Confetti</option>
+                  <option value="energy-sparks">🔥 Rising Energy Sparks</option>
+                  <option value="spotlight-sweep">🔦 Arena Spotlight Sweep</option>
+                  <option value="petals-drift">🌸 Drifting Sakura Petals</option>
+                  <option value="shimmer-wave">✨ Metallic Light Shimmer Wave</option>
+                  <option value="aurora-glow">🌌 Ambient Aurora Glow</option>
+                  <option value="scanline-crt">📺 Retro Arcade CRT Scanlines</option>
+                </select>
+              </div>
+              <div style="margin-top:8px;">
+                <label>Card &amp; Champion Idle Loop</label>
+                <div class="seg-bar" id="seg-res-cardIdle">
+                  <button type="button" data-val="theme" class="active-chip">Theme</button>
+                  <button type="button" data-val="champ-glow">👑 Champ Glow</button>
+                  <button type="button" data-val="float-wave">🌊 Float Wave</button>
+                  <button type="button" data-val="sheen-loop">✨ Sheen Loop</button>
+                  <button type="button" data-val="none">Static</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="studio-box">
+              <h3>🌀 Animated Backdrop Pattern</h3>
+              <label>Pattern Texture</label>
+              <div class="seg-bar" id="seg-res-pat" style="margin-bottom:8px;">
+                <button type="button" data-val="theme" class="active-chip">Theme</button>
+                <button type="button" data-val="diagonal">Diag</button>
+                <button type="button" data-val="grid">Grid</button>
+                <button type="button" data-val="halftone">Dots</button>
+                <button type="button" data-val="hex">Hex</button>
+                <button type="button" data-val="chevrons">Chevrons</button>
+                <button type="button" data-val="symbols">Buttons</button>
+                <button type="button" data-val="rings">Rings</button>
+                <button type="button" data-val="stars">Stars</button>
+                <button type="button" data-val="none">Off</button>
+              </div>
+              <label>Scroll Direction</label>
+              <div class="seg-bar" id="seg-res-patDir" style="margin-bottom:8px;">
+                <button type="button" data-val="diag-dr" class="active-chip">↘ Diag</button>
+                <button type="button" data-val="up">↑ Up</button>
+                <button type="button" data-val="down">↓ Down</button>
+                <button type="button" data-val="left">← Left</button>
+                <button type="button" data-val="right">→ Right</button>
+                <button type="button" data-val="diag-ul">↖ Rev</button>
+              </div>
+              <div class="slider-row">
+                <div class="slider-head"><span>Pattern Speed (0 = Static)</span><b id="val-res-patSpeed">38%</b></div>
+                <input type="range" id="rng-res-patSpeed" min="0" max="100" step="2" value="38" />
+              </div>
+              <div class="slider-row">
+                <div class="slider-head"><span>Pattern Opacity (-1 = Auto)</span><b id="val-res-patOp">Auto</b></div>
+                <input type="range" id="rng-res-patOp" min="-1" max="80" step="1" value="-1" />
+              </div>
+              <div class="slider-row">
+                <div class="slider-head"><span>Pattern Scale</span><b id="val-res-patScale">100%</b></div>
+                <input type="range" id="rng-res-patScale" min="50" max="200" step="5" value="100" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PANE 4: EVENT HEADER, LOGO & GAME PACK -->
+        <div class="res-insp-pane" id="respane-header">
+          <div class="studio-grid">
+            <div class="studio-box">
+              <h3>🏷️ Event Title, Entrants &amp; Branding</h3>
+              <div class="row">
+                <div><label for="res-title">Main Title</label><input type="text" id="res-title" placeholder="TOP 8 RESULTS" maxlength="64" /></div>
+                <div><label for="res-subtitle">Subtitle / Event Name</label><input type="text" id="res-subtitle" placeholder="TOURNAMENT FINALS" maxlength="64" /></div>
+              </div>
+              <div class="row" style="margin-top:8px;">
+                <div><label for="res-entrantsCount">Entrants Badge</label><input type="text" id="res-entrantsCount" placeholder="e.g. 128" maxlength="24" /></div>
+                <div><label for="res-footerText">Footer Tag / Handle</label><input type="text" id="res-footerText" placeholder="e.g. #Tournament2026 · @YourOrg" maxlength="64" /></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;margin-top:10px;padding:8px;background:#090c14;border:1px solid var(--border);border-radius:7px;">
+                <img id="res-logo-thumb" alt="" style="display:none;width:44px;height:44px;object-fit:contain;border-radius:6px;background:#0d1018;padding:3px;border:1px solid var(--border);" />
+                <div style="flex:1;min-width:0;">
+                  <strong style="font-size:11px;display:block;">Event Logo</strong>
+                  <span id="res-logo-status" style="font-size:10.5px;color:var(--muted);">Auto-inherits connected tournament / VS logo</span>
+                </div>
+                <button type="button" id="btn-res-logo-upload">⬆ Upload</button>
+                <button type="button" id="btn-res-logo-clear" style="display:none;" title="Clear override (reverts to auto tournament logo)">✕</button>
+                <input type="file" id="file-res-logo" accept="image/png,image/jpeg,image/webp,image/svg+xml" style="display:none;" />
+              </div>
+            </div>
+
+            <div class="studio-box">
+              <h3>🎮 Game &amp; Character Render Pack</h3>
+              <p style="font-size:11px;color:var(--muted);margin-bottom:8px;">
+                Choose the game &amp; art pack used for all 8 character renders on the Results screen (uses the same local offline cache as VS Splash).
+              </p>
+              <div class="row">
+                <div>
+                  <label for="res-game-select">Game Roster</label>
+                  <select id="res-game-select"></select>
+                </div>
+                <div>
+                  <label for="res-pack-select">Render Art Pack</label>
+                  <select id="res-pack-select"></select>
+                </div>
+              </div>
+              <div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap;">
+                <button type="button" id="btn-res-sync-game">🔄 Match VS Splash Game</button>
+                <span id="res-roster-status" style="font-size:11px;color:var(--muted);">Ready</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- RIGHT SIDEBAR: 24 DISTINCT TOURNAMENT RESULTS DESIGNS -->
+    <aside class="card vs-designs-sidebar">
+      <div class="designs-head">
+        <h2>🏅 Results Designs <span class="designs-count-pill" id="res-design-count">24</span></h2>
+      </div>
+      <div class="designs-tools">
+        <input type="text" id="res-design-search" placeholder="🔍 Search 24 results designs (EVO, SF6, TWT, Podium, Top 4, Anime...)" style="padding:5px 9px;font-size:12px;" />
+        <div class="filter-tabs" id="res-design-filters">
+          <button type="button" class="active-chip" data-rcat="all">All</button>
+          <button type="button" data-rcat="major">🏆 Majors</button>
+          <button type="button" data-rcat="sf6">🥊 SF6</button>
+          <button type="button" data-rcat="tekken">🥋 Tekken</button>
+          <button type="button" data-rcat="anime">⚡ Anime</button>
+          <button type="button" data-rcat="minimal">✨ Minimal</button>
+        </div>
+      </div>
+      <div class="vs-designs-scroll">
+        <div class="vs-design-grid" id="res-design-grid"></div>
+      </div>
+    </aside>
+  </div>
+</div>
+
 <!-- VISUAL FLAG & REGION PICKER MODAL -->
 <div class="flag-modal-backdrop" id="flag-modal" role="dialog" aria-modal="true">
   <div class="flag-modal">
@@ -3901,6 +4316,7 @@
 <script src="flags.js"></script>
 <script src="vs-designs.js"></script>
 <script src="sf6-themes.js"></script>
+<script src="results-designs.js"></script>
 <script>
 (() => {
   /* =========================================================================
@@ -4214,6 +4630,65 @@
   let vsDragEnabled = true;
   let vsSelectedEl = '';
 
+  const DEFAULT_RESULTS = {
+    visible: true,
+    design: 'res-evo-gold',
+    layoutOverride: 'theme',
+    cardStyle: 'theme',
+    game: 'tekken8',
+    pack: 'full',
+    title: 'TOP 8 RESULTS',
+    subtitle: 'TOURNAMENT FINALS',
+    entrantsCount: '',
+    footerText: '',
+    logoUrl: '',
+    showLogo: true,
+    showCrown: true,
+    showFlags: true,
+    flagMode: 'both',
+    avatarMode: 'badge',
+    showSponsor: true,
+    showCharName: true,
+    showHandles: true,
+    showEntrants: true,
+    bgMode: 'theme',
+    bgColor1: '#1d356b',
+    bgColor2: '#060912',
+    accentColor: '',
+    goldColor: '',
+    fontDisplay: 'theme',
+    pattern: 'theme',
+    patternSpeed: 38,
+    patternDir: 'diag-dr',
+    patternOpacity: -1,
+    patternScale: 100,
+    entryAnim: 'theme',
+    entrySpeed: 100,
+    staggerMs: 85,
+    ambientAnim: 'theme',
+    cardIdleAnim: 'theme',
+    charZoom: 100,
+    charOffsetY: 0,
+    introNonce: 0,
+    placements: [
+      { place: 1, name: 'PLAYER 1', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '' },
+      { place: 2, name: 'PLAYER 2', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '' },
+      { place: 3, name: 'PLAYER 3', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '' },
+      { place: 4, name: 'PLAYER 4', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '' },
+      { place: 5, name: 'PLAYER 5', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '' },
+      { place: 5, name: 'PLAYER 6', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '' },
+      { place: 7, name: 'PLAYER 7', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '' },
+      { place: 7, name: 'PLAYER 8', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '' }
+    ]
+  };
+  const RESULTS_DESIGNS = window.FGC_RESULTS_DESIGNS || [];
+  let resDesignCat = 'all';
+  let resDesignSearch = '';
+  let resRoster = { game: 'tekken8', pack: 'full', characters: [] };
+  let resRosterLoadingKey = '';
+  const failedResRosterKeys = new Set();
+  let resAvatarUploadIdx = 0;
+
   const FLAG_CATALOG = window.FGC_FLAG_CATALOG || [];
   const FLAGS_MAP = window.FGC_FLAGS || {};
 
@@ -4251,7 +4726,8 @@
     commentators: { c1Name: 'CASTER 1', c1Handle: '@caster1', c2Name: 'CASTER 2', c2Handle: '@caster2' },
     tweaks: { offsetY: 0, scale: 100, wingSpread: 0, opacity: 100, customColors: false, p1Color: '#ff6a1a', p2Color: '#7b5cff', centerColor: '#ffd24d' },
     style: { ...DEFAULT_STYLE },
-    vs: structuredClone(DEFAULT_VS)
+    vs: structuredClone(DEFAULT_VS),
+    results: structuredClone(DEFAULT_RESULTS)
   };
   let gamesCatalog = { featured: [], all: [], loadedAll: false };
   let activeRoster = { game: 'tekken8', gameName: 'Tekken 8', pack: 'full', characters: [], cachedCount: 0, total: 0 };
@@ -4278,14 +4754,16 @@
   let themeSearch = '';
   let previewPinned = localStorage.getItem('fgc_preview_pinned') !== '0';
   let vsPreviewPinned = localStorage.getItem('fgc_vs_preview_pinned') !== '0';
+  let resPreviewPinned = localStorage.getItem('fgc_res_preview_pinned') !== '0';
   let sidebarCollapsed = localStorage.getItem('fgc_sidebar_collapsed') === '1';
   let activeWorkspace = localStorage.getItem('fgc_active_workspace') || 'scorebars';
-  if (!['scorebars', 'vs', 'tournaments'].includes(activeWorkspace)) activeWorkspace = 'scorebars';
+  if (!['scorebars', 'vs', 'results', 'tournaments'].includes(activeWorkspace)) activeWorkspace = 'scorebars';
   let pickerState = { open: false, side: 'p1', slot: 'flag', cat: 'world', query: '' };
 
   const $ = (id) => document.getElementById(id);
   const previewFrame = $('preview-frame');
   const vsPreviewFrame = $('vs-preview-frame');
+  const resultsPreviewFrame = $('results-preview-frame');
 
   function toast(msg) {
     const t = $('toast');
@@ -4306,9 +4784,13 @@
       vsPreviewFrame.contentWindow.postMessage({ type: 'vs-interactive-config', interactive: vsInteractiveEdit, drag: vsDragEnabled }, '*');
       if (vsSelectedEl) vsPreviewFrame.contentWindow.postMessage({ type: 'vs-highlight-element', element: vsSelectedEl }, '*');
     }
+    if (resultsPreviewFrame?.contentWindow) {
+      resultsPreviewFrame.contentWindow.postMessage({ type: 'state-update', state }, '*');
+    }
   }
   previewFrame.addEventListener('load', pushPreviewConfig);
   vsPreviewFrame?.addEventListener('load', pushPreviewConfig);
+  resultsPreviewFrame?.addEventListener('load', pushPreviewConfig);
 
   let pushTimer = null;
   function commitState(patch, immediate = false) {
@@ -4346,6 +4828,19 @@
           : nextVs.customMatch
       };
     }
+    const baseRes = { ...DEFAULT_RESULTS, ...(state.results || {}) };
+    const nextRes = patch.results
+      ? {
+          ...baseRes,
+          ...patch.results,
+          placements: Array.isArray(patch.results.placements)
+            ? patch.results.placements
+            : (Array.isArray(baseRes.placements) && baseRes.placements.length ? baseRes.placements : structuredClone(DEFAULT_RESULTS.placements))
+        }
+      : {
+          ...baseRes,
+          placements: Array.isArray(baseRes.placements) && baseRes.placements.length ? baseRes.placements : structuredClone(DEFAULT_RESULTS.placements)
+        };
     const seq = ++localSeq;
     state = {
       ...state,
@@ -4356,6 +4851,7 @@
       tweaks: patch.tweaks ? { ...state.tweaks, ...patch.tweaks } : state.tweaks,
       style: patch.style ? { ...DEFAULT_STYLE, ...(state.style || {}), ...patch.style } : { ...DEFAULT_STYLE, ...(state.style || {}) },
       vs: nextVs,
+      results: nextRes,
       _cid: CLIENT_ID,
       _seq: seq
     };
@@ -4752,8 +5248,11 @@
     const fontHtml = FONT_OPTIONS.map(([v, l]) => `<option value="${v}">${l}</option>`).join('');
     $('st-font-name').innerHTML = fontHtml;
     $('st-font-score').innerHTML = fontHtml;
+    if ($('res-fontDisplay')) $('res-fontDisplay').innerHTML = fontHtml;
     renderAdaptiveColorStudio(DEFAULT_STYLE);
     renderVsDesignCards();
+    renderResultsDesignCards();
+    buildResultsPlayersRows();
   }
 
   function renderPresetsList() {
@@ -4792,14 +5291,39 @@
     }
   }
 
+  function getFlagTarget(side) {
+    if (String(side || '').startsWith('res-')) {
+      const idx = Number(side.slice(4));
+      const list = state.results?.placements || DEFAULT_RESULTS.placements;
+      return list[idx] || {};
+    }
+    return state[side] || {};
+  }
+
+  function commitFlagTarget(side, slot, code) {
+    if (String(side || '').startsWith('res-')) {
+      const idx = Number(side.slice(4));
+      const cur = Array.isArray(state.results?.placements) && state.results.placements.length
+        ? state.results.placements.map(p => ({ ...p }))
+        : structuredClone(DEFAULT_RESULTS.placements);
+      if (cur[idx]) {
+        cur[idx][slot] = code;
+        commitState({ results: { placements: cur } }, true);
+      }
+      return;
+    }
+    commitState({ [side]: { [slot]: code } }, true);
+  }
+
   function openFlagPicker(side, slot) {
-    const curCode = (state[side]?.[slot] || '').toUpperCase();
+    const tgt = getFlagTarget(side);
+    const curCode = (tgt[slot] || '').toUpperCase();
     const curItem = FLAGS_MAP[curCode];
     let defaultCat = slot === 'region' ? 'usa' : 'world';
     if (curItem) defaultCat = curItem.cat;
-    else if (slot === 'region' && state[side]?.flag === 'ES') defaultCat = 'es_ccaa';
-    else if (slot === 'region' && state[side]?.flag === 'US') defaultCat = 'usa';
-    else if (slot === 'region' && state[side]?.flag) defaultCat = 'europe';
+    else if (slot === 'region' && tgt.flag === 'ES') defaultCat = 'es_ccaa';
+    else if (slot === 'region' && tgt.flag === 'US') defaultCat = 'usa';
+    else if (slot === 'region' && tgt.flag) defaultCat = 'europe';
 
     pickerState = { open: true, side, slot, cat: defaultCat, query: '' };
     $('flag-search-input').value = '';
@@ -4815,10 +5339,19 @@
 
   function renderFlagPickerModal() {
     const { side, slot, cat, query } = pickerState;
+    const tgt = getFlagTarget(side);
     const badge = $('flag-modal-player-badge');
-    badge.textContent = side === 'p1' ? 'PLAYER 1' : 'PLAYER 2';
-    badge.style.background = side === 'p1' ? 'var(--p1)' : 'var(--p2)';
-    $('flag-modal-heading').textContent = `${state[side]?.name || side.toUpperCase()} — Pick Flag`;
+    if (String(side).startsWith('res-')) {
+      const idx = Number(side.slice(4));
+      badge.textContent = `TOP 8 · #${tgt.place || (idx + 1)}`;
+      badge.style.background = 'var(--gold)';
+      badge.style.color = '#090a0e';
+    } else {
+      badge.textContent = side === 'p1' ? 'PLAYER 1' : 'PLAYER 2';
+      badge.style.background = side === 'p1' ? 'var(--p1)' : 'var(--p2)';
+      badge.style.color = '#fff';
+    }
+    $('flag-modal-heading').textContent = `${tgt.name || side.toUpperCase()} — Pick Flag`;
 
     $('flag-slot-switch').querySelectorAll('button').forEach(b => {
       b.classList.toggle('active-chip', b.dataset.slot === slot);
@@ -4828,7 +5361,7 @@
     });
 
     const q = normText(query.trim());
-    const curVal = (state[side]?.[slot] || '').toUpperCase();
+    const curVal = (tgt[slot] || '').toUpperCase();
     const filtered = FLAG_CATALOG.filter(f => {
       if (q) {
         const hay = normText(`${f.name} ${f.code} ${f.aliases || ''}`);
@@ -4941,7 +5474,7 @@
   }
 
   function setActiveWorkspace(ws) {
-    if (!['scorebars', 'vs', 'tournaments'].includes(ws)) ws = 'scorebars';
+    if (!['scorebars', 'vs', 'results', 'tournaments'].includes(ws)) ws = 'scorebars';
     activeWorkspace = ws;
     try { localStorage.setItem('fgc_active_workspace', ws); } catch {}
     $('top-workspace-nav')?.querySelectorAll('button[data-ws]').forEach(b => {
@@ -4951,11 +5484,13 @@
       v.classList.toggle('active', v.id === `ws-${ws}`);
     });
     const isVs = ws === 'vs';
-    $('hdr-group-scorebars')?.classList.toggle('hidden', isVs);
+    const isRes = ws === 'results';
+    $('hdr-group-scorebars')?.classList.toggle('hidden', isVs || isRes);
     $('hdr-group-vs')?.classList.toggle('hidden', !isVs);
+    $('hdr-group-results')?.classList.toggle('hidden', !isRes);
     if ($('btn-am-go-scorebar')) $('btn-am-go-scorebar').style.display = ws === 'scorebars' ? 'none' : 'inline-flex';
     syncWorkspaceLayout();
-    if (isVs) pushPreviewConfig();
+    if (isVs || isRes) pushPreviewConfig();
   }
 
   function syncWorkspaceLayout() {
@@ -4987,6 +5522,8 @@
     $('btn-pin-preview').classList.toggle('active-chip', previewPinned);
     $('vs-preview-card')?.classList.toggle('is-pinned', vsPreviewPinned);
     $('btn-pin-vs')?.classList.toggle('active-chip', vsPreviewPinned);
+    $('res-preview-card')?.classList.toggle('is-pinned', resPreviewPinned);
+    $('btn-pin-res')?.classList.toggle('active-chip', resPreviewPinned);
   }
 
   function renderPlayersDb() {
@@ -5263,6 +5800,7 @@
     renderActiveMatchBar();
     renderH2H();
     renderVsUI();
+    renderResultsUI();
   }
 
   /* =========================================================================
@@ -5399,7 +5937,8 @@
       renderFlagPickerModal();
     });
     $('btn-clear-flag-slot').addEventListener('click', () => {
-      commitState({ [pickerState.side]: { [pickerState.slot]: '' } }, true);
+      commitFlagTarget(pickerState.side, pickerState.slot, '');
+      renderFlagPickerModal();
       toast('Flag cleared');
     });
     $('flag-picker-grid').addEventListener('click', (e) => {
@@ -5407,9 +5946,11 @@
       if (!tile) return;
       const code = tile.dataset.pickCode;
       const item = FLAGS_MAP[code];
-      const patch = { [pickerState.slot]: code };
-      commitState({ [pickerState.side]: patch }, true);
-      toast(`${pickerState.side.toUpperCase()} · ${item ? item.name : code}`);
+      commitFlagTarget(pickerState.side, pickerState.slot, code);
+      const labelPrefix = String(pickerState.side).startsWith('res-')
+        ? `Top 8 #${Number(pickerState.side.slice(4)) + 1}`
+        : pickerState.side.toUpperCase();
+      toast(`${labelPrefix} · ${item ? item.name : code}`);
       closeFlagPicker();
     });
     window.addEventListener('keydown', (e) => {
@@ -5945,10 +6486,13 @@
     $('copy-obs-2').addEventListener('click', () => copyText($('obs-url-text').textContent, 'OBS URL'));
     $('btn-copy-vs').addEventListener('click', () => copyText($('vs-url-text').textContent, 'VS Splash OBS URL'));
     $('copy-vs-2').addEventListener('click', () => copyText($('vs-url-text').textContent, 'VS Splash OBS URL'));
+    $('btn-copy-results').addEventListener('click', () => copyText($('results-url-text').textContent, 'Tournament Results OBS URL'));
+    $('copy-results-2').addEventListener('click', () => copyText($('results-url-text').textContent, 'Tournament Results OBS URL'));
     $('copy-dock').addEventListener('click', () => copyText($('dock-url-text').textContent, 'Dock URL'));
     $('copy-lan').addEventListener('click', () => copyText($('lan-url-text').textContent, 'LAN Mobile URL'));
     $('btn-open-overlay').addEventListener('click', () => window.open('index.html', '_blank'));
     $('btn-open-vs').addEventListener('click', () => window.open('vs.html', '_blank'));
+    $('btn-open-results').addEventListener('click', () => window.open('results.html', '_blank'));
 
     // Global Keyboard Hotkeys
     window.addEventListener('keydown', (e) => {
@@ -6867,6 +7411,15 @@
         $('btn-load-all-games').textContent = `${data.totalCatalogGames} Games Loaded`;
         $('btn-load-all-games').disabled = true;
       }
+      // Also populate Tournament Results game/pack selectors
+      const resSel = $('res-game-select');
+      if (resSel) {
+        resSel.innerHTML = list.map(g => `<option value="${g.id}">${g.featured ? '★ ' : ''}${g.name}</option>`).join('');
+        const activeResGame = state.results?.game || state.vs?.game || 'tekken8';
+        if (list.some(g => g.id === activeResGame)) resSel.value = activeResGame;
+        const chosenResPack = syncResPackSelect(resSel.value, state.results?.pack || 'full');
+        loadResultsRoster(resSel.value, chosenResPack);
+      }
       await loadActiveRoster(sel.value, chosenPack);
     } catch {}
   }
@@ -7362,6 +7915,589 @@
   }
 
   /* =========================================================================
+     WORKSPACE 4: TOURNAMENT FINAL RESULTS (TOP 8 / TOP 4 / PODIUM) CONTROLLER
+     ========================================================================= */
+  const RES_LAYOUT_LABELS = {
+    'champ-left': 'TOP 8 HERO',
+    'podium-top': 'PODIUM + 5',
+    'esports-grid': '4x2 GRID',
+    'tower-ladder': 'LADDER',
+    'top4-quad': 'TOP 4',
+    'podium-3': 'TOP 3'
+  };
+
+  function getResPlacementsClone() {
+    const src = Array.isArray(state.results?.placements) && state.results.placements.length
+      ? state.results.placements
+      : DEFAULT_RESULTS.placements;
+    const out = [];
+    const defaultRanks = [1, 2, 3, 4, 5, 5, 7, 7];
+    for (let i = 0; i < 8; i++) {
+      const p = src[i] || {};
+      out.push({
+        place: Number(p.place || defaultRanks[i]),
+        name: p.name ?? `PLAYER ${i + 1}`,
+        sponsor: p.sponsor || '',
+        flag: p.flag || '',
+        region: p.region || '',
+        character: p.character || '',
+        avatar: p.avatar || '',
+        handle: p.handle || ''
+      });
+    }
+    return out;
+  }
+
+  function renderResultsDesignCards() {
+    const grid = $('res-design-grid');
+    if (!grid) return;
+    const q = normText(resDesignSearch.trim());
+    const list = RESULTS_DESIGNS.filter(d => {
+      if (q) return normText(`${d.name} ${d.desc} ${d.cat} ${d.tier} ${d.layout} ${d.cardStyle} ${d.ambient}`).includes(q);
+      return resDesignCat === 'all' || d.cat === resDesignCat;
+    });
+    if ($('res-design-count')) $('res-design-count').textContent = list.length;
+    const curId = state.results?.design || 'res-evo-gold';
+    grid.innerHTML = list.map(d => `
+      <button type="button" class="vs-design-card ${curId === d.id ? 'active' : ''}" data-res-design="${d.id}">
+        <div class="vs-design-swatch" style="background:${d.swatch || d.bg}">${RES_LAYOUT_LABELS[d.layout] || 'TOP 8'}</div>
+        <div class="vs-design-head">
+          <strong>${d.name}</strong>
+          <span style="display:flex;gap:4px;align-items:center;flex-shrink:0;">
+            <span class="res-layout-badge">${RES_LAYOUT_LABELS[d.layout] || d.layout}</span>
+            <span class="vs-tier-badge ${d.tier || 'PRO'}">${d.tier || 'PRO'}</span>
+          </span>
+        </div>
+        <small>${d.desc}</small>
+      </button>
+    `).join('') || '<div style="padding:16px;text-align:center;color:var(--muted);font-size:11px;">No results designs matched that search.</div>';
+  }
+
+  function getResCharOptionsHtml(extraChar) {
+    const names = (resRoster.characters && resRoster.characters.length)
+      ? ['', ...resRoster.characters.map(c => c.name)]
+      : T8_CHARS;
+    const list = (extraChar && !names.includes(extraChar)) ? [...names, extraChar] : names;
+    return list.map(ch => `<option value="${ch.replace(/"/g, '&quot;')}">${ch || '— None —'}</option>`).join('');
+  }
+
+  function buildResultsPlayersRows() {
+    const host = $('res-players-editor');
+    if (!host) return;
+    const rankOpts = [1, 2, 3, 4, 5, 7, 9].map(r => `<option value="${r}">${r === 1 ? '1st' : r === 2 ? '2nd' : r === 3 ? '3rd' : `${r}th`}</option>`).join('');
+    const charOpts = getResCharOptionsHtml('');
+    host.innerHTML = Array.from({ length: 8 }, (_, i) => `
+      <div class="res-player-row" id="res-row-${i}" data-row-idx="${i}" data-rank="${[1,2,3,4,5,5,7,7][i]}">
+        <select class="res-rank-sel" id="res-p-place-${i}" data-res-field="place" data-idx="${i}" title="Placement Rank">${rankOpts}</select>
+        <input type="text" id="res-p-sponsor-${i}" data-res-field="sponsor" data-idx="${i}" placeholder="TAG" maxlength="14" />
+        <input type="text" id="res-p-name-${i}" data-res-field="name" data-idx="${i}" placeholder="Player ${i + 1}" maxlength="32" />
+        <div class="res-flag-btns">
+          <button type="button" class="res-mini-flag-btn" id="res-p-flag-${i}" data-res-flag="${i}" data-slot="flag" title="Pick Country Flag">🌍</button>
+          <button type="button" class="res-mini-flag-btn" id="res-p-region-${i}" data-res-flag="${i}" data-slot="region" title="Pick Region / State Flag">🏳</button>
+        </div>
+        <select id="res-p-char-${i}" data-res-field="character" data-idx="${i}" title="Character Render">${charOpts}</select>
+        <input type="text" id="res-p-handle-${i}" data-res-field="handle" data-idx="${i}" placeholder="@handle" maxlength="24" />
+        <div class="res-row-actions">
+          <button type="button" class="res-av-btn" id="res-p-av-${i}" data-res-av-up="${i}" title="Upload Player Photo / Avatar">📷</button>
+          <button type="button" id="res-p-avclr-${i}" data-res-av-clr="${i}" title="Clear Avatar" style="display:none;">✕</button>
+          <button type="button" data-res-move="${i}" data-dir="-1" title="Move Up" ${i === 0 ? 'disabled' : ''}>↑</button>
+          <button type="button" data-res-move="${i}" data-dir="1" title="Move Down" ${i === 7 ? 'disabled' : ''}>↓</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function populateResCharDropdowns() {
+    const placements = getResPlacementsClone();
+    for (let i = 0; i < 8; i++) {
+      const sel = $(`res-p-char-${i}`);
+      if (!sel) continue;
+      const cur = placements[i]?.character || '';
+      sel.innerHTML = getResCharOptionsHtml(cur);
+      sel.value = cur;
+    }
+  }
+
+  function syncResPackSelect(gameId, preferredPack) {
+    const list = gamesCatalog.all?.length ? gamesCatalog.all : gamesCatalog.featured;
+    const g = list.find(x => x.id === gameId);
+    const packs = g?.packs?.length ? g.packs : [{ id: 'full', name: 'Full Renders', cachedCount: 0 }];
+    const sel = $('res-pack-select');
+    if (!sel) return preferredPack || 'full';
+    sel.innerHTML = packs.map(p => `<option value="${p.id}">${p.name}${p.cachedCount ? ` (${p.cachedCount} cached)` : ''}</option>`).join('');
+    const chosen = packs.some(p => p.id === preferredPack) ? preferredPack : (g?.defaultPack || packs[0].id);
+    sel.value = chosen;
+    return chosen;
+  }
+
+  async function loadResultsRoster(gameId, packId) {
+    if (!isHttp) return;
+    const g = gameId || 'tekken8';
+    const p = packId || 'full';
+    const key = `${g}/${p}`;
+    resRosterLoadingKey = key;
+    try {
+      const res = await fetch(`/api/assets/roster?game=${encodeURIComponent(g)}&pack=${encodeURIComponent(p)}`);
+      if (!res.ok) {
+        failedResRosterKeys.add(key);
+        return;
+      }
+      failedResRosterKeys.delete(key);
+      resRoster = await res.json();
+      populateResCharDropdowns();
+      if ($('res-roster-status')) {
+        $('res-roster-status').textContent = `${resRoster.gameName || g} · ${resRoster.total || 0} characters (${resRoster.cachedCount || 0} cached)`;
+      }
+    } catch {
+      failedResRosterKeys.add(key);
+    } finally {
+      if (resRosterLoadingKey === key) resRosterLoadingKey = '';
+    }
+  }
+
+  function renderResultsUI() {
+    if (!$('res-players-editor')) return;
+    const res = { ...DEFAULT_RESULTS, ...(state.results || {}) };
+    const syncSeg = (id, val) => {
+      $(id)?.querySelectorAll('button[data-val]').forEach(b => b.classList.toggle('active-chip', b.dataset.val === val));
+    };
+
+    const visBtn = $('btn-res-vis');
+    const isVis = res.visible !== false;
+    visBtn.textContent = isVis ? '👁 Results ON' : '🚫 Results HIDDEN';
+    visBtn.classList.toggle('is-hidden', !isVis);
+
+    $('res-design-grid')?.querySelectorAll('[data-res-design]').forEach(c => {
+      c.classList.toggle('active', c.dataset.resDesign === res.design);
+    });
+
+    // Update 8 player rows in-place (zero focus loss while typing!)
+    const placements = getResPlacementsClone();
+    for (let i = 0; i < 8; i++) {
+      const pl = placements[i];
+      const row = $(`res-row-${i}`);
+      if (!row) continue;
+      row.dataset.rank = String(pl.place || (i + 1));
+      const pSel = $(`res-p-place-${i}`);
+      if (pSel && document.activeElement !== pSel) pSel.value = String(pl.place || (i + 1));
+      setIfNotFocused($(`res-p-sponsor-${i}`), pl.sponsor || '');
+      setIfNotFocused($(`res-p-name-${i}`), pl.name || '');
+      setIfNotFocused($(`res-p-handle-${i}`), pl.handle || '');
+      const cSel = $(`res-p-char-${i}`);
+      if (cSel && document.activeElement !== cSel) {
+        if (pl.character && !Array.from(cSel.options).some(o => o.value === pl.character)) {
+          const opt = document.createElement('option');
+          opt.value = pl.character;
+          opt.textContent = pl.character;
+          cSel.appendChild(opt);
+        }
+        cSel.value = pl.character || '';
+      }
+      const fBtn = $(`res-p-flag-${i}`);
+      const rBtn = $(`res-p-region-${i}`);
+      const fItem = pl.flag ? FLAGS_MAP[String(pl.flag).toUpperCase()] : null;
+      const rItem = pl.region ? FLAGS_MAP[String(pl.region).toUpperCase()] : null;
+      if (fBtn) {
+        fBtn.innerHTML = fItem ? fItem.svg : '🌍';
+        fBtn.title = fItem ? `Country: ${fItem.name}` : 'Pick Country Flag';
+      }
+      if (rBtn) {
+        rBtn.innerHTML = rItem ? rItem.svg : '🏳';
+        rBtn.title = rItem ? `Region: ${rItem.name}` : 'Pick Region / State Flag';
+      }
+      const avBtn = $(`res-p-av-${i}`);
+      const avClr = $(`res-p-avclr-${i}`);
+      if (avBtn) avBtn.classList.toggle('has-av', Boolean(pl.avatar));
+      if (avClr) avClr.style.display = pl.avatar ? 'inline-flex' : 'none';
+    }
+
+    // Style & Colors
+    $('res-layoutOverride').value = res.layoutOverride || 'theme';
+    $('res-cardStyle').value = res.cardStyle || 'theme';
+    if ($('res-fontDisplay').options.length) $('res-fontDisplay').value = res.fontDisplay || 'theme';
+    syncSeg('seg-res-flagMode', res.flagMode || (res.showFlags === false ? 'none' : 'both'));
+    syncSeg('seg-res-avatarMode', res.avatarMode || 'badge');
+    syncSeg('seg-res-bgMode', res.bgMode || 'theme');
+    $('res-bg1').value = res.bgColor1 || '#1d356b';
+    $('res-bg2').value = res.bgColor2 || '#060912';
+    $('res-accent').value = res.accentColor || '#facc15';
+    $('res-gold').value = res.goldColor || '#facc15';
+    $('rng-res-charZoom').value = res.charZoom ?? 100;
+    $('val-res-charZoom').textContent = `${res.charZoom ?? 100}%`;
+    $('rng-res-charY').value = res.charOffsetY ?? 0;
+    $('val-res-charY').textContent = `${res.charOffsetY ?? 0} px`;
+    $('chk-res-crown').checked = res.showCrown !== false;
+    $('chk-res-sponsor').checked = res.showSponsor !== false;
+    $('chk-res-charname').checked = res.showCharName !== false;
+    $('chk-res-handles').checked = res.showHandles !== false;
+    $('chk-res-entrants').checked = res.showEntrants !== false;
+    $('chk-res-logo').checked = res.showLogo !== false;
+
+    // Animations & Pattern
+    $('res-entryAnim').value = res.entryAnim || 'theme';
+    $('rng-res-entrySpeed').value = res.entrySpeed ?? 100;
+    $('val-res-entrySpeed').textContent = `${res.entrySpeed ?? 100}%`;
+    $('rng-res-staggerMs').value = res.staggerMs ?? 85;
+    $('val-res-staggerMs').textContent = `${res.staggerMs ?? 85} ms`;
+    $('res-ambientAnim').value = res.ambientAnim || 'theme';
+    syncSeg('seg-res-cardIdle', res.cardIdleAnim || 'theme');
+    syncSeg('seg-res-pat', res.pattern || 'theme');
+    syncSeg('seg-res-patDir', res.patternDir || 'diag-dr');
+    $('rng-res-patSpeed').value = res.patternSpeed ?? 38;
+    $('val-res-patSpeed').textContent = Number(res.patternSpeed ?? 38) === 0 ? 'Static' : `${res.patternSpeed ?? 38}%`;
+    const rPatOp = Number(res.patternOpacity ?? -1);
+    $('rng-res-patOp').value = rPatOp;
+    $('val-res-patOp').textContent = rPatOp < 0 ? 'Auto' : `${rPatOp}%`;
+    $('rng-res-patScale').value = res.patternScale ?? 100;
+    $('val-res-patScale').textContent = `${res.patternScale ?? 100}%`;
+
+    // Header & Branding
+    setIfNotFocused($('res-title'), res.title || '');
+    setIfNotFocused($('res-subtitle'), res.subtitle || '');
+    setIfNotFocused($('res-entrantsCount'), res.entrantsCount || '');
+    setIfNotFocused($('res-footerText'), res.footerText || '');
+    const effLogo = res.logoUrl || state.vs?.logoUrl || '';
+    const rLogoThumb = $('res-logo-thumb');
+    if (effLogo) {
+      if (rLogoThumb.getAttribute('src') !== effLogo) rLogoThumb.src = effLogo;
+      rLogoThumb.style.display = 'block';
+      $('res-logo-status').textContent = res.logoUrl ? '✅ Custom / Standings Event Logo' : '🔗 Inherited from Connected Tournament / VS';
+    } else {
+      rLogoThumb.style.display = 'none';
+      $('res-logo-status').textContent = 'Auto-inherits connected tournament / VS logo';
+    }
+    $('btn-res-logo-clear').style.display = res.logoUrl ? 'inline-flex' : 'none';
+
+    if ($('res-game-select')?.options.length && res.game) {
+      $('res-game-select').value = res.game;
+      const wantPack = res.pack || 'full';
+      const wantKey = `${res.game}/${wantPack}`;
+      if ((resRoster.game !== res.game || resRoster.pack !== wantPack) && resRosterLoadingKey !== wantKey && !failedResRosterKeys.has(wantKey)) {
+        syncResPackSelect(res.game, wantPack);
+        loadResultsRoster(res.game, wantPack);
+      }
+    }
+  }
+
+  async function pullTournamentStandings(forceProvider) {
+    if (!isHttp) return toast('Start the local server first (Start_Scorebar.bat)');
+    const provider = forceProvider || trnState.snapshot?.provider || trnState.provider || 'startgg';
+    const btn = forceProvider === 'demo' ? $('btn-res-demo') : $('btn-res-pull');
+    const origText = btn?.textContent || '';
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ Loading...'; }
+    try {
+      const resp = await fetch('/api/tournament/standings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          provider,
+          eventId: trnState.snapshot?.selectedEventId || undefined
+        })
+      });
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data.error || 'Could not load standings');
+      const incoming = Array.isArray(data.placements) ? data.placements : [];
+      const defaultRanks = [1, 2, 3, 4, 5, 5, 7, 7];
+      const placements = Array.from({ length: 8 }, (_, i) => {
+        const pl = incoming[i] || {};
+        return {
+          place: Number(pl.place || defaultRanks[i]),
+          name: pl.name || `PLAYER ${i + 1}`,
+          sponsor: pl.sponsor || '',
+          flag: pl.flag || '',
+          region: pl.region || '',
+          character: pl.character || '',
+          avatar: pl.avatar || '',
+          handle: pl.handle || ''
+        };
+      });
+      const patch = {
+        placements,
+        title: data.tournamentName ? `${data.tournamentName.toUpperCase()} — TOP 8` : 'TOP 8 RESULTS',
+        subtitle: data.eventName ? data.eventName.toUpperCase() : 'TOURNAMENT FINALS',
+        entrantsCount: data.entrantsCount ? String(data.entrantsCount) : (state.results?.entrantsCount || ''),
+        introNonce: Date.now()
+      };
+      if (data.cachedLogoUrl || data.logoUrl) {
+        patch.logoUrl = data.cachedLogoUrl || data.logoUrl;
+      }
+      commitState({ results: patch }, true);
+      toast(`🏅 Loaded Top ${Math.min(8, incoming.length || 8)} standings (${provider.toUpperCase()})`);
+    } catch (err) {
+      toast(`⚠️ ${err.message}`);
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = origText; }
+    }
+  }
+
+  function bindResultsEvents() {
+    // Inspector Tabs
+    $('res-insp-tabs').addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-respane]');
+      if (!btn) return;
+      $('res-insp-tabs').querySelectorAll('button').forEach(b => b.classList.toggle('active-chip', b === btn));
+      document.querySelectorAll('.res-insp-pane').forEach(p => p.classList.toggle('active', p.id === `respane-${btn.dataset.respane}`));
+    });
+
+    // Header & Preview Toolbar buttons
+    $('btn-res-vis').addEventListener('click', () => commitState({ results: { visible: state.results?.visible === false } }, true));
+    const replayResultsIntro = () => {
+      commitState({ results: { introNonce: Date.now() } }, true);
+      resultsPreviewFrame?.contentWindow?.postMessage({ type: 'test-results-entry' }, '*');
+      toast('🎬 Replaying Tournament Results intro');
+    };
+    $('btn-res-replay').addEventListener('click', replayResultsIntro);
+    $('btn-res-test-anim').addEventListener('click', replayResultsIntro);
+    $('btn-res-test-entry2').addEventListener('click', replayResultsIntro);
+
+    $('btn-res-pull').addEventListener('click', () => pullTournamentStandings());
+    $('btn-res-demo').addEventListener('click', () => pullTournamentStandings('demo'));
+    $('btn-res-export-png').addEventListener('click', () => {
+      resultsPreviewFrame?.contentWindow?.postMessage({ type: 'export-results-png' }, '*');
+      toast('⬇ Generating 1920x1080 PNG results graphic...');
+    });
+    $('btn-pin-res').addEventListener('click', () => {
+      resPreviewPinned = !resPreviewPinned;
+      try { localStorage.setItem('fgc_res_preview_pinned', resPreviewPinned ? '1' : '0'); } catch {}
+      syncWorkspaceLayout();
+      toast(resPreviewPinned ? '📌 Results Preview pinned' : 'Results Preview unpinned');
+    });
+    $('btn-res-reset').addEventListener('click', () => {
+      commitState({
+        results: {
+          layoutOverride: 'theme', cardStyle: 'theme', bgMode: 'theme',
+          accentColor: '', goldColor: '', fontDisplay: 'theme',
+          pattern: 'theme', patternSpeed: 38, patternDir: 'diag-dr', patternOpacity: -1, patternScale: 100,
+          entryAnim: 'theme', entrySpeed: 100, staggerMs: 85, ambientAnim: 'theme', cardIdleAnim: 'theme',
+          charZoom: 100, charOffsetY: 0
+        }
+      }, true);
+      toast('↺ Results style overrides reset to active design');
+    });
+
+    // Quick fill 1st/2nd from active scorebar match
+    $('btn-res-from-match').addEventListener('click', () => {
+      const p1Score = Number(state.p1?.score || 0);
+      const p2Score = Number(state.p2?.score || 0);
+      const winner = p1Score >= p2Score ? state.p1 : state.p2;
+      const runnerUp = p1Score >= p2Score ? state.p2 : state.p1;
+      const list = getResPlacementsClone();
+      list[0] = { ...list[0], place: 1, name: winner?.name || 'PLAYER 1', sponsor: winner?.sponsor || '', flag: winner?.flag || '', region: winner?.region || '', character: winner?.character || '', avatar: winner?.avatar || '' };
+      list[1] = { ...list[1], place: 2, name: runnerUp?.name || 'PLAYER 2', sponsor: runnerUp?.sponsor || '', flag: runnerUp?.flag || '', region: runnerUp?.region || '', character: runnerUp?.character || '', avatar: runnerUp?.avatar || '' };
+      commitState({ results: { placements: list } }, true);
+      toast(`🏆 1st: ${list[0].name} · 2nd: ${list[1].name}`);
+    });
+    $('btn-res-clear-players').addEventListener('click', () => {
+      commitState({ results: { placements: structuredClone(DEFAULT_RESULTS.placements) } }, true);
+      toast('🗑 Reset Top 8 placements to placeholders');
+    });
+
+    // Top 8 Players Editor delegated events
+    const editor = $('res-players-editor');
+    editor.addEventListener('input', (e) => {
+      const el = e.target.closest('[data-res-field]');
+      if (!el || el.tagName === 'SELECT') return;
+      const idx = Number(el.dataset.idx);
+      const field = el.dataset.resField;
+      const list = getResPlacementsClone();
+      if (!list[idx]) return;
+      list[idx][field] = el.value;
+      commitState({ results: { placements: list } });
+    });
+    editor.addEventListener('change', (e) => {
+      const el = e.target.closest('select[data-res-field]');
+      if (!el) return;
+      const idx = Number(el.dataset.idx);
+      const field = el.dataset.resField;
+      const list = getResPlacementsClone();
+      if (!list[idx]) return;
+      list[idx][field] = field === 'place' ? Number(el.value) : el.value;
+      commitState({ results: { placements: list } }, true);
+    });
+    editor.addEventListener('click', (e) => {
+      const flagBtn = e.target.closest('[data-res-flag]');
+      if (flagBtn) {
+        openFlagPicker(`res-${flagBtn.dataset.resFlag}`, flagBtn.dataset.slot);
+        return;
+      }
+      const avUp = e.target.closest('[data-res-av-up]');
+      if (avUp) {
+        resAvatarUploadIdx = Number(avUp.dataset.resAvUp);
+        $('file-res-avatar').click();
+        return;
+      }
+      const avClr = e.target.closest('[data-res-av-clr]');
+      if (avClr) {
+        const idx = Number(avClr.dataset.resAvClr);
+        const list = getResPlacementsClone();
+        if (list[idx]) { list[idx].avatar = ''; commitState({ results: { placements: list } }, true); toast(`Cleared avatar #${idx + 1}`); }
+        return;
+      }
+      const mv = e.target.closest('[data-res-move]');
+      if (mv) {
+        const idx = Number(mv.dataset.resMove);
+        const target = idx + Number(mv.dataset.dir);
+        if (target < 0 || target > 7) return;
+        const list = getResPlacementsClone();
+        const aRank = list[idx].place;
+        const bRank = list[target].place;
+        const tmp = list[idx];
+        list[idx] = { ...list[target], place: aRank };
+        list[target] = { ...tmp, place: bRank };
+        commitState({ results: { placements: list } }, true);
+      }
+    });
+    $('file-res-avatar').addEventListener('change', async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      try {
+        const list = getResPlacementsClone();
+        const pl = list[resAvatarUploadIdx];
+        if (!pl) return;
+        const url = await uploadLocalImage(file, 'avatar', pl.name || `top8-${resAvatarUploadIdx + 1}`);
+        pl.avatar = url;
+        commitState({ results: { placements: list } }, true);
+        toast(`📷 Updated photo for ${pl.name || `Player ${resAvatarUploadIdx + 1}`}`);
+      } catch (err) {
+        toast(`⚠️ ${err.message}`);
+      }
+      e.target.value = '';
+    });
+
+    // Helper for seg-bar, select, color, slider, checkbox bindings
+    const bindResSeg = (id, key, extraFn) => {
+      $(id).addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-val]');
+        if (!btn) return;
+        const patch = { [key]: btn.dataset.val };
+        if (extraFn) Object.assign(patch, extraFn(btn.dataset.val));
+        commitState({ results: patch }, true);
+      });
+    };
+    const bindResSel = (id, key) => $(id).addEventListener('change', (e) => commitState({ results: { [key]: e.target.value } }, true));
+    const bindResCol = (id, key) => $(id).addEventListener('input', (e) => commitState({ results: { [key]: e.target.value } }));
+    const bindResRng = (id, key) => $(id).addEventListener('input', (e) => commitState({ results: { [key]: Number(e.target.value) } }));
+    const bindResChk = (id, key) => $(id).addEventListener('change', (e) => commitState({ results: { [key]: e.target.checked } }, true));
+    const bindResTxt = (id, key) => $(id).addEventListener('input', (e) => commitState({ results: { [key]: e.target.value } }));
+
+    bindResSel('res-layoutOverride', 'layoutOverride');
+    bindResSel('res-cardStyle', 'cardStyle');
+    bindResSel('res-fontDisplay', 'fontDisplay');
+    bindResSeg('seg-res-flagMode', 'flagMode', (v) => ({ showFlags: v !== 'none' }));
+    bindResSeg('seg-res-avatarMode', 'avatarMode');
+    bindResSeg('seg-res-bgMode', 'bgMode');
+    bindResCol('res-bg1', 'bgColor1');
+    bindResCol('res-bg2', 'bgColor2');
+    bindResCol('res-accent', 'accentColor');
+    bindResCol('res-gold', 'goldColor');
+    $('btn-res-accent-auto').addEventListener('click', () => { commitState({ results: { accentColor: '' } }, true); toast('Accent → Design Auto'); });
+    $('btn-res-gold-auto').addEventListener('click', () => { commitState({ results: { goldColor: '' } }, true); toast('1st Gold → Design Auto'); });
+    bindResRng('rng-res-charZoom', 'charZoom');
+    bindResRng('rng-res-charY', 'charOffsetY');
+    bindResChk('chk-res-crown', 'showCrown');
+    bindResChk('chk-res-sponsor', 'showSponsor');
+    bindResChk('chk-res-charname', 'showCharName');
+    bindResChk('chk-res-handles', 'showHandles');
+    bindResChk('chk-res-entrants', 'showEntrants');
+    bindResChk('chk-res-logo', 'showLogo');
+
+    bindResSel('res-entryAnim', 'entryAnim');
+    bindResRng('rng-res-entrySpeed', 'entrySpeed');
+    bindResRng('rng-res-staggerMs', 'staggerMs');
+    bindResSel('res-ambientAnim', 'ambientAnim');
+    bindResSeg('seg-res-cardIdle', 'cardIdleAnim');
+    bindResSeg('seg-res-pat', 'pattern');
+    bindResSeg('seg-res-patDir', 'patternDir');
+    bindResRng('rng-res-patSpeed', 'patternSpeed');
+    bindResRng('rng-res-patOp', 'patternOpacity');
+    bindResRng('rng-res-patScale', 'patternScale');
+
+    bindResTxt('res-title', 'title');
+    bindResTxt('res-subtitle', 'subtitle');
+    bindResTxt('res-entrantsCount', 'entrantsCount');
+    bindResTxt('res-footerText', 'footerText');
+
+    // Event Logo upload / clear
+    $('btn-res-logo-upload').addEventListener('click', () => $('file-res-logo').click());
+    $('btn-res-logo-clear').addEventListener('click', () => {
+      commitState({ results: { logoUrl: '' } }, true);
+      toast('Results logo override cleared');
+    });
+    $('file-res-logo').addEventListener('change', async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      try {
+        const url = await uploadLocalImage(file, 'branding', 'results-event-logo');
+        commitState({ results: { logoUrl: url, showLogo: true } }, true);
+        toast('🏷️ Results event logo uploaded');
+      } catch (err) {
+        toast(`⚠️ ${err.message}`);
+      }
+      e.target.value = '';
+    });
+
+    // Game & Art Pack selector
+    $('res-game-select').addEventListener('change', async (e) => {
+      const gameId = e.target.value;
+      const packId = syncResPackSelect(gameId, 'full');
+      commitState({ results: { game: gameId, pack: packId } }, true);
+      await loadResultsRoster(gameId, packId);
+      toast(`🎮 Results game → ${e.target.selectedOptions[0]?.textContent || gameId}`);
+    });
+    $('res-pack-select').addEventListener('change', async (e) => {
+      const gameId = $('res-game-select').value || state.results?.game || 'tekken8';
+      const packId = e.target.value;
+      commitState({ results: { game: gameId, pack: packId } }, true);
+      await loadResultsRoster(gameId, packId);
+    });
+    $('btn-res-sync-game').addEventListener('click', async () => {
+      const g = state.vs?.game || 'tekken8';
+      const p = state.vs?.pack || 'full';
+      syncResPackSelect(g, p);
+      commitState({ results: { game: g, pack: p } }, true);
+      await loadResultsRoster(g, p);
+      toast(`🔄 Synced Results game with VS Splash (${g})`);
+    });
+
+    // 24 Results Designs Sidebar (Search + Filters + Card Selection)
+    $('res-design-search').addEventListener('input', (e) => {
+      resDesignSearch = e.target.value;
+      renderResultsDesignCards();
+    });
+    $('res-design-filters').addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-rcat]');
+      if (!btn) return;
+      resDesignCat = btn.dataset.rcat;
+      $('res-design-filters').querySelectorAll('button').forEach(b => b.classList.toggle('active-chip', b === btn));
+      renderResultsDesignCards();
+    });
+    $('res-design-grid').addEventListener('click', (e) => {
+      const card = e.target.closest('[data-res-design]');
+      if (!card) return;
+      const id = card.dataset.resDesign;
+      const d = RESULTS_DESIGNS.find(x => x.id === id);
+      commitState({
+        results: {
+          design: id,
+          layoutOverride: 'theme',
+          cardStyle: 'theme',
+          bgMode: 'theme',
+          accentColor: '',
+          goldColor: '',
+          fontDisplay: 'theme',
+          pattern: 'theme',
+          patternOpacity: -1,
+          entryAnim: 'theme',
+          ambientAnim: 'theme',
+          cardIdleAnim: 'theme',
+          introNonce: Date.now()
+        }
+      }, true);
+      toast(`🏅 Results Design → ${d ? d.name : id}`);
+    });
+  }
+
+  /* =========================================================================
      BOOTSTRAP & SERVER CONNECTION
      ========================================================================= */
   initSelects();
@@ -7370,6 +8506,7 @@
   bindEvents();
   bindTournamentEvents();
   bindVsAndAssetEvents();
+  bindResultsEvents();
 
   if (isHttp) {
     const stateReady = fetch('/api/state').then(r => r.json()).then(s => {
@@ -7405,6 +8542,7 @@
       fetch('/api/info').then(r => r.json()).then(info => {
         $('obs-url-text').textContent = info.overlayUrl;
         if (info.vsOverlayUrl) $('vs-url-text').textContent = info.vsOverlayUrl;
+        if (info.resultsOverlayUrl && $('results-url-text')) $('results-url-text').textContent = info.resultsOverlayUrl;
         $('dock-url-text').textContent = info.panelUrl;
         $('lan-url-text').textContent = info.lanPanelUrls?.[0] || info.panelUrl;
         $('conn-pill').classList.add('online');

@@ -619,6 +619,80 @@ export async function fetchStartGGEntrants(eventId, token) {
   return results;
 }
 
+export async function fetchStartGGStandings(eventId, token) {
+  if (!eventId) throw new Error('Connect a start.gg event first.');
+  const q = `
+    query EventStandings($eventId: ID!) {
+      event(id: $eventId) {
+        id
+        name
+        numEntrants
+        videogame { name }
+        tournament {
+          name
+          slug
+          city
+          countryCode
+          images { url type }
+        }
+        standings(query: { perPage: 8, page: 1 }) {
+          nodes {
+            placement
+            entrant {
+              id
+              name
+              participants {
+                gamerTag
+                prefix
+                user {
+                  location { country state city }
+                  images(type: "profile") { url type }
+                  authorizations(types: [TWITTER]) { externalUsername }
+                }
+              }
+            }
+          }
+        }
+      }
+    }`;
+  const data = await startggQuery(token, q, { eventId });
+  const ev = data?.event;
+  if (!ev) throw new Error('Event standings not found on start.gg.');
+  const t = ev.tournament || {};
+  const { logoUrl } = extractTournamentImages(t);
+  const nodes = ev.standings?.nodes || [];
+  const placements = nodes.slice(0, 8).map((n, idx) => {
+    const ent = n.entrant || {};
+    const p = ent.participants?.[0];
+    const { sponsor, name } = splitSponsorAndName(p?.gamerTag || ent.name || `Player ${idx + 1}`, p?.prefix);
+    const loc = p?.user?.location || {};
+    const { flag, region } = mapLocationToFlags(loc.country, loc.state, loc.city);
+    const avatar = extractProfileAvatar(p?.user);
+    const tw = p?.user?.authorizations?.[0]?.externalUsername || '';
+    return {
+      place: Number(n.placement || (idx + 1)),
+      name,
+      sponsor,
+      flag,
+      region,
+      character: '',
+      avatar,
+      handle: tw ? `@${String(tw).replace(/^@/, '')}` : ''
+    };
+  });
+  return {
+    provider: 'startgg',
+    tournamentName: t.name || ev.name || 'Tournament',
+    tournamentSlug: t.slug || '',
+    eventName: ev.name || '',
+    gameName: ev.videogame?.name || '',
+    entrantsCount: Number(ev.numEntrants || 0),
+    location: [t.city, t.countryCode].filter(Boolean).join(', '),
+    logoUrl,
+    placements
+  };
+}
+
 export async function reportStartGGSet({ setId, winnerEntrantId, p1EntrantId, p2EntrantId, p1Score, p2Score, token }) {
   if (!setId || !winnerEntrantId) throw new Error('Missing setId or winnerEntrantId for start.gg report.');
   const s1 = Math.max(0, Number(p1Score || 0));
@@ -785,6 +859,46 @@ export async function fetchChallongeTournamentLogo(urlOrSlug, apiKey) {
   return { name: t.name, slug, logoUrl };
 }
 
+export async function fetchChallongeStandings(urlOrSlug, apiKey) {
+  const { slug } = parseChallongeUrl(urlOrSlug);
+  if (!slug) throw new Error('Enter a valid Challonge tournament URL or slug first.');
+  if (!apiKey || !String(apiKey).trim()) throw new Error('Missing Challonge API key.');
+  const url = `${CHALLONGE_BASE}/tournaments/${encodeURIComponent(slug)}.json?api_key=${encodeURIComponent(String(apiKey).trim())}&include_participants=1`;
+  const res = await fetch(url, { headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(8000) });
+  const json = await res.json().catch(() => null);
+  if (!res.ok || !json?.tournament) throw new Error(`Challonge HTTP ${res.status}`);
+  const t = json.tournament;
+  const parts = (t.participants || []).map(w => w.participant || w);
+  const ranked = parts
+    .filter(p => p.final_rank != null || p.seed != null)
+    .sort((a, b) => (a.final_rank ?? 999) - (b.final_rank ?? 999) || (a.seed ?? 999) - (b.seed ?? 999))
+    .slice(0, 8);
+  const placements = ranked.map((p, idx) => {
+    const { sponsor, name } = splitSponsorAndName(p.display_name || p.name || p.username || `Player ${idx + 1}`);
+    return {
+      place: Number(p.final_rank || [1, 2, 3, 4, 5, 5, 7, 7][idx] || (idx + 1)),
+      name,
+      sponsor,
+      flag: '',
+      region: '',
+      character: '',
+      avatar: '',
+      handle: p.challonge_username ? `@${p.challonge_username}` : ''
+    };
+  });
+  return {
+    provider: 'challonge',
+    tournamentName: t.name || slug,
+    tournamentSlug: slug,
+    eventName: t.game_name || t.name || '',
+    gameName: t.game_name || '',
+    entrantsCount: parts.length,
+    location: 'Challonge',
+    logoUrl: String(t.organization_logo_url || t.logo_url || t.avatar_url || t.image_url || '').trim(),
+    placements
+  };
+}
+
 export async function reportChallongeMatch({ tournamentSlug, matchId, winnerEntrantId, p1Score, p2Score, apiKey, liveOnly = false }) {
   if (!tournamentSlug || !matchId) throw new Error('Missing Challonge tournament slug or matchId.');
   if (!apiKey || !String(apiKey).trim()) throw new Error('Missing Challonge API key.');
@@ -861,6 +975,30 @@ export function getDemoTournament() {
     streamQueue: demoSetsLive.filter(s => s.state !== 'complete'),
     sets: demoSetsLive,
     participants: demoSetsLive.flatMap(s => [s.p1, s.p2]).filter((v, i, a) => a.findIndex(x => x.name === v.name) === i)
+  };
+}
+
+export function getDemoStandings() {
+  const sample = [
+    { place: 1, name: 'PLAYER ALPHA',   sponsor: 'TEAM A', flag: 'JP', region: '',       character: 'Jin Kazama',     avatar: '', handle: '@player_alpha' },
+    { place: 2, name: 'PLAYER BRAVO',   sponsor: 'TEAM B', flag: 'KR', region: '',       character: 'Kazuya Mishima', avatar: '', handle: '@player_bravo' },
+    { place: 3, name: 'PLAYER CHARLIE', sponsor: 'FGC',    flag: 'US', region: 'US-CA',  character: 'Reina',          avatar: '', handle: '@player_charlie' },
+    { place: 4, name: 'PLAYER DELTA',   sponsor: 'PRO',    flag: 'ES', region: 'ES-MD',  character: 'Jun Kazama',     avatar: '', handle: '@player_delta' },
+    { place: 5, name: 'PLAYER ECHO',    sponsor: 'UK',     flag: 'GB', region: 'GB-SCT', character: 'Bryan Fury',     avatar: '', handle: '@player_echo' },
+    { place: 5, name: 'PLAYER FOXTROT', sponsor: 'T8',     flag: 'PK', region: '',       character: 'Dragunov',       avatar: '', handle: '@player_foxtrot' },
+    { place: 7, name: 'PLAYER GULF',    sponsor: 'WEST',   flag: 'US', region: 'US-NV',  character: 'Victor',         avatar: '', handle: '@player_gulf' },
+    { place: 7, name: 'PLAYER HOTEL',   sponsor: 'EAST',   flag: 'FR', region: 'FR-BRE', character: 'King',           avatar: '', handle: '@player_hotel' }
+  ];
+  return {
+    provider: 'demo',
+    tournamentName: 'FGC OPEN CHAMPIONSHIP',
+    tournamentSlug: 'demo-tournament',
+    eventName: 'Tekken 8 Singles · Top 8',
+    gameName: 'Tekken 8',
+    entrantsCount: 64,
+    location: 'Offline Demo',
+    logoUrl: DEMO_EVENT_LOGO_SVG,
+    placements: sample
   };
 }
 
