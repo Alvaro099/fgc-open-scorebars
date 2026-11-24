@@ -255,7 +255,9 @@ export const DEFAULT_RESULTS = {
   ambientAnim: 'theme',      // 'theme' | 'none' | 'confetti-gold' | 'energy-sparks' | 'spotlight-sweep' | 'petals-drift' | 'shimmer-wave' | 'aurora-glow' | 'scanline-crt'
   cardIdleAnim: 'theme',     // 'theme' | 'none' | 'champ-glow' | 'float-wave' | 'sheen-loop'
   charZoom: 100,
+  charOffsetX: 0,
   charOffsetY: 0,
+  charFlip: false,
   introNonce: 0,
   // Live Tournament Auto-Sync Link
   autoSyncTournament: true,

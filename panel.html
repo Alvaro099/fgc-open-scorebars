@@ -4092,8 +4092,33 @@
 
         <!-- PANE 1: TOP 8 PLAYERS EDITOR -->
         <div class="res-insp-pane active" id="respane-players">
+          <!-- GLOBAL ALL-PLAYERS IMAGE FRAMING CONTROLS (Moves/Zooms all 8 portraits together!) -->
+          <div style="padding:9px 11px;margin-bottom:10px;border-radius:8px;background:#0b1120;border:1px solid rgba(56,189,248,0.38);">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:6px;">
+              <strong style="font-size:11px;color:#7dd3fc;letter-spacing:.04em;text-transform:uppercase;">🎛 Global Image Framing (All 8 Players Together)</strong>
+              <div style="display:flex;gap:5px;flex-wrap:wrap;">
+                <button type="button" id="btn-res-all-flip" style="padding:3px 8px;font-size:10.5px;" title="Mirror all 8 character renders horizontally">⇄ Flip All</button>
+                <button type="button" id="btn-res-all-reset" style="padding:3px 8px;font-size:10.5px;" title="Reset global &amp; per-player image framing back to centered defaults">↺ Reset All Framing</button>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;align-items:center;">
+              <div class="slider-row" style="margin-top:0;">
+                <div class="slider-head"><span>↕ All Vertical Y (Up / Down)</span><b id="val-res-all-y">0 px</b></div>
+                <input type="range" id="rng-res-all-y" min="-240" max="240" step="2" value="0" />
+              </div>
+              <div class="slider-row" style="margin-top:0;">
+                <div class="slider-head"><span>↔ All Horizontal X (Left / Right)</span><b id="val-res-all-x">0 px</b></div>
+                <input type="range" id="rng-res-all-x" min="-240" max="240" step="2" value="0" />
+              </div>
+              <div class="slider-row" style="margin-top:0;">
+                <div class="slider-head"><span>🔍 All Zoom</span><b id="val-res-all-zoom">100%</b></div>
+                <input type="range" id="rng-res-all-zoom" min="50" max="240" step="2" value="100" />
+              </div>
+            </div>
+          </div>
+
           <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
-            <span style="font-size:11px;color:var(--muted);">Edit placements, tags, country/region flags, characters, handles &amp; avatars — or pull directly from Start.gg / Challonge.</span>
+            <span style="font-size:11px;color:var(--muted);">Edit placements, flags, characters, handles &amp; avatars — or click 🎯 on any row / drag directly on the preview for individual framing.</span>
             <div style="display:flex;gap:6px;flex-wrap:wrap;">
               <button type="button" id="btn-res-from-match" title="Assign current Scorebar winner to 1st place and runner-up to 2nd place">🏆 Fill 1st/2nd from Match</button>
               <button type="button" id="btn-res-clear-players" title="Reset all 8 placements to clean placeholders">🗑 Reset Names</button>
@@ -4184,12 +4209,12 @@
                 </div>
               </div>
               <div class="slider-row">
-                <div class="slider-head"><span>Character Render Zoom</span><b id="val-res-charZoom">100%</b></div>
-                <input type="range" id="rng-res-charZoom" min="60" max="160" step="2" value="100" />
+                <div class="slider-head"><span>Character Render Zoom (All)</span><b id="val-res-charZoom">100%</b></div>
+                <input type="range" id="rng-res-charZoom" min="50" max="240" step="2" value="100" />
               </div>
               <div class="slider-row">
-                <div class="slider-head"><span>Character Vertical Shift (Y)</span><b id="val-res-charY">0 px</b></div>
-                <input type="range" id="rng-res-charY" min="-120" max="120" step="2" value="0" />
+                <div class="slider-head"><span>Character Vertical Shift Y (All)</span><b id="val-res-charY">0 px</b></div>
+                <input type="range" id="rng-res-charY" min="-240" max="240" step="2" value="0" />
               </div>
               <div class="toggles-row" style="margin-top:8px;">
                 <label class="toggle-item"><input type="checkbox" id="chk-res-crown" checked /> 1st Crown</label>
@@ -4764,7 +4789,9 @@
     ambientAnim: 'theme',
     cardIdleAnim: 'theme',
     charZoom: 100,
+    charOffsetX: 0,
     charOffsetY: 0,
+    charFlip: false,
     introNonce: 0,
     autoSyncTournament: true,
     linkedProvider: '',
@@ -8422,6 +8449,16 @@
     $('val-res-charZoom').textContent = `${res.charZoom ?? 100}%`;
     $('rng-res-charY').value = res.charOffsetY ?? 0;
     $('val-res-charY').textContent = `${res.charOffsetY ?? 0} px`;
+    // Sync prominent Global All-Players Framing Bar in Top 8 Players tab
+    if ($('rng-res-all-y')) {
+      $('rng-res-all-y').value = res.charOffsetY ?? 0;
+      $('val-res-all-y').textContent = `${res.charOffsetY ?? 0} px`;
+      $('rng-res-all-x').value = res.charOffsetX ?? 0;
+      $('val-res-all-x').textContent = `${res.charOffsetX ?? 0} px`;
+      $('rng-res-all-zoom').value = res.charZoom ?? 100;
+      $('val-res-all-zoom').textContent = `${res.charZoom ?? 100}%`;
+      $('btn-res-all-flip')?.classList.toggle('active-chip', Boolean(res.charFlip));
+    }
     $('chk-res-crown').checked = res.showCrown !== false;
     $('chk-res-sponsor').checked = res.showSponsor !== false;
     $('chk-res-charname').checked = res.showCharName !== false;
@@ -8608,10 +8645,23 @@
           accentColor: '', goldColor: '', fontDisplay: 'theme',
           pattern: 'theme', patternSpeed: 38, patternDir: 'diag-dr', patternOpacity: -1, patternScale: 100,
           entryAnim: 'theme', entrySpeed: 100, staggerMs: 85, ambientAnim: 'theme', cardIdleAnim: 'theme',
-          charZoom: 100, charOffsetY: 0
+          charZoom: 100, charOffsetX: 0, charOffsetY: 0, charFlip: false
         }
       }, true);
       toast('↺ Results style overrides reset to active design');
+    });
+
+    // Global All-Players Framing Bar bindings (moves/zooms/flips all 8 portraits together!)
+    $('rng-res-all-y').addEventListener('input', (e) => commitState({ results: { charOffsetY: Number(e.target.value) } }));
+    $('rng-res-all-x').addEventListener('input', (e) => commitState({ results: { charOffsetX: Number(e.target.value) } }));
+    $('rng-res-all-zoom').addEventListener('input', (e) => commitState({ results: { charZoom: Number(e.target.value) } }));
+    $('btn-res-all-flip').addEventListener('click', () => {
+      commitState({ results: { charFlip: !state.results?.charFlip } }, true);
+    });
+    $('btn-res-all-reset').addEventListener('click', () => {
+      const list = getResPlacementsClone().map(p => ({ ...p, charZoom: 100, charX: 0, charY: 0, charFlip: false }));
+      commitState({ results: { charZoom: 100, charOffsetX: 0, charOffsetY: 0, charFlip: false, placements: list } }, true);
+      toast('↺ Reset global & individual image framing for all 8 players');
     });
 
     // Quick fill 1st/2nd from active scorebar match
