@@ -1785,11 +1785,61 @@
     height: 100%;
     border: 0;
     display: block;
-    pointer-events: none;
+    pointer-events: auto;
+  }
+  .vs-sel-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 7px 11px;
+    background: #0d1322;
+    border-top: 1px solid rgba(56, 189, 248, 0.28);
+    font-size: 11px;
+  }
+  .vs-sel-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 9px;
+    border-radius: 99px;
+    background: rgba(0, 229, 255, 0.14);
+    border: 1px solid rgba(0, 229, 255, 0.48);
+    color: #67e8f9;
+    font-weight: 800;
+    font-size: 11px;
+  }
+  .vs-sel-jumps {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .vs-sel-jumps button {
+    padding: 3px 7px;
+    font-size: 10px;
+    border-radius: 5px;
+    background: #141a2b;
+    border-color: var(--border);
+  }
+  .vs-sel-jumps button.active-chip {
+    background: rgba(0, 229, 255, 0.18);
+    border-color: #00e5ff;
+    color: #a5f3fc;
+  }
+  .vs-insp-pane { display: none; }
+  .vs-insp-pane.active { display: block; }
+  .studio-box.vs-flash {
+    animation: vsCardFlash 1.1s ease;
+  }
+  @keyframes vsCardFlash {
+    0%   { border-color: #00e5ff; box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.55), 0 0 22px rgba(0, 229, 255, 0.35); }
+    100% { border-color: var(--border); box-shadow: none; }
   }
   .vs-design-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(156px, 1fr));
+    grid-template-columns: 1fr;
     gap: 8px;
     margin-bottom: 12px;
   }
@@ -1809,15 +1859,15 @@
   .vs-design-card.active {
     border-color: #60a5fa;
     background: #131d33;
-    box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.5);
+    box-shadow: 0 0 0 1.5px rgba(96, 165, 250, 0.58);
   }
   .vs-design-swatch {
     width: 100%;
-    height: 36px;
+    height: 40px;
     border-radius: 5px;
     position: relative;
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.16);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1825,9 +1875,27 @@
     font-weight: 900;
     letter-spacing: 0.08em;
     color: #fff;
-    text-shadow: 0 1px 4px rgba(0,0,0,0.85);
+    text-shadow: 0 1px 4px rgba(0,0,0,0.9);
   }
-  .vs-design-card strong { font-size: 11px; color: #fff; }
+  .vs-design-head {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+  }
+  .vs-tier-badge {
+    font-size: 9px;
+    font-weight: 800;
+    padding: 1px 5px;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+  }
+  .vs-tier-badge.SIMPLE { background: rgba(148,163,184,0.18); color: #cbd5e1; }
+  .vs-tier-badge.PRO    { background: rgba(59,130,246,0.22); color: #93c5fd; }
+  .vs-tier-badge.EPIC   { background: rgba(245,158,11,0.24); color: #fcd34d; }
+  .vs-design-card strong { font-size: 11.5px; color: #fff; }
   .vs-design-card small { font-size: 10px; color: var(--muted); line-height: 1.25; }
 
   .vs-next-bar {
@@ -2523,6 +2591,12 @@
               <button type="button" data-val="on">Italic ON</button>
               <button type="button" data-val="off">Upright OFF</button>
             </div>
+            <label>Score Number Slant (Slanted Plaques)</label>
+            <div class="seg-bar" id="seg-scoreSlant" style="margin-bottom:8px;">
+              <button type="button" data-val="mirror" class="active-chip" title="Mirrors left (\) &amp; right (/) score slant to match angled score plaques">⇄ Mirrored \ /</button>
+              <button type="button" data-val="upright" title="Keep score digits strictly upright">▮ Upright</button>
+              <button type="button" data-val="italic" title="Classic forward italic on both sides">Italic / /</button>
+            </div>
             <label>Text Shadow</label>
             <div class="seg-bar" id="seg-textShadow" style="margin-bottom:8px;">
               <button type="button" data-val="broadcast" class="active-chip">Broadcast</button>
@@ -3071,12 +3145,12 @@
 </div>
 
 <!-- =========================================================================
-     WORKSPACE 2: VS SPLASH STUDIO & MULTI-GAME CHARACTER PACKS (Dedicated 2-Col View)
+     WORKSPACE 2: VS SPLASH STUDIO (42 DESIGNS + CLICK-TO-EDIT + MILLIMETER FX)
      ========================================================================= -->
 <div class="workspace-view" id="ws-vs">
   <div class="vs-workspace-shell">
     <div class="main-column">
-      <!-- PINNED 16:9 VS LIVE PREVIEW MONITOR -->
+      <!-- PINNED 16:9 INTERACTIVE VS LIVE PREVIEW MONITOR -->
       <section class="vs-preview-card is-pinned" id="vs-preview-card">
         <div class="preview-toolbar">
           <div class="preview-toolbar-group">
@@ -3088,12 +3162,32 @@
             </div>
           </div>
           <div class="preview-toolbar-group">
-            <button type="button" id="btn-vs-export-png" title="Render &amp; download a 1920x1080 PNG graphic for X/Twitter/Discord">⬇ Export 1920×1080 PNG</button>
-            <button type="button" id="btn-pin-vs" class="active-chip" title="Keep the VS Live Preview pinned at the top while scrolling">📌 Pin Top</button>
+            <button type="button" id="btn-vs-interactive" class="active-chip" title="Click any element directly on the VS preview to jump to its settings">🎯 Click-to-Edit</button>
+            <button type="button" id="btn-vs-drag" class="active-chip" title="Drag Characters, VS Emblem, Header, or Plates directly on the canvas">✋ Drag</button>
+            <button type="button" id="btn-vs-export-png" title="Render &amp; download a 1920x1080 PNG graphic">⬇ PNG</button>
+            <button type="button" id="btn-vs-reset-all" title="Reset all VS customizations to active design defaults">↺ Reset VS</button>
+            <button type="button" id="btn-pin-vs" class="active-chip" title="Keep the VS Live Preview pinned at the top while scrolling">📌 Pin</button>
           </div>
         </div>
         <div class="vs-preview-stage">
           <iframe id="vs-preview-frame" src="vs.html?preview=1"></iframe>
+        </div>
+        <!-- LIVE INTERACTIVE ELEMENT INSPECTOR BREADCRUMB -->
+        <div class="vs-sel-bar" id="vs-sel-bar">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span class="vs-sel-pill" id="vs-sel-label">🎯 Click any element above to inspect &amp; edit</span>
+            <button type="button" id="btn-vs-clear-sel" style="display:none;padding:2px 7px;font-size:10px;">✕ Clear</button>
+          </div>
+          <div class="vs-sel-jumps" id="vs-sel-jumps">
+            <button type="button" data-vs-jump="backdrop">🖼️ Backdrop</button>
+            <button type="button" data-vs-jump="divider">⚡ Divider</button>
+            <button type="button" data-vs-jump="emblem">⚔️ VS Badge</button>
+            <button type="button" data-vs-jump="header">🏆 Header</button>
+            <button type="button" data-vs-jump="p1-char">🧑 P1 Char</button>
+            <button type="button" data-vs-jump="p2-char">🧑 P2 Char</button>
+            <button type="button" data-vs-jump="p1-plate">🏷️ Plates</button>
+            <button type="button" data-vs-jump="flags">🏳️ Flags</button>
+          </div>
         </div>
       </section>
 
@@ -3122,137 +3216,434 @@
         </div>
       </section>
 
-      <!-- VS STUDIO CONTROLS -->
+      <!-- 6-TAB MILLIMETER VS STUDIO INSPECTOR -->
       <section class="card">
-        <div class="studio-grid">
-          <div class="studio-box">
-            <h3>Profile Avatars, Branding &amp; Info</h3>
-            <label>Player Profile Photo Mode</label>
-            <div class="seg-bar" id="seg-vs-avatar" style="margin-bottom:8px;">
-              <button type="button" data-val="badge">Badge + Char</button>
-              <button type="button" data-val="hero-fallback" class="active-chip">Auto Fallback</button>
-              <button type="button" data-val="portrait-hero">Photo Spotlight</button>
-              <button type="button" data-val="off">Off</button>
-            </div>
-            <div class="row" style="margin-bottom:8px;">
-              <div><label for="vs-eyebrow">Top Eyebrow Label</label><input type="text" id="vs-eyebrow" placeholder="UP NEXT" maxlength="24" /></div>
-              <div><label for="vs-subtitle">Event Footer Text</label><input type="text" id="vs-subtitle" placeholder="Tournament / Channel" maxlength="40" /></div>
-            </div>
-            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
-              <label class="toggle-item"><input type="checkbox" id="chk-vs-flags" checked /> Flags</label>
-              <label class="toggle-item"><input type="checkbox" id="chk-vs-h2h" checked /> H2H</label>
-              <label class="toggle-item"><input type="checkbox" id="chk-vs-sponsor" checked /> Sponsors</label>
-              <label class="toggle-item"><input type="checkbox" id="chk-vs-charname" checked /> Char Name</label>
-              <label class="toggle-item"><input type="checkbox" id="chk-vs-score" /> Score</label>
-              <label class="toggle-item"><input type="checkbox" id="chk-vs-logo" checked /> Logo</label>
-            </div>
-            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-              <button type="button" id="btn-vs-logo-upload" style="font-size:11px;">🏷️ Upload Event Logo</button>
-              <button type="button" id="btn-vs-logo-clear" style="font-size:11px;display:none;">✕ Remove Logo</button>
-              <span id="vs-logo-status" style="font-size:10px;color:var(--muted);">No event logo</span>
-              <input type="file" id="file-vs-logo" accept="image/png,image/jpeg,image/webp,image/svg+xml" style="display:none;" />
-            </div>
-          </div>
+        <div class="tab-nav" id="vs-insp-tabs" style="margin-bottom:12px;">
+          <button type="button" class="active-chip" data-vspane="backdrop">🖼️ Backdrop &amp; Pattern</button>
+          <button type="button" data-vspane="divider">⚡ Divider &amp; VS Badge</button>
+          <button type="button" data-vspane="plates">🏷️ Plates, Flags &amp; Fonts</button>
+          <button type="button" data-vspane="chars">🧑 Characters &amp; Photos</button>
+          <button type="button" data-vspane="header">🏆 Header, Branding &amp; FX</button>
+          <button type="button" data-vspane="packs">📦 Character Packs</button>
+        </div>
 
-          <div class="studio-box">
-            <h3>Backdrop, Pattern &amp; Entry Animation</h3>
-            <label>Background Style</label>
-            <div class="seg-bar" id="seg-vs-bg" style="margin-bottom:8px;">
-              <button type="button" data-val="theme" class="active-chip">Design Theme</button>
-              <button type="button" data-val="custom">Custom Colors</button>
-              <button type="button" data-val="transparent">Transparent</button>
+        <!-- INSPECTOR TAB 1: BACKDROP, COLORS, ANIMATED PATTERN & OUTER FRAME -->
+        <div class="vs-insp-pane active" id="vspane-backdrop">
+          <div class="studio-grid">
+            <div class="studio-box" id="vs-card-backdrop">
+              <h3>Backdrop &amp; Palette</h3>
+              <label>Background Mode</label>
+              <div class="seg-bar" id="seg-vs-bg" style="margin-bottom:8px;">
+                <button type="button" data-val="theme" class="active-chip">Design Theme</button>
+                <button type="button" data-val="custom">Custom Colors</button>
+                <button type="button" data-val="transparent">Transparent (Cam)</button>
+              </div>
+              <div class="color-pair-row" style="margin-bottom:8px;">
+                <div class="color-pick">BG 1 <input type="color" id="vs-bg1" value="#f5b800" /></div>
+                <div class="color-pick">BG 2 <input type="color" id="vs-bg2" value="#10131e" /></div>
+                <div class="color-pick">P1 <input type="color" id="vs-p1col" value="#ff512f" /></div>
+                <div class="color-pick">P2 <input type="color" id="vs-p2col" value="#2563eb" /></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                <div class="color-pick" style="flex:1;">Accent <input type="color" id="vs-accentcol" value="#facc15" /></div>
+                <button type="button" id="btn-vs-accent-auto" class="mini-tool-btn">Theme Accent</button>
+              </div>
+              <label for="vs-frameStyle">Outer Architectural Frame</label>
+              <select id="vs-frameStyle">
+                <option value="theme">— From Active Design —</option>
+                <option value="arcade-teeth">Arcade Notched Teeth</option>
+                <option value="cyber-corners">Cyber HUD Corner Brackets</option>
+                <option value="cinematic-bars">Cinematic Letterbox Bars</option>
+                <option value="double-gold">Championship Double Frame</option>
+                <option value="hazard-tape">Industrial Hazard Tape</option>
+                <option value="manga-ink">Manga Thick Ink Border</option>
+                <option value="neon-tube">Glowing Neon Perimeter</option>
+                <option value="minimal-line">Minimal Hairline Frame</option>
+                <option value="none">None (Borderless)</option>
+              </select>
             </div>
-            <label>Animated Pattern</label>
-            <div class="seg-bar" id="seg-vs-pat" style="margin-bottom:8px;">
-              <button type="button" data-val="symbols" class="active-chip">△○×□</button>
-              <button type="button" data-val="grid">Grid</button>
-              <button type="button" data-val="halftone">Halftone</button>
-              <button type="button" data-val="diagonal">Stripes</button>
-              <button type="button" data-val="none">None</button>
-            </div>
-            <div class="color-pair-row" style="margin-bottom:8px;">
-              <div class="color-pick">BG 1 <input type="color" id="vs-bg1" value="#f5b800" /></div>
-              <div class="color-pick">BG 2 <input type="color" id="vs-bg2" value="#10131e" /></div>
-              <div class="color-pick">P1 <input type="color" id="vs-p1col" value="#ff512f" /></div>
-              <div class="color-pick">P2 <input type="color" id="vs-p2col" value="#2563eb" /></div>
-            </div>
-            <label for="vs-entryAnim">OBS Scene Entry Animation</label>
-            <select id="vs-entryAnim">
-              <option value="slam-split">⚡ Side Slam + VS Impact</option>
-              <option value="curtain">🪟 Split Curtain Reveal</option>
-              <option value="zoom-burst">💥 Zoom Burst</option>
-              <option value="fade">🌫 Smooth Fade</option>
-            </select>
-          </div>
 
-          <div class="studio-box">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-              <h3 style="margin:0;">Character Framing &amp; Flip</h3>
-              <button type="button" id="btn-vs-reset-frame" class="mini-tool-btn">↺ Reset</button>
+            <div class="studio-box" id="vs-card-pattern">
+              <h3>Animated Background Pattern</h3>
+              <label>Pattern Texture (8 Styles)</label>
+              <div class="seg-bar" id="seg-vs-pat" style="margin-bottom:8px;">
+                <button type="button" data-val="theme" class="active-chip">Theme</button>
+                <button type="button" data-val="symbols">△○×□</button>
+                <button type="button" data-val="grid">Grid</button>
+                <button type="button" data-val="halftone">Halftone</button>
+                <button type="button" data-val="diagonal">Stripes</button>
+                <button type="button" data-val="hex">Hex</button>
+                <button type="button" data-val="chevrons">Chevrons</button>
+                <button type="button" data-val="rings">Rings</button>
+                <button type="button" data-val="stars">Stars</button>
+                <button type="button" data-val="none">Off</button>
+              </div>
+              <label>Movement Direction</label>
+              <div class="seg-bar" id="seg-vs-patDir" style="margin-bottom:8px;">
+                <button type="button" data-val="diag-dr" class="active-chip">↘ Diag</button>
+                <button type="button" data-val="up">⬆ Up</button>
+                <button type="button" data-val="down">⬇ Down</button>
+                <button type="button" data-val="left">⬅ Left</button>
+                <button type="button" data-val="right">➡ Right</button>
+                <button type="button" data-val="diag-ul">↖ Rev</button>
+              </div>
+              <div class="slider-head"><span>Pattern Animation Speed (0 = Static)</span><b id="val-vs-patSpeed">40%</b></div>
+              <input type="range" id="rng-vs-patSpeed" min="0" max="100" step="2" value="40" />
+              <div class="slider-head" style="margin-top:6px;"><span>Pattern Opacity (-1 = Auto)</span><b id="val-vs-patOp">Auto</b></div>
+              <input type="range" id="rng-vs-patOp" min="-1" max="80" step="1" value="-1" />
+              <div class="slider-head" style="margin-top:6px;"><span>Pattern Scale / Size</span><b id="val-vs-patScale">100%</b></div>
+              <input type="range" id="rng-vs-patScale" min="50" max="200" step="5" value="100" />
             </div>
-            <div style="display:flex;gap:6px;margin-bottom:8px;">
-              <button type="button" id="btn-vs-p1-flip" style="flex:1;font-size:11px;">⇄ Flip P1</button>
-              <button type="button" id="btn-vs-p2-flip" class="active-chip" style="flex:1;font-size:11px;">⇄ Flip P2</button>
-            </div>
-            <div class="slider-head"><span>P1 Character Zoom</span><b id="val-vs-p1Zoom">100%</b></div>
-            <input type="range" id="rng-vs-p1Zoom" min="65" max="150" step="5" value="100" />
-            <div class="slider-head" style="margin-top:6px;"><span>P1 Vertical Offset</span><b id="val-vs-p1Y">0 px</b></div>
-            <input type="range" id="rng-vs-p1Y" min="-140" max="140" step="10" value="0" />
-            <div class="slider-head" style="margin-top:8px;"><span>P2 Character Zoom</span><b id="val-vs-p2Zoom">100%</b></div>
-            <input type="range" id="rng-vs-p2Zoom" min="65" max="150" step="5" value="100" />
-            <div class="slider-head" style="margin-top:6px;"><span>P2 Vertical Offset</span><b id="val-vs-p2Y">0 px</b></div>
-            <input type="range" id="rng-vs-p2Y" min="-140" max="140" step="10" value="0" />
           </div>
         </div>
 
-        <!-- MULTI-GAME CHARACTER ASSET PACK MANAGER (StreamHelperAssets) -->
-        <div class="asset-mgr-box">
-          <div class="asset-mgr-head">
-            <div>
-              <strong style="font-size:12px;color:#c4b5fd;">📦 Multi-Game Character Splash Manager (Offline Cache)</strong>
-              <div style="font-size:11px;color:var(--muted);">Renders auto-download on demand when you pick a character, or pre-download an entire game pack for 100% offline tournaments.</div>
+        <!-- INSPECTOR TAB 2: ANIMATED CENTER DIVIDER & VS EMBLEM -->
+        <div class="vs-insp-pane" id="vspane-divider">
+          <div class="studio-grid">
+            <div class="studio-box" id="vs-card-divider">
+              <h3>⚡ Animated Center Divider Line</h3>
+              <label for="vs-dividerStyle">Divider Design (10 Styles)</label>
+              <select id="vs-dividerStyle" style="margin-bottom:8px;">
+                <option value="theme">— From Active Design —</option>
+                <option value="x-tape">Scrolling × × × Ribbon Tape</option>
+                <option value="chevron-stream">Scrolling ▼ ▼ Chevron Stream</option>
+                <option value="hazard-scroll">Scrolling Hazard Caution Tape</option>
+                <option value="ticker-vs">Scrolling Vertical "VS · FIGHT" Ticker</option>
+                <option value="energy-beam">Flowing Plasma Energy Beam</option>
+                <option value="lightning-crack">Electric Lightning Crack</option>
+                <option value="scan-rail">Cyber Telemetry Scan Rail</option>
+                <option value="solid-glow">Glowing Solid Blade</option>
+                <option value="hairline">Minimal Hairline</option>
+                <option value="none">None (Hidden)</option>
+              </select>
+              <label>Divider Motion (Scroll Contents Up / Down)</label>
+              <div class="seg-bar" id="seg-vs-divAnim" style="margin-bottom:8px;">
+                <button type="button" data-val="theme" class="active-chip">Theme</button>
+                <button type="button" data-val="scroll-down">⬇ Scroll Down</button>
+                <button type="button" data-val="scroll-up">⬆ Scroll Up</button>
+                <button type="button" data-val="pulse">💓 Pulse</button>
+                <button type="button" data-val="shimmer">✨ Shimmer</button>
+                <button type="button" data-val="static">⏸ Static</button>
+              </div>
+              <div class="slider-head"><span>Divider Scroll Speed (0 = Pause)</span><b id="val-vs-divSpeed">45%</b></div>
+              <input type="range" id="rng-vs-divSpeed" min="0" max="100" step="2" value="45" />
+              <div class="slider-head" style="margin-top:6px;"><span>Divider Width (0 = Theme Auto)</span><b id="val-vs-divW">Auto</b></div>
+              <input type="range" id="rng-vs-divW" min="0" max="64" step="2" value="0" />
+              <div class="slider-head" style="margin-top:6px;">
+                <span>Divider Slant / Tilt Angle</span>
+                <span><b id="val-vs-divTilt">Auto</b> <button type="button" id="btn-vs-divTilt-auto" class="mini-tool-btn">Auto</button></span>
+              </div>
+              <input type="range" id="rng-vs-divTilt" min="-20" max="20" step="1" value="0" />
+              <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+                <div class="color-pick" style="flex:1;">Divider Color <input type="color" id="vs-divColor" value="#ffffff" /></div>
+                <button type="button" id="btn-vs-divColor-auto" class="mini-tool-btn">Theme Color</button>
+              </div>
             </div>
-            <span class="designs-count-pill" id="vs-cache-status">Loading catalog...</span>
+
+            <div class="studio-box" id="vs-card-emblem">
+              <h3>⚔️ Center VS Badge / Emblem</h3>
+              <label for="vs-emblemStyle">Badge Architecture (10 Styles)</label>
+              <select id="vs-emblemStyle" style="margin-bottom:8px;">
+                <option value="theme">— From Active Design —</option>
+                <option value="winged">Classic Winged VS</option>
+                <option value="diamond-shield">Esports Diamond Shield</option>
+                <option value="circle-ring">Spinning Segmented HUD Ring</option>
+                <option value="hex-core">Glowing Hexagonal Core</option>
+                <option value="comic-burst">Manga Comic Starburst</option>
+                <option value="pill-tag">Clean Broadcast Pill</option>
+                <option value="slash-bolt">Energy Slash Bolt</option>
+                <option value="monolith">Giant Monolith Watermark</option>
+                <option value="minimal-text">Minimal Text Only</option>
+                <option value="none">None (Hidden)</option>
+              </select>
+              <label for="vs-emblemText">Custom Emblem Text</label>
+              <input type="text" id="vs-emblemText" placeholder="VS" maxlength="8" style="margin-bottom:8px;" />
+              <label>Idle Animation</label>
+              <div class="seg-bar" id="seg-vs-embAnim" style="margin-bottom:8px;">
+                <button type="button" data-val="theme" class="active-chip">Theme</button>
+                <button type="button" data-val="none">Static</button>
+                <button type="button" data-val="float">Float</button>
+                <button type="button" data-val="pulse">Pulse</button>
+                <button type="button" data-val="glitch">Glitch</button>
+                <button type="button" data-val="spin-ring">Spin Ring</button>
+              </div>
+              <div class="slider-head"><span>Emblem Scale</span><b id="val-vs-embScale">100%</b></div>
+              <input type="range" id="rng-vs-embScale" min="50" max="180" step="2" value="100" />
+              <div class="slider-head" style="margin-top:6px;"><span>Vertical Offset Y (or drag on canvas)</span><b id="val-vs-embY">0 px</b></div>
+              <input type="range" id="rng-vs-embY" min="-300" max="300" step="4" value="0" />
+            </div>
+          </div>
+        </div>
+
+        <!-- INSPECTOR TAB 3: NAMEPLATES, TYPOGRAPHY & FLAGS (WITH REGION-ONLY!) -->
+        <div class="vs-insp-pane" id="vspane-plates">
+          <div class="studio-grid">
+            <div class="studio-box" id="vs-card-plates">
+              <h3>🏷️ Player Nameplates &amp; Fonts</h3>
+              <div class="row" style="margin-bottom:8px;">
+                <div>
+                  <label for="vs-plateStyle">Plate Architecture</label>
+                  <select id="vs-plateStyle">
+                    <option value="theme">— Active Design —</option>
+                    <option value="arcade-box">Arcade Heavy Box</option>
+                    <option value="t8-blade">Tekken 8 Angled Blade</option>
+                    <option value="glass-pill">Liquid Frosted Glass</option>
+                    <option value="floating-clean">Clean Floating Bar</option>
+                    <option value="corner-ribbon">Edge-Flush Ribbon</option>
+                    <option value="hex-plate">Sharp 6-Point Hex</option>
+                    <option value="comic-skew">Manga Skew Panel</option>
+                    <option value="stacked-banner">Stacked Top-Trim Card</option>
+                    <option value="luxury-thin">Luxury Editorial Hairline</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="vs-fontDisplay">Display Typography</label>
+                  <select id="vs-fontDisplay">
+                    <option value="theme">— Active Design —</option>
+                    <option value="Russo One">Russo One (Heavy Arcade)</option>
+                    <option value="Barlow Condensed">Barlow Condensed (Broadcast)</option>
+                    <option value="Chakra Petch">Chakra Petch (Cyber T8)</option>
+                    <option value="Orbitron">Orbitron (Sci-Fi HUD)</option>
+                    <option value="Teko">Teko (Tall Fighter)</option>
+                    <option value="Anton">Anton (Manga Impact)</option>
+                    <option value="Bebas Neue">Bebas Neue (Arena Poster)</option>
+                    <option value="Oswald">Oswald (Clean TV)</option>
+                    <option value="Exo 2">Exo 2 (Modern Sport)</option>
+                    <option value="Black Ops One">Black Ops One (Cage)</option>
+                    <option value="Montserrat">Montserrat (Minimalist)</option>
+                  </select>
+                </div>
+              </div>
+              <div class="slider-head"><span>Vertical Height from Bottom (-1 = Auto)</span><b id="val-vs-plateBot">Auto</b></div>
+              <input type="range" id="rng-vs-plateBot" min="-1" max="420" step="2" value="-1" />
+              <div class="slider-head" style="margin-top:6px;"><span>Plate Width</span><b id="val-vs-plateW">790 px</b></div>
+              <input type="range" id="rng-vs-plateW" min="540" max="900" step="10" value="790" />
+              <div class="slider-head" style="margin-top:6px;"><span>Plate Scale</span><b id="val-vs-plateScale">100%</b></div>
+              <input type="range" id="rng-vs-plateScale" min="70" max="135" step="2" value="100" />
+              <div class="slider-head" style="margin-top:6px;"><span>Plate Opacity</span><b id="val-vs-plateOp">96%</b></div>
+              <input type="range" id="rng-vs-plateOp" min="25" max="100" step="2" value="96" />
+              <div class="slider-head" style="margin-top:6px;"><span>Player Name Font Size</span><b id="val-vs-nameScale">100%</b></div>
+              <input type="range" id="rng-vs-nameScale" min="65" max="145" step="2" value="100" />
+            </div>
+
+            <div class="studio-box" id="vs-card-flags">
+              <h3>🏳️ VS Flags &amp; Info Toggles</h3>
+              <label>VS Splash Flag Display (Supports Region-Only Exclusively!)</label>
+              <div class="seg-bar" id="seg-vs-flagMode" style="margin-bottom:10px;">
+                <button type="button" data-val="both" class="active-chip">Both</button>
+                <button type="button" data-val="country">Country Only</button>
+                <button type="button" data-val="region">Region Only</button>
+                <button type="button" data-val="none">Off</button>
+              </div>
+              <div class="slider-head"><span>Plate Flag Size</span><b id="val-vs-flagSize">100%</b></div>
+              <input type="range" id="rng-vs-flagSize" min="70" max="150" step="5" value="100" />
+              <div class="slider-head" style="margin-top:6px;"><span>Giant Backdrop Flag Watermark (-1 = Auto)</span><b id="val-vs-wmOp">Auto</b></div>
+              <input type="range" id="rng-vs-wmOp" min="-1" max="60" step="1" value="-1" />
+              <label style="margin-top:10px;">Visible Elements on Plates</label>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;">
+                <label class="toggle-item"><input type="checkbox" id="chk-vs-h2h" checked /> H2H</label>
+                <label class="toggle-item"><input type="checkbox" id="chk-vs-sponsor" checked /> Sponsors</label>
+                <label class="toggle-item"><input type="checkbox" id="chk-vs-charname" checked /> Char Name</label>
+                <label class="toggle-item"><input type="checkbox" id="chk-vs-score" /> Score</label>
+                <label class="toggle-item"><input type="checkbox" id="chk-vs-logo" checked /> Logo</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- INSPECTOR TAB 4: MILLIMETER CHARACTER & PROFILE PHOTO FRAMING -->
+        <div class="vs-insp-pane" id="vspane-chars">
+          <div class="studio-box" style="margin-bottom:10px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+              <div>
+                <label>Player Profile Photo Mode</label>
+                <div class="seg-bar" id="seg-vs-avatar">
+                  <button type="button" data-val="badge">Badge + Char</button>
+                  <button type="button" data-val="hero-fallback" class="active-chip">Auto Fallback</button>
+                  <button type="button" data-val="portrait-hero">Photo Spotlight</button>
+                  <button type="button" data-val="off">Off</button>
+                </div>
+              </div>
+              <div>
+                <label>Character Idle Motion</label>
+                <div class="seg-bar" id="seg-vs-charIdle">
+                  <button type="button" data-val="none" class="active-chip">Static</button>
+                  <button type="button" data-val="breathe">Breathe</button>
+                  <button type="button" data-val="float">Float</button>
+                </div>
+              </div>
+              <button type="button" id="btn-vs-reset-frame" class="mini-tool-btn">↺ Reset Framing</button>
+            </div>
+            <div class="slider-head" style="margin-top:8px;"><span>Character Drop Shadow Depth</span><b id="val-vs-charShadow">60%</b></div>
+            <input type="range" id="rng-vs-charShadow" min="0" max="100" step="5" value="60" />
           </div>
 
-          <div class="asset-mgr-controls">
-            <div>
-              <label for="vs-game-select">Active Game Roster <button type="button" id="btn-load-all-games" class="mini-tool-btn" style="margin-left:6px;">Load All 240+ Games</button></label>
-              <select id="vs-game-select"></select>
+          <div class="studio-grid">
+            <div class="studio-box" id="vs-card-p1char">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+                <h3 style="margin:0;color:#fdba74;">🧑 P1 Character (Left)</h3>
+                <button type="button" id="btn-vs-p1-flip" style="font-size:11px;padding:3px 9px;">⇄ Flip P1</button>
+              </div>
+              <div class="slider-head"><span>P1 Zoom</span><b id="val-vs-p1Zoom">100%</b></div>
+              <input type="range" id="rng-vs-p1Zoom" min="50" max="180" step="2" value="100" />
+              <div class="slider-head" style="margin-top:6px;"><span>P1 Horizontal X (or drag)</span><b id="val-vs-p1X">0 px</b></div>
+              <input type="range" id="rng-vs-p1X" min="-300" max="300" step="2" value="0" />
+              <div class="slider-head" style="margin-top:6px;"><span>P1 Vertical Y (or drag)</span><b id="val-vs-p1Y">0 px</b></div>
+              <input type="range" id="rng-vs-p1Y" min="-260" max="260" step="2" value="0" />
             </div>
-            <div>
-              <label for="vs-pack-select">Render Art Pack</label>
-              <select id="vs-pack-select"></select>
-            </div>
-            <div style="display:flex;gap:6px;flex-wrap:wrap;">
-              <button type="button" id="btn-dl-pack" class="primary" style="height:33px;">⬇ Download Full Pack</button>
-              <button type="button" id="btn-upload-custom-char" style="height:33px;" title="Upload a custom transparent PNG for a character">⬆ Custom PNG</button>
-              <button type="button" id="btn-clear-pack" style="height:33px;" title="Clear local disk cache for this pack">🗑</button>
-              <input type="file" id="file-custom-char" accept="image/png,image/webp,image/jpeg" style="display:none;" />
-            </div>
-          </div>
 
-          <div class="asset-progress" id="vs-dl-progress">
-            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);">
-              <span id="vs-dl-text">Downloading...</span>
-              <b id="vs-dl-pct" style="color:#fff;">0%</b>
+            <div class="studio-box" id="vs-card-p2char">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+                <h3 style="margin:0;color:#a5b4fc;">🧑 P2 Character (Right)</h3>
+                <button type="button" id="btn-vs-p2-flip" class="active-chip" style="font-size:11px;padding:3px 9px;">⇄ Flip P2</button>
+              </div>
+              <div class="slider-head"><span>P2 Zoom</span><b id="val-vs-p2Zoom">100%</b></div>
+              <input type="range" id="rng-vs-p2Zoom" min="50" max="180" step="2" value="100" />
+              <div class="slider-head" style="margin-top:6px;"><span>P2 Horizontal X (or drag)</span><b id="val-vs-p2X">0 px</b></div>
+              <input type="range" id="rng-vs-p2X" min="-300" max="300" step="2" value="0" />
+              <div class="slider-head" style="margin-top:6px;"><span>P2 Vertical Y (or drag)</span><b id="val-vs-p2Y">0 px</b></div>
+              <input type="range" id="rng-vs-p2Y" min="-260" max="260" step="2" value="0" />
             </div>
-            <div class="asset-progress-track"><div class="asset-progress-fill" id="vs-dl-fill"></div></div>
           </div>
+        </div>
 
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px;">
-            <input type="text" id="vs-roster-search" placeholder="🔍 Filter game roster &amp; quick-assign to P1 / P2..." style="max-width:320px;padding:5px 9px;font-size:12px;" />
-            <span style="font-size:10px;color:var(--muted);">Source: community <code>StreamHelperAssets</code> · cached locally in <code>data/assets/</code></span>
+        <!-- INSPECTOR TAB 5: HEADER, BRANDING, LOGO & 10 ENTRY ANIMATIONS -->
+        <div class="vs-insp-pane" id="vspane-header">
+          <div class="studio-grid">
+            <div class="studio-box" id="vs-card-header">
+              <h3>🏆 Top Header &amp; Branding</h3>
+              <label for="vs-headerStyle">Header Architecture</label>
+              <select id="vs-headerStyle" style="margin-bottom:8px;">
+                <option value="theme">— Active Design —</option>
+                <option value="trapezoid">Broadcast Angled Trapezoid</option>
+                <option value="floating-pill">Frosted Floating Pill</option>
+                <option value="full-ribbon">Full-Width Top Ribbon</option>
+                <option value="hex-crest">Hexagonal Crest</option>
+                <option value="skew-tag">Slanted Motorsport Tag</option>
+                <option value="minimal-text">Minimal Text (No Box)</option>
+                <option value="none">None (Hidden)</option>
+              </select>
+              <div class="row" style="margin-bottom:8px;">
+                <div><label for="vs-eyebrow">Top Eyebrow Label</label><input type="text" id="vs-eyebrow" placeholder="UP NEXT" maxlength="24" /></div>
+                <div><label for="vs-subtitle">Event Footer Text</label><input type="text" id="vs-subtitle" placeholder="Tournament / Channel" maxlength="40" /></div>
+              </div>
+              <div class="slider-head"><span>Header Scale</span><b id="val-vs-hdrScale">100%</b></div>
+              <input type="range" id="rng-vs-hdrScale" min="60" max="150" step="2" value="100" />
+              <div class="slider-head" style="margin-top:6px;"><span>Header Vertical Offset Y</span><b id="val-vs-hdrY">0 px</b></div>
+              <input type="range" id="rng-vs-hdrY" min="0" max="180" step="2" value="0" />
+            </div>
+
+            <div class="studio-box" id="vs-card-brand">
+              <h3>🎬 Animations, Ambient FX &amp; Logo</h3>
+              <label for="vs-entryAnim">OBS Scene Entry Choreography (10 Styles)</label>
+              <div style="display:flex;gap:6px;margin-bottom:8px;">
+                <select id="vs-entryAnim">
+                  <option value="slam-split">⚡ Side Slam + VS Impact</option>
+                  <option value="curtain">🪟 Split Curtain Reveal</option>
+                  <option value="zoom-burst">💥 Zoom Impact Burst</option>
+                  <option value="diag-slash">⚔️ Katana Diagonal Slash</option>
+                  <option value="shatter-drop">⬇ Staggered Drop Cascade</option>
+                  <option value="clash-collide">🔥 High-Speed Collision</option>
+                  <option value="cyber-glitch">👾 Cyber Glitch Boot</option>
+                  <option value="cinema-pan">🎥 Slow Cinema Pan</option>
+                  <option value="wipe-iris">◎ Radial Iris Reveal</option>
+                  <option value="fade">🌫 Clean Smooth Dissolve</option>
+                </select>
+                <button type="button" id="btn-vs-test-entry" class="primary" style="white-space:nowrap;">▶ Test</button>
+              </div>
+              <div class="slider-head"><span>Entry Animation Speed</span><b id="val-vs-entrySpeed">100%</b></div>
+              <input type="range" id="rng-vs-entrySpeed" min="40" max="200" step="5" value="100" />
+              <label for="vs-ambientAnim" style="margin-top:8px;">Continuous Ambient Arena FX</label>
+              <select id="vs-ambientAnim" style="margin-bottom:8px;">
+                <option value="theme">— From Active Design —</option>
+                <option value="none">None (Clean / Minimal)</option>
+                <option value="pulse-glow">Breathing Arena Aura</option>
+                <option value="shimmer-sweep">Metallic Light Sweep</option>
+                <option value="energy-sparks">Rising Energy Sparks</option>
+                <option value="spotlight-sway">Sweeping Stadium Spotlights</option>
+                <option value="scanline-crt">Retro Arcade CRT Scanlines</option>
+              </select>
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px;">
+                <button type="button" id="btn-vs-logo-upload" style="font-size:11px;">🏷️ Upload Logo</button>
+                <button type="button" id="btn-vs-logo-clear" style="font-size:11px;display:none;">✕</button>
+                <select id="vs-logoPos" style="width:auto;font-size:11px;padding:3px 6px;">
+                  <option value="bottom-left">Bottom-Left</option>
+                  <option value="bottom-right">Bottom-Right</option>
+                  <option value="top-left">Top-Left</option>
+                  <option value="top-right">Top-Right</option>
+                </select>
+                <span id="vs-logo-status" style="font-size:10px;color:var(--muted);">No event logo</span>
+                <input type="file" id="file-vs-logo" accept="image/png,image/jpeg,image/webp,image/svg+xml" style="display:none;" />
+              </div>
+              <div class="slider-head"><span>Logo Scale</span><b id="val-vs-logoScale">100%</b></div>
+              <input type="range" id="rng-vs-logoScale" min="50" max="180" step="5" value="100" />
+              <div class="slider-head" style="margin-top:6px;"><span>H2H Pill Bottom Offset</span><b id="val-vs-h2hY">84 px</b></div>
+              <input type="range" id="rng-vs-h2hY" min="20" max="240" step="4" value="84" />
+            </div>
           </div>
-          <div class="roster-strip" id="vs-roster-strip"></div>
+        </div>
+
+        <!-- INSPECTOR TAB 6: MULTI-GAME CHARACTER ASSET PACK MANAGER -->
+        <div class="vs-insp-pane" id="vspane-packs">
+          <div class="asset-mgr-box" style="margin-top:0;">
+            <div class="asset-mgr-head">
+              <div>
+                <strong style="font-size:12px;color:#c4b5fd;">📦 Multi-Game Character Splash Manager (Offline Cache)</strong>
+                <div style="font-size:11px;color:var(--muted);">Renders auto-download on demand when you pick a character, or pre-download an entire game pack for 100% offline tournaments.</div>
+              </div>
+              <span class="designs-count-pill" id="vs-cache-status">Loading catalog...</span>
+            </div>
+
+            <div class="asset-mgr-controls">
+              <div>
+                <label for="vs-game-select">Active Game Roster <button type="button" id="btn-load-all-games" class="mini-tool-btn" style="margin-left:6px;">Load All 240+ Games</button></label>
+                <select id="vs-game-select"></select>
+              </div>
+              <div>
+                <label for="vs-pack-select">Render Art Pack</label>
+                <select id="vs-pack-select"></select>
+              </div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <button type="button" id="btn-dl-pack" class="primary" style="height:33px;">⬇ Download Full Pack</button>
+                <button type="button" id="btn-upload-custom-char" style="height:33px;" title="Upload a custom transparent PNG for a character">⬆ Custom PNG</button>
+                <button type="button" id="btn-clear-pack" style="height:33px;" title="Clear local disk cache for this pack">🗑</button>
+                <input type="file" id="file-custom-char" accept="image/png,image/webp,image/jpeg" style="display:none;" />
+              </div>
+            </div>
+
+            <div class="asset-progress" id="vs-dl-progress">
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);">
+                <span id="vs-dl-text">Downloading...</span>
+                <b id="vs-dl-pct" style="color:#fff;">0%</b>
+              </div>
+              <div class="asset-progress-track"><div class="asset-progress-fill" id="vs-dl-fill"></div></div>
+            </div>
+
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px;">
+              <input type="text" id="vs-roster-search" placeholder="🔍 Filter game roster &amp; quick-assign to P1 / P2..." style="max-width:320px;padding:5px 9px;font-size:12px;" />
+              <span style="font-size:10px;color:var(--muted);">Source: community <code>StreamHelperAssets</code> · cached locally in <code>data/assets/</code></span>
+            </div>
+            <div class="roster-strip" id="vs-roster-strip"></div>
+          </div>
         </div>
       </section>
     </div>
 
-    <!-- RIGHT SIDEBAR: VS SPLASH DESIGNS (Pinned right beside the 16:9 VS Preview!) -->
+    <!-- RIGHT SIDEBAR: 42 DISTINCT VS SPLASH DESIGNS (Search + Categories!) -->
     <aside class="card vs-designs-sidebar">
       <div class="designs-head">
-        <h2>⚔️ VS Splash Designs <span class="designs-count-pill">6</span></h2>
+        <h2>⚔️ VS Splash Designs <span class="designs-count-pill" id="vs-design-count">42</span></h2>
+      </div>
+      <div class="designs-tools">
+        <input type="text" id="vs-design-search" placeholder="🔍 Search 42 VS designs (Arcade, Tekken, Minimal, Cyber, Glass...)" style="padding:5px 9px;font-size:12px;" />
+        <div class="filter-tabs" id="vs-design-filters">
+          <button type="button" class="active-chip" data-vcat="all">All</button>
+          <button type="button" data-vcat="arcade">🕹 Arcade</button>
+          <button type="button" data-vcat="tekken">🥊 Tekken</button>
+          <button type="button" data-vcat="esports">📺 Esports</button>
+          <button type="button" data-vcat="anime">⚡ Anime</button>
+          <button type="button" data-vcat="minimal">✨ Minimal</button>
+        </div>
       </div>
       <div class="vs-designs-scroll">
         <div class="vs-design-grid" id="vs-design-grid"></div>
@@ -3388,6 +3779,7 @@
 <div class="toast" id="toast"></div>
 
 <script src="flags.js"></script>
+<script src="vs-designs.js"></script>
 <script>
 (() => {
   /* =========================================================================
@@ -3575,7 +3967,7 @@
   };
 
   const DEFAULT_STYLE = {
-    fontName: 'theme', fontScore: 'theme', fontScale: 100, letterSpacing: 4, italic: 'theme', uppercase: true,
+    fontName: 'theme', fontScore: 'theme', fontScale: 100, letterSpacing: 4, italic: 'theme', scoreSlant: 'mirror', uppercase: true,
     layoutOverride: 'theme', scorePosOverride: 'theme', shape: 'theme', flagStyle: 'theme', borderStyle: 'theme',
     centerStyle: 'theme', outerBlade: 'theme', bladeSlant: 22, barHeight: 0, flagWidth: 62, flagOpacity: 100,
     flagFadeMode: 'fade-out', flagFadeCurve: 'smooth', flagFadeIn: 0, flagFadeStart: 34, flagFadeEnd: 98,
@@ -3621,7 +4013,37 @@
     bgColor2: '#10131e',
     p1Color: '#ff512f',
     p2Color: '#2563eb',
-    pattern: 'symbols',
+    accentColor: '',
+    pattern: 'theme',
+    patternSpeed: 40,
+    patternDir: 'diag-dr',
+    patternOpacity: -1,
+    patternScale: 100,
+    frameStyle: 'theme',
+    headerStyle: 'theme',
+    headerScale: 100,
+    headerOffsetY: 0,
+    dividerStyle: 'theme',
+    dividerAnim: 'theme',
+    dividerSpeed: 45,
+    dividerWidth: 0,
+    dividerTilt: null,
+    dividerColor: '',
+    emblemStyle: 'theme',
+    emblemText: 'VS',
+    emblemScale: 100,
+    emblemOffsetY: 0,
+    emblemAnim: 'theme',
+    plateStyle: 'theme',
+    plateBottom: -1,
+    plateWidth: 790,
+    plateScale: 100,
+    plateOpacity: 96,
+    fontDisplay: 'theme',
+    nameScale: 100,
+    flagMode: 'both',
+    flagSize: 100,
+    flagWatermarkOpacity: -1,
     eyebrow: 'UP NEXT',
     subtitle: '',
     showFlags: true,
@@ -3631,13 +4053,22 @@
     showLogo: true,
     showScore: false,
     logoUrl: '',
+    logoScale: 100,
+    logoPos: 'bottom-left',
+    h2hOffsetY: 84,
     p1Flip: false,
     p2Flip: true,
     p1Zoom: 100,
     p2Zoom: 100,
+    p1OffsetX: 0,
+    p2OffsetX: 0,
     p1OffsetY: 0,
     p2OffsetY: 0,
+    charShadow: 60,
+    charIdleAnim: 'none',
     entryAnim: 'slam-split',
+    entrySpeed: 100,
+    ambientAnim: 'theme',
     introNonce: 0,
     customMatch: {
       round: 'GRAND FINALS',
@@ -3648,14 +4079,12 @@
     nextMatch: null
   };
 
-  const VS_DESIGNS = [
-    { id: 'arcade-pop',     name: '★ Arcade Pop Split',    desc: 'Bold high-contrast yellow/black split with button pattern & giant renders.', bg: 'linear-gradient(90deg,#f5b800 47%,#fff 47%,#fff 53%,#f5b800 53%)' },
-    { id: 't8-clash',       name: '★ Tekken 8 Clash',      desc: 'Obsidian Heat orange vs. electric violet clash with diagonal energy rift.', bg: 'linear-gradient(125deg,#ff5e1a 0%,#140b18 48%,#7c3aed 100%)' },
-    { id: 'twt-clean',      name: '★ TWT Broadcast',       desc: 'Matte carbon championship layout with giant flag watermarks & H2H.', bg: 'linear-gradient(90deg,#3b0a18 0%,#111520 50%,#0b2147 100%)' },
-    { id: 'portrait-cards', name: '★ Player Spotlight',    desc: 'Player profile photos take center stage inside framed esports cards.', bg: 'linear-gradient(135deg,#1d2438 0%,#0f1320 50%,#1d2842 100%)' },
-    { id: 'cyber-neon',     name: 'Cyber Manga Neon',      desc: 'Vibrant magenta vs. cyan anime diagonal split with halftone pop.', bg: 'linear-gradient(125deg,#ff006e 0%,#ffe600 50%,#00d4ff 100%)' },
-    { id: 'glass-pro',      name: 'Liquid Frosted Glass',  desc: 'Translucent blur cards over soft color bloom (great over live cameras).', bg: 'linear-gradient(135deg,#0f2a3f 0%,#151b2b 50%,#3b1224 100%)' }
-  ];
+  const VS_DESIGNS = window.FGC_VS_DESIGNS || [];
+  let vsDesignCat = 'all';
+  let vsDesignSearch = '';
+  let vsInteractiveEdit = true;
+  let vsDragEnabled = true;
+  let vsSelectedEl = '';
 
   const FLAG_CATALOG = window.FGC_FLAG_CATALOG || [];
   const FLAGS_MAP = window.FGC_FLAGS || {};
@@ -3741,6 +4170,8 @@
     if (vsPreviewFrame?.contentWindow) {
       vsPreviewFrame.contentWindow.postMessage({ type: 'state-update', state }, '*');
       vsPreviewFrame.contentWindow.postMessage({ type: 'history-update', history: historyDb }, '*');
+      vsPreviewFrame.contentWindow.postMessage({ type: 'vs-interactive-config', interactive: vsInteractiveEdit, drag: vsDragEnabled }, '*');
+      if (vsSelectedEl) vsPreviewFrame.contentWindow.postMessage({ type: 'vs-highlight-element', element: vsSelectedEl }, '*');
     }
   }
   previewFrame.addEventListener('load', pushPreviewConfig);
@@ -4126,13 +4557,23 @@
   }
 
   function renderVsDesignCards() {
-    $('vs-design-grid').innerHTML = VS_DESIGNS.map(d => `
-      <button type="button" class="vs-design-card ${(state.vs?.design || 'arcade-pop') === d.id ? 'active' : ''}" data-vs-design="${d.id}">
-        <div class="vs-design-swatch" style="background:${d.bg}">VS</div>
-        <strong>${d.name}</strong>
+    const q = normText(vsDesignSearch.trim());
+    const list = VS_DESIGNS.filter(d => {
+      if (q) return normText(`${d.name} ${d.desc} ${d.cat} ${d.tier} ${d.divider} ${d.plate} ${d.emblem}`).includes(q);
+      return vsDesignCat === 'all' || d.cat === vsDesignCat;
+    });
+    if ($('vs-design-count')) $('vs-design-count').textContent = list.length;
+    const curId = state.vs?.design || 'arcade-pop';
+    $('vs-design-grid').innerHTML = list.map(d => `
+      <button type="button" class="vs-design-card ${curId === d.id ? 'active' : ''}" data-vs-design="${d.id}">
+        <div class="vs-design-swatch" style="background:${d.swatch || d.bgLeft}">${d.emblem === 'none' ? '' : 'VS'}</div>
+        <div class="vs-design-head">
+          <strong>${d.name}</strong>
+          <span class="vs-tier-badge ${d.tier || 'PRO'}">${d.tier || 'PRO'}</span>
+        </div>
         <small>${d.desc}</small>
       </button>
-    `).join('');
+    `).join('') || '<div style="padding:16px;text-align:center;color:var(--muted);font-size:11px;">No VS designs matched that search.</div>';
   }
 
   function renderAvatarBox(side, url) {
@@ -4631,6 +5072,7 @@
     syncSeg('seg-flagFadeMode', st.flagFadeMode || 'fade-out');
     syncSeg('seg-flagFadeCurve', st.flagFadeCurve || 'smooth');
     syncSeg('seg-italic', st.italic);
+    syncSeg('seg-scoreSlant', st.scoreSlant || 'mirror');
     syncSeg('seg-textShadow', st.textShadow);
     syncSeg('seg-glow', st.glow);
     syncSeg('seg-sheen', st.sheen);
@@ -4955,6 +5397,7 @@
     bindSeg('seg-fill-mode', 'fillMode');
     bindSeg('seg-flagStyle', 'flagStyle');
     bindSeg('seg-italic', 'italic');
+    bindSeg('seg-scoreSlant', 'scoreSlant');
     bindSeg('seg-textShadow', 'textShadow');
     bindSeg('seg-glow', 'glow');
     bindSeg('seg-sheen', 'sheen');
@@ -5932,6 +6375,45 @@
     return pool[0];
   }
 
+  function openVsInspectorForElement(elKey, customLabel) {
+    const MAP = {
+      'backdrop': { pane: 'backdrop', card: 'vs-card-backdrop', label: '🖼️ Backdrop & Pattern' },
+      'divider':  { pane: 'divider',  card: 'vs-card-divider',  label: '⚡ Center Divider' },
+      'emblem':   { pane: 'divider',  card: 'vs-card-emblem',   label: '⚔️ VS Emblem' },
+      'header':   { pane: 'header',   card: 'vs-card-header',   label: '🏆 Top Header' },
+      'p1-char':  { pane: 'chars',    card: 'vs-card-p1char',   label: '🧑 P1 Character' },
+      'p2-char':  { pane: 'chars',    card: 'vs-card-p2char',   label: '🧑 P2 Character' },
+      'p1-plate': { pane: 'plates',   card: 'vs-card-plates',   label: '🏷️ Player Nameplates' },
+      'p2-plate': { pane: 'plates',   card: 'vs-card-plates',   label: '🏷️ Player Nameplates' },
+      'flags':    { pane: 'plates',   card: 'vs-card-flags',    label: '🏳️ Flags (Country / Region Only)' },
+      'h2h':      { pane: 'header',   card: 'vs-card-brand',    label: '📊 Head-to-Head Pill' },
+      'logo':     { pane: 'header',   card: 'vs-card-brand',    label: '🏷️ Event Logo' },
+      'subtitle': { pane: 'header',   card: 'vs-card-header',   label: '📝 Event Footer Text' }
+    };
+    const info = MAP[elKey];
+    if (!info) return;
+    vsSelectedEl = elKey;
+    // Switch VS Inspector Tab cleanly
+    $('vs-insp-tabs')?.querySelectorAll('button').forEach(b => b.classList.toggle('active-chip', b.dataset.vspane === info.pane));
+    document.querySelectorAll('.vs-insp-pane').forEach(p => p.classList.toggle('active', p.id === `vspane-${info.pane}`));
+    // Update breadcrumb & jump chip highlights
+    $('vs-sel-label').textContent = `🎯 Editing: ${customLabel ? customLabel.replace(/\s*\([^)]*\)/g, '') : info.label}`;
+    $('btn-vs-clear-sel').style.display = 'inline-flex';
+    $('vs-sel-jumps')?.querySelectorAll('button[data-vs-jump]').forEach(b => {
+      const k = b.dataset.vsJump;
+      b.classList.toggle('active-chip', k === elKey || (k === 'p1-plate' && elKey === 'p2-plate'));
+    });
+    // Flash highlight the exact target control card & bring it cleanly into view
+    const card = $(info.card);
+    if (card) {
+      card.classList.remove('vs-flash');
+      void card.offsetWidth;
+      card.classList.add('vs-flash');
+      card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    vsPreviewFrame?.contentWindow?.postMessage({ type: 'vs-highlight-element', element: elKey }, '*');
+  }
+
   function renderVsUI() {
     const vs = { ...DEFAULT_VS, ...(state.vs || {}) };
     const syncSeg = (id, val) => {
@@ -5940,7 +6422,12 @@
     syncSeg('seg-vs-source', vs.source);
     syncSeg('seg-vs-avatar', vs.avatarMode);
     syncSeg('seg-vs-bg', vs.bgMode);
-    syncSeg('seg-vs-pat', vs.pattern);
+    syncSeg('seg-vs-pat', vs.pattern || 'theme');
+    syncSeg('seg-vs-patDir', vs.patternDir || 'diag-dr');
+    syncSeg('seg-vs-divAnim', vs.dividerAnim || 'theme');
+    syncSeg('seg-vs-embAnim', vs.emblemAnim || 'theme');
+    syncSeg('seg-vs-flagMode', vs.flagMode || (vs.showFlags === false ? 'none' : 'both'));
+    syncSeg('seg-vs-charIdle', vs.charIdleAnim || 'none');
 
     const visBtn = $('btn-vs-vis');
     const isVis = vs.visible !== false;
@@ -5967,30 +6454,98 @@
     if ($('vs-c-p1-char')) $('vs-c-p1-char').value = cm.p1?.character || '';
     if ($('vs-c-p2-char')) $('vs-c-p2-char').value = cm.p2?.character || '';
 
-    setIfNotFocused($('vs-eyebrow'), vs.eyebrow);
-    setIfNotFocused($('vs-subtitle'), vs.subtitle);
-    $('chk-vs-flags').checked = vs.showFlags !== false;
+    // Backdrop & Pattern
+    $('vs-bg1').value = vs.bgColor1 || '#f5b800';
+    $('vs-bg2').value = vs.bgColor2 || '#10131e';
+    $('vs-p1col').value = vs.p1Color || '#ff512f';
+    $('vs-p2col').value = vs.p2Color || '#2563eb';
+    $('vs-accentcol').value = vs.accentColor || '#facc15';
+    $('vs-frameStyle').value = vs.frameStyle || 'theme';
+    $('rng-vs-patSpeed').value = vs.patternSpeed ?? 40;
+    $('val-vs-patSpeed').textContent = Number(vs.patternSpeed ?? 40) === 0 ? 'Static' : `${vs.patternSpeed ?? 40}%`;
+    const patOp = Number(vs.patternOpacity ?? -1);
+    $('rng-vs-patOp').value = patOp;
+    $('val-vs-patOp').textContent = patOp < 0 ? 'Auto' : `${patOp}%`;
+    $('rng-vs-patScale').value = vs.patternScale ?? 100;
+    $('val-vs-patScale').textContent = `${vs.patternScale ?? 100}%`;
+
+    // Divider & VS Emblem
+    $('vs-dividerStyle').value = vs.dividerStyle || 'theme';
+    $('rng-vs-divSpeed').value = vs.dividerSpeed ?? 45;
+    $('val-vs-divSpeed').textContent = Number(vs.dividerSpeed ?? 45) === 0 ? 'Paused' : `${vs.dividerSpeed ?? 45}%`;
+    const divW = Number(vs.dividerWidth ?? 0);
+    $('rng-vs-divW').value = divW;
+    $('val-vs-divW').textContent = divW === 0 ? 'Auto' : `${divW} px`;
+    const hasTilt = vs.dividerTilt !== null && vs.dividerTilt !== undefined && vs.dividerTilt !== '';
+    $('rng-vs-divTilt').value = hasTilt ? Number(vs.dividerTilt) : 0;
+    $('val-vs-divTilt').textContent = hasTilt ? `${Number(vs.dividerTilt)}°` : 'Auto';
+    $('vs-divColor').value = vs.dividerColor || '#ffffff';
+
+    $('vs-emblemStyle').value = vs.emblemStyle || 'theme';
+    setIfNotFocused($('vs-emblemText'), vs.emblemText ?? 'VS');
+    $('rng-vs-embScale').value = vs.emblemScale ?? 100;
+    $('val-vs-embScale').textContent = `${vs.emblemScale ?? 100}%`;
+    $('rng-vs-embY').value = vs.emblemOffsetY ?? 0;
+    $('val-vs-embY').textContent = `${vs.emblemOffsetY ?? 0} px`;
+
+    // Plates, Typography & Flags
+    $('vs-plateStyle').value = vs.plateStyle || 'theme';
+    $('vs-fontDisplay').value = vs.fontDisplay || 'theme';
+    const pBot = Number(vs.plateBottom ?? -1);
+    $('rng-vs-plateBot').value = pBot;
+    $('val-vs-plateBot').textContent = pBot < 0 ? 'Auto' : `${pBot} px`;
+    $('rng-vs-plateW').value = vs.plateWidth ?? 790;
+    $('val-vs-plateW').textContent = `${vs.plateWidth ?? 790} px`;
+    $('rng-vs-plateScale').value = vs.plateScale ?? 100;
+    $('val-vs-plateScale').textContent = `${vs.plateScale ?? 100}%`;
+    $('rng-vs-plateOp').value = vs.plateOpacity ?? 96;
+    $('val-vs-plateOp').textContent = `${vs.plateOpacity ?? 96}%`;
+    $('rng-vs-nameScale').value = vs.nameScale ?? 100;
+    $('val-vs-nameScale').textContent = `${vs.nameScale ?? 100}%`;
+    $('rng-vs-flagSize').value = vs.flagSize ?? 100;
+    $('val-vs-flagSize').textContent = `${vs.flagSize ?? 100}%`;
+    const wmOp = Number(vs.flagWatermarkOpacity ?? -1);
+    $('rng-vs-wmOp').value = wmOp;
+    $('val-vs-wmOp').textContent = wmOp < 0 ? 'Auto' : `${wmOp}%`;
     $('chk-vs-h2h').checked = vs.showH2H !== false;
     $('chk-vs-sponsor').checked = vs.showSponsor !== false;
     $('chk-vs-charname').checked = vs.showCharName !== false;
     $('chk-vs-score').checked = Boolean(vs.showScore);
     $('chk-vs-logo').checked = vs.showLogo !== false;
 
+    // Header, Branding & FX
+    $('vs-headerStyle').value = vs.headerStyle || 'theme';
+    setIfNotFocused($('vs-eyebrow'), vs.eyebrow);
+    setIfNotFocused($('vs-subtitle'), vs.subtitle);
+    $('rng-vs-hdrScale').value = vs.headerScale ?? 100;
+    $('val-vs-hdrScale').textContent = `${vs.headerScale ?? 100}%`;
+    $('rng-vs-hdrY').value = vs.headerOffsetY ?? 0;
+    $('val-vs-hdrY').textContent = `${vs.headerOffsetY ?? 0} px`;
+    $('vs-entryAnim').value = vs.entryAnim || 'slam-split';
+    $('rng-vs-entrySpeed').value = vs.entrySpeed ?? 100;
+    $('val-vs-entrySpeed').textContent = `${vs.entrySpeed ?? 100}%`;
+    $('vs-ambientAnim').value = vs.ambientAnim || 'theme';
+    $('vs-logoPos').value = vs.logoPos || 'bottom-left';
     $('vs-logo-status').textContent = vs.logoUrl ? '✅ Event logo loaded' : 'No event logo';
     $('btn-vs-logo-clear').style.display = vs.logoUrl ? 'inline-flex' : 'none';
+    $('rng-vs-logoScale').value = vs.logoScale ?? 100;
+    $('val-vs-logoScale').textContent = `${vs.logoScale ?? 100}%`;
+    $('rng-vs-h2hY').value = vs.h2hOffsetY ?? 84;
+    $('val-vs-h2hY').textContent = `${vs.h2hOffsetY ?? 84} px`;
 
-    $('vs-bg1').value = vs.bgColor1 || '#f5b800';
-    $('vs-bg2').value = vs.bgColor2 || '#10131e';
-    $('vs-p1col').value = vs.p1Color || '#ff512f';
-    $('vs-p2col').value = vs.p2Color || '#2563eb';
-    $('vs-entryAnim').value = vs.entryAnim || 'slam-split';
-
+    // Character Framing
     $('btn-vs-p1-flip').classList.toggle('active-chip', Boolean(vs.p1Flip));
     $('btn-vs-p2-flip').classList.toggle('active-chip', vs.p2Flip !== false);
+    $('rng-vs-charShadow').value = vs.charShadow ?? 60;
+    $('val-vs-charShadow').textContent = `${vs.charShadow ?? 60}%`;
     $('rng-vs-p1Zoom').value = vs.p1Zoom ?? 100;
     $('val-vs-p1Zoom').textContent = `${vs.p1Zoom ?? 100}%`;
     $('rng-vs-p2Zoom').value = vs.p2Zoom ?? 100;
     $('val-vs-p2Zoom').textContent = `${vs.p2Zoom ?? 100}%`;
+    $('rng-vs-p1X').value = vs.p1OffsetX ?? 0;
+    $('val-vs-p1X').textContent = `${vs.p1OffsetX ?? 0} px`;
+    $('rng-vs-p2X').value = vs.p2OffsetX ?? 0;
+    $('val-vs-p2X').textContent = `${vs.p2OffsetX ?? 0} px`;
     $('rng-vs-p1Y').value = vs.p1OffsetY ?? 0;
     $('val-vs-p1Y').textContent = `${vs.p1OffsetY ?? 0} px`;
     $('rng-vs-p2Y').value = vs.p2OffsetY ?? 0;
@@ -6141,6 +6696,62 @@
       });
     }
 
+    // Interactive Click-to-Select & Direct Drag Listener from vs.html Preview Iframe!
+    window.addEventListener('message', (ev) => {
+      const msg = ev.data;
+      if (!msg || typeof msg !== 'object') return;
+      if (msg.type === 'vs-select-element' && msg.element) {
+        openVsInspectorForElement(msg.element, msg.label);
+      } else if (msg.type === 'vs-drag-patch' && msg.patch) {
+        commitState({ vs: msg.patch }, Boolean(msg.commit));
+      }
+    });
+
+    $('btn-vs-interactive').addEventListener('click', (e) => {
+      vsInteractiveEdit = !vsInteractiveEdit;
+      e.currentTarget.classList.toggle('active-chip', vsInteractiveEdit);
+      if (!vsInteractiveEdit) {
+        vsSelectedEl = '';
+        $('vs-sel-label').textContent = 'Click-to-Edit paused (click 🎯 to re-enable)';
+        $('btn-vs-clear-sel').style.display = 'none';
+      } else {
+        $('vs-sel-label').textContent = '🎯 Click any element above to inspect & edit';
+      }
+      vsPreviewFrame?.contentWindow?.postMessage({ type: 'vs-interactive-config', interactive: vsInteractiveEdit, drag: vsDragEnabled }, '*');
+    });
+    $('btn-vs-drag').addEventListener('click', (e) => {
+      vsDragEnabled = !vsDragEnabled;
+      e.currentTarget.classList.toggle('active-chip', vsDragEnabled);
+      vsPreviewFrame?.contentWindow?.postMessage({ type: 'vs-interactive-config', interactive: vsInteractiveEdit, drag: vsDragEnabled }, '*');
+      toast(vsDragEnabled ? '✋ Direct canvas drag enabled' : 'Direct canvas drag locked');
+    });
+    $('btn-vs-clear-sel').addEventListener('click', () => {
+      vsSelectedEl = '';
+      $('vs-sel-label').textContent = '🎯 Click any element above to inspect & edit';
+      $('btn-vs-clear-sel').style.display = 'none';
+      $('vs-sel-jumps')?.querySelectorAll('button').forEach(b => b.classList.remove('active-chip'));
+      vsPreviewFrame?.contentWindow?.postMessage({ type: 'vs-highlight-element', element: '' }, '*');
+    });
+    $('vs-sel-jumps').addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-vs-jump]');
+      if (!btn) return;
+      openVsInspectorForElement(btn.dataset.vsJump);
+    });
+    $('vs-insp-tabs').addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-vspane]');
+      if (!btn) return;
+      $('vs-insp-tabs').querySelectorAll('button').forEach(b => b.classList.toggle('active-chip', b === btn));
+      document.querySelectorAll('.vs-insp-pane').forEach(p => p.classList.toggle('active', p.id === `vspane-${btn.dataset.vspane}`));
+    });
+    $('btn-vs-reset-all').addEventListener('click', () => {
+      const curDesign = state.vs?.design || 'arcade-pop';
+      const curGame = state.vs?.game || 'tekken8';
+      const curPack = state.vs?.pack || 'full';
+      const curLogo = state.vs?.logoUrl || '';
+      commitState({ vs: { ...structuredClone(DEFAULT_VS), design: curDesign, game: curGame, pack: curPack, logoUrl: curLogo } }, true);
+      toast('↺ VS Splash reset to active design defaults');
+    });
+
     // VS Segmented controls
     const bindVsSeg = (id, key) => {
       $(id).addEventListener('click', (e) => {
@@ -6152,6 +6763,7 @@
           const cand = findNextQueueCandidate();
           if (cand) patch.nextMatch = enrichSetForVs(cand);
         }
+        if (key === 'flagMode') patch.showFlags = val !== 'none';
         commitState({ vs: patch }, true);
       });
     };
@@ -6159,19 +6771,67 @@
     bindVsSeg('seg-vs-avatar', 'avatarMode');
     bindVsSeg('seg-vs-bg', 'bgMode');
     bindVsSeg('seg-vs-pat', 'pattern');
+    bindVsSeg('seg-vs-patDir', 'patternDir');
+    bindVsSeg('seg-vs-divAnim', 'dividerAnim');
+    bindVsSeg('seg-vs-embAnim', 'emblemAnim');
+    bindVsSeg('seg-vs-flagMode', 'flagMode');
+    bindVsSeg('seg-vs-charIdle', 'charIdleAnim');
 
+    // 42 VS Designs search, category filters & cards
+    $('vs-design-search').addEventListener('input', (e) => {
+      vsDesignSearch = e.target.value;
+      renderVsDesignCards();
+    });
+    $('vs-design-filters').addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-vcat]');
+      if (!btn) return;
+      vsDesignCat = btn.dataset.vcat;
+      vsDesignSearch = '';
+      $('vs-design-search').value = '';
+      $('vs-design-filters').querySelectorAll('button').forEach(b => b.classList.toggle('active-chip', b === btn));
+      renderVsDesignCards();
+    });
     $('vs-design-grid').addEventListener('click', (e) => {
       const card = e.target.closest('[data-vs-design]');
       if (!card) return;
-      commitState({ vs: { design: card.dataset.vsDesign, bgMode: 'theme' } }, true);
-      toast(`⚔️ VS Design: ${VS_DESIGNS.find(d => d.id === card.dataset.vsDesign)?.name || card.dataset.vsDesign}`);
+      const d = VS_DESIGNS.find(x => x.id === card.dataset.vsDesign);
+      // Apply design cleanly and reset theme-driven structural overrides so the design shines 1:1!
+      commitState({
+        vs: {
+          design: card.dataset.vsDesign,
+          bgMode: 'theme',
+          pattern: 'theme',
+          patternOpacity: -1,
+          frameStyle: 'theme',
+          headerStyle: 'theme',
+          dividerStyle: 'theme',
+          dividerAnim: 'theme',
+          dividerWidth: 0,
+          dividerTilt: null,
+          dividerColor: '',
+          emblemStyle: 'theme',
+          emblemAnim: 'theme',
+          plateStyle: 'theme',
+          plateBottom: -1,
+          fontDisplay: 'theme',
+          accentColor: '',
+          flagWatermarkOpacity: -1,
+          ambientAnim: 'theme'
+        }
+      }, true);
+      toast(`⚔️ VS Design: ${d?.name || card.dataset.vsDesign}`);
     });
 
     $('btn-vs-vis').addEventListener('click', () => commitState({ vs: { visible: state.vs?.visible === false } }, true));
-    $('btn-vs-replay').addEventListener('click', () => {
+    const triggerVsIntro = () => {
       commitState({ vs: { visible: true, introNonce: Date.now() } }, true);
       vsPreviewFrame.contentWindow?.postMessage({ type: 'test-vs-entry' }, '*');
       toast('🎬 VS Splash intro replayed');
+    };
+    $('btn-vs-replay').addEventListener('click', triggerVsIntro);
+    $('btn-vs-test-entry').addEventListener('click', () => {
+      vsPreviewFrame.contentWindow?.postMessage({ type: 'test-vs-entry' }, '*');
+      toast(`▶ Testing VS entry: ${state.vs?.entryAnim || 'slam-split'}`);
     });
     $('btn-vs-export-png').addEventListener('click', () => {
       vsPreviewFrame.contentWindow?.postMessage({ type: 'export-vs-png' }, '*');
@@ -6202,7 +6862,7 @@
     // Branding, text & toggles
     $('vs-eyebrow').addEventListener('input', (e) => commitState({ vs: { eyebrow: e.target.value } }));
     $('vs-subtitle').addEventListener('input', (e) => commitState({ vs: { subtitle: e.target.value } }));
-    $('chk-vs-flags').addEventListener('change', (e) => commitState({ vs: { showFlags: e.target.checked } }, true));
+    $('vs-emblemText').addEventListener('input', (e) => commitState({ vs: { emblemText: e.target.value } }));
     $('chk-vs-h2h').addEventListener('change', (e) => commitState({ vs: { showH2H: e.target.checked } }, true));
     $('chk-vs-sponsor').addEventListener('change', (e) => commitState({ vs: { showSponsor: e.target.checked } }, true));
     $('chk-vs-charname').addEventListener('change', (e) => commitState({ vs: { showCharName: e.target.checked } }, true));
@@ -6227,21 +6887,65 @@
       e.target.value = '';
     });
 
-    // Colors, entry anim & character framing
-    $('vs-bg1').addEventListener('input', (e) => commitState({ vs: { bgColor1: e.target.value } }));
-    $('vs-bg2').addEventListener('input', (e) => commitState({ vs: { bgColor2: e.target.value } }));
-    $('vs-p1col').addEventListener('input', (e) => commitState({ vs: { p1Color: e.target.value } }));
-    $('vs-p2col').addEventListener('input', (e) => commitState({ vs: { p2Color: e.target.value } }));
-    $('vs-entryAnim').addEventListener('change', (e) => commitState({ vs: { entryAnim: e.target.value } }, true));
+    // Colors, Selects & Millimeter Sliders
+    $('vs-bg1').addEventListener('input', (e) => commitState({ vs: { bgMode: 'custom', bgColor1: e.target.value } }));
+    $('vs-bg2').addEventListener('input', (e) => commitState({ vs: { bgMode: 'custom', bgColor2: e.target.value } }));
+    $('vs-p1col').addEventListener('input', (e) => commitState({ vs: { bgMode: 'custom', p1Color: e.target.value } }));
+    $('vs-p2col').addEventListener('input', (e) => commitState({ vs: { bgMode: 'custom', p2Color: e.target.value } }));
+    $('vs-accentcol').addEventListener('input', (e) => commitState({ vs: { accentColor: e.target.value } }));
+    $('btn-vs-accent-auto').addEventListener('click', () => commitState({ vs: { accentColor: '' } }, true));
+    $('vs-divColor').addEventListener('input', (e) => commitState({ vs: { dividerColor: e.target.value } }));
+    $('btn-vs-divColor-auto').addEventListener('click', () => commitState({ vs: { dividerColor: '' } }, true));
+    $('btn-vs-divTilt-auto').addEventListener('click', () => commitState({ vs: { dividerTilt: null } }, true));
+
+    const bindVsSelect = (id, key) => {
+      $(id).addEventListener('change', (e) => commitState({ vs: { [key]: e.target.value } }, true));
+    };
+    bindVsSelect('vs-frameStyle', 'frameStyle');
+    bindVsSelect('vs-dividerStyle', 'dividerStyle');
+    bindVsSelect('vs-emblemStyle', 'emblemStyle');
+    bindVsSelect('vs-plateStyle', 'plateStyle');
+    bindVsSelect('vs-fontDisplay', 'fontDisplay');
+    bindVsSelect('vs-headerStyle', 'headerStyle');
+    bindVsSelect('vs-entryAnim', 'entryAnim');
+    bindVsSelect('vs-ambientAnim', 'ambientAnim');
+    bindVsSelect('vs-logoPos', 'logoPos');
+
+    const bindVsRange = (id, key) => {
+      $(id).addEventListener('input', (e) => commitState({ vs: { [key]: Number(e.target.value) } }));
+    };
+    bindVsRange('rng-vs-patSpeed', 'patternSpeed');
+    bindVsRange('rng-vs-patOp', 'patternOpacity');
+    bindVsRange('rng-vs-patScale', 'patternScale');
+    bindVsRange('rng-vs-divSpeed', 'dividerSpeed');
+    bindVsRange('rng-vs-divW', 'dividerWidth');
+    bindVsRange('rng-vs-divTilt', 'dividerTilt');
+    bindVsRange('rng-vs-embScale', 'emblemScale');
+    bindVsRange('rng-vs-embY', 'emblemOffsetY');
+    bindVsRange('rng-vs-plateBot', 'plateBottom');
+    bindVsRange('rng-vs-plateW', 'plateWidth');
+    bindVsRange('rng-vs-plateScale', 'plateScale');
+    bindVsRange('rng-vs-plateOp', 'plateOpacity');
+    bindVsRange('rng-vs-nameScale', 'nameScale');
+    bindVsRange('rng-vs-flagSize', 'flagSize');
+    bindVsRange('rng-vs-wmOp', 'flagWatermarkOpacity');
+    bindVsRange('rng-vs-hdrScale', 'headerScale');
+    bindVsRange('rng-vs-hdrY', 'headerOffsetY');
+    bindVsRange('rng-vs-entrySpeed', 'entrySpeed');
+    bindVsRange('rng-vs-logoScale', 'logoScale');
+    bindVsRange('rng-vs-h2hY', 'h2hOffsetY');
+    bindVsRange('rng-vs-charShadow', 'charShadow');
+    bindVsRange('rng-vs-p1Zoom', 'p1Zoom');
+    bindVsRange('rng-vs-p2Zoom', 'p2Zoom');
+    bindVsRange('rng-vs-p1X', 'p1OffsetX');
+    bindVsRange('rng-vs-p2X', 'p2OffsetX');
+    bindVsRange('rng-vs-p1Y', 'p1OffsetY');
+    bindVsRange('rng-vs-p2Y', 'p2OffsetY');
 
     $('btn-vs-p1-flip').addEventListener('click', () => commitState({ vs: { p1Flip: !state.vs?.p1Flip } }, true));
     $('btn-vs-p2-flip').addEventListener('click', () => commitState({ vs: { p2Flip: state.vs?.p2Flip === false } }, true));
-    $('rng-vs-p1Zoom').addEventListener('input', (e) => commitState({ vs: { p1Zoom: Number(e.target.value) } }));
-    $('rng-vs-p2Zoom').addEventListener('input', (e) => commitState({ vs: { p2Zoom: Number(e.target.value) } }));
-    $('rng-vs-p1Y').addEventListener('input', (e) => commitState({ vs: { p1OffsetY: Number(e.target.value) } }));
-    $('rng-vs-p2Y').addEventListener('input', (e) => commitState({ vs: { p2OffsetY: Number(e.target.value) } }));
     $('btn-vs-reset-frame').addEventListener('click', () => {
-      commitState({ vs: { p1Flip: false, p2Flip: true, p1Zoom: 100, p2Zoom: 100, p1OffsetY: 0, p2OffsetY: 0 } }, true);
+      commitState({ vs: { p1Flip: false, p2Flip: true, p1Zoom: 100, p2Zoom: 100, p1OffsetX: 0, p2OffsetX: 0, p1OffsetY: 0, p2OffsetY: 0, charShadow: 60, charIdleAnim: 'none' } }, true);
       toast('↺ Character framing reset');
     });
 

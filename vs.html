@@ -6,22 +6,55 @@
 <title>VS Match Splash — FGC Open Scorebars (1920x1080)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,800;0,900;1,800;1,900&family=Chakra+Petch:ital,wght@0,700;1,700&family=Orbitron:wght@700;900&family=Russo+One&family=Teko:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:ital,wght@0,700;0,800;0,900;1,800;1,900&family=Bebas+Neue&family=Black+Ops+One&family=Chakra+Petch:ital,wght@0,700;1,700&family=Exo+2:ital,wght@0,700;0,800;1,800&family=Montserrat:ital,wght@0,700;0,800;1,800&family=Orbitron:wght@700;900&family=Oswald:wght@600;700&family=Russo+One&family=Teko:wght@600;700&display=swap" rel="stylesheet">
 <style>
   :root {
+    --vs-bg-l: radial-gradient(circle at 50% 42%, #ffe03a 0%, #f5b800 68%, #d49200 100%);
+    --vs-bg-r: radial-gradient(circle at 50% 42%, #ffe03a 0%, #f5b800 68%, #d49200 100%);
     --vs-bg1: #f5b800;
     --vs-bg2: #10131e;
     --vs-p1: #ff512f;
     --vs-p2: #2563eb;
     --vs-accent: #facc15;
+    --vs-div-color: #ffffff;
+    --vs-plate-bg: rgba(8, 10, 16, 0.95);
+    --vs-plate-text: #ffffff;
+    --vs-header-bg: #0a0c13;
+    --vs-header-text: #ffffff;
+    --vs-frame-color: #0a0b10;
+    --vs-frame-accent: #ffffff;
     --vs-font: 'Barlow Condensed', 'Segoe UI', sans-serif;
     --vs-font-display: 'Russo One', 'Barlow Condensed', sans-serif;
+    /* Dynamic millimeter & motion variables */
     --p1-zoom: 1;
     --p2-zoom: 1;
+    --p1-x: 0px;
+    --p2-x: 0px;
     --p1-y: 0px;
     --p2-y: 0px;
     --p1-flip: 1;
     --p2-flip: -1;
+    --char-shadow-alpha: 0.55;
+    --pat-op: 0.2;
+    --pat-dur: 22s;
+    --pat-scale: 1;
+    --wm-op: 0;
+    --div-w: 28px;
+    --div-tilt: 0deg;
+    --div-dur: 4.5s;
+    --emb-scale: 1;
+    --emb-y: 0px;
+    --hdr-scale: 1;
+    --hdr-y: 0px;
+    --plate-bottom: 176px;
+    --plate-w: 790px;
+    --plate-scale: 1;
+    --plate-op: 0.96;
+    --name-scale: 1;
+    --flag-scale: 1;
+    --logo-scale: 1;
+    --h2h-bottom: 84px;
+    --entry-mult: 1;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -37,7 +70,7 @@
   body.preview-mode {
     width: 100vw;
     height: 100vh;
-    background: #090b12;
+    background: #080a10;
   }
 
   #vs-scaler {
@@ -56,13 +89,10 @@
     opacity: 1;
     transition: opacity 0.32s ease;
   }
-  #vs-stage.is-hidden {
-    opacity: 0;
-    pointer-events: none;
-  }
+  #vs-stage.is-hidden { opacity: 0; pointer-events: none; }
 
   /* =========================================================================
-     BACKDROP LAYERS & ANIMATED PATTERNS
+     1. BACKDROP & SPLIT GEOMETRIES (9 ARCHITECTURES)
      ========================================================================= */
   .vs-bg {
     position: absolute;
@@ -75,86 +105,476 @@
     top: 0;
     bottom: 0;
     width: 50%;
-    transition: background 0.35s ease;
+    transition: background 0.3s ease;
   }
-  .vs-bg-half.left { left: 0; }
-  .vs-bg-half.right { right: 0; }
+  .vs-bg-half.left { left: 0; background: var(--vs-bg-l); }
+  .vs-bg-half.right { right: 0; background: var(--vs-bg-r); }
 
+  #vs-stage[data-split="diag-left"] .vs-bg-half.left { width: 56%; clip-path: polygon(0 0, 100% 0, 86% 100%, 0 100%); }
+  #vs-stage[data-split="diag-left"] .vs-bg-half.right { width: 56%; clip-path: polygon(14% 0, 100% 0, 100% 100%, 0 100%); }
+
+  #vs-stage[data-split="diag-right"] .vs-bg-half.left { width: 56%; clip-path: polygon(0 0, 86% 0, 100% 100%, 0 100%); }
+  #vs-stage[data-split="diag-right"] .vs-bg-half.right { width: 56%; clip-path: polygon(0 0, 100% 0, 100% 100%, 14% 100%); }
+
+  #vs-stage[data-split="chevron"] .vs-bg-half.left { width: 55%; clip-path: polygon(0 0, 88% 0, 100% 50%, 88% 100%, 0 100%); }
+  #vs-stage[data-split="chevron"] .vs-bg-half.right { width: 55%; clip-path: polygon(12% 0, 100% 0, 100% 100%, 12% 100%, 0 50%); }
+
+  #vs-stage[data-split="horizon"] .vs-bg::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: 0; height: 42%;
+    background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.65) 100%);
+    pointer-events: none;
+  }
+
+  #vs-stage[data-split="framed-cards"] .vs-bg-half.left,
+  #vs-stage[data-split="framed-cards"] .vs-bg-half.right {
+    width: 47%;
+    top: 40px; bottom: 40px;
+    border-radius: 26px;
+    border: 2px solid rgba(255,255,255,0.12);
+    box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+  }
+  #vs-stage[data-split="framed-cards"] .vs-bg-half.left { left: 2%; }
+  #vs-stage[data-split="framed-cards"] .vs-bg-half.right { right: 2%; }
+  #vs-stage[data-split="framed-cards"] .vs-bg { background: #070910; }
+
+  #vs-stage[data-split="radial-clash"] .vs-bg::after {
+    content: '';
+    position: absolute;
+    left: 50%; top: 47%;
+    width: 900px; height: 900px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(255,255,255,0.18) 0%, transparent 62%);
+    pointer-events: none;
+  }
+
+  #vs-stage[data-split="triple-stripe"] .vs-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(-55deg, transparent 0 180px, rgba(255,255,255,0.06) 180px 210px, transparent 210px 420px);
+    pointer-events: none;
+  }
+
+  /* Custom BG & Transparent Mode */
+  #vs-stage[data-bg-mode="custom"] .vs-bg-half.left {
+    background: radial-gradient(circle at 40% 45%, var(--vs-p1) 0%, var(--vs-bg1) 58%, var(--vs-bg2) 100%) !important;
+  }
+  #vs-stage[data-bg-mode="custom"] .vs-bg-half.right {
+    background: radial-gradient(circle at 60% 45%, var(--vs-p2) 0%, var(--vs-bg1) 58%, var(--vs-bg2) 100%) !important;
+  }
+  #vs-stage[data-bg-mode="transparent"] .vs-bg,
+  #vs-stage[data-bg-mode="transparent"] .vs-pattern,
+  #vs-stage[data-bg-mode="transparent"] .vs-ambient {
+    display: none !important;
+  }
+
+  /* =========================================================================
+     2. ANIMATED PATTERNS (8 PATTERNS x 6 DIRECTIONS x CUSTOM SPEED/SCALE!)
+     ========================================================================= */
+  .vs-pattern-wrap {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    overflow: hidden;
+    pointer-events: none;
+  }
   .vs-pattern {
     position: absolute;
-    inset: -120px;
-    z-index: 2;
-    pointer-events: none;
-    opacity: 0.2;
+    inset: -280px;
+    opacity: var(--pat-op, 0.2);
     will-change: transform;
+    background-repeat: repeat;
   }
   .vs-pattern[data-pat="none"] { display: none; }
+  .vs-pattern[data-light="0"] { filter: invert(1); }
+
   .vs-pattern[data-pat="symbols"] {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cg fill='none' stroke='%23000000' stroke-width='4' stroke-opacity='0.34'%3E%3Cpolygon points='35,18 51,46 19,46'/%3E%3Ccircle cx='105' cy='32' r='14'/%3E%3Crect x='21' y='90' width='26' height='26'/%3E%3Cpath d='M92,90 L118,116 M118,90 L92,116'/%3E%3C/g%3E%3C/svg%3E");
-    background-size: 140px 140px;
-    animation: patDrift 26s linear infinite;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cg fill='none' stroke='%23000' stroke-width='4' stroke-opacity='0.42'%3E%3Cpolygon points='35,18 51,46 19,46'/%3E%3Ccircle cx='105' cy='32' r='14'/%3E%3Crect x='21' y='90' width='26' height='26'/%3E%3Cpath d='M92,90 L118,116 M118,90 L92,116'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: calc(140px * var(--pat-scale, 1)) calc(140px * var(--pat-scale, 1));
   }
   .vs-pattern[data-pat="grid"] {
     background-image:
-      linear-gradient(rgba(255,255,255,0.14) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.14) 1px, transparent 1px);
-    background-size: 56px 56px;
-    animation: patDrift 22s linear infinite;
+      linear-gradient(rgba(0,0,0,0.34) 1.5px, transparent 1.5px),
+      linear-gradient(90deg, rgba(0,0,0,0.34) 1.5px, transparent 1.5px);
+    background-size: calc(70px * var(--pat-scale, 1)) calc(70px * var(--pat-scale, 1));
   }
   .vs-pattern[data-pat="halftone"] {
-    background-image: radial-gradient(rgba(0,0,0,0.34) 22%, transparent 25%);
-    background-size: 24px 24px;
-    animation: patDrift 20s linear infinite;
+    background-image: radial-gradient(rgba(0,0,0,0.42) 22%, transparent 26%);
+    background-size: calc(28px * var(--pat-scale, 1)) calc(28px * var(--pat-scale, 1));
   }
   .vs-pattern[data-pat="diagonal"] {
-    background-image: repeating-linear-gradient(
-      -45deg,
-      rgba(255,255,255,0.09) 0 18px,
-      transparent 18px 46px
-    );
-    animation: patDrift 18s linear infinite;
+    background-image: repeating-linear-gradient(-45deg, rgba(0,0,0,0.28) 0 calc(16px * var(--pat-scale, 1)), transparent calc(16px * var(--pat-scale, 1)) calc(44px * var(--pat-scale, 1)));
+    background-size: calc(140px * var(--pat-scale, 1)) calc(140px * var(--pat-scale, 1));
   }
-  @keyframes patDrift {
-    0%   { transform: translate3d(0, 0, 0); }
-    100% { transform: translate3d(140px, 140px, 0); }
+  .vs-pattern[data-pat="hex"] {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='78' viewBox='0 0 90 78'%3E%3Cpolygon points='22,2 68,2 88,39 68,76 22,76 2,39' fill='none' stroke='%23000' stroke-width='2.5' stroke-opacity='0.36'/%3E%3C/svg%3E");
+    background-size: calc(90px * var(--pat-scale, 1)) calc(78px * var(--pat-scale, 1));
+  }
+  .vs-pattern[data-pat="chevrons"] {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cpath d='M8,52 L40,22 L72,52' fill='none' stroke='%23000' stroke-width='5' stroke-opacity='0.34'/%3E%3C/svg%3E");
+    background-size: calc(80px * var(--pat-scale, 1)) calc(80px * var(--pat-scale, 1));
+  }
+  .vs-pattern[data-pat="rings"] {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Ccircle cx='60' cy='60' r='40' fill='none' stroke='%23000' stroke-width='3' stroke-opacity='0.32'/%3E%3Ccircle cx='60' cy='60' r='16' fill='none' stroke='%23000' stroke-width='2.5' stroke-opacity='0.22'/%3E%3C/svg%3E");
+    background-size: calc(120px * var(--pat-scale, 1)) calc(120px * var(--pat-scale, 1));
+  }
+  .vs-pattern[data-pat="stars"] {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cpath d='M30,10 L34,26 L50,30 L34,34 L30,50 L26,34 L10,30 L26,26 Z' fill='%23000' fill-opacity='0.35'/%3E%3Ccircle cx='92' cy='86' r='4' fill='%23000' fill-opacity='0.4'/%3E%3Ccircle cx='96' cy='28' r='2.5' fill='%23000' fill-opacity='0.3'/%3E%3C/svg%3E");
+    background-size: calc(120px * var(--pat-scale, 1)) calc(120px * var(--pat-scale, 1));
   }
 
-  /* Giant Flag Watermarks behind characters (subtle by default, prominent in twt-clean) */
+  .vs-pattern[data-pat-dir="diag-dr"] { animation: patDR var(--pat-dur) linear infinite; }
+  .vs-pattern[data-pat-dir="diag-ul"] { animation: patUL var(--pat-dur) linear infinite; }
+  .vs-pattern[data-pat-dir="up"]      { animation: patUp var(--pat-dur) linear infinite; }
+  .vs-pattern[data-pat-dir="down"]    { animation: patDown var(--pat-dur) linear infinite; }
+  .vs-pattern[data-pat-dir="left"]    { animation: patLeft var(--pat-dur) linear infinite; }
+  .vs-pattern[data-pat-dir="right"]   { animation: patRight var(--pat-dur) linear infinite; }
+  .vs-pattern.paused { animation-play-state: paused !important; }
+
+  @keyframes patDR    { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(140px, 140px, 0); } }
+  @keyframes patUL    { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(-140px, -140px, 0); } }
+  @keyframes patUp    { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(0, -140px, 0); } }
+  @keyframes patDown  { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(0, 140px, 0); } }
+  @keyframes patLeft  { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(-140px, 0, 0); } }
+  @keyframes patRight { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(140px, 0, 0); } }
+
+  /* =========================================================================
+     3. AMBIENT BROADCAST FX LAYER (6 MODES)
+     ========================================================================= */
+  .vs-ambient {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  #vs-stage[data-ambient="none"] .vs-ambient { display: none; }
+  #vs-stage[data-ambient="pulse-glow"] .vs-ambient::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 26% 45%, var(--vs-p1), transparent 52%),
+      radial-gradient(circle at 74% 45%, var(--vs-p2), transparent 52%);
+    opacity: 0.24;
+    animation: ambPulse 4.2s ease-in-out infinite;
+  }
+  @keyframes ambPulse {
+    0%, 100% { opacity: 0.14; transform: scale(1); }
+    50%      { opacity: 0.32; transform: scale(1.06); }
+  }
+  #vs-stage[data-ambient="shimmer-sweep"] .vs-ambient::before {
+    content: '';
+    position: absolute;
+    top: -20%; left: -40%; width: 32%; height: 140%;
+    background: linear-gradient(105deg, transparent 10%, rgba(255,255,255,0.16) 50%, transparent 90%);
+    transform: skewX(-20deg);
+    animation: ambSweep 5.5s ease-in-out infinite;
+  }
+  @keyframes ambSweep {
+    0%, 50% { left: -45%; opacity: 0; }
+    65% { opacity: 1; }
+    100% { left: 135%; opacity: 0; }
+  }
+  #vs-stage[data-ambient="energy-sparks"] .vs-ambient::before {
+    content: '';
+    position: absolute;
+    inset: -140px 0;
+    background-image:
+      radial-gradient(2px 14px at 14% 25%, rgba(255,255,255,0.75), transparent),
+      radial-gradient(3px 20px at 32% 72%, var(--vs-p1), transparent),
+      radial-gradient(2px 18px at 46% 38%, var(--vs-accent), transparent),
+      radial-gradient(3px 22px at 68% 64%, var(--vs-p2), transparent),
+      radial-gradient(2px 16px at 84% 22%, rgba(255,255,255,0.7), transparent),
+      radial-gradient(2px 14px at 54% 84%, var(--vs-accent), transparent);
+    background-size: 640px 540px;
+    opacity: 0.55;
+    animation: ambSparks 5.5s linear infinite;
+  }
+  @keyframes ambSparks {
+    from { transform: translateY(140px); }
+    to   { transform: translateY(-400px); }
+  }
+  #vs-stage[data-ambient="spotlight-sway"] .vs-ambient::before,
+  #vs-stage[data-ambient="spotlight-sway"] .vs-ambient::after {
+    content: '';
+    position: absolute;
+    top: -80px; width: 620px; height: 1300px;
+    transform-origin: top center;
+    opacity: 0.26;
+  }
+  #vs-stage[data-ambient="spotlight-sway"] .vs-ambient::before {
+    left: 16%;
+    background: linear-gradient(180deg, var(--vs-p1) 0%, transparent 78%);
+    clip-path: polygon(44% 0, 56% 0, 100% 100%, 0 100%);
+    animation: spotLeft 6.5s ease-in-out infinite;
+  }
+  #vs-stage[data-ambient="spotlight-sway"] .vs-ambient::after {
+    right: 16%;
+    background: linear-gradient(180deg, var(--vs-p2) 0%, transparent 78%);
+    clip-path: polygon(44% 0, 56% 0, 100% 100%, 0 100%);
+    animation: spotRight 6.5s ease-in-out infinite;
+  }
+  @keyframes spotLeft  { 0%, 100% { transform: rotate(-16deg); } 50% { transform: rotate(10deg); } }
+  @keyframes spotRight { 0%, 100% { transform: rotate(16deg); } 50% { transform: rotate(-10deg); } }
+  #vs-stage[data-ambient="scanline-crt"] .vs-ambient::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, rgba(0,0,0,0.22) 0 2px, transparent 2px 5px);
+  }
+  #vs-stage[data-ambient="scanline-crt"] .vs-ambient::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; height: 110px;
+    background: linear-gradient(180deg, transparent, rgba(255,255,255,0.08), transparent);
+    animation: crtScan 5s linear infinite;
+  }
+  @keyframes crtScan { from { top: -120px; } to { top: 1120px; } }
+
+  /* Giant Flag Watermarks behind characters */
   .vs-flag-wm {
     position: absolute;
     top: 120px;
     width: 820px;
     height: 540px;
-    z-index: 3;
-    opacity: 0;
+    z-index: 4;
+    opacity: var(--wm-op, 0);
     pointer-events: none;
     overflow: hidden;
     filter: saturate(1.1);
-    transition: opacity 0.35s ease;
+    transition: opacity 0.3s ease;
   }
   .vs-flag-wm.left { left: 40px; mask-image: radial-gradient(ellipse at 45% 50%, #000 18%, transparent 74%); -webkit-mask-image: radial-gradient(ellipse at 45% 50%, #000 18%, transparent 74%); }
   .vs-flag-wm.right { right: 40px; mask-image: radial-gradient(ellipse at 55% 50%, #000 18%, transparent 74%); -webkit-mask-image: radial-gradient(ellipse at 55% 50%, #000 18%, transparent 74%); }
   .vs-flag-wm svg { width: 100%; height: 100%; display: block; object-fit: cover; }
 
-  /* Center vertical / diagonal divider */
+  /* =========================================================================
+     4. ANIMATED CENTER DIVIDER ENGINE (10 STYLES + UP/DOWN SCROLLING!)
+     ========================================================================= */
   .vs-divider {
     position: absolute;
     left: 50%;
-    top: 0;
-    bottom: 0;
-    width: 24px;
-    transform: translateX(-50%);
-    z-index: 5;
+    top: -120px;
+    bottom: -120px;
+    width: var(--div-w, 28px);
+    transform: translateX(-50%) skewX(var(--div-tilt, 0deg));
+    z-index: 9;
+    overflow: hidden;
     pointer-events: none;
+  }
+  .vs-divider[data-divider="none"] { display: none; }
+  .vs-divider-track {
+    position: absolute;
+    left: 0; right: 0;
+    top: -100%;
+    height: 300%;
+    will-change: transform;
+  }
+  /* Vertical Scroll Up / Scroll Down / Pulse / Shimmer animations */
+  .vs-divider[data-div-anim="scroll-down"] .vs-divider-track { animation: divScrollDown var(--div-dur) linear infinite; }
+  .vs-divider[data-div-anim="scroll-up"] .vs-divider-track   { animation: divScrollUp var(--div-dur) linear infinite; }
+  .vs-divider[data-div-anim="pulse"] .vs-divider-track       { animation: divPulse var(--div-dur) ease-in-out infinite; }
+  .vs-divider[data-div-anim="shimmer"] .vs-divider-track     { animation: divScrollDown var(--div-dur) linear infinite; }
+  .vs-divider.paused .vs-divider-track { animation-play-state: paused !important; }
+
+  @keyframes divScrollDown { from { transform: translateY(0); } to { transform: translateY(33.333%); } }
+  @keyframes divScrollUp   { from { transform: translateY(33.333%); } to { transform: translateY(0); } }
+  @keyframes divPulse      { 0%, 100% { opacity: 0.72; filter: brightness(0.95); } 50% { opacity: 1; filter: brightness(1.45); } }
+
+  /* Style 1: X-Tape (Classic scrolling X X X ribbon!) */
+  .vs-divider[data-divider="x-tape"] {
+    background: var(--vs-div-color);
+    border-left: 3px solid #0a0b10;
+    border-right: 3px solid #0a0b10;
+    box-shadow: 0 0 18px rgba(0,0,0,0.45);
+  }
+  .vs-divider[data-divider="x-tape"] .vs-divider-track {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='30' viewBox='0 0 24 30'%3E%3Cpath d='M6,9 L18,21 M18,9 L6,21' stroke='%230a0b10' stroke-width='3.2' stroke-linecap='square'/%3E%3C/svg%3E");
+    background-repeat: repeat-y;
+    background-position: center top;
+    background-size: 24px 30px;
+  }
+
+  /* Style 2: Chevron Stream (Scrolling >>> directional arrows!) */
+  .vs-divider[data-divider="chevron-stream"] {
+    background: #0a0b10;
+    border-left: 2.5px solid var(--vs-div-color);
+    border-right: 2.5px solid var(--vs-div-color);
+  }
+  .vs-divider[data-divider="chevron-stream"] .vs-divider-track {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='28' viewBox='0 0 24 28'%3E%3Cpath d='M4,8 L12,18 L20,8' fill='none' stroke='%23ffffff' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: repeat-y;
+    background-position: center top;
+    background-size: 22px 28px;
+  }
+
+  /* Style 3: Hazard Scroll (Industrial scrolling caution stripes!) */
+  .vs-divider[data-divider="hazard-scroll"] {
+    border-left: 3px solid #09090d;
+    border-right: 3px solid #09090d;
+  }
+  .vs-divider[data-divider="hazard-scroll"] .vs-divider-track {
+    background: repeating-linear-gradient(-45deg, var(--vs-div-color) 0 16px, #09090d 16px 32px);
+  }
+
+  /* Style 4: Energy Beam (Flowing molten plasma / electric core!) */
+  .vs-divider[data-divider="energy-beam"] {
+    box-shadow: 0 0 32px var(--vs-div-color), 0 0 64px var(--vs-p1);
+  }
+  .vs-divider[data-divider="energy-beam"] .vs-divider-track {
+    background: repeating-linear-gradient(180deg, #ffffff 0%, var(--vs-div-color) 18%, var(--vs-p1) 36%, var(--vs-p2) 54%, #ffffff 72%, var(--vs-div-color) 100%);
+    background-size: 100% 360px;
+  }
+
+  /* Style 5: Lightning Crack (Scrolling jagged electric bolt!) */
+  .vs-divider[data-divider="lightning-crack"] {
+    filter: drop-shadow(0 0 12px var(--vs-div-color)) drop-shadow(0 0 26px var(--vs-div-color));
+  }
+  .vs-divider[data-divider="lightning-crack"] .vs-divider-track {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='120' viewBox='0 0 32 120'%3E%3Cpolyline points='16,0 24,22 8,48 22,74 10,98 16,120' fill='none' stroke='%23ffffff' stroke-width='4.5' stroke-linejoin='miter'/%3E%3C/svg%3E");
+    background-repeat: repeat-y;
+    background-position: center top;
+    background-size: 100% 120px;
+  }
+
+  /* Style 6: Scan Rail (Sci-fi telemetry nodes moving along rail!) */
+  .vs-divider[data-divider="scan-rail"] {
+    background: rgba(8, 12, 20, 0.72);
+    border-left: 1.5px solid rgba(255,255,255,0.22);
+    border-right: 1.5px solid rgba(255,255,255,0.22);
+  }
+  .vs-divider[data-divider="scan-rail"] .vs-divider-track {
+    background: repeating-linear-gradient(180deg, transparent 0 40px, var(--vs-div-color) 40px 66px, #ffffff 66px 72px, var(--vs-div-color) 72px 84px, transparent 84px 160px);
+    box-shadow: 0 0 18px var(--vs-div-color);
+  }
+
+  /* Style 7: Vertical Scrolling Broadcast Ticker ("VS · FIGHT · VS") */
+  .vs-divider[data-divider="ticker-vs"] {
+    background: #0a0b10;
+    border-left: 2.5px solid var(--vs-div-color);
+    border-right: 2.5px solid var(--vs-div-color);
+  }
+  .vs-divider[data-divider="ticker-vs"] .vs-divider-track {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    color: var(--vs-div-color);
+    font: 900 18px/1 var(--vs-font-display);
+    letter-spacing: 0.14em;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+  }
+
+  /* Style 8: Solid Glow Blade */
+  .vs-divider[data-divider="solid-glow"] {
+    background: linear-gradient(180deg, transparent 3%, var(--vs-div-color) 20%, #ffffff 50%, var(--vs-div-color) 80%, transparent 97%);
+    box-shadow: 0 0 20px var(--vs-div-color);
+  }
+  .vs-divider[data-divider="solid-glow"] .vs-divider-track {
+    background: repeating-linear-gradient(180deg, transparent 0 120px, rgba(255,255,255,0.85) 150px, transparent 180px 340px);
+  }
+
+  /* Style 9: Crisp Hairline */
+  .vs-divider[data-divider="hairline"] {
+    background: linear-gradient(180deg, transparent 6%, var(--vs-div-color) 50%, transparent 94%);
   }
 
   /* =========================================================================
-     CHARACTER RENDER + HERO PORTRAIT STAGE
+     5. ARCHITECTURAL OUTER FRAME STYLES (9 STYLES)
+     ========================================================================= */
+  .vs-frame-deco {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    pointer-events: none;
+  }
+  .vs-frame-deco::before, .vs-frame-deco::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    pointer-events: none;
+  }
+
+  #vs-stage[data-frame="none"] .vs-frame-deco { display: none; }
+
+  #vs-stage[data-frame="arcade-teeth"] .vs-frame-deco::before {
+    top: 0; height: 66px; background: var(--vs-frame-color);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 91% 100%, 88% 58%, 63% 58%, 60% 100%, 40% 100%, 37% 58%, 12% 58%, 9% 100%, 0 100%);
+    border-bottom: 5px solid var(--vs-frame-accent);
+  }
+  #vs-stage[data-frame="arcade-teeth"] .vs-frame-deco::after {
+    bottom: 0; height: 60px; background: var(--vs-frame-color);
+    clip-path: polygon(0 0, 9% 0, 12% 45%, 37% 45%, 40% 0, 60% 0, 63% 45%, 88% 45%, 91% 0, 100% 0, 100% 100%, 0 100%);
+  }
+
+  #vs-stage[data-frame="cinematic-bars"] .vs-frame-deco::before {
+    top: 0; height: 42px; background: var(--vs-frame-color);
+    border-bottom: 2px solid var(--vs-frame-accent);
+  }
+  #vs-stage[data-frame="cinematic-bars"] .vs-frame-deco::after {
+    bottom: 0; height: 48px; background: var(--vs-frame-color);
+    border-top: 2px solid var(--vs-frame-accent);
+  }
+
+  #vs-stage[data-frame="double-gold"] .vs-frame-deco::before {
+    inset: 18px;
+    border: 2px solid var(--vs-frame-color);
+    box-shadow: inset 0 0 0 5px transparent, inset 0 0 0 6.5px rgba(255,255,255,0.28);
+  }
+
+  #vs-stage[data-frame="cyber-corners"] .vs-frame-deco::before {
+    inset: 22px;
+    background:
+      linear-gradient(var(--vs-frame-color), var(--vs-frame-color)) top left / 70px 4px no-repeat,
+      linear-gradient(var(--vs-frame-color), var(--vs-frame-color)) top left / 4px 70px no-repeat,
+      linear-gradient(var(--vs-frame-accent), var(--vs-frame-accent)) top right / 70px 4px no-repeat,
+      linear-gradient(var(--vs-frame-accent), var(--vs-frame-accent)) top right / 4px 70px no-repeat,
+      linear-gradient(var(--vs-frame-color), var(--vs-frame-color)) bottom left / 70px 4px no-repeat,
+      linear-gradient(var(--vs-frame-color), var(--vs-frame-color)) bottom left / 4px 70px no-repeat,
+      linear-gradient(var(--vs-frame-accent), var(--vs-frame-accent)) bottom right / 70px 4px no-repeat,
+      linear-gradient(var(--vs-frame-accent), var(--vs-frame-accent)) bottom right / 4px 70px no-repeat;
+  }
+
+  #vs-stage[data-frame="hazard-tape"] .vs-frame-deco::before {
+    top: 0; height: 22px;
+    background: repeating-linear-gradient(-45deg, var(--vs-frame-accent) 0 18px, var(--vs-frame-color) 18px 36px);
+    border-bottom: 3px solid #000;
+  }
+  #vs-stage[data-frame="hazard-tape"] .vs-frame-deco::after {
+    bottom: 0; height: 22px;
+    background: repeating-linear-gradient(-45deg, var(--vs-frame-accent) 0 18px, var(--vs-frame-color) 18px 36px);
+    border-top: 3px solid #000;
+  }
+
+  #vs-stage[data-frame="manga-ink"] .vs-frame-deco::before {
+    inset: 14px;
+    border: 8px solid var(--vs-frame-color);
+    box-shadow: 0 0 0 14px var(--vs-frame-accent);
+  }
+
+  #vs-stage[data-frame="neon-tube"] .vs-frame-deco::before {
+    inset: 16px;
+    border: 3px solid var(--vs-frame-color);
+    border-radius: 12px;
+    box-shadow: 0 0 22px var(--vs-frame-color), inset 0 0 22px var(--vs-frame-accent);
+  }
+
+  #vs-stage[data-frame="minimal-line"] .vs-frame-deco::before {
+    inset: 18px;
+    border: 1.5px solid var(--vs-frame-color);
+    opacity: 0.45;
+  }
+
+  /* =========================================================================
+     6. CHARACTER RENDER + HERO PORTRAIT STAGE (MILLIMETER X/Y/ZOOM/IDLE)
      ========================================================================= */
   .vs-side {
     position: absolute;
-    top: 0;
-    bottom: 0;
+    top: 0; bottom: 0;
     width: 960px;
     z-index: 6;
     display: flex;
@@ -167,12 +587,25 @@
 
   .vs-char-wrap {
     position: absolute;
-    inset: 40px 24px 36px 24px;
+    inset: 30px 20px 30px 20px;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: visible;
   }
+  .vs-char-idle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+  }
+  #vs-stage[data-char-idle="breathe"] .vs-char-idle { animation: charBreathe 4.6s ease-in-out infinite; }
+  #vs-stage[data-char-idle="float"] .vs-char-idle   { animation: charFloat 5.2s ease-in-out infinite; }
+  #vs-stage[data-char-idle="float"] .vs-side.right .vs-char-idle { animation-delay: -2.4s; }
+  @keyframes charBreathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.028); } }
+  @keyframes charFloat   { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-14px); } }
+
   .vs-char-img {
     max-width: 94%;
     max-height: 98%;
@@ -180,42 +613,32 @@
     height: 920px;
     object-fit: contain;
     display: none;
-    filter: drop-shadow(0 18px 28px rgba(0, 0, 0, 0.55));
+    filter: drop-shadow(0 18px 28px rgba(0, 0, 0, var(--char-shadow-alpha, 0.55)));
     transform-origin: center center;
-    transition: opacity 0.25s ease;
     will-change: transform;
   }
   .vs-char-img.loaded { display: block; }
-  #p1-char-img { transform: translateY(var(--p1-y)) scale(var(--p1-zoom)) scaleX(var(--p1-flip)); }
-  #p2-char-img { transform: translateY(var(--p2-y)) scale(var(--p2-zoom)) scaleX(var(--p2-flip)); }
+  #p1-char-img { transform: translate3d(var(--p1-x), var(--p1-y), 0) scale(var(--p1-zoom)) scaleX(var(--p1-flip)); }
+  #p2-char-img { transform: translate3d(var(--p2-x), var(--p2-y), 0) scale(var(--p2-zoom)) scaleX(var(--p2-flip)); }
 
-  /* Hero Profile Avatar Card (shown in portrait-hero OR hero-fallback when no character is set) */
   .vs-hero-avatar {
     display: none;
     position: relative;
-    width: 440px;
-    height: 440px;
+    width: 450px;
+    height: 450px;
     margin-bottom: 120px;
-    border-radius: 26px;
+    border-radius: 28px;
     overflow: hidden;
     background: #10131e;
-    border: 6px solid rgba(255, 255, 255, 0.9);
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65);
+    border: 6px solid var(--vs-p1);
+    box-shadow: 0 0 0 10px rgba(255,255,255,0.06), 0 24px 60px rgba(0, 0, 0, 0.68);
     z-index: 8;
   }
+  .vs-side.right .vs-hero-avatar { border-color: var(--vs-p2); }
   .vs-hero-avatar.active { display: block; }
-  .vs-hero-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-  .vs-side.has-hero-avatar .vs-char-img.loaded {
-    opacity: 0.26;
-    filter: blur(2px) saturate(1.1) drop-shadow(0 18px 28px rgba(0, 0, 0, 0.5));
-  }
+  .vs-hero-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .vs-side.has-hero-avatar .vs-char-img.loaded { opacity: 0.24; filter: blur(2px) saturate(1.1); }
 
-  /* Clean Monogram Emblem fallback when neither character nor profile avatar is set */
   .vs-fallback-emblem {
     display: none;
     width: 340px;
@@ -223,57 +646,78 @@
     margin-bottom: 120px;
     border-radius: 50%;
     background: rgba(12, 15, 24, 0.55);
-    border: 5px solid rgba(255, 255, 255, 0.22);
+    border: 5px solid rgba(255, 255, 255, 0.24);
     backdrop-filter: blur(8px);
     align-items: center;
     justify-content: center;
     font-family: var(--vs-font-display);
     font-size: 132px;
-    color: rgba(255, 255, 255, 0.85);
-    letter-spacing: 0.04em;
+    color: rgba(255, 255, 255, 0.86);
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
   }
   .vs-fallback-emblem.active { display: flex; }
 
   /* =========================================================================
-     TOP / BOTTOM ARCHITECTURAL FRAME BARS
+     7. TOP HEADER (6 ARCHITECTURES)
      ========================================================================= */
-  .vs-frame-top, .vs-frame-bot {
+  .vs-frame-top {
     position: absolute;
-    left: 0;
-    right: 0;
-    z-index: 12;
+    top: var(--hdr-y, 0px);
+    left: 0; right: 0;
+    z-index: 14;
+    display: flex;
+    justify-content: center;
     pointer-events: none;
   }
-  .vs-frame-top {
-    top: 0;
-    height: 112px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-  }
-  .vs-frame-bot {
-    bottom: 0;
-    height: 76px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 42px;
-  }
-
   .vs-top-header {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 2px;
-    padding: 12px 58px 14px;
-    background: #0a0c13;
-    color: #fff;
-    clip-path: polygon(0 0, 100% 0, calc(100% - 34px) 100%, 34px 100%);
+    padding: 12px 62px 14px;
+    background: var(--vs-header-bg);
+    color: var(--vs-header-text);
     border-bottom: 4px solid var(--vs-accent);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.52);
+    transform-origin: top center;
+    transform: scale(var(--hdr-scale, 1));
   }
+  #vs-stage[data-header="none"] .vs-frame-top { display: none; }
+  #vs-stage[data-header="trapezoid"] .vs-top-header {
+    clip-path: polygon(0 0, 100% 0, calc(100% - 34px) 100%, 34px 100%);
+  }
+  #vs-stage[data-header="floating-pill"] .vs-top-header {
+    margin-top: 14px;
+    border-radius: 999px;
+    padding: 10px 52px 12px;
+    border: 2px solid rgba(255,255,255,0.22);
+    border-bottom: 3px solid var(--vs-accent);
+    backdrop-filter: blur(16px);
+  }
+  #vs-stage[data-header="full-ribbon"] .vs-top-header {
+    width: 100%;
+    padding: 10px 40px 12px;
+    border-bottom: 3px solid var(--vs-accent);
+  }
+  #vs-stage[data-header="hex-crest"] .vs-top-header {
+    margin-top: 8px;
+    padding: 12px 72px 14px;
+    clip-path: polygon(30px 0, calc(100% - 30px) 0, 100% 50%, calc(100% - 30px) 100%, 30px 100%, 0 50%);
+  }
+  #vs-stage[data-header="minimal-text"] .vs-top-header {
+    margin-top: 18px;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 6px 24px;
+  }
+  #vs-stage[data-header="skew-tag"] .vs-top-header {
+    margin-top: 12px;
+    transform: scale(var(--hdr-scale, 1)) skewX(-12deg);
+    padding: 10px 56px 12px;
+  }
+  #vs-stage[data-header="skew-tag"] .vs-top-header > * { transform: skewX(12deg); }
+
   .vs-eyebrow {
     font-size: 20px;
     font-weight: 800;
@@ -283,20 +727,16 @@
     line-height: 1;
   }
   .vs-eyebrow:empty { display: none; }
-  .vs-round-row {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
+  .vs-round-row { display: flex; align-items: center; gap: 14px; }
   .vs-round-text {
     font-family: var(--vs-font-display);
     font-size: 40px;
     font-weight: 900;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: #fff;
+    color: var(--vs-header-text);
     line-height: 1.05;
-    text-shadow: 0 3px 10px rgba(0, 0, 0, 0.6);
+    text-shadow: 0 3px 10px rgba(0, 0, 0, 0.45);
   }
   .vs-format-pill {
     padding: 3px 12px;
@@ -309,38 +749,53 @@
   }
   .vs-format-pill:empty { display: none; }
 
-  /* Center VS Emblem */
+  /* =========================================================================
+     8. CENTER VS EMBLEM (10 ARCHITECTURES + IDLE ANIMATIONS)
+     ========================================================================= */
   .vs-emblem {
     position: absolute;
     left: 50%;
-    top: 47%;
-    transform: translate(-50%, -50%);
+    top: calc(47% + var(--emb-y, 0px));
+    transform: translate(-50%, -50%) scale(var(--emb-scale, 1));
     z-index: 16;
     display: flex;
     align-items: center;
-    gap: 14px;
+    justify-content: center;
     pointer-events: none;
   }
-  .vs-emblem-wings {
-    width: 112px;
-    height: 28px;
+  #vs-stage[data-emblem="none"] .vs-emblem { display: none; }
+  .vs-emblem-inner {
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
   }
-  .vs-emblem-wings::before,
-  .vs-emblem-wings::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    height: 7px;
-    background: #fff;
-    border: 2px solid #090b10;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+
+  /* Emblem idle animations */
+  #vs-stage[data-emb-anim="float"] .vs-emblem-inner  { animation: embFloat 3.4s ease-in-out infinite; }
+  #vs-stage[data-emb-anim="pulse"] .vs-emblem-inner  { animation: embPulse 2.4s ease-in-out infinite; }
+  #vs-stage[data-emb-anim="glitch"] .vs-emblem-inner { animation: embGlitch 3.2s steps(2) infinite; }
+  @keyframes embFloat  { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+  @keyframes embPulse  { 0%, 100% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.06); filter: brightness(1.18); } }
+  @keyframes embGlitch {
+    0%, 88%, 100% { transform: translate(0, 0); filter: none; }
+    90% { transform: translate(-4px, 2px); filter: drop-shadow(4px 0 #ff006e) drop-shadow(-4px 0 #00e5ff); }
+    93% { transform: translate(4px, -2px); filter: drop-shadow(-4px 0 #ff006e) drop-shadow(4px 0 #00e5ff); }
+    96% { transform: translate(0, 0); }
+  }
+
+  .vs-emblem-shape { display: none; position: absolute; z-index: -1; }
+  .vs-emblem-wings { display: none; width: 112px; height: 28px; position: relative; }
+  .vs-emblem-wings::before, .vs-emblem-wings::after {
+    content: ''; position: absolute; left: 0; right: 0; height: 7px;
+    background: #fff; border: 2px solid #090b10; box-shadow: 0 3px 10px rgba(0,0,0,0.5);
   }
   .vs-emblem-wings::before { top: 2px; transform: skewX(-28deg); }
   .vs-emblem-wings::after { bottom: 2px; width: 72%; transform: skewX(-28deg); }
   .vs-emblem-wings.left::after { left: auto; right: 0; }
   .vs-emblem-wings.right::before, .vs-emblem-wings.right::after { transform: skewX(28deg); }
+
   .vs-emblem-text {
     font-family: var(--vs-font-display);
     font-size: 108px;
@@ -354,40 +809,184 @@
     filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.7));
   }
 
+  #vs-stage[data-emblem="winged"] .vs-emblem-wings { display: block; }
+
+  #vs-stage[data-emblem="diamond-shield"] .vs-emblem-shape {
+    display: block; width: 170px; height: 170px;
+    background: linear-gradient(135deg, #121726, #06080f);
+    border: 4px solid var(--vs-accent);
+    transform: rotate(45deg);
+    box-shadow: 0 0 34px rgba(0,0,0,0.75), 0 0 26px var(--vs-accent);
+  }
+  #vs-stage[data-emblem="diamond-shield"] .vs-emblem-text { font-size: 84px; -webkit-text-stroke: 0; }
+
+  #vs-stage[data-emblem="circle-ring"] .vs-emblem-shape {
+    display: block; width: 192px; height: 192px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(10,14,26,0.92) 55%, transparent 72%);
+    border: 5px dashed var(--vs-accent);
+    box-shadow: 0 0 28px var(--vs-accent), inset 0 0 22px rgba(0,0,0,0.6);
+  }
+  #vs-stage[data-emblem="circle-ring"][data-emb-anim="spin-ring"] .vs-emblem-shape { animation: spinRing 12s linear infinite; }
+  @keyframes spinRing { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  #vs-stage[data-emblem="circle-ring"] .vs-emblem-text { font-size: 82px; -webkit-text-stroke: 2px #090b10; }
+
+  #vs-stage[data-emblem="hex-core"] .vs-emblem-shape {
+    display: block; width: 204px; height: 180px;
+    background: linear-gradient(160deg, var(--vs-p1), #0b1020 45%, var(--vs-p2));
+    clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+    filter: drop-shadow(0 0 22px var(--vs-accent));
+  }
+  #vs-stage[data-emblem="hex-core"] .vs-emblem-text { font-size: 82px; -webkit-text-stroke: 4px #070a12; }
+
+  #vs-stage[data-emblem="comic-burst"] .vs-emblem-shape {
+    display: block; width: 240px; height: 240px;
+    background: var(--vs-accent);
+    clip-path: polygon(50% 0%, 62% 24%, 88% 12%, 78% 38%, 100% 50%, 78% 62%, 88% 88%, 62% 76%, 50% 100%, 38% 76%, 12% 88%, 22% 62%, 0% 50%, 22% 38%, 12% 12%, 38% 24%);
+    filter: drop-shadow(0 8px 0 #09090d);
+  }
+  #vs-stage[data-emblem="comic-burst"] .vs-emblem-text { color: #09090d; -webkit-text-stroke: 4px #ffffff; font-size: 92px; }
+
+  #vs-stage[data-emblem="pill-tag"] .vs-emblem-text {
+    font-size: 76px;
+    font-style: normal;
+    padding: 12px 32px;
+    background: var(--vs-header-bg);
+    color: var(--vs-header-text);
+    border: 3px solid var(--vs-accent);
+    border-radius: 14px;
+    -webkit-text-stroke: 0;
+  }
+
+  #vs-stage[data-emblem="monolith"] .vs-emblem-text {
+    font-size: 210px;
+    font-style: normal;
+    opacity: 0.24;
+    -webkit-text-stroke: 3px #ffffff;
+    color: transparent;
+    letter-spacing: 0.06em;
+  }
+
+  #vs-stage[data-emblem="slash-bolt"] .vs-emblem-shape {
+    display: block; width: 230px; height: 14px;
+    background: linear-gradient(90deg, transparent, var(--vs-accent), #ffffff, var(--vs-accent), transparent);
+    transform: rotate(-28deg);
+    box-shadow: 0 0 24px var(--vs-accent);
+  }
+  #vs-stage[data-emblem="slash-bolt"] .vs-emblem-text {
+    background: linear-gradient(180deg, #ffffff 10%, var(--vs-accent) 62%, var(--vs-p1) 100%);
+    -webkit-background-clip: text;
+    color: transparent;
+    -webkit-text-stroke: 4px #0c0806;
+    font-size: 118px;
+  }
+
+  #vs-stage[data-emblem="minimal-text"] .vs-emblem-text {
+    font-size: 84px;
+    font-style: normal;
+    -webkit-text-stroke: 0;
+    color: var(--vs-header-text);
+    opacity: 0.9;
+    letter-spacing: 0.12em;
+  }
+
   /* =========================================================================
-     PLAYER NAMEPLATES (OVERLAPPING LOWER STAGE) + AVATAR MEDALLION + FLAGS
+     9. PLAYER NAMEPLATES (9 ARCHITECTURES + MILLIMETER POSITIONING)
      ========================================================================= */
   .vs-plate {
     position: absolute;
-    bottom: 184px;
-    width: 790px;
-    min-height: 138px;
+    bottom: var(--plate-bottom, 176px);
+    width: var(--plate-w, 790px);
+    min-height: 136px;
     z-index: 15;
     display: flex;
     align-items: center;
     gap: 20px;
     padding: 16px 28px;
-    background: rgba(8, 10, 16, 0.94);
-    border: 3px solid rgba(255, 255, 255, 0.16);
-    box-shadow: 0 22px 48px rgba(0, 0, 0, 0.72);
-    color: #fff;
+    background: var(--vs-plate-bg);
+    color: var(--vs-plate-text);
+    border: 2.5px solid rgba(255, 255, 255, 0.16);
+    box-shadow: 0 22px 48px rgba(0, 0, 0, 0.65);
+    opacity: var(--plate-op, 0.96);
+    transform-origin: bottom left;
+    transform: scale(var(--plate-scale, 1));
   }
-  .vs-plate.left {
-    left: 62px;
-    border-left: 10px solid var(--vs-p1);
+  .vs-plate.left  { left: 62px;  border-left: 10px solid var(--vs-p1); }
+  .vs-plate.right { right: 62px; flex-direction: row-reverse; text-align: right; border-right: 10px solid var(--vs-p2); transform-origin: bottom right; }
+
+  #vs-stage[data-plate="arcade-box"] .vs-plate {
+    border-radius: 6px;
+    border-top: 4px solid rgba(255,255,255,0.88);
+    box-shadow: 0 14px 0 rgba(0,0,0,0.28), 0 24px 48px rgba(0,0,0,0.65);
   }
-  .vs-plate.right {
-    right: 62px;
-    flex-direction: row-reverse;
-    text-align: right;
-    border-right: 10px solid var(--vs-p2);
+  #vs-stage[data-plate="t8-blade"] .vs-plate {
+    clip-path: polygon(24px 0, 100% 0, calc(100% - 24px) 100%, 0 100%);
+    padding: 16px 42px;
+    border: none;
+    border-top: 2px solid rgba(255,255,255,0.3);
+    border-bottom: 5px solid var(--vs-p1);
   }
+  #vs-stage[data-plate="t8-blade"] .vs-plate.right {
+    clip-path: polygon(0 0, calc(100% - 24px) 0, 100% 100%, 24px 100%);
+    border-bottom-color: var(--vs-p2);
+  }
+  #vs-stage[data-plate="glass-pill"] .vs-plate {
+    border-radius: 20px;
+    backdrop-filter: blur(20px) saturate(145%);
+    -webkit-backdrop-filter: blur(20px) saturate(145%);
+    border: 1.5px solid rgba(255,255,255,0.24);
+  }
+  #vs-stage[data-plate="glass-pill"] .vs-plate.left { border-left: 7px solid var(--vs-p1); }
+  #vs-stage[data-plate="glass-pill"] .vs-plate.right { border-right: 7px solid var(--vs-p2); }
+  #vs-stage[data-plate="glass-pill"] .vs-avatar-badge { border-radius: 50%; }
+
+  #vs-stage[data-plate="floating-clean"] .vs-plate {
+    border: none;
+    border-bottom: 4px solid var(--vs-p1);
+    border-radius: 4px;
+    box-shadow: 0 14px 36px rgba(0,0,0,0.45);
+  }
+  #vs-stage[data-plate="floating-clean"] .vs-plate.right { border-bottom-color: var(--vs-p2); }
+
+  #vs-stage[data-plate="corner-ribbon"] .vs-plate.left  { left: 0; border-left: none; border-right: 8px solid var(--vs-p1); border-radius: 0 12px 12px 0; padding-left: 48px; }
+  #vs-stage[data-plate="corner-ribbon"] .vs-plate.right { right: 0; border-right: none; border-left: 8px solid var(--vs-p2); border-radius: 12px 0 0 12px; padding-right: 48px; }
+
+  #vs-stage[data-plate="hex-plate"] .vs-plate {
+    clip-path: polygon(28px 0, calc(100% - 28px) 0, 100% 50%, calc(100% - 28px) 100%, 28px 100%, 0 50%);
+    padding: 16px 46px;
+    border: none;
+    border-top: 2px solid var(--vs-p1);
+    border-bottom: 4px solid var(--vs-p1);
+  }
+  #vs-stage[data-plate="hex-plate"] .vs-plate.right { border-top-color: var(--vs-p2); border-bottom-color: var(--vs-p2); }
+
+  #vs-stage[data-plate="comic-skew"] .vs-plate {
+    border: 3.5px solid var(--vs-accent);
+    box-shadow: 10px 10px 0 rgba(0,0,0,0.85);
+    transform: scale(var(--plate-scale, 1)) skewX(-7deg);
+  }
+  #vs-stage[data-plate="comic-skew"] .vs-plate > * { transform: skewX(7deg); }
+
+  #vs-stage[data-plate="stacked-banner"] .vs-plate {
+    border-radius: 12px;
+    border-top: 4px solid var(--vs-p1);
+    border-left-width: 2px;
+    border-right-width: 2px;
+  }
+  #vs-stage[data-plate="stacked-banner"] .vs-plate.right { border-top-color: var(--vs-p2); }
+
+  #vs-stage[data-plate="luxury-thin"] .vs-plate {
+    border: 1px solid rgba(255,255,255,0.22);
+    border-bottom: 2px solid var(--vs-p1);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    backdrop-filter: blur(12px);
+  }
+  #vs-stage[data-plate="luxury-thin"] .vs-plate.right { border-bottom-color: var(--vs-p2); }
 
   .vs-avatar-badge {
     display: none;
     flex: 0 0 98px;
-    width: 98px;
-    height: 98px;
+    width: 98px; height: 98px;
     border-radius: 14px;
     overflow: hidden;
     border: 3px solid rgba(255, 255, 255, 0.85);
@@ -395,87 +994,52 @@
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.55);
   }
   .vs-avatar-badge.active { display: block; }
-  .vs-avatar-badge img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
+  .vs-avatar-badge img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-  .vs-plate-body {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-  }
+  .vs-plate-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
   .vs-plate.right .vs-plate-body { align-items: flex-end; }
-
-  .vs-meta-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
+  .vs-meta-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .vs-plate.right .vs-meta-row { justify-content: flex-end; }
 
-  .vs-sponsor {
-    font-size: 26px;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--vs-accent);
-  }
+  .vs-sponsor { font-size: 26px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--vs-accent); }
   .vs-sponsor:empty { display: none; }
-
-  .vs-bracket {
-    padding: 2px 9px;
-    border-radius: 4px;
-    font-size: 20px;
-    font-weight: 900;
-    background: rgba(255, 255, 255, 0.14);
-    color: #fff;
-  }
+  .vs-bracket { padding: 2px 9px; border-radius: 4px; font-size: 20px; font-weight: 900; background: rgba(255,255,255,0.14); color: var(--vs-plate-text); }
   .vs-bracket:empty { display: none; }
   .vs-bracket.W { background: rgba(34, 197, 94, 0.22); color: #86efac; border: 1px solid rgba(34, 197, 94, 0.45); }
   .vs-bracket.L { background: rgba(239, 68, 68, 0.22); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.45); }
 
-  .vs-flags {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-  }
+  .vs-flags { display: inline-flex; align-items: center; gap: 6px; }
   .vs-flags:empty { display: none; }
   .vs-flag-box {
-    width: 44px;
-    height: 29px;
+    width: calc(44px * var(--flag-scale, 1));
+    height: calc(29px * var(--flag-scale, 1));
     border-radius: 3px;
     overflow: hidden;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.28);
     display: inline-block;
   }
   .vs-flag-box svg { width: 100%; height: 100%; display: block; }
 
   .vs-player-name {
     font-family: var(--vs-font-display);
-    font-size: 62px;
+    font-size: calc(62px * var(--name-scale, 1));
     font-weight: 900;
     line-height: 1;
     letter-spacing: 0.02em;
-    color: #fff;
+    color: var(--vs-plate-text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 100%;
-    text-shadow: 0 4px 14px rgba(0, 0, 0, 0.75);
+    text-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
   }
   .vs-char-sub {
     font-size: 24px;
     font-weight: 800;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.72);
+    opacity: 0.72;
   }
   .vs-char-sub:empty { display: none; }
 
@@ -496,11 +1060,11 @@
   .vs-plate.right .vs-score-box { background: var(--vs-p2); }
   .vs-score-box.active { display: flex; }
 
-  /* Bottom H2H Pill + Tournament Logo + Subtitle */
+  /* H2H Pill, Tournament Logo (4 positions), Footer Subtitle */
   .vs-h2h-pill {
     position: absolute;
     left: 50%;
-    bottom: 84px;
+    bottom: var(--h2h-bottom, 84px);
     transform: translateX(-50%);
     z-index: 16;
     display: none;
@@ -522,22 +1086,18 @@
 
   .vs-logo-slot {
     position: absolute;
-    left: 44px;
-    bottom: 24px;
     z-index: 18;
     display: none;
     align-items: center;
-    gap: 12px;
-    max-width: 280px;
-    max-height: 112px;
+    transform-origin: bottom left;
+    transform: scale(var(--logo-scale, 1));
   }
   .vs-logo-slot.active { display: flex; }
-  .vs-logo-slot img {
-    max-width: 240px;
-    max-height: 104px;
-    object-fit: contain;
-    filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.65));
-  }
+  .vs-logo-slot[data-pos="bottom-left"]  { left: 44px;  bottom: 24px; transform-origin: bottom left; }
+  .vs-logo-slot[data-pos="bottom-right"] { right: 44px; bottom: 56px; transform-origin: bottom right; }
+  .vs-logo-slot[data-pos="top-left"]     { left: 44px;  top: 24px;    transform-origin: top left; }
+  .vs-logo-slot[data-pos="top-right"]    { right: 44px; top: 24px;    transform-origin: top right; }
+  .vs-logo-slot img { max-width: 240px; max-height: 104px; object-fit: contain; filter: drop-shadow(0 6px 16px rgba(0,0,0,0.65)); }
 
   .vs-subtitle-slot {
     position: absolute;
@@ -548,343 +1108,140 @@
     font-weight: 800;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.86);
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+    color: rgba(255, 255, 255, 0.88);
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85);
   }
   .vs-subtitle-slot:empty { display: none; }
 
   /* =========================================================================
-     DESIGN 1: ARCADE POP SPLIT (Bold Yellow/Black Geometric Split — Default!)
+     10. 10 OBS SCENE ENTRY CHOREOGRAPHIES (SCALED BY --entry-mult)
      ========================================================================= */
-  #vs-stage[data-design="arcade-pop"] .vs-bg-half.left,
-  #vs-stage[data-design="arcade-pop"] .vs-bg-half.right {
-    background: radial-gradient(circle at 50% 44%, #ffd82b 0%, var(--vs-bg1) 72%, #d99b00 100%);
+  #vs-stage.anim-slam-split .vs-side.left  { animation: vsSlamLeft  calc(0.68s * var(--entry-mult)) cubic-bezier(0.16, 1, 0.3, 1) both; }
+  #vs-stage.anim-slam-split .vs-side.right { animation: vsSlamRight calc(0.68s * var(--entry-mult)) cubic-bezier(0.16, 1, 0.3, 1) both; }
+  #vs-stage.anim-slam-split .vs-plate.left  { animation: vsPlateLeft  calc(0.58s * var(--entry-mult)) calc(0.16s * var(--entry-mult)) cubic-bezier(0.16, 1, 0.3, 1) both; }
+  #vs-stage.anim-slam-split .vs-plate.right { animation: vsPlateRight calc(0.58s * var(--entry-mult)) calc(0.16s * var(--entry-mult)) cubic-bezier(0.16, 1, 0.3, 1) both; }
+  #vs-stage.anim-slam-split .vs-emblem      { animation: vsEmblemSlam calc(0.62s * var(--entry-mult)) calc(0.22s * var(--entry-mult)) cubic-bezier(0.18, 1.28, 0.32, 1) both; }
+  #vs-stage.anim-slam-split .vs-top-header  { animation: vsTopDrop    calc(0.52s * var(--entry-mult)) calc(0.08s * var(--entry-mult)) cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+  #vs-stage.anim-curtain .vs-bg-half.left  { animation: vsSlamLeft  calc(0.6s * var(--entry-mult)) ease-out both; }
+  #vs-stage.anim-curtain .vs-bg-half.right { animation: vsSlamRight calc(0.6s * var(--entry-mult)) ease-out both; }
+  #vs-stage.anim-curtain .vs-side          { animation: vsFadeUp    calc(0.62s * var(--entry-mult)) calc(0.16s * var(--entry-mult)) cubic-bezier(0.16, 1, 0.3, 1) both; }
+  #vs-stage.anim-curtain .vs-plate         { animation: vsFadeUp    calc(0.54s * var(--entry-mult)) calc(0.26s * var(--entry-mult)) cubic-bezier(0.16, 1, 0.3, 1) both; }
+  #vs-stage.anim-curtain .vs-emblem        { animation: vsEmblemSlam calc(0.55s * var(--entry-mult)) calc(0.3s * var(--entry-mult)) ease-out both; }
+
+  #vs-stage.anim-zoom-burst .vs-side   { animation: vsZoomIn calc(0.64s * var(--entry-mult)) cubic-bezier(0.16, 1, 0.3, 1) both; }
+  #vs-stage.anim-zoom-burst .vs-emblem { animation: vsEmblemSlam calc(0.58s * var(--entry-mult)) calc(0.14s * var(--entry-mult)) cubic-bezier(0.18, 1.35, 0.32, 1) both; }
+  #vs-stage.anim-zoom-burst .vs-plate  { animation: vsFadeUp calc(0.55s * var(--entry-mult)) calc(0.22s * var(--entry-mult)) ease-out both; }
+
+  #vs-stage.anim-diag-slash .vs-side.left  { animation: vsSlashL calc(0.62s * var(--entry-mult)) cubic-bezier(0.16, 1, 0.3, 1) both; }
+  #vs-stage.anim-diag-slash .vs-side.right { animation: vsSlashR calc(0.62s * var(--entry-mult)) cubic-bezier(0.16, 1, 0.3, 1) both; }
+  #vs-stage.anim-diag-slash .vs-divider    { animation: vsDivDrop calc(0.45s * var(--entry-mult)) ease-out both; }
+  #vs-stage.anim-diag-slash .vs-emblem     { animation: vsEmblemSlam calc(0.52s * var(--entry-mult)) calc(0.2s * var(--entry-mult)) cubic-bezier(0.18, 1.3, 0.32, 1) both; }
+  #vs-stage.anim-diag-slash .vs-plate      { animation: vsFadeUp calc(0.5s * var(--entry-mult)) calc(0.24s * var(--entry-mult)) ease-out both; }
+
+  #vs-stage.anim-shatter-drop .vs-top-header { animation: vsTopDrop calc(0.48s * var(--entry-mult)) both; }
+  #vs-stage.anim-shatter-drop .vs-side.left  { animation: vsDropDown calc(0.62s * var(--entry-mult)) calc(0.1s * var(--entry-mult)) cubic-bezier(0.16, 1, 0.3, 1) both; }
+  #vs-stage.anim-shatter-drop .vs-side.right { animation: vsDropDown calc(0.62s * var(--entry-mult)) calc(0.2s * var(--entry-mult)) cubic-bezier(0.16, 1, 0.3, 1) both; }
+  #vs-stage.anim-shatter-drop .vs-plate      { animation: vsFadeUp calc(0.52s * var(--entry-mult)) calc(0.32s * var(--entry-mult)) ease-out both; }
+  #vs-stage.anim-shatter-drop .vs-emblem     { animation: vsEmblemSlam calc(0.55s * var(--entry-mult)) calc(0.36s * var(--entry-mult)) both; }
+
+  #vs-stage.anim-clash-collide .vs-side.left  { animation: vsCollideL calc(0.7s * var(--entry-mult)) cubic-bezier(0.12, 1, 0.25, 1) both; }
+  #vs-stage.anim-clash-collide .vs-side.right { animation: vsCollideR calc(0.7s * var(--entry-mult)) cubic-bezier(0.12, 1, 0.25, 1) both; }
+  #vs-stage.anim-clash-collide .vs-emblem     { animation: vsEmblemSlam calc(0.5s * var(--entry-mult)) calc(0.28s * var(--entry-mult)) cubic-bezier(0.18, 1.4, 0.32, 1) both; }
+  #vs-stage.anim-clash-collide .vs-plate      { animation: vsFadeUp calc(0.48s * var(--entry-mult)) calc(0.32s * var(--entry-mult)) ease-out both; }
+
+  #vs-stage.anim-cyber-glitch { animation: vsGlitchIn calc(0.64s * var(--entry-mult)) steps(4) both; }
+  #vs-stage.anim-cinema-pan .vs-side.left  { animation: vsPanL calc(0.95s * var(--entry-mult)) cubic-bezier(0.22, 1, 0.36, 1) both; }
+  #vs-stage.anim-cinema-pan .vs-side.right { animation: vsPanR calc(0.95s * var(--entry-mult)) cubic-bezier(0.22, 1, 0.36, 1) both; }
+  #vs-stage.anim-cinema-pan .vs-plate      { animation: vsSimpleFade calc(0.7s * var(--entry-mult)) calc(0.3s * var(--entry-mult)) ease both; }
+  #vs-stage.anim-wipe-iris                 { animation: vsIrisIn calc(0.72s * var(--entry-mult)) cubic-bezier(0.16, 1, 0.3, 1) both; }
+  #vs-stage.anim-fade                      { animation: vsSimpleFade calc(0.58s * var(--entry-mult)) ease both; }
+
+  @keyframes vsSlamLeft  { from { opacity: 0; transform: translate3d(-260px, 0, 0) scale(1.06); } to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); } }
+  @keyframes vsSlamRight { from { opacity: 0; transform: translate3d(260px, 0, 0) scale(1.06); }  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); } }
+  @keyframes vsPlateLeft  { from { opacity: 0; transform: translate3d(-120px, 24px, 0) scale(var(--plate-scale, 1)); } to { opacity: var(--plate-op, 0.96); transform: translate3d(0, 0, 0) scale(var(--plate-scale, 1)); } }
+  @keyframes vsPlateRight { from { opacity: 0; transform: translate3d(120px, 24px, 0) scale(var(--plate-scale, 1)); }  to { opacity: var(--plate-op, 0.96); transform: translate3d(0, 0, 0) scale(var(--plate-scale, 1)); } }
+  @keyframes vsEmblemSlam { 0% { opacity: 0; transform: translate(-50%, -50%) scale(calc(var(--emb-scale, 1) * 2.3)) rotate(-8deg); } 70% { opacity: 1; transform: translate(-50%, -50%) scale(calc(var(--emb-scale, 1) * 0.94)) rotate(1deg); } 100% { opacity: 1; transform: translate(-50%, -50%) scale(var(--emb-scale, 1)) rotate(0); } }
+  @keyframes vsTopDrop   { from { opacity: 0; transform: translate3d(0, -100%, 0) scale(var(--hdr-scale, 1)); } to { opacity: 1; transform: translate3d(0, 0, 0) scale(var(--hdr-scale, 1)); } }
+  @keyframes vsFadeUp    { from { opacity: 0; transform: translate3d(0, 48px, 0); } to { opacity: 1; transform: translate3d(0, 0, 0); } }
+  @keyframes vsZoomIn    { from { opacity: 0; transform: scale(1.24); } to { opacity: 1; transform: scale(1); } }
+  @keyframes vsSlashL    { from { opacity: 0; transform: translate3d(-320px, -120px, 0) skewX(-16deg); filter: brightness(1.8); } to { opacity: 1; transform: none; filter: none; } }
+  @keyframes vsSlashR    { from { opacity: 0; transform: translate3d(320px, 120px, 0) skewX(16deg); filter: brightness(1.8); } to { opacity: 1; transform: none; filter: none; } }
+  @keyframes vsDivDrop   { from { opacity: 0; transform: translateX(-50%) skewX(var(--div-tilt, 0deg)) scaleY(0); } to { opacity: 1; transform: translateX(-50%) skewX(var(--div-tilt, 0deg)) scaleY(1); } }
+  @keyframes vsDropDown  { from { opacity: 0; transform: translate3d(0, -220px, 0); } to { opacity: 1; transform: none; } }
+  @keyframes vsCollideL  { 0% { opacity: 0; transform: translate3d(-460px, 0, 0); } 65% { opacity: 1; transform: translate3d(34px, 0, 0); } 100% { opacity: 1; transform: none; } }
+  @keyframes vsCollideR  { 0% { opacity: 0; transform: translate3d(460px, 0, 0); } 65% { opacity: 1; transform: translate3d(-34px, 0, 0); } 100% { opacity: 1; transform: none; } }
+  @keyframes vsGlitchIn  { 0% { opacity: 0; filter: hue-rotate(110deg) contrast(2.2); transform: skewX(12deg); } 45% { opacity: 0.9; filter: hue-rotate(-50deg) contrast(1.5); transform: skewX(-6deg); } 100% { opacity: 1; filter: none; transform: none; } }
+  @keyframes vsPanL      { from { opacity: 0; transform: translate3d(-90px, 0, 0) scale(1.06); } to { opacity: 1; transform: none; } }
+  @keyframes vsPanR      { from { opacity: 0; transform: translate3d(90px, 0, 0) scale(1.06); } to { opacity: 1; transform: none; } }
+  @keyframes vsIrisIn    { from { clip-path: circle(0% at 50% 50%); opacity: 0.2; } to { clip-path: circle(120% at 50% 50%); opacity: 1; } }
+  @keyframes vsSimpleFade { from { opacity: 0; } to { opacity: 1; } }
+
+  /* =========================================================================
+     11. INTERACTIVE CLICK-TO-SELECT STUDIO OVERLAY (PREVIEW MODE ONLY!)
+     ========================================================================= */
+  body.interactive-edit .vs-hit {
+    pointer-events: auto !important;
+    cursor: pointer;
   }
-  #vs-stage[data-design="arcade-pop"]::before,
-  #vs-stage[data-design="arcade-pop"]::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    z-index: 10;
+  body.interactive-edit .vs-divider.vs-hit {
+    min-width: 44px;
+  }
+  body.interactive-edit .vs-hit:hover {
+    outline: 4px dashed rgba(56, 189, 248, 0.92);
+    outline-offset: 4px;
+  }
+  body.interactive-edit .vs-hit.vs-selected {
+    outline: 5px solid #00e5ff !important;
+    outline-offset: 5px;
+    box-shadow: 0 0 0 12px rgba(0, 229, 255, 0.22);
+  }
+  #vs-hover-pill {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    padding: 4px 10px;
+    border-radius: 99px;
+    background: rgba(8, 12, 24, 0.94);
+    border: 1.5px solid #38bdf8;
+    color: #e0f2fe;
+    font: 800 12px/1.2 'Barlow Condensed', 'Segoe UI', sans-serif;
+    letter-spacing: 0.05em;
     pointer-events: none;
-  }
-  #vs-stage[data-design="arcade-pop"]::before {
-    top: 0;
-    height: 68px;
-    background: #0a0b10;
-    clip-path: polygon(0 0, 100% 0, 100% 100%, 91% 100%, 88% 58%, 63% 58%, 60% 100%, 40% 100%, 37% 58%, 12% 58%, 9% 100%, 0 100%);
-    border-bottom: 5px solid #fff;
-  }
-  #vs-stage[data-design="arcade-pop"]::after {
-    bottom: 0;
-    height: 62px;
-    background: #0a0b10;
-    clip-path: polygon(0 0, 9% 0, 12% 45%, 37% 45%, 40% 0, 60% 0, 63% 45%, 88% 45%, 91% 0, 100% 0, 100% 100%, 0 100%);
-  }
-  #vs-stage[data-design="arcade-pop"] .vs-divider {
-    width: 26px;
-    background: #ffffff;
-    border-left: 3px solid #0a0b10;
-    border-right: 3px solid #0a0b10;
-  }
-  #vs-stage[data-design="arcade-pop"] .vs-divider::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='28' viewBox='0 0 20 28'%3E%3Cpath d='M5,9 L15,19 M15,9 L5,19' stroke='%230a0b10' stroke-width='3'/%3E%3C/svg%3E");
-    background-repeat: repeat-y;
-    background-position: center;
-  }
-  #vs-stage[data-design="arcade-pop"] .vs-plate {
-    background: linear-gradient(180deg, rgba(16, 15, 14, 0.96), rgba(6, 6, 8, 0.98));
-    border: 3px solid #000;
-    border-top: 4px solid rgba(255, 255, 255, 0.9);
-    border-radius: 6px;
-    box-shadow: 0 16px 0 rgba(0, 0, 0, 0.25), 0 24px 50px rgba(0, 0, 0, 0.65);
-  }
-  #vs-stage[data-design="arcade-pop"] .vs-plate.left { border-left: 10px solid #ffffff; }
-  #vs-stage[data-design="arcade-pop"] .vs-plate.right { border-right: 10px solid #ffffff; }
-  #vs-stage[data-design="arcade-pop"] .vs-top-header {
-    background: #0a0b10;
-    border-bottom: 4px solid #ffffff;
-    padding: 8px 66px 12px;
-  }
-
-  /* =========================================================================
-     DESIGN 2: TEKKEN 8 CINEMATIC CLASH (Obsidian + Molten Heat vs Electric Violet)
-     ========================================================================= */
-  #vs-stage[data-design="t8-clash"] .vs-bg-half.left {
-    width: 56%;
-    clip-path: polygon(0 0, 100% 0, 86% 100%, 0 100%);
-    background: radial-gradient(circle at 38% 42%, rgba(255, 115, 20, 0.68) 0%, rgba(145, 22, 8, 0.72) 42%, #0a080d 86%);
-  }
-  #vs-stage[data-design="t8-clash"] .vs-bg-half.right {
-    width: 56%;
-    clip-path: polygon(14% 0, 100% 0, 100% 100%, 0 100%);
-    background: radial-gradient(circle at 62% 42%, rgba(124, 58, 237, 0.72) 0%, rgba(28, 36, 125, 0.74) 44%, #080914 86%);
-  }
-  #vs-stage[data-design="t8-clash"] .vs-divider {
-    width: 10px;
-    transform: translateX(-50%) skewX(-8deg);
-    background: linear-gradient(180deg, #fff8c7, #ff9d1c 45%, #7c3aed 75%, #fff);
-    box-shadow: 0 0 36px rgba(255, 160, 40, 0.9), 0 0 60px rgba(124, 58, 237, 0.8);
-  }
-  #vs-stage[data-design="t8-clash"] .vs-pattern { opacity: 0.14; filter: invert(1); }
-  #vs-stage[data-design="t8-clash"] .vs-top-header {
-    background: linear-gradient(180deg, rgba(24, 18, 28, 0.96), rgba(10, 8, 14, 0.98));
-    border-bottom: 4px solid #ffae19;
-  }
-  #vs-stage[data-design="t8-clash"] .vs-plate {
-    background: linear-gradient(180deg, rgba(24, 20, 32, 0.94), rgba(10, 8, 15, 0.97));
-    border: 2px solid rgba(255, 215, 150, 0.35);
-    clip-path: polygon(22px 0, 100% 0, calc(100% - 22px) 100%, 0 100%);
-    padding: 16px 40px;
-  }
-  #vs-stage[data-design="t8-clash"] .vs-plate.left {
-    border-left: none;
-    border-bottom: 5px solid #ff8c1a;
-    box-shadow: 0 16px 46px rgba(255, 90, 20, 0.35);
-  }
-  #vs-stage[data-design="t8-clash"] .vs-plate.right {
-    border-right: none;
-    border-bottom: 5px solid #8b5cf6;
-    box-shadow: 0 16px 46px rgba(124, 58, 237, 0.35);
-  }
-  #vs-stage[data-design="t8-clash"] .vs-emblem-text {
-    background: linear-gradient(180deg, #fffbe0 10%, #ffbe26 52%, #e64500 95%);
-    -webkit-background-clip: text;
-    color: transparent;
-    -webkit-text-stroke: 4px #180804;
-    filter: drop-shadow(0 0 28px rgba(255, 140, 20, 0.85));
-  }
-
-  /* =========================================================================
-     DESIGN 3: TWT CHAMPIONSHIP BROADCAST (Carbon + Giant Flag Watermarks)
-     ========================================================================= */
-  #vs-stage[data-design="twt-clean"] .vs-bg-half.left {
-    background: linear-gradient(135deg, #1b1118 0%, #10131c 58%, #090b10 100%);
-  }
-  #vs-stage[data-design="twt-clean"] .vs-bg-half.right {
-    background: linear-gradient(225deg, #10192b 0%, #10131c 58%, #090b10 100%);
-  }
-  #vs-stage[data-design="twt-clean"] .vs-flag-wm { opacity: 0.24; }
-  #vs-stage[data-design="twt-clean"] .vs-pattern { opacity: 0.08; filter: invert(1); }
-  #vs-stage[data-design="twt-clean"] .vs-divider {
-    width: 4px;
-    background: linear-gradient(180deg, transparent 5%, rgba(255,255,255,0.45) 50%, transparent 95%);
-  }
-  #vs-stage[data-design="twt-clean"] .vs-top-header {
-    background: #d41634;
-    border-bottom: 4px solid #ffffff;
-  }
-  #vs-stage[data-design="twt-clean"] .vs-eyebrow { color: #ffe4e6; }
-  #vs-stage[data-design="twt-clean"] .vs-plate {
-    bottom: 148px;
-    background: rgba(14, 17, 26, 0.94);
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    border-top: 4px solid #f41f64;
-  }
-  #vs-stage[data-design="twt-clean"] .vs-plate.left { border-left: 8px solid #f41f64; border-top-color: #f41f64; }
-  #vs-stage[data-design="twt-clean"] .vs-plate.right { border-right: 8px solid #2474f5; border-top-color: #2474f5; }
-  #vs-stage[data-design="twt-clean"] .vs-emblem-wings { display: none; }
-  #vs-stage[data-design="twt-clean"] .vs-emblem-text {
-    font-size: 86px;
-    padding: 10px 26px;
-    background: #0d1018;
-    border: 3px solid rgba(255, 255, 255, 0.85);
-    border-radius: 10px;
-    -webkit-text-stroke: 0;
-  }
-
-  /* =========================================================================
-     DESIGN 4: PLAYER SPOTLIGHT CARDS (Profile Photos Front & Center!)
-     ========================================================================= */
-  #vs-stage[data-design="portrait-cards"] .vs-bg-half.left {
-    background: radial-gradient(circle at 35% 40%, rgba(255, 92, 40, 0.34), #0c0f18 72%);
-  }
-  #vs-stage[data-design="portrait-cards"] .vs-bg-half.right {
-    background: radial-gradient(circle at 65% 40%, rgba(59, 130, 246, 0.36), #0c0f18 72%);
-  }
-  #vs-stage[data-design="portrait-cards"] .vs-flag-wm { opacity: 0.16; }
-  #vs-stage[data-design="portrait-cards"] .vs-pattern { opacity: 0.1; filter: invert(1); }
-  #vs-stage[data-design="portrait-cards"] .vs-divider {
-    width: 3px;
-    background: linear-gradient(180deg, transparent, rgba(255,255,255,0.28), transparent);
-  }
-  #vs-stage[data-design="portrait-cards"] .vs-hero-avatar {
-    width: 470px;
-    height: 470px;
-    border-radius: 30px;
-    border-width: 5px;
-    border-color: var(--vs-p1);
-    box-shadow: 0 0 0 10px rgba(255, 255, 255, 0.06), 0 28px 65px rgba(0, 0, 0, 0.72);
-  }
-  #vs-stage[data-design="portrait-cards"] .vs-side.right .vs-hero-avatar {
-    border-color: var(--vs-p2);
-  }
-  #vs-stage[data-design="portrait-cards"] .vs-plate {
-    bottom: 152px;
-    border-radius: 16px;
-    background: rgba(13, 17, 28, 0.92);
-    backdrop-filter: blur(14px);
-  }
-
-  /* =========================================================================
-     DESIGN 5: CYBER MANGA HALFTONE (Vibrant Duotone Anime Fighting Energy)
-     ========================================================================= */
-  #vs-stage[data-design="cyber-neon"] .vs-bg-half.left {
-    width: 55%;
-    clip-path: polygon(0 0, 100% 0, 88% 100%, 0 100%);
-    background: linear-gradient(135deg, #ff006e 0%, #9b0047 68%, #28041c 100%);
-  }
-  #vs-stage[data-design="cyber-neon"] .vs-bg-half.right {
-    width: 55%;
-    clip-path: polygon(12% 0, 100% 0, 100% 100%, 0 100%);
-    background: linear-gradient(225deg, #00d4ff 0%, #0058b8 68%, #07122e 100%);
-  }
-  #vs-stage[data-design="cyber-neon"] .vs-divider {
-    width: 14px;
-    transform: translateX(-50%) skewX(-7deg);
-    background: #ffe600;
-    box-shadow: 0 0 28px rgba(255, 230, 0, 0.85);
-  }
-  #vs-stage[data-design="cyber-neon"] .vs-plate {
-    background: rgba(8, 6, 18, 0.95);
-    border: 3px solid #ffe600;
-    transform: skewX(-6deg);
-  }
-  #vs-stage[data-design="cyber-neon"] .vs-plate > * { transform: skewX(6deg); }
-  #vs-stage[data-design="cyber-neon"] .vs-top-header {
-    background: #0d071c;
-    border-bottom: 4px solid #ffe600;
-  }
-
-  /* =========================================================================
-     DESIGN 6: LIQUID FROSTED ESPORTS (Modern Translucent Glass)
-     ========================================================================= */
-  #vs-stage[data-design="glass-pro"] .vs-bg-half.left {
-    background: radial-gradient(circle at 28% 35%, rgba(56, 189, 248, 0.28), rgba(10, 14, 24, 0.88) 70%);
-  }
-  #vs-stage[data-design="glass-pro"] .vs-bg-half.right {
-    background: radial-gradient(circle at 72% 35%, rgba(251, 113, 133, 0.28), rgba(10, 14, 24, 0.88) 70%);
-  }
-  #vs-stage[data-design="glass-pro"] .vs-pattern { opacity: 0.08; filter: invert(1); }
-  #vs-stage[data-design="glass-pro"] .vs-divider {
-    width: 2px;
-    background: linear-gradient(180deg, transparent, rgba(255,255,255,0.35), transparent);
-  }
-  #vs-stage[data-design="glass-pro"] .vs-plate {
-    border-radius: 18px;
-    background: rgba(15, 22, 36, 0.68);
-    backdrop-filter: blur(20px) saturate(145%);
-    border: 1.5px solid rgba(255, 255, 255, 0.24);
-    border-left-width: 6px;
-  }
-  #vs-stage[data-design="glass-pro"] .vs-plate.right { border-left-width: 1.5px; border-right-width: 6px; }
-  #vs-stage[data-design="glass-pro"] .vs-avatar-badge { border-radius: 50%; }
-  #vs-stage[data-design="glass-pro"] .vs-top-header {
-    border-radius: 0 0 22px 22px;
-    clip-path: none;
-    background: rgba(15, 22, 36, 0.78);
-    backdrop-filter: blur(18px);
-    border: 1.5px solid rgba(255, 255, 255, 0.2);
-    border-top: none;
-  }
-
-  /* Custom Background Color Mode & Transparent Mode */
-  #vs-stage[data-bg-mode="custom"] .vs-bg-half.left {
-    background: radial-gradient(circle at 42% 45%, var(--vs-p1) 0%, var(--vs-bg1) 64%, var(--vs-bg2) 100%) !important;
-  }
-  #vs-stage[data-bg-mode="custom"] .vs-bg-half.right {
-    background: radial-gradient(circle at 58% 45%, var(--vs-p2) 0%, var(--vs-bg1) 64%, var(--vs-bg2) 100%) !important;
-  }
-  #vs-stage[data-bg-mode="transparent"] .vs-bg,
-  #vs-stage[data-bg-mode="transparent"] .vs-pattern {
-    display: none !important;
-  }
-
-  /* =========================================================================
-     DRAMATIC OBS SCENE-ENTRY CHOREOGRAPHY
-     ========================================================================= */
-  #vs-stage.anim-slam-split .vs-side.left { animation: vsSlamLeft 0.68s cubic-bezier(0.16, 1, 0.3, 1) both; }
-  #vs-stage.anim-slam-split .vs-side.right { animation: vsSlamRight 0.68s cubic-bezier(0.16, 1, 0.3, 1) both; }
-  #vs-stage.anim-slam-split .vs-plate.left { animation: vsPlateLeft 0.58s 0.18s cubic-bezier(0.16, 1, 0.3, 1) both; }
-  #vs-stage.anim-slam-split .vs-plate.right { animation: vsPlateRight 0.58s 0.18s cubic-bezier(0.16, 1, 0.3, 1) both; }
-  #vs-stage.anim-slam-split .vs-emblem { animation: vsEmblemSlam 0.62s 0.24s cubic-bezier(0.18, 1.28, 0.32, 1) both; }
-  #vs-stage.anim-slam-split .vs-top-header { animation: vsTopDrop 0.52s 0.08s cubic-bezier(0.16, 1, 0.3, 1) both; }
-
-  #vs-stage.anim-curtain .vs-bg-half.left { animation: vsSlamLeft 0.6s ease-out both; }
-  #vs-stage.anim-curtain .vs-bg-half.right { animation: vsSlamRight 0.6s ease-out both; }
-  #vs-stage.anim-curtain .vs-side { animation: vsFadeUp 0.62s 0.16s cubic-bezier(0.16, 1, 0.3, 1) both; }
-  #vs-stage.anim-curtain .vs-plate { animation: vsFadeUp 0.54s 0.26s cubic-bezier(0.16, 1, 0.3, 1) both; }
-  #vs-stage.anim-curtain .vs-emblem { animation: vsEmblemSlam 0.55s 0.3s ease-out both; }
-
-  #vs-stage.anim-zoom-burst .vs-side { animation: vsZoomIn 0.64s cubic-bezier(0.16, 1, 0.3, 1) both; }
-  #vs-stage.anim-zoom-burst .vs-emblem { animation: vsEmblemSlam 0.58s 0.16s cubic-bezier(0.18, 1.35, 0.32, 1) both; }
-  #vs-stage.anim-zoom-burst .vs-plate { animation: vsFadeUp 0.55s 0.22s ease-out both; }
-
-  #vs-stage.anim-fade { animation: vsSimpleFade 0.55s ease both; }
-
-  @keyframes vsSlamLeft {
-    from { opacity: 0; transform: translate3d(-240px, 0, 0) scale(1.06); }
-    to   { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
-  }
-  @keyframes vsSlamRight {
-    from { opacity: 0; transform: translate3d(240px, 0, 0) scale(1.06); }
-    to   { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
-  }
-  @keyframes vsPlateLeft {
-    from { opacity: 0; transform: translate3d(-120px, 24px, 0); }
-    to   { opacity: 1; transform: translate3d(0, 0, 0); }
-  }
-  @keyframes vsPlateRight {
-    from { opacity: 0; transform: translate3d(120px, 24px, 0); }
-    to   { opacity: 1; transform: translate3d(0, 0, 0); }
-  }
-  @keyframes vsEmblemSlam {
-    0%   { opacity: 0; transform: translate(-50%, -50%) scale(2.3) rotate(-8deg); }
-    70%  { opacity: 1; transform: translate(-50%, -50%) scale(0.94) rotate(1deg); }
-    100% { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0); }
-  }
-  @keyframes vsTopDrop {
-    from { opacity: 0; transform: translate3d(0, -100%, 0); }
-    to   { opacity: 1; transform: translate3d(0, 0, 0); }
-  }
-  @keyframes vsFadeUp {
-    from { opacity: 0; transform: translate3d(0, 46px, 0); }
-    to   { opacity: 1; transform: translate3d(0, 0, 0); }
-  }
-  @keyframes vsZoomIn {
-    from { opacity: 0; transform: scale(1.22); }
-    to   { opacity: 1; transform: scale(1); }
-  }
-  @keyframes vsSimpleFade {
-    from { opacity: 0; }
-    to   { opacity: 1; }
+    box-shadow: 0 6px 18px rgba(0,0,0,0.7);
+    white-space: nowrap;
   }
 </style>
 </head>
 <body>
+<div id="vs-hover-pill"></div>
 <div id="vs-scaler">
-  <div id="vs-stage" data-design="arcade-pop" data-bg-mode="theme">
+  <div id="vs-stage" data-design="arcade-pop" data-bg-mode="theme" data-split="vertical" data-frame="arcade-teeth" data-emblem="winged" data-plate="arcade-box" data-header="trapezoid" data-ambient="none">
     <!-- Background Halves & Pattern -->
-    <div class="vs-bg">
+    <div class="vs-bg vs-hit" data-vs-el="backdrop" data-vs-label="🖼️ Backdrop &amp; Pattern">
       <div class="vs-bg-half left"></div>
       <div class="vs-bg-half right"></div>
     </div>
-    <div class="vs-pattern" id="vs-pattern" data-pat="symbols"></div>
+    <div class="vs-pattern-wrap">
+      <div class="vs-pattern" id="vs-pattern" data-pat="symbols" data-pat-dir="diag-dr" data-light="1"></div>
+    </div>
+    <div class="vs-ambient"></div>
 
-    <!-- Subtle Giant Flag Watermarks -->
+    <!-- Giant Flag Watermarks -->
     <div class="vs-flag-wm left" id="p1-flag-wm"></div>
     <div class="vs-flag-wm right" id="p2-flag-wm"></div>
 
-    <!-- Center Divider -->
-    <div class="vs-divider"></div>
+    <!-- Animated Center Divider -->
+    <div class="vs-divider vs-hit" id="vs-divider" data-divider="x-tape" data-div-anim="scroll-down" data-vs-el="divider" data-vs-label="⚡ Center Divider (Scroll &amp; Style)">
+      <div class="vs-divider-track" id="vs-divider-track"></div>
+    </div>
 
-    <!-- Top Architectural Header -->
+    <!-- Architectural Frame -->
+    <div class="vs-frame-deco"></div>
+
+    <!-- Top Header -->
     <div class="vs-frame-top">
-      <div class="vs-top-header">
+      <div class="vs-top-header vs-hit" id="vs-top-header" data-vs-el="header" data-vs-label="🏆 Top Header (Drag Y / Click to Edit)">
         <div class="vs-eyebrow" id="vs-eyebrow">UP NEXT</div>
         <div class="vs-round-row">
           <div class="vs-round-text" id="vs-round">ROUND 1</div>
@@ -894,36 +1251,43 @@
     </div>
 
     <!-- P1 Character & Hero Portrait Stage -->
-    <div class="vs-side left" id="p1-side">
+    <div class="vs-side left vs-hit" id="p1-side" data-vs-el="p1-char" data-vs-label="🧑 P1 Character (Drag X/Y · Click to Edit)">
       <div class="vs-char-wrap">
-        <img class="vs-char-img" id="p1-char-img" alt="" crossorigin="anonymous" />
+        <div class="vs-char-idle">
+          <img class="vs-char-img" id="p1-char-img" alt="" crossorigin="anonymous" />
+        </div>
       </div>
       <div class="vs-hero-avatar" id="p1-hero-avatar"><img id="p1-hero-avatar-img" alt="" crossorigin="anonymous" /></div>
       <div class="vs-fallback-emblem" id="p1-fallback">P1</div>
     </div>
 
     <!-- P2 Character & Hero Portrait Stage -->
-    <div class="vs-side right" id="p2-side">
+    <div class="vs-side right vs-hit" id="p2-side" data-vs-el="p2-char" data-vs-label="🧑 P2 Character (Drag X/Y · Click to Edit)">
       <div class="vs-char-wrap">
-        <img class="vs-char-img" id="p2-char-img" alt="" crossorigin="anonymous" />
+        <div class="vs-char-idle">
+          <img class="vs-char-img" id="p2-char-img" alt="" crossorigin="anonymous" />
+        </div>
       </div>
       <div class="vs-hero-avatar" id="p2-hero-avatar"><img id="p2-hero-avatar-img" alt="" crossorigin="anonymous" /></div>
       <div class="vs-fallback-emblem" id="p2-fallback">P2</div>
     </div>
 
     <!-- Center VS Impact Emblem -->
-    <div class="vs-emblem" id="vs-emblem">
-      <div class="vs-emblem-wings left"></div>
-      <div class="vs-emblem-text">VS</div>
-      <div class="vs-emblem-wings right"></div>
+    <div class="vs-emblem vs-hit" id="vs-emblem" data-vs-el="emblem" data-vs-label="⚔️ VS Emblem (Drag Y · Click to Edit)">
+      <div class="vs-emblem-inner">
+        <div class="vs-emblem-shape"></div>
+        <div class="vs-emblem-wings left"></div>
+        <div class="vs-emblem-text" id="vs-emblem-text">VS</div>
+        <div class="vs-emblem-wings right"></div>
+      </div>
     </div>
 
     <!-- P1 Nameplate -->
-    <div class="vs-plate left" id="p1-plate">
+    <div class="vs-plate left vs-hit" id="p1-plate" data-vs-el="p1-plate" data-vs-label="🏷️ P1 Plate &amp; Flags (Drag Y · Click to Edit)">
       <div class="vs-avatar-badge" id="p1-avatar-badge"><img id="p1-avatar-badge-img" alt="" crossorigin="anonymous" /></div>
       <div class="vs-plate-body">
         <div class="vs-meta-row">
-          <span class="vs-flags" id="p1-flags"></span>
+          <span class="vs-flags vs-hit" id="p1-flags" data-vs-el="flags" data-vs-label="🏳️ Flags Mode (Country / Region Only)"></span>
           <span class="vs-sponsor" id="p1-sponsor"></span>
           <span class="vs-bracket" id="p1-bracket"></span>
         </div>
@@ -934,13 +1298,13 @@
     </div>
 
     <!-- P2 Nameplate -->
-    <div class="vs-plate right" id="p2-plate">
+    <div class="vs-plate right vs-hit" id="p2-plate" data-vs-el="p2-plate" data-vs-label="🏷️ P2 Plate &amp; Flags (Drag Y · Click to Edit)">
       <div class="vs-avatar-badge" id="p2-avatar-badge"><img id="p2-avatar-badge-img" alt="" crossorigin="anonymous" /></div>
       <div class="vs-plate-body">
         <div class="vs-meta-row">
           <span class="vs-bracket" id="p2-bracket"></span>
           <span class="vs-sponsor" id="p2-sponsor"></span>
-          <span class="vs-flags" id="p2-flags"></span>
+          <span class="vs-flags vs-hit" id="p2-flags" data-vs-el="flags" data-vs-label="🏳️ Flags Mode (Country / Region Only)"></span>
         </div>
         <div class="vs-player-name" id="p2-name">PLAYER 2</div>
         <div class="vs-char-sub" id="p2-char-sub"></div>
@@ -949,35 +1313,68 @@
     </div>
 
     <!-- Head-to-Head Pill -->
-    <div class="vs-h2h-pill" id="vs-h2h-pill">
+    <div class="vs-h2h-pill vs-hit" id="vs-h2h-pill" data-vs-el="h2h" data-vs-label="📊 Head-to-Head Pill (Drag Y · Click to Edit)">
       <span>HEAD-TO-HEAD</span>
       <b id="vs-h2h-score">0 - 0</b>
     </div>
 
     <!-- Tournament Brand Logo + Event Subtitle -->
-    <div class="vs-logo-slot" id="vs-logo-slot">
+    <div class="vs-logo-slot vs-hit" id="vs-logo-slot" data-pos="bottom-left" data-vs-el="logo" data-vs-label="🏷️ Event Logo (Click to Edit)">
       <img id="vs-logo-img" alt="" crossorigin="anonymous" />
     </div>
-    <div class="vs-subtitle-slot" id="vs-subtitle"></div>
+    <div class="vs-subtitle-slot vs-hit" id="vs-subtitle" data-vs-el="subtitle" data-vs-label="📝 Event Footer Text (Click to Edit)"></div>
   </div>
 </div>
 
 <script src="flags.js"></script>
+<script src="vs-designs.js"></script>
 <script>
 (() => {
   const FLAGS_MAP = window.FGC_FLAGS || {};
+  const DESIGN_MAP = window.FGC_VS_DESIGN_MAP || {};
+  const FALLBACK_DESIGN = (window.FGC_VS_DESIGNS && window.FGC_VS_DESIGNS[0]) || {
+    id: 'arcade-pop', split: 'vertical', frame: 'arcade-teeth', divider: 'x-tape', divAnim: 'scroll-down', divW: 28, divTilt: 0,
+    emblem: 'winged', embAnim: 'pulse', plate: 'arcade-box', plateBottom: 176, header: 'trapezoid', pat: 'symbols', patOp: 22, wmOp: 0,
+    ambient: 'none', font: 'Russo One', lightBg: true, bgLeft: '#f5b800', bgRight: '#f5b800', p1: '#ff3b1f', p2: '#1d4ed8',
+    accent: '#ffd400', divColor: '#ffffff', plateBg: 'rgba(10,10,14,0.96)', plateText: '#ffffff',
+    headerBg: '#0a0b10', headerText: '#ffffff', frameColor: '#0a0b10', frameAccent: '#ffffff'
+  };
+  const FONT_STACKS = {
+    'Barlow Condensed': `'Barlow Condensed', 'Bahnschrift', sans-serif`,
+    'Chakra Petch':     `'Chakra Petch', 'Bahnschrift', sans-serif`,
+    'Orbitron':         `'Orbitron', 'Chakra Petch', sans-serif`,
+    'Teko':             `'Teko', 'Barlow Condensed', sans-serif`,
+    'Russo One':        `'Russo One', 'Impact', sans-serif`,
+    'Oswald':           `'Oswald', 'Barlow Condensed', sans-serif`,
+    'Bebas Neue':       `'Bebas Neue', 'Impact', sans-serif`,
+    'Anton':            `'Anton', 'Impact', sans-serif`,
+    'Exo 2':            `'Exo 2', 'Segoe UI', sans-serif`,
+    'Black Ops One':    `'Black Ops One', 'Impact', sans-serif`,
+    'Montserrat':       `'Montserrat', 'Segoe UI', sans-serif`
+  };
+  const ENTRY_CLASSES = [
+    'anim-slam-split', 'anim-curtain', 'anim-zoom-burst', 'anim-diag-slash',
+    'anim-shatter-drop', 'anim-clash-collide', 'anim-cyber-glitch', 'anim-cinema-pan',
+    'anim-wipe-iris', 'anim-fade'
+  ];
+
   const qs = new URLSearchParams(location.search);
   const isPreview = qs.has('preview');
   const isHttp = location.protocol === 'http:' || location.protocol === 'https:';
   const $ = (id) => document.getElementById(id);
 
+  let currentScale = 1;
+  let interactiveEdit = isPreview;
+  let dragEnabled = isPreview;
+  let selectedElement = '';
+
   let rescalePreview = () => {};
   if (isPreview) {
-    document.body.classList.add('preview-mode');
+    document.body.classList.add('preview-mode', 'interactive-edit');
     rescalePreview = () => {
       if (!window.innerWidth || !window.innerHeight) return;
-      const s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
-      $('vs-scaler').style.transform = `scale(${s})`;
+      currentScale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+      $('vs-scaler').style.transform = `scale(${currentScale})`;
     };
     window.addEventListener('resize', rescalePreview);
     rescalePreview();
@@ -991,79 +1388,58 @@
   function norm(s) {
     return String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
   }
-
   function resolveAvatarSrc(raw) {
     const u = String(raw || '').trim();
     if (!u) return '';
     if (u.startsWith('/media/') || u.startsWith('data:')) return u;
-    if (/^https?:\/\//i.test(u) && isHttp) {
-      return `/api/avatar-proxy?url=${encodeURIComponent(u)}`;
-    }
+    if (/^https?:\/\//i.test(u) && isHttp) return `/api/avatar-proxy?url=${encodeURIComponent(u)}`;
     return u;
   }
-
   function buildCharRenderUrl(game, pack, charName) {
     if (!charName || !String(charName).trim() || !isHttp) return '';
     return `/api/assets/render?game=${encodeURIComponent(game || 'tekken8')}&pack=${encodeURIComponent(pack || 'full')}&char=${encodeURIComponent(charName.trim())}`;
   }
-
   function getActiveMatchData(st) {
     const vs = st.vs || {};
     if (vs.source === 'next' && vs.nextMatch?.p1?.name) {
-      return {
-        round: vs.nextMatch.roundText || vs.nextMatch.round || st.round || 'UP NEXT',
-        format: st.format || 'FT3',
-        p1: vs.nextMatch.p1,
-        p2: vs.nextMatch.p2
-      };
+      return { round: vs.nextMatch.roundText || vs.nextMatch.round || st.round || 'UP NEXT', format: st.format || 'FT3', p1: vs.nextMatch.p1, p2: vs.nextMatch.p2 };
     }
     if (vs.source === 'custom' && vs.customMatch) {
-      return {
-        round: vs.customMatch.round || 'GRAND FINALS',
-        format: vs.customMatch.format ?? st.format ?? 'FT3',
-        p1: vs.customMatch.p1 || st.p1,
-        p2: vs.customMatch.p2 || st.p2
-      };
+      return { round: vs.customMatch.round || 'GRAND FINALS', format: vs.customMatch.format ?? st.format ?? 'FT3', p1: vs.customMatch.p1 || st.p1, p2: vs.customMatch.p2 || st.p2 };
     }
-    return {
-      round: st.round || 'ROUND 1',
-      format: st.format || '',
-      p1: st.p1 || {},
-      p2: st.p2 || {}
-    };
+    return { round: st.round || 'ROUND 1', format: st.format || '', p1: st.p1 || {}, p2: st.p2 || {} };
   }
-
   function computeH2H(nameA, nameB) {
-    const a = norm(nameA);
-    const b = norm(nameB);
+    const a = norm(nameA), b = norm(nameB);
     if (!a || !b || a === b) return { winsA: 0, winsB: 0, total: 0 };
     let winsA = 0, winsB = 0;
     for (const h of historyDb) {
-      const p1 = norm(h.p1?.name);
-      const p2 = norm(h.p2?.name);
-      if (p1 === a && p2 === b) {
-        if (h.winnerSide === 'p1') winsA++; else winsB++;
-      } else if (p1 === b && p2 === a) {
-        if (h.winnerSide === 'p1') winsB++; else winsA++;
-      }
+      const p1 = norm(h.p1?.name), p2 = norm(h.p2?.name);
+      if (p1 === a && p2 === b) { if (h.winnerSide === 'p1') winsA++; else winsB++; }
+      else if (p1 === b && p2 === a) { if (h.winnerSide === 'p1') winsB++; else winsA++; }
     }
     return { winsA, winsB, total: winsA + winsB };
   }
 
-  function renderSideFlags(containerId, wmId, player, showFlags) {
+  function resolvePlayerFlags(player, vs) {
+    const fMode = vs.flagMode || (vs.showFlags === false ? 'none' : 'both');
+    if (fMode === 'none') return [];
+    const wantCountry = fMode === 'both' || fMode === 'country';
+    const wantRegion = fMode === 'both' || fMode === 'region';
+    const cCode = wantCountry ? String(player.flag || '').toUpperCase().trim() : '';
+    let rCode = wantRegion ? String(player.region || '').toUpperCase().trim() : '';
+    if (cCode && rCode && cCode === rCode) rCode = '';
+    const f1 = cCode && FLAGS_MAP[cCode] ? FLAGS_MAP[cCode] : null;
+    const f2 = rCode && FLAGS_MAP[rCode] ? FLAGS_MAP[rCode] : null;
+    return [f1, f2].filter(Boolean);
+  }
+
+  function renderSideFlags(containerId, wmId, player, vs) {
     const cont = $(containerId);
     const wm = $(wmId);
-    if (!showFlags) {
-      cont.innerHTML = '';
-      wm.innerHTML = '';
-      return;
-    }
-    const f1 = player.flag && FLAGS_MAP[String(player.flag).toUpperCase()] ? FLAGS_MAP[String(player.flag).toUpperCase()] : null;
-    const f2 = player.region && FLAGS_MAP[String(player.region).toUpperCase()] && player.region !== player.flag
-      ? FLAGS_MAP[String(player.region).toUpperCase()] : null;
-    const list = [f1, f2].filter(Boolean);
+    const list = resolvePlayerFlags(player, vs);
     cont.innerHTML = list.map(f => `<span class="vs-flag-box">${f.svg}</span>`).join('');
-    wm.innerHTML = (f1 || f2) ? (f1 || f2).svg : '';
+    wm.innerHTML = list[0] ? list[0].svg : '';
   }
 
   function updateSideVisuals(side, player, vs) {
@@ -1078,9 +1454,7 @@
     const charName = String(player.character || '').trim();
     const charUrl = buildCharRenderUrl(vs.game || 'tekken8', vs.pack || 'full', charName);
     const avUrl = resolveAvatarSrc(player.avatar);
-    const avMode = vs.design === 'portrait-cards' && vs.avatarMode === 'badge'
-      ? 'portrait-hero'
-      : (vs.avatarMode || 'hero-fallback');
+    const avMode = vs.design === 'portrait-cards' && vs.avatarMode === 'badge' ? 'portrait-hero' : (vs.avatarMode || 'hero-fallback');
 
     const applyAvatarVisibility = () => {
       const hasCharLoaded = Boolean(charUrl && charImg.classList.contains('loaded'));
@@ -1091,27 +1465,18 @@
         (vs.design === 'portrait-cards' && avMode !== 'off')
       );
       const showBadgeAv = hasAv && !showHeroAv && (avMode === 'badge' || avMode === 'hero-fallback');
-
       heroAvBox.classList.toggle('active', showHeroAv);
       sideEl.classList.toggle('has-hero-avatar', showHeroAv);
       badgeAvBox.classList.toggle('active', showBadgeAv);
       fallbackEl.classList.toggle('active', !hasCharLoaded && !showHeroAv);
     };
 
-    // Update avatar image URLs
     const avKey = `${side}Av`;
     if (lastImgSrc[avKey] !== avUrl) {
       lastImgSrc[avKey] = avUrl;
-      if (avUrl) {
-        heroAvImg.src = avUrl;
-        badgeAvImg.src = avUrl;
-      } else {
-        heroAvImg.removeAttribute('src');
-        badgeAvImg.removeAttribute('src');
-      }
+      if (avUrl) { heroAvImg.src = avUrl; badgeAvImg.src = avUrl; }
+      else { heroAvImg.removeAttribute('src'); badgeAvImg.removeAttribute('src'); }
     }
-
-    // Update character render image URL
     const chKey = `${side}Char`;
     if (lastImgSrc[chKey] !== charUrl) {
       lastImgSrc[chKey] = charUrl;
@@ -1124,18 +1489,25 @@
         charImg.removeAttribute('src');
       }
     }
-
-    // Monogram fallback text
-    const initials = (String(player.name || side.toUpperCase()).trim().slice(0, 2) || side.toUpperCase()).toUpperCase();
-    fallbackEl.textContent = initials;
+    fallbackEl.textContent = (String(player.name || side.toUpperCase()).trim().slice(0, 2) || side.toUpperCase()).toUpperCase();
     applyAvatarVisibility();
   }
 
   function triggerEntryAnim(animName) {
     const stage = $('vs-stage');
-    stage.classList.remove('anim-slam-split', 'anim-curtain', 'anim-zoom-burst', 'anim-fade');
+    stage.classList.remove(...ENTRY_CLASSES);
     void stage.offsetWidth;
-    stage.classList.add(`anim-${animName || 'slam-split'}`);
+    const cls = `anim-${animName || 'slam-split'}`;
+    stage.classList.add(ENTRY_CLASSES.includes(cls) ? cls : 'anim-slam-split');
+  }
+
+  function speedToDuration(speed0to100, slowSec, fastSec) {
+    const s = Math.max(0, Math.min(100, Number(speed0to100 ?? 45)));
+    if (s === 0) return { paused: true, dur: `${slowSec}s` };
+    // Exponential curve so both very slow and very fast feel natural
+    const t = s / 100;
+    const sec = slowSec * Math.pow(fastSec / slowSec, t);
+    return { paused: false, dur: `${sec.toFixed(2)}s` };
   }
 
   function render(st) {
@@ -1144,23 +1516,121 @@
     const vs = st.vs || {};
     const stage = $('vs-stage');
     const root = document.documentElement;
+    const d = DESIGN_MAP[vs.design] || FALLBACK_DESIGN;
+
+    // Resolve each visual axis (user override > active design default)
+    const bgMode = vs.bgMode || 'theme';
+    const effPat = (vs.pattern && vs.pattern !== 'theme') ? vs.pattern : (d.pat || 'symbols');
+    const effFrame = (vs.frameStyle && vs.frameStyle !== 'theme') ? vs.frameStyle : (d.frame || 'none');
+    const effHeader = (vs.headerStyle && vs.headerStyle !== 'theme') ? vs.headerStyle : (d.header || 'trapezoid');
+    const effDiv = (vs.dividerStyle && vs.dividerStyle !== 'theme') ? vs.dividerStyle : (d.divider || 'x-tape');
+    const effDivAnim = (vs.dividerAnim && vs.dividerAnim !== 'theme') ? vs.dividerAnim : (d.divAnim || 'scroll-down');
+    const effEmblem = (vs.emblemStyle && vs.emblemStyle !== 'theme') ? vs.emblemStyle : (d.emblem || 'winged');
+    const effEmbAnim = (vs.emblemAnim && vs.emblemAnim !== 'theme') ? vs.emblemAnim : (d.embAnim || 'none');
+    const effPlate = (vs.plateStyle && vs.plateStyle !== 'theme') ? vs.plateStyle : (d.plate || 'arcade-box');
+    const effAmbient = (vs.ambientAnim && vs.ambientAnim !== 'theme') ? vs.ambientAnim : (d.ambient || 'none');
+    const effFont = (vs.fontDisplay && vs.fontDisplay !== 'theme') ? vs.fontDisplay : (d.font || 'Russo One');
 
     stage.classList.toggle('is-hidden', vs.visible === false);
-    stage.dataset.design = vs.design || 'arcade-pop';
-    stage.dataset.bgMode = vs.bgMode || 'theme';
-    $('vs-pattern').dataset.pat = vs.pattern || 'symbols';
+    stage.dataset.design = d.id;
+    stage.dataset.bgMode = bgMode;
+    stage.dataset.split = d.split || 'vertical';
+    stage.dataset.frame = effFrame;
+    stage.dataset.header = effHeader;
+    stage.dataset.emblem = effEmblem;
+    stage.dataset.embAnim = effEmbAnim;
+    stage.dataset.plate = effPlate;
+    stage.dataset.ambient = effAmbient;
+    stage.dataset.charIdle = vs.charIdleAnim || 'none';
 
+    // Theme Palette + Custom Overrides
+    root.style.setProperty('--vs-bg-l', d.bgLeft);
+    root.style.setProperty('--vs-bg-r', d.bgRight);
     root.style.setProperty('--vs-bg1', vs.bgColor1 || '#f5b800');
     root.style.setProperty('--vs-bg2', vs.bgColor2 || '#10131e');
-    root.style.setProperty('--vs-p1', vs.p1Color || '#ff512f');
-    root.style.setProperty('--vs-p2', vs.p2Color || '#2563eb');
+    root.style.setProperty('--vs-p1', bgMode === 'custom' ? (vs.p1Color || d.p1) : d.p1);
+    root.style.setProperty('--vs-p2', bgMode === 'custom' ? (vs.p2Color || d.p2) : d.p2);
+    root.style.setProperty('--vs-accent', (vs.accentColor && vs.accentColor.trim()) ? vs.accentColor : d.accent);
+    root.style.setProperty('--vs-div-color', (vs.dividerColor && vs.dividerColor.trim()) ? vs.dividerColor : d.divColor);
+    root.style.setProperty('--vs-plate-bg', d.plateBg);
+    root.style.setProperty('--vs-plate-text', d.plateText);
+    root.style.setProperty('--vs-header-bg', d.headerBg);
+    root.style.setProperty('--vs-header-text', d.headerText);
+    root.style.setProperty('--vs-frame-color', d.frameColor);
+    root.style.setProperty('--vs-frame-accent', d.frameAccent);
+    root.style.setProperty('--vs-font-display', FONT_STACKS[effFont] || FONT_STACKS['Russo One']);
+
+    // Pattern Engine (Speed, Direction, Opacity, Scale)
+    const patEl = $('vs-pattern');
+    patEl.dataset.pat = effPat;
+    patEl.dataset.patDir = vs.patternDir || 'diag-dr';
+    patEl.dataset.light = d.lightBg ? '1' : '0';
+    const patTiming = speedToDuration(vs.patternSpeed ?? 40, 60, 2.2);
+    patEl.classList.toggle('paused', patTiming.paused);
+    root.style.setProperty('--pat-dur', patTiming.dur);
+    const patOpVal = (typeof vs.patternOpacity === 'number' && vs.patternOpacity >= 0) ? vs.patternOpacity : (d.patOp ?? 18);
+    root.style.setProperty('--pat-op', (patOpVal / 100).toFixed(2));
+    root.style.setProperty('--pat-scale', (Number(vs.patternScale ?? 100) / 100).toFixed(2));
+
+    // Flag Watermark Opacity
+    const wmOpVal = (typeof vs.flagWatermarkOpacity === 'number' && vs.flagWatermarkOpacity >= 0) ? vs.flagWatermarkOpacity : (d.wmOp ?? 0);
+    root.style.setProperty('--wm-op', (wmOpVal / 100).toFixed(2));
+
+    // Animated Center Divider Engine
+    const divEl = $('vs-divider');
+    const divTrack = $('vs-divider-track');
+    divEl.dataset.divider = effDiv;
+    divEl.dataset.divAnim = effDivAnim;
+    const divTiming = speedToDuration(vs.dividerSpeed ?? 45, 20, 0.75);
+    divEl.classList.toggle('paused', divTiming.paused || effDivAnim === 'static');
+    root.style.setProperty('--div-dur', divTiming.dur);
+    const divW = Number(vs.dividerWidth) > 0 ? Number(vs.dividerWidth) : (d.divW ?? 24);
+    root.style.setProperty('--div-w', `${divW}px`);
+    const divTilt = (vs.dividerTilt !== null && vs.dividerTilt !== undefined && vs.dividerTilt !== '') ? Number(vs.dividerTilt) : (d.divTilt ?? 0);
+    root.style.setProperty('--div-tilt', `${divTilt}deg`);
+    if (effDiv === 'ticker-vs') {
+      const txt = `${(vs.emblemText || 'VS').toUpperCase()}  ·  FIGHT  ·  `;
+      if (divTrack.dataset.tickerTxt !== txt) {
+        divTrack.dataset.tickerTxt = txt;
+        divTrack.textContent = txt.repeat(26);
+      }
+    } else if (divTrack.textContent) {
+      divTrack.textContent = '';
+      delete divTrack.dataset.tickerTxt;
+    }
+
+    // Millimeter Geometry Variables
+    root.style.setProperty('--emb-scale', (Number(vs.emblemScale ?? 100) / 100).toFixed(2));
+    root.style.setProperty('--emb-y', `${Number(vs.emblemOffsetY ?? 0)}px`);
+    $('vs-emblem-text').textContent = (vs.emblemText && String(vs.emblemText).trim()) ? String(vs.emblemText).trim() : 'VS';
+
+    root.style.setProperty('--hdr-scale', (Number(vs.headerScale ?? 100) / 100).toFixed(2));
+    root.style.setProperty('--hdr-y', `${Number(vs.headerOffsetY ?? 0)}px`);
+
+    const pBot = (typeof vs.plateBottom === 'number' && vs.plateBottom >= 0) ? vs.plateBottom : (d.plateBottom ?? 168);
+    root.style.setProperty('--plate-bottom', `${pBot}px`);
+    root.style.setProperty('--plate-w', `${Number(vs.plateWidth ?? 790)}px`);
+    root.style.setProperty('--plate-scale', (Number(vs.plateScale ?? 100) / 100).toFixed(2));
+    root.style.setProperty('--plate-op', (Number(vs.plateOpacity ?? 96) / 100).toFixed(2));
+    root.style.setProperty('--name-scale', (Number(vs.nameScale ?? 100) / 100).toFixed(2));
+    root.style.setProperty('--flag-scale', (Number(vs.flagSize ?? 100) / 100).toFixed(2));
+    root.style.setProperty('--logo-scale', (Number(vs.logoScale ?? 100) / 100).toFixed(2));
+    root.style.setProperty('--h2h-bottom', `${Number(vs.h2hOffsetY ?? 84)}px`);
+
     root.style.setProperty('--p1-zoom', String((Number(vs.p1Zoom ?? 100)) / 100));
     root.style.setProperty('--p2-zoom', String((Number(vs.p2Zoom ?? 100)) / 100));
+    root.style.setProperty('--p1-x', `${Number(vs.p1OffsetX ?? 0)}px`);
+    root.style.setProperty('--p2-x', `${Number(vs.p2OffsetX ?? 0)}px`);
     root.style.setProperty('--p1-y', `${Number(vs.p1OffsetY ?? 0)}px`);
     root.style.setProperty('--p2-y', `${Number(vs.p2OffsetY ?? 0)}px`);
     root.style.setProperty('--p1-flip', vs.p1Flip ? '-1' : '1');
     root.style.setProperty('--p2-flip', vs.p2Flip === false ? '1' : '-1');
+    root.style.setProperty('--char-shadow-alpha', ((Number(vs.charShadow ?? 60) / 100) * 0.9).toFixed(2));
 
+    const spd = Math.max(40, Math.min(200, Number(vs.entrySpeed ?? 100)));
+    root.style.setProperty('--entry-mult', (100 / spd).toFixed(2));
+
+    // Match Content
     const match = getActiveMatchData(st);
     const p1 = match.p1 || {};
     const p2 = match.p2 || {};
@@ -1184,20 +1654,17 @@
     $('p1-char-sub').textContent = vs.showCharName !== false ? (p1.character || '') : '';
     $('p2-char-sub').textContent = vs.showCharName !== false ? (p2.character || '') : '';
 
-    const sc1 = $('p1-score');
-    const sc2 = $('p2-score');
+    const sc1 = $('p1-score'), sc2 = $('p2-score');
     sc1.textContent = p1.score ?? 0;
     sc2.textContent = p2.score ?? 0;
     sc1.classList.toggle('active', Boolean(vs.showScore));
     sc2.classList.toggle('active', Boolean(vs.showScore));
 
-    renderSideFlags('p1-flags', 'p1-flag-wm', p1, vs.showFlags !== false);
-    renderSideFlags('p2-flags', 'p2-flag-wm', p2, vs.showFlags !== false);
-
+    renderSideFlags('p1-flags', 'p1-flag-wm', p1, vs);
+    renderSideFlags('p2-flags', 'p2-flag-wm', p2, vs);
     updateSideVisuals('p1', p1, vs);
     updateSideVisuals('p2', p2, vs);
 
-    // Head-to-head pill
     const h2h = computeH2H(p1.name, p2.name);
     const h2hPill = $('vs-h2h-pill');
     if (vs.showH2H !== false && h2h.total > 0) {
@@ -1207,9 +1674,9 @@
       h2hPill.classList.remove('active');
     }
 
-    // Tournament Logo & Subtitle
     const logoSlot = $('vs-logo-slot');
     const logoImg = $('vs-logo-img');
+    logoSlot.dataset.pos = vs.logoPos || 'bottom-left';
     if (vs.showLogo !== false && vs.logoUrl) {
       if (logoImg.getAttribute('src') !== vs.logoUrl) logoImg.src = vs.logoUrl;
       logoSlot.classList.add('active');
@@ -1218,7 +1685,6 @@
     }
     $('vs-subtitle').textContent = vs.subtitle || st.tournament || '';
 
-    // Replay OBS entry animation on nonce change
     if (vs.introNonce && vs.introNonce !== lastIntroNonce) {
       lastIntroNonce = vs.introNonce;
       triggerEntryAnim(vs.entryAnim);
@@ -1226,7 +1692,104 @@
   }
 
   /* =========================================================================
-     PURE HTML5 CANVAS 1920x1080 PNG GRAPHIC EXPORTER (For Social Media / Discord!)
+     INTERACTIVE CLICK-TO-SELECT & DIRECT DRAG STUDIO (PREVIEW MODE ONLY!)
+     ========================================================================= */
+  function highlightSelectedEl(elKey) {
+    selectedElement = elKey || '';
+    document.querySelectorAll('.vs-hit.vs-selected').forEach(n => n.classList.remove('vs-selected'));
+    if (!selectedElement) return;
+    document.querySelectorAll(`.vs-hit[data-vs-el="${selectedElement}"]`).forEach(n => n.classList.add('vs-selected'));
+  }
+
+  if (isPreview) {
+    const hoverPill = $('vs-hover-pill');
+    let dragState = null;
+
+    document.addEventListener('mousemove', (e) => {
+      if (dragState && dragEnabled) {
+        const dx = Math.round((e.clientX - dragState.startX) / (currentScale || 1));
+        const dy = Math.round((e.clientY - dragState.startY) / (currentScale || 1));
+        if (!dragState.moved && Math.hypot(dx, dy) > 5) dragState.moved = true;
+        if (dragState.moved) {
+          const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, Math.round(v)));
+          const patch = {};
+          if (dragState.el === 'p1-char') {
+            patch.p1OffsetX = clamp(dragState.base.p1X + dx, -300, 300);
+            patch.p1OffsetY = clamp(dragState.base.p1Y + dy, -260, 260);
+          } else if (dragState.el === 'p2-char') {
+            patch.p2OffsetX = clamp(dragState.base.p2X + dx, -300, 300);
+            patch.p2OffsetY = clamp(dragState.base.p2Y + dy, -260, 260);
+          } else if (dragState.el === 'emblem') {
+            patch.emblemOffsetY = clamp(dragState.base.embY + dy, -300, 300);
+          } else if (dragState.el === 'header') {
+            patch.headerOffsetY = clamp(dragState.base.hdrY + dy, 0, 180);
+          } else if (dragState.el === 'p1-plate' || dragState.el === 'p2-plate') {
+            patch.plateBottom = clamp(dragState.base.plateB - dy, 30, 420);
+          } else if (dragState.el === 'h2h') {
+            patch.h2hOffsetY = clamp(dragState.base.h2hB - dy, 20, 240);
+          }
+          if (Object.keys(patch).length) {
+            dragState.lastPatch = patch;
+            window.parent?.postMessage({ type: 'vs-drag-patch', patch, commit: false }, '*');
+          }
+        }
+        return;
+      }
+
+      if (!interactiveEdit) { hoverPill.style.display = 'none'; return; }
+      const hit = e.target.closest('.vs-hit');
+      if (hit && hit.dataset.vsLabel) {
+        hoverPill.textContent = hit.dataset.vsLabel;
+        hoverPill.style.display = 'block';
+        hoverPill.style.left = `${Math.min(window.innerWidth - 220, e.clientX + 12)}px`;
+        hoverPill.style.top = `${Math.max(8, e.clientY - 30)}px`;
+      } else {
+        hoverPill.style.display = 'none';
+      }
+    });
+
+    document.addEventListener('mouseleave', () => { hoverPill.style.display = 'none'; });
+
+    document.addEventListener('mousedown', (e) => {
+      if (!interactiveEdit) return;
+      const hit = e.target.closest('.vs-hit');
+      if (!hit) return;
+      const elKey = hit.dataset.vsEl;
+      const vs = currentState?.vs || {};
+      const d = DESIGN_MAP[vs.design] || FALLBACK_DESIGN;
+      dragState = {
+        el: elKey,
+        label: hit.dataset.vsLabel || elKey,
+        startX: e.clientX,
+        startY: e.clientY,
+        moved: false,
+        lastPatch: null,
+        base: {
+          p1X: Number(vs.p1OffsetX ?? 0), p1Y: Number(vs.p1OffsetY ?? 0),
+          p2X: Number(vs.p2OffsetX ?? 0), p2Y: Number(vs.p2OffsetY ?? 0),
+          embY: Number(vs.emblemOffsetY ?? 0),
+          hdrY: Number(vs.headerOffsetY ?? 0),
+          plateB: (typeof vs.plateBottom === 'number' && vs.plateBottom >= 0) ? vs.plateBottom : (d.plateBottom ?? 168),
+          h2hB: Number(vs.h2hOffsetY ?? 84)
+        }
+      };
+      e.preventDefault();
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (!dragState) return;
+      const ds = dragState;
+      dragState = null;
+      highlightSelectedEl(ds.el);
+      if (ds.moved && ds.lastPatch) {
+        window.parent?.postMessage({ type: 'vs-drag-patch', patch: ds.lastPatch, commit: true }, '*');
+      }
+      window.parent?.postMessage({ type: 'vs-select-element', element: ds.el, label: ds.label }, '*');
+    });
+  }
+
+  /* =========================================================================
+     PURE HTML5 CANVAS 1920x1080 PNG GRAPHIC EXPORTER
      ========================================================================= */
   async function loadImg(src) {
     if (!src) return null;
@@ -1238,7 +1801,6 @@
       im.src = src;
     });
   }
-
   async function loadSvgAsImg(svgText) {
     if (!svgText) return null;
     const blob = new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' });
@@ -1252,60 +1814,34 @@
     if (!currentState) return;
     const st = currentState;
     const vs = st.vs || {};
+    const d = DESIGN_MAP[vs.design] || FALLBACK_DESIGN;
     const match = getActiveMatchData(st);
-    const p1 = match.p1 || {};
-    const p2 = match.p2 || {};
-    const design = vs.design || 'arcade-pop';
+    const p1 = match.p1 || {}, p2 = match.p2 || {};
+    const pickHex = (str, fb) => (String(str || '').match(/#[0-9a-fA-F]{6}/) || [fb])[0];
 
     const canvas = document.createElement('canvas');
-    canvas.width = 1920;
-    canvas.height = 1080;
+    canvas.width = 1920; canvas.height = 1080;
     const ctx = canvas.getContext('2d');
 
-    // 1. Background
     if (vs.bgMode !== 'transparent') {
-      if (design === 'arcade-pop' && vs.bgMode !== 'custom') {
-        const g = ctx.createRadialGradient(960, 480, 120, 960, 540, 1180);
-        g.addColorStop(0, '#ffd82b');
-        g.addColorStop(0.7, vs.bgColor1 || '#f5b800');
-        g.addColorStop(1, '#d99b00');
-        ctx.fillStyle = g;
-        ctx.fillRect(0, 0, 1920, 1080);
-      } else if (design === 't8-clash' && vs.bgMode !== 'custom') {
-        const g1 = ctx.createRadialGradient(420, 460, 60, 480, 540, 950);
-        g1.addColorStop(0, '#c84b10');
-        g1.addColorStop(1, '#09070d');
-        ctx.fillStyle = g1;
-        ctx.fillRect(0, 0, 960, 1080);
-        const g2 = ctx.createRadialGradient(1500, 460, 60, 1440, 540, 950);
-        g2.addColorStop(0, '#5b21b6');
-        g2.addColorStop(1, '#080914');
-        ctx.fillStyle = g2;
-        ctx.fillRect(960, 0, 960, 1080);
-      } else if (design === 'cyber-neon' && vs.bgMode !== 'custom') {
-        const g1 = ctx.createLinearGradient(0, 0, 960, 1080);
-        g1.addColorStop(0, '#ff006e'); g1.addColorStop(1, '#28041c');
-        ctx.fillStyle = g1; ctx.fillRect(0, 0, 960, 1080);
-        const g2 = ctx.createLinearGradient(1920, 0, 960, 1080);
-        g2.addColorStop(0, '#00d4ff'); g2.addColorStop(1, '#07122e');
-        ctx.fillStyle = g2; ctx.fillRect(960, 0, 960, 1080);
-      } else {
-        const g1 = ctx.createRadialGradient(480, 460, 80, 480, 540, 960);
-        g1.addColorStop(0, vs.bgMode === 'custom' ? (vs.p1Color || '#ff512f') : '#1e2436');
-        g1.addColorStop(1, vs.bgColor2 || '#0b0e16');
-        ctx.fillStyle = g1; ctx.fillRect(0, 0, 960, 1080);
-        const g2 = ctx.createRadialGradient(1440, 460, 80, 1440, 540, 960);
-        g2.addColorStop(0, vs.bgMode === 'custom' ? (vs.p2Color || '#2563eb') : '#18243d');
-        g2.addColorStop(1, vs.bgColor2 || '#0b0e16');
-        ctx.fillStyle = g2; ctx.fillRect(960, 0, 960, 1080);
-      }
+      const c1 = vs.bgMode === 'custom' ? (vs.p1Color || d.p1) : pickHex(d.bgLeft, d.p1);
+      const c2 = vs.bgMode === 'custom' ? (vs.p2Color || d.p2) : pickHex(d.bgRight, d.p2);
+      const dark = vs.bgMode === 'custom' ? (vs.bgColor2 || '#0b0e16') : (d.lightBg ? '#e2e8f0' : '#080a12');
+      const g1 = ctx.createRadialGradient(480, 460, 80, 480, 540, 980);
+      g1.addColorStop(0, c1); g1.addColorStop(1, dark);
+      ctx.fillStyle = g1; ctx.fillRect(0, 0, 960, 1080);
+      const g2 = ctx.createRadialGradient(1440, 460, 80, 1440, 540, 980);
+      g2.addColorStop(0, c2); g2.addColorStop(1, dark);
+      ctx.fillStyle = g2; ctx.fillRect(960, 0, 960, 1080);
 
-      // Subtle center divider
-      ctx.fillStyle = design === 'arcade-pop' ? '#ffffff' : 'rgba(255,255,255,0.35)';
-      ctx.fillRect(design === 'arcade-pop' ? 950 : 958, 0, design === 'arcade-pop' ? 20 : 4, 1080);
+      const effDiv = (vs.dividerStyle && vs.dividerStyle !== 'theme') ? vs.dividerStyle : d.divider;
+      if (effDiv !== 'none') {
+        const w = Number(vs.dividerWidth) > 0 ? Number(vs.dividerWidth) : (d.divW || 8);
+        ctx.fillStyle = vs.dividerColor || d.divColor || '#ffffff';
+        ctx.fillRect(960 - w / 2, 0, w, 1080);
+      }
     }
 
-    // 2. Character Renders & Profile Avatars
     const [p1CharIm, p2CharIm, p1AvIm, p2AvIm, logoIm] = await Promise.all([
       loadImg(buildCharRenderUrl(vs.game, vs.pack, p1.character)),
       loadImg(buildCharRenderUrl(vs.game, vs.pack, p2.character)),
@@ -1314,159 +1850,144 @@
       vs.showLogo !== false && vs.logoUrl ? loadImg(vs.logoUrl) : Promise.resolve(null)
     ]);
 
-    const drawChar = (im, cx, zoom, offY, flip, dim) => {
+    const drawChar = (im, cx, zoom, offX, offY, flip, dim) => {
       if (!im) return;
       const targetH = 900 * (zoom / 100);
       const scale = targetH / im.naturalHeight;
-      const w = im.naturalWidth * scale;
-      const h = im.naturalHeight * scale;
+      const w = im.naturalWidth * scale, h = im.naturalHeight * scale;
       ctx.save();
       ctx.globalAlpha = dim ? 0.25 : 1;
-      ctx.translate(cx, 540 + offY);
+      ctx.translate(cx + offX, 540 + offY);
       ctx.scale(flip ? -1 : 1, 1);
-      ctx.shadowColor = 'rgba(0,0,0,0.55)';
-      ctx.shadowBlur = 28;
-      ctx.shadowOffsetY = 16;
+      ctx.shadowColor = `rgba(0,0,0,${((Number(vs.charShadow ?? 60) / 100) * 0.9).toFixed(2)})`;
+      ctx.shadowBlur = 28; ctx.shadowOffsetY = 16;
       ctx.drawImage(im, -w / 2, -h / 2, w, h);
       ctx.restore();
     };
-
     const drawHeroAv = (im, cx, borderColor) => {
       if (!im) return;
-      const sz = 440;
-      const x = cx - sz / 2;
-      const y = 210;
+      const sz = 440, x = cx - sz / 2, y = 210;
       ctx.save();
-      ctx.beginPath();
-      ctx.roundRect(x, y, sz, sz, 26);
-      ctx.closePath();
-      ctx.clip();
+      ctx.beginPath(); ctx.roundRect(x, y, sz, sz, 26); ctx.clip();
       const s = Math.max(sz / im.naturalWidth, sz / im.naturalHeight);
-      const dw = im.naturalWidth * s;
-      const dh = im.naturalHeight * s;
-      ctx.drawImage(im, cx - dw / 2, y + sz / 2 - dh / 2, dw, dh);
+      ctx.drawImage(im, cx - (im.naturalWidth * s) / 2, y + sz / 2 - (im.naturalHeight * s) / 2, im.naturalWidth * s, im.naturalHeight * s);
       ctx.restore();
-      ctx.lineWidth = 8;
-      ctx.strokeStyle = borderColor;
-      ctx.beginPath();
-      ctx.roundRect(x, y, sz, sz, 26);
-      ctx.stroke();
+      ctx.lineWidth = 8; ctx.strokeStyle = borderColor;
+      ctx.beginPath(); ctx.roundRect(x, y, sz, sz, 26); ctx.stroke();
     };
 
-    const avMode = design === 'portrait-cards' && vs.avatarMode === 'badge' ? 'portrait-hero' : (vs.avatarMode || 'hero-fallback');
+    const avMode = vs.design === 'portrait-cards' && vs.avatarMode === 'badge' ? 'portrait-hero' : (vs.avatarMode || 'hero-fallback');
     const p1Hero = Boolean(p1AvIm && (avMode === 'portrait-hero' || (avMode === 'hero-fallback' && !p1CharIm)));
     const p2Hero = Boolean(p2AvIm && (avMode === 'portrait-hero' || (avMode === 'hero-fallback' && !p2CharIm)));
+    drawChar(p1CharIm, 480, Number(vs.p1Zoom ?? 100), Number(vs.p1OffsetX ?? 0), Number(vs.p1OffsetY ?? 0), Boolean(vs.p1Flip), p1Hero);
+    drawChar(p2CharIm, 1440, Number(vs.p2Zoom ?? 100), Number(vs.p2OffsetX ?? 0), Number(vs.p2OffsetY ?? 0), vs.p2Flip !== false, p2Hero);
+    if (p1Hero) drawHeroAv(p1AvIm, 480, vs.p1Color || d.p1);
+    if (p2Hero) drawHeroAv(p2AvIm, 1440, vs.p2Color || d.p2);
 
-    drawChar(p1CharIm, 480, Number(vs.p1Zoom ?? 100), Number(vs.p1OffsetY ?? 0), Boolean(vs.p1Flip), p1Hero);
-    drawChar(p2CharIm, 1440, Number(vs.p2Zoom ?? 100), Number(vs.p2OffsetY ?? 0), vs.p2Flip !== false, p2Hero);
-    if (p1Hero) drawHeroAv(p1AvIm, 480, vs.p1Color || '#ff512f');
-    if (p2Hero) drawHeroAv(p2AvIm, 1440, vs.p2Color || '#2563eb');
-
-    // 3. Top Header Banner
-    ctx.save();
-    ctx.fillStyle = design === 'twt-clean' ? '#d41634' : '#0a0c13';
-    ctx.beginPath();
-    ctx.moveTo(640, 0); ctx.lineTo(1280, 0); ctx.lineTo(1240, 108); ctx.lineTo(680, 108); ctx.closePath();
-    ctx.fill();
-    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 4;
-    ctx.beginPath(); ctx.moveTo(680, 108); ctx.lineTo(1240, 108); ctx.stroke();
-    ctx.textAlign = 'center';
-    if (vs.eyebrow) {
-      ctx.fillStyle = '#facc15';
-      ctx.font = '800 22px "Barlow Condensed", sans-serif';
-      ctx.fillText(String(vs.eyebrow).toUpperCase(), 960, 34);
+    // Header
+    const hdrY = Number(vs.headerOffsetY ?? 0);
+    if ((vs.headerStyle || d.header) !== 'none') {
+      ctx.save();
+      ctx.fillStyle = pickHex(d.headerBg, '#0a0c13');
+      ctx.beginPath();
+      ctx.moveTo(640, hdrY); ctx.lineTo(1280, hdrY); ctx.lineTo(1240, hdrY + 108); ctx.lineTo(680, hdrY + 108); ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = vs.accentColor || d.accent || '#fff'; ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.moveTo(680, hdrY + 108); ctx.lineTo(1240, hdrY + 108); ctx.stroke();
+      ctx.textAlign = 'center';
+      if (vs.eyebrow) {
+        ctx.fillStyle = vs.accentColor || d.accent || '#facc15';
+        ctx.font = '800 22px "Barlow Condensed", sans-serif';
+        ctx.fillText(String(vs.eyebrow).toUpperCase(), 960, hdrY + 34);
+      }
+      ctx.fillStyle = d.headerText || '#ffffff';
+      ctx.font = '900 42px "Russo One", "Barlow Condensed", sans-serif';
+      const roundTitle = `${(match.round || 'ROUND 1').toUpperCase()}${(st.showFormat !== false && match.format) ? `  ·  ${match.format}` : ''}`;
+      ctx.fillText(roundTitle, 960, hdrY + 84);
+      ctx.restore();
     }
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '900 42px "Russo One", "Barlow Condensed", sans-serif';
-    const roundTitle = `${(match.round || 'ROUND 1').toUpperCase()}${(st.showFormat !== false && match.format) ? `  ·  ${match.format}` : ''}`;
-    ctx.fillText(roundTitle, 960, 84);
-    ctx.restore();
 
-    // 4. Center VS Emblem
-    ctx.save();
-    ctx.font = 'italic 900 112px "Russo One", "Barlow Condensed", sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.lineWidth = 14;
-    ctx.strokeStyle = '#090b10';
-    ctx.strokeText('VS', 960, 505);
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText('VS', 960, 505);
-    ctx.restore();
+    // Center VS Emblem
+    if ((vs.emblemStyle || d.emblem) !== 'none') {
+      ctx.save();
+      const ey = 508 + Number(vs.emblemOffsetY ?? 0);
+      const sz = Math.round(112 * (Number(vs.emblemScale ?? 100) / 100));
+      ctx.font = `italic 900 ${sz}px "Russo One", "Barlow Condensed", sans-serif`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.lineWidth = 14; ctx.strokeStyle = '#090b10';
+      const txt = (vs.emblemText && vs.emblemText.trim()) ? vs.emblemText.trim() : 'VS';
+      ctx.strokeText(txt, 960, ey);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(txt, 960, ey);
+      ctx.restore();
+    }
 
-    // 5. Player Nameplates + Avatar Badges + Flags
+    // Plates with Region-Only / Country / Both flag support!
+    const pBot = (typeof vs.plateBottom === 'number' && vs.plateBottom >= 0) ? vs.plateBottom : (d.plateBottom ?? 168);
+    const pW = Number(vs.plateWidth ?? 790);
     const drawPlate = async (side, player, avIm, isHero) => {
       const isLeft = side === 'p1';
-      const x = isLeft ? 62 : 1068;
-      const y = 758;
-      const w = 790;
       const h = 142;
+      const x = isLeft ? 62 : (1920 - 62 - pW);
+      const y = 1080 - pBot - h;
       ctx.save();
-      ctx.fillStyle = 'rgba(8, 10, 16, 0.95)';
-      ctx.shadowColor = 'rgba(0,0,0,0.65)';
-      ctx.shadowBlur = 32;
-      ctx.beginPath();
-      ctx.roundRect(x, y, w, h, 8);
-      ctx.fill();
+      ctx.fillStyle = d.lightBg && d.plateText === '#0f172a' ? 'rgba(255,255,255,0.95)' : 'rgba(8, 10, 16, 0.95)';
+      ctx.shadowColor = 'rgba(0,0,0,0.6)'; ctx.shadowBlur = 30;
+      ctx.beginPath(); ctx.roundRect(x, y, pW, h, 8); ctx.fill();
       ctx.shadowBlur = 0;
-      ctx.fillStyle = isLeft ? (vs.p1Color || '#ff512f') : (vs.p2Color || '#2563eb');
-      ctx.fillRect(isLeft ? x : x + w - 10, y, 10, h);
+      ctx.fillStyle = isLeft ? (vs.bgMode === 'custom' ? (vs.p1Color || d.p1) : d.p1) : (vs.bgMode === 'custom' ? (vs.p2Color || d.p2) : d.p2);
+      ctx.fillRect(isLeft ? x : x + pW - 10, y, 10, h);
 
       const showBadge = Boolean(avIm && !isHero && avMode !== 'off');
-      let textX = isLeft ? x + 32 : x + w - 32;
+      let textX = isLeft ? x + 32 : x + pW - 32;
       if (showBadge) {
-        const bx = isLeft ? x + 28 : x + w - 126;
-        const by = y + 22;
-        ctx.save();
-        ctx.beginPath(); ctx.roundRect(bx, by, 98, 98, 12); ctx.clip();
+        const bx = isLeft ? x + 28 : x + pW - 126, by = y + 22;
+        ctx.save(); ctx.beginPath(); ctx.roundRect(bx, by, 98, 98, 12); ctx.clip();
         const s = Math.max(98 / avIm.naturalWidth, 98 / avIm.naturalHeight);
         ctx.drawImage(avIm, bx + 49 - (avIm.naturalWidth * s) / 2, by + 49 - (avIm.naturalHeight * s) / 2, avIm.naturalWidth * s, avIm.naturalHeight * s);
         ctx.restore();
-        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3;
-        ctx.beginPath(); ctx.roundRect(bx, by, 98, 98, 12); ctx.stroke();
-        textX = isLeft ? x + 146 : x + w - 146;
+        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.roundRect(bx, by, 98, 98, 12); ctx.stroke();
+        textX = isLeft ? x + 146 : x + pW - 146;
       }
 
-      // Draw Country Flag if enabled
+      const flagItems = resolvePlayerFlags(player, vs);
       let metaOffset = 0;
-      if (vs.showFlags !== false && player.flag && FLAGS_MAP[String(player.flag).toUpperCase()]) {
-        const flagIm = await loadSvgAsImg(FLAGS_MAP[String(player.flag).toUpperCase()].svg);
+      for (const fi of flagItems) {
+        const flagIm = await loadSvgAsImg(fi.svg);
         if (flagIm) {
-          const fx = isLeft ? textX : textX - 44;
+          const fx = isLeft ? textX + metaOffset : textX - metaOffset - 44;
           ctx.drawImage(flagIm, fx, y + 18, 44, 29);
-          metaOffset = 54;
+          metaOffset += 52;
         }
       }
 
       ctx.textAlign = isLeft ? 'left' : 'right';
       const metaLabel = [vs.showSponsor !== false ? player.sponsor : '', player.bracket ? `[${player.bracket}]` : ''].filter(Boolean).join('  ');
       if (metaLabel) {
-        ctx.fillStyle = '#facc15';
+        ctx.fillStyle = vs.accentColor || d.accent || '#facc15';
         ctx.font = '800 26px "Barlow Condensed", sans-serif';
         ctx.fillText(metaLabel.toUpperCase(), isLeft ? textX + metaOffset : textX - metaOffset, y + 41);
       }
-
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '900 58px "Russo One", "Barlow Condensed", sans-serif';
+      ctx.fillStyle = d.plateText || '#ffffff';
+      ctx.font = `900 ${Math.round(58 * (Number(vs.nameScale ?? 100) / 100))}px "Russo One", "Barlow Condensed", sans-serif`;
       ctx.fillText((player.name || (isLeft ? 'PLAYER 1' : 'PLAYER 2')).slice(0, 22), textX, y + 98);
-
       if (vs.showCharName !== false && player.character) {
-        ctx.fillStyle = 'rgba(255,255,255,0.75)';
+        ctx.fillStyle = d.plateText === '#0f172a' ? 'rgba(15,23,42,0.72)' : 'rgba(255,255,255,0.75)';
         ctx.font = '800 23px "Barlow Condensed", sans-serif';
         ctx.fillText(String(player.character).toUpperCase(), textX, y + 128);
       }
       ctx.restore();
     };
-
     await drawPlate('p1', p1, p1AvIm, p1Hero);
     await drawPlate('p2', p2, p2AvIm, p2Hero);
 
-    // 6. Tournament Logo
     if (logoIm) {
-      const scale = Math.min(220 / logoIm.naturalWidth, 96 / logoIm.naturalHeight, 1);
-      const lw = logoIm.naturalWidth * scale;
-      const lh = logoIm.naturalHeight * scale;
-      ctx.drawImage(logoIm, 44, 1054 - lh, lw, lh);
+      const scale = Math.min(220 / logoIm.naturalWidth, 96 / logoIm.naturalHeight, 1) * (Number(vs.logoScale ?? 100) / 100);
+      const lw = logoIm.naturalWidth * scale, lh = logoIm.naturalHeight * scale;
+      const pos = vs.logoPos || 'bottom-left';
+      const lx = pos.endsWith('right') ? (1920 - 44 - lw) : 44;
+      const ly = pos.startsWith('top') ? 24 : (1054 - lh);
+      ctx.drawImage(logoIm, lx, ly, lw, lh);
     }
 
     const a = document.createElement('a');
@@ -1486,9 +2007,16 @@
     else if (d.type === 'history-update' && Array.isArray(d.history)) { historyDb = d.history; if (currentState) render(currentState); }
     else if (d.type === 'test-vs-entry') triggerEntryAnim(currentState?.vs?.entryAnim || 'slam-split');
     else if (d.type === 'export-vs-png') exportPngGraphic();
+    else if (d.type === 'vs-interactive-config' && isPreview) {
+      interactiveEdit = Boolean(d.interactive);
+      dragEnabled = Boolean(d.drag);
+      document.body.classList.toggle('interactive-edit', interactiveEdit);
+      if (!interactiveEdit) highlightSelectedEl('');
+    } else if (d.type === 'vs-highlight-element' && isPreview) {
+      highlightSelectedEl(d.element || '');
+    }
   });
 
-  // OBS Browser Source native scene activation replay
   const onSceneShow = () => {
     if (currentState?.vs?.visible !== false) triggerEntryAnim(currentState?.vs?.entryAnim || 'slam-split');
   };
@@ -1498,9 +2026,7 @@
 
   try {
     const bc = new BroadcastChannel('fgc_open_scorebar');
-    bc.onmessage = (ev) => {
-      if (ev.data?.type === 'state' && ev.data.payload) render(ev.data.payload);
-    };
+    bc.onmessage = (ev) => { if (ev.data?.type === 'state' && ev.data.payload) render(ev.data.payload); };
   } catch {}
 
   if (isHttp) {
@@ -1509,11 +2035,8 @@
       render(st);
       if (!isPreview && st?.vs?.visible !== false) triggerEntryAnim(st?.vs?.entryAnim || 'slam-split');
     }).catch(() => {});
-
     const es = new EventSource('/api/events');
-    es.addEventListener('state', (ev) => {
-      try { render(JSON.parse(ev.data)); } catch {}
-    });
+    es.addEventListener('state', (ev) => { try { render(JSON.parse(ev.data)); } catch {} });
   }
 })();
 </script>

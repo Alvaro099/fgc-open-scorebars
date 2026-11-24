@@ -49,7 +49,7 @@ const assets = createAssetManager(DATA_DIR);
 export const DEFAULT_VS = {
   visible: true,
   source: 'current',           // 'current' | 'next' | 'custom'
-  design: 'arcade-pop',        // 'arcade-pop' | 't8-clash' | 'twt-clean' | 'portrait-cards' | 'cyber-neon' | 'glass-pro'
+  design: 'arcade-pop',        // 42 built-in broadcast designs from vs-designs.js
   game: 'tekken8',
   pack: 'full',
   avatarMode: 'hero-fallback', // 'badge' | 'hero-fallback' | 'portrait-hero' | 'off'
@@ -58,7 +58,43 @@ export const DEFAULT_VS = {
   bgColor2: '#10131e',
   p1Color: '#ff512f',
   p2Color: '#2563eb',
-  pattern: 'symbols',          // 'symbols' | 'grid' | 'halftone' | 'diagonal' | 'none'
+  accentColor: '',             // '' = design theme default
+  // Animated Pattern Studio
+  pattern: 'theme',            // 'theme' | 'symbols' | 'grid' | 'halftone' | 'diagonal' | 'hex' | 'chevrons' | 'rings' | 'stars' | 'none'
+  patternSpeed: 40,            // 0 (static) .. 100 (fast)
+  patternDir: 'diag-dr',       // 'diag-dr' | 'up' | 'down' | 'left' | 'right' | 'diag-ul'
+  patternOpacity: -1,          // -1 = theme default, else 0..80 %
+  patternScale: 100,           // 50..200 %
+  // Architectural Frame & Header
+  frameStyle: 'theme',         // 'theme' | 'arcade-teeth' | 'cyber-corners' | 'cinematic-bars' | 'double-gold' | 'hazard-tape' | 'manga-ink' | 'neon-tube' | 'minimal-line' | 'none'
+  headerStyle: 'theme',        // 'theme' | 'trapezoid' | 'floating-pill' | 'full-ribbon' | 'hex-crest' | 'minimal-text' | 'skew-tag' | 'none'
+  headerScale: 100,            // 60..150 %
+  headerOffsetY: 0,            // 0..180 px
+  // Center Divider Studio (with animated scrolling contents!)
+  dividerStyle: 'theme',       // 'theme' | 'x-tape' | 'chevron-stream' | 'hazard-scroll' | 'energy-beam' | 'lightning-crack' | 'scan-rail' | 'ticker-vs' | 'solid-glow' | 'hairline' | 'none'
+  dividerAnim: 'theme',        // 'theme' | 'scroll-down' | 'scroll-up' | 'pulse' | 'shimmer' | 'static'
+  dividerSpeed: 45,            // 0 (static) .. 100 (fast)
+  dividerWidth: 0,             // 0 = theme default, else 2..64 px
+  dividerTilt: null,           // null = theme default, else -20..20 deg
+  dividerColor: '',            // '' = theme default
+  // Center VS Emblem Studio
+  emblemStyle: 'theme',        // 'theme' | 'winged' | 'diamond-shield' | 'circle-ring' | 'hex-core' | 'comic-burst' | 'pill-tag' | 'monolith' | 'slash-bolt' | 'minimal-text' | 'none'
+  emblemText: 'VS',
+  emblemScale: 100,            // 50..180 %
+  emblemOffsetY: 0,            // -300..300 px
+  emblemAnim: 'theme',         // 'theme' | 'none' | 'float' | 'pulse' | 'glitch' | 'spin-ring'
+  // Nameplates, Typography & Flags Studio
+  plateStyle: 'theme',         // 'theme' | 'arcade-box' | 't8-blade' | 'glass-pill' | 'floating-clean' | 'corner-ribbon' | 'hex-plate' | 'comic-skew' | 'stacked-banner' | 'luxury-thin'
+  plateBottom: -1,             // -1 = theme default, else 30..420 px
+  plateWidth: 790,             // 540..900 px
+  plateScale: 100,             // 70..135 %
+  plateOpacity: 96,            // 25..100 %
+  fontDisplay: 'theme',        // 'theme' | Google font name
+  nameScale: 100,              // 65..145 %
+  flagMode: 'both',            // 'both' | 'country' | 'region' | 'none' (supports Region-Only!)
+  flagSize: 100,               // 70..150 %
+  flagWatermarkOpacity: -1,    // -1 = theme default, else 0..60 %
+  // Branding & Info Toggles
   eyebrow: 'UP NEXT',
   subtitle: '',
   showFlags: true,
@@ -68,13 +104,24 @@ export const DEFAULT_VS = {
   showLogo: true,
   showScore: false,
   logoUrl: '',
+  logoScale: 100,              // 50..180 %
+  logoPos: 'bottom-left',      // 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right'
+  h2hOffsetY: 84,              // 20..240 px from bottom
+  // Millimeter Character Framing
   p1Flip: false,
   p2Flip: true,
   p1Zoom: 100,
   p2Zoom: 100,
-  p1OffsetY: 0,
-  p2OffsetY: 0,
-  entryAnim: 'slam-split',     // 'slam-split' | 'curtain' | 'zoom-burst' | 'fade'
+  p1OffsetX: 0,                // -300..300 px
+  p2OffsetX: 0,                // -300..300 px
+  p1OffsetY: 0,                // -260..260 px
+  p2OffsetY: 0,                // -260..260 px
+  charShadow: 60,              // 0..100 %
+  charIdleAnim: 'none',        // 'none' | 'breathe' | 'float'
+  // OBS Scene Entry & Ambient FX
+  entryAnim: 'slam-split',     // 10 choreography styles
+  entrySpeed: 100,             // 40..200 %
+  ambientAnim: 'theme',        // 'theme' | 'none' | 'pulse-glow' | 'shimmer-sweep' | 'energy-sparks' | 'spotlight-sway' | 'scanline-crt'
   introNonce: 0,
   customMatch: {
     round: 'GRAND FINALS',
@@ -92,6 +139,7 @@ export const DEFAULT_STYLE = {
   fontScale: 100,
   letterSpacing: 4,
   italic: 'theme',       // 'theme' | 'on' | 'off'
+  scoreSlant: 'mirror',  // 'mirror' (\ / symmetric to blade) | 'upright' | 'italic'
   uppercase: true,
   // Layout & Shape overrides
   layoutOverride: 'theme',   // 'theme' | 'blade' | 'crown' | 'split' | 'arch'
