@@ -1615,15 +1615,13 @@
       padding-left: 48px;
     }
 
-    const qs=new URLSearchParams(location.search);
-    const isPreview=qs.has('preview');
-    const isHttp=location.protocol==='http:' || location.protocol==='https:';
-
-    if ( !isHttp) {
-      document.querySelectorAll('img[crossorigin]').forEach(im=> im.removeAttribute('crossorigin'));
+    #vs-stage[data-plate="corner-ribbon"] .vs-plate.right {
+      right: 0;
+      border-right: none;
+      border-left: 8px solid var(--vs-p2);
+      border-radius: 12px 0 0 12px;
+      padding-right: 48px;
     }
-
-    const $ =(id)=>document.getElementById(id);
 
     #vs-stage[data-plate="hex-plate"] .vs-plate {
       clip-path: polygon(28px 0, calc(100% - 28px) 0, 100% 50%, calc(100% - 28px) 100%, 28px 100%, 0 50%);

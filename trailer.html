@@ -51,32 +51,26 @@
   }
   body.clean-mode #stage-1080 { box-shadow: none; }
 
-  /* CLEAN SCENES WITH SMOOTH GPU CAMERA ZOOM & TRANSITIONS */
+  /* CLEAN SCENES (ONLY SCOREBARS USES CAMERA ZOOM; VS & TOP 8 STAY CRISP 1:1!) */
   .scene {
     position: absolute; inset: 0; z-index: 5;
     opacity: 0; pointer-events: none;
-    transform: scale(1.045);
-    transition: opacity 0.52s cubic-bezier(.22, 1, .36, 1), transform 0.72s cubic-bezier(.22, 1, .36, 1);
+    transition: opacity 0.45s ease;
     overflow: hidden;
   }
-  .scene.active { opacity: 1; transform: scale(1); }
+  .scene.active { opacity: 1; }
   .cam-rig {
     width: 1920px; height: 1080px;
     transform-origin: center center;
     transform: translate3d(0, 0, 0) scale(1);
-    transition: transform 1.25s cubic-bezier(.22, 1, .36, 1);
+    transition: transform 1.2s cubic-bezier(.22, 1, .36, 1);
     will-change: transform;
   }
   #cam-scorebar { transform-origin: 50% 0%; }
-  .cam-rig.snap { transition-duration: 0.48s; }
+  .cam-rig.snap { transition-duration: 0.4s; }
   .scene iframe {
     width: 1920px; height: 1080px; border: 0; display: block;
     pointer-events: none;
-  }
-  #cut-veil {
-    position: absolute; inset: 0; z-index: 25;
-    background: #06070a; opacity: 0; pointer-events: none;
-    transition: opacity 0.28s ease-out;
   }
 
   /* SCENE 01 — SIMPLE CLEAN INTRO */
@@ -134,6 +128,33 @@
   .sb-caption span {
     display: block; font-size: 20px; color: #cbd5e1; margin-top: 4px;
   }
+
+  /* CLEAN SECTION COMMENTARY PILL (FOR VS SPLASH & TOP 8 — ZERO FACE OR CARD OVERLAP!) */
+  .section-commentary {
+    position: absolute; left: 50%; bottom: 10px; z-index: 18;
+    transform: translateX(-50%) translateY(14px);
+    max-width: 1460px;
+    padding: 8px 22px; border-radius: 12px;
+    background: rgba(9, 10, 14, 0.92);
+    border: 1px solid rgba(245, 185, 66, 0.5);
+    backdrop-filter: blur(12px);
+    display: flex; align-items: center; gap: 14px;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.78);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+  }
+  .section-commentary.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .section-commentary .sc-badge {
+    padding: 4px 11px; border-radius: 7px;
+    background: var(--gold); color: #0a0b0f;
+    font-family: 'Space Mono', monospace; font-size: 13px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase; flex-shrink: 0;
+  }
+  .section-commentary .sc-text {
+    font-size: 17px; font-weight: 600; color: #f8fafc; line-height: 1.25;
+    white-space: nowrap;
+  }
+  .section-commentary .sc-text b { color: var(--gold); }
 
   /* SCENE 05 — SIMPLE CLEAN OUTRO */
   #scene-outro {
@@ -279,19 +300,21 @@
       <span id="sbc-s">Zero HUD overlap · Flag Fade · Live Match Point</span>
     </div>
 
-    <!-- 03: REAL VS SPLASH (FULL 1080p UNOBSTRUCTED + ZOOM TRANSITIONS) -->
+    <!-- 03: REAL VS SPLASH (FULL 1080p CLEAN — NO CAMERA ZOOM) -->
     <section class="scene" id="scene-vs">
-      <div class="cam-rig" id="cam-vs">
-        <iframe id="frame-vs" title="Live VS Splash"></iframe>
-      </div>
+      <iframe id="frame-vs" title="Live VS Splash"></iframe>
     </section>
 
-    <!-- 04: REAL TOP 8 RESULTS (FULL 1080p UNOBSTRUCTED + CHAMPION ZOOM & PULLBACK) -->
+    <!-- 04: REAL TOP 8 RESULTS (FULL 1080p CLEAN — NO CAMERA ZOOM) -->
     <section class="scene" id="scene-results">
-      <div class="cam-rig" id="cam-results">
-        <iframe id="frame-results" title="Live Top 8 Results"></iframe>
-      </div>
+      <iframe id="frame-results" title="Live Top 8 Results"></iframe>
     </section>
+
+    <!-- CLEAN SECTION COMMENTARY STRIP FOR VS & TOP 8 -->
+    <div class="section-commentary" id="section-commentary">
+      <span class="sc-badge" id="sc-badge">VS SPLASH</span>
+      <span class="sc-text" id="sc-text">42 animated designs · Click-to-edit &amp; direct drag</span>
+    </div>
 
     <!-- 05: SIMPLE CLEAN OUTRO -->
     <section class="scene" id="scene-outro">
@@ -316,7 +339,6 @@
       </div>
     </section>
 
-    <div id="cut-veil"></div>
     <div id="fade-black"></div>
   </div>
 </div>
@@ -396,8 +418,22 @@
       introPill: '100% FREE · OPEN-SOURCE FOR THE FGC',
       introSub: 'Local broadcast suite for OBS Studio. Zero subscriptions, zero paywalls — built to expand across fighting games.',
       it: ['56 SCOREBARS', '42 VS SCREENS', '24 TOP 8 LAYOUTS', 'EXPANDING TO MORE GAMES'],
-      sbcK: '56 HUD-CALIBRATED SCOREBARS',
-      sbcS: 'Zero HUD overlap · Flag Fade · Live Match Point',
+      sbCues: [
+        { k: '56 HUD-CALIBRATED SCOREBARS', t: '★ Tekken 8 Native HUD', s: 'Exact fit above healthbars · 0 px overlap · Native OBS Stinger entry' },
+        { k: 'STYLE STUDIO & FLAG FADE', t: '★ TWT 2026 Blade · Flag Fade', s: '114 vector flags, Region-Only mode, 12 fonts, live Match Point & FX' },
+        { k: 'CALIBRATED FOR STREET FIGHTER 6', t: '🥊 SF6 Native Drive HUD', s: '24 SF6 designs clearing Healthbars, Drive Gauges, Round Gems & [M]/[C]' },
+        { k: 'STUDIO WHITE & JSON PRESETS', t: '🥊 SF6 Broadcast White Studio', s: 'Save unlimited custom styles & share JSON presets in 1 click' }
+      ],
+      vsCues: [
+        { b: '42 VS DESIGNS', tx: '<b>Interactive VS Splash</b> — Click-to-edit &amp; drag directly · Auto event logo &amp; animated vertical dividers' },
+        { b: '240+ ROSTERS', tx: '<b>Offline Character Packs</b> — Cache full rosters locally for zero-internet venues · Region-Only flags' },
+        { b: 'OBS + 1080P PNG', tx: '<b>Live OBS &amp; Social Export</b> — Syncs active match or Start.gg Up Next queue · Instant 1080p PNG' }
+      ],
+      resCues: [
+        { b: 'TOP 8 RESULTS', tx: '<b>24 Top 8 Broadcast Designs</b> — Auto-sync standings from Start.gg &amp; Challonge · Live confetti FX' },
+        { b: '6 PRO LAYOUTS', tx: '<b>Hero Top 8, Top 3 Podium, 4×2 Grid, Top 4 &amp; Ladder</b> — Switch full layouts in 1 click' },
+        { b: 'DRAG & PNG 1080P', tx: '<b>Global &amp; Per-Player Framing</b> — Drag portraits, wheel-zoom &amp; export 1920×1080 PNG' }
+      ],
       outKicker: 'FREE FOREVER · GROWING WITH THE COMMUNITY',
       outTitle: 'Built for the <span>FGC.</span>',
       outSub: 'Actively evolving and designed to expand to more fighting games.',
@@ -414,8 +450,22 @@
       introPill: '100% GRATIS · OPEN-SOURCE PARA LA FGC',
       introSub: 'Suite local de retransmisión para OBS Studio. Sin cuotas ni muros de pago — pensada para ampliarse a más juegos de lucha.',
       it: ['56 MARCADORES', '42 PANTALLAS VS', '24 DISEÑOS TOP 8', 'PENSADO PARA MÁS JUEGOS'],
-      sbcK: '56 MARCADORES CALIBRADOS AL HUD',
-      sbcS: '0 px de solapamiento · Difuminado de banderas · Match Point',
+      sbCues: [
+        { k: '56 MARCADORES CALIBRADOS AL HUD', t: '★ Tekken 8 Native HUD', s: 'Encaje exacto sobre barras de vida · 0 px de solapamiento · Intro OBS Stinger' },
+        { k: 'ESTUDIO DE ESTILO Y FLAG FADE', t: '★ TWT 2026 Blade · Difuminado', s: '114 banderas vectoriales, Solo Región, 12 fuentes, Match Point y FX en vivo' },
+        { k: 'CALIBRADO PARA STREET FIGHTER 6', t: '🥊 SF6 Native Drive HUD', s: '24 diseños SF6 respetando barras de vida, Drive Gauge, rondas e iconos [M]/[C]' },
+        { k: 'BLANCO TV Y PRESETS JSON', t: '🥊 SF6 Broadcast White Studio', s: 'Guarda tus propios estilos ilimitados y comparte presets JSON en 1 clic' }
+      ],
+      vsCues: [
+        { b: '42 DISEÑOS VS', tx: '<b>Pantalla VS Interactiva</b> — Clic-para-editar y arrastre directo · Logo del torneo y divisores animados' },
+        { b: '+240 JUEGOS', tx: '<b>Packs de Personajes Offline</b> — Caché local para torneos sin internet · Modo Solo Región' },
+        { b: 'OBS + PNG 1080P', tx: '<b>Escena OBS y Exportación PNG</b> — Sincroniza combate o Cola Start.gg y exporta en 1920×1080' }
+      ],
+      resCues: [
+        { b: 'RESULTADOS TOP 8', tx: '<b>24 Diseños de Top 8</b> — Sincronización automática desde Start.gg y Challonge · Confeti en vivo' },
+        { b: '6 FORMATOS PRO', tx: '<b>Campeón Top 8, Podio Top 3, Rejilla 4×2, Top 4 y Escalera</b> — Cambia de formato al instante' },
+        { b: 'ARRASTRE Y PNG', tx: '<b>Encuadre Global e Individual</b> — Arrastra cada render, haz zoom con la rueda y exporta en PNG' }
+      ],
       outKicker: 'GRATIS PARA SIEMPRE · EN CONSTANTE EVOLUCIÓN',
       outTitle: 'Hecho para la <span>FGC.</span>',
       outSub: 'Un proyecto vivo en desarrollo, pensado para ir ampliándose a más juegos.',
@@ -431,7 +481,7 @@
   };
 
   /* =========================================================================
-     REAL TOP 8 (1ST: CORRALES46 · EXACT CENTERING charZoom:100, charX:0, charY:0!)
+     REAL TOP 8 (1ST: CORRALES46 · BIG HERO ZOOM ON EVERY RENDER!)
      ========================================================================= */
   const REAL_LOGO = isHttp
     ? '/media/branding/event_tournament_starfest_2026.png'
@@ -440,14 +490,14 @@
   const ORACLE_AV = 'https://images.start.gg/images/user/718402/image-f209edcfc6db42d30a6ca00c9d6be20e.jpg?ehk=IfWPA61kB99OfxZ%2F7NLlRs8EqN9cO168eh%2FE2MkHOQo%3D&ehkOptimized=3BVShEG60Ok1eFnUcwTk4SQQqvsry7SO%2BOo7bUfmebU%3D';
 
   const REAL_TOP8 = [
-    { place: 1, name: 'Corrales46',        sponsor: 'PBRD',     flag: 'ES', region: 'ES-AN', character: 'Reina',                 handle: '@corrales46',   avatar: '', charZoom: 116, charX: 0, charY: -28, charFlip: false },
-    { place: 2, name: 'Oracle_99',         sponsor: '',         flag: 'ES', region: 'ES-CN', character: 'Shaheen',               handle: '@Oracle_Javier',avatar: ORACLE_AV, charZoom: 100, charX: 0, charY: 0, charFlip: false },
-    { place: 3, name: 'BadCat',            sponsor: 'DM',       flag: 'ES', region: 'ES-GA', character: 'Fahkumram',             handle: '@BadCatGatocan',avatar: '', charZoom: 100, charX: 0, charY: 0, charFlip: false },
-    { place: 4, name: 'Silmad',            sponsor: 'PBRD',     flag: 'ES', region: 'ES-EX', character: 'Ling Xiaoyu',           handle: '@Silmad',       avatar: '', charZoom: 100, charX: 0, charY: 0, charFlip: false },
-    { place: 5, name: 'Copito',            sponsor: 'DM',       flag: 'ES', region: 'ES-IB', character: 'Robert "Bob" Richards', handle: '@AdrrnnCopito', avatar: '', charZoom: 100, charX: 0, charY: 0, charFlip: false },
-    { place: 5, name: 'Joker Intensifies', sponsor: 'MESETEAM', flag: 'ES', region: 'ES-MD', character: 'Jun Kazama',            handle: '@JookerTekken', avatar: '', charZoom: 100, charX: 0, charY: 0, charFlip: false },
-    { place: 7, name: 'Ryu',               sponsor: 'PBRD',     flag: 'ES', region: 'ES-EX', character: 'Fahkumram',             handle: '@Ruy_pls',      avatar: '', charZoom: 100, charX: 0, charY: 0, charFlip: false },
-    { place: 7, name: 'Crebain',           sponsor: '',         flag: '',   region: '',      character: 'Bryan Fury',            handle: '',              avatar: '', charZoom: 100, charX: 0, charY: 0, charFlip: false }
+    { place: 1, name: 'Corrales46',        sponsor: 'PBRD',     flag: 'ES', region: 'ES-AN', character: 'Reina',                 handle: '@corrales46',   avatar: '', charZoom: 138, charX: 0, charY: -34, charFlip: false },
+    { place: 2, name: 'Oracle_99',         sponsor: '',         flag: 'ES', region: 'ES-CN', character: 'Shaheen',               handle: '@Oracle_Javier',avatar: ORACLE_AV, charZoom: 130, charX: 0, charY: -22, charFlip: false },
+    { place: 3, name: 'BadCat',            sponsor: 'DM',       flag: 'ES', region: 'ES-GA', character: 'Fahkumram',             handle: '@BadCatGatocan',avatar: '', charZoom: 130, charX: 0, charY: -22, charFlip: false },
+    { place: 4, name: 'Silmad',            sponsor: 'PBRD',     flag: 'ES', region: 'ES-EX', character: 'Ling Xiaoyu',           handle: '@Silmad',       avatar: '', charZoom: 130, charX: 0, charY: -22, charFlip: false },
+    { place: 5, name: 'Copito',            sponsor: 'DM',       flag: 'ES', region: 'ES-IB', character: 'Robert "Bob" Richards', handle: '@AdrrnnCopito', avatar: '', charZoom: 130, charX: 0, charY: -22, charFlip: false },
+    { place: 5, name: 'Joker Intensifies', sponsor: 'MESETEAM', flag: 'ES', region: 'ES-MD', character: 'Jun Kazama',            handle: '@JookerTekken', avatar: '', charZoom: 130, charX: 0, charY: -22, charFlip: false },
+    { place: 7, name: 'Ryu',               sponsor: 'PBRD',     flag: 'ES', region: 'ES-EX', character: 'Fahkumram',             handle: '@Ruy_pls',      avatar: '', charZoom: 130, charX: 0, charY: -22, charFlip: false },
+    { place: 7, name: 'Crebain',           sponsor: '',         flag: '',   region: '',      character: 'Bryan Fury',            handle: '',              avatar: '', charZoom: 130, charX: 0, charY: -22, charFlip: false }
   ];
 
   const ROPESU = { name: 'Ropesu', sponsor: 'PBRD', flag: 'ES', region: 'ES-CB', bracket: 'W', character: 'Eddy Gordo', score: 2, avatar: '' };
@@ -460,23 +510,24 @@
     customColors: false, bgMode: 'gradient', fontName: 'theme', fontScore: 'theme',
     fontScale: 100, letterSpacing: 0, italic: 'theme', scoreSlant: 'mirror',
     textShadow: 'broadcast', uppercase: true, flagStyle: 'theme',
-    hudLayout: 'theme', plateShape: 'theme', centerStyle: 'theme',
-    outerBlade: 'theme', scorePos: 'theme', borderStyle: 'theme', showIso: 'theme',
-    glow: 'off', sheen: 'slow', borderAnim: 'off', texture: 'none',
-    sceneAnim: 't8-slash', sceneDelay: 0, animDuration: 550, scoreDuration: 400,
-    sceneStagger: true, sceneSheen: true, scoreAnim: 'pop',
-    mpStyle: 'fin', mpColor: 'gold', mpLabel: 'MATCH POINT',
+    layoutOverride: 'theme', shape: 'theme', centerStyle: 'theme',
+    outerBlade: 'theme', scorePosOverride: 'theme', borderStyle: 'theme', showIsoCode: 'theme',
+    glow: 'off', sheen: 'slow', animBorder: 'off', texture: 'none',
+    entryAnim: 't8-slash', sceneDelay: 0, animDuration: 520, scoreAnimDuration: 400,
+    introStagger: true, introFlash: true, scoreAnim: 'pop',
+    mpStyle: 'side-peek', mpColor: 'gold', mpText: 'MATCH POINT',
     flagFadeMode: 'out', flagFadeCurve: 'smooth', flagFadeIn: 0,
-    flagFadeStart: 30, flagFadeEnd: 98, flagFadeAngle: 22, flagFadeWidth: 120,
-    flagFadeOpacity: 100, flagFadeZoom: 112, flagFadeShiftX: 0,
-    flagFadeSat: 110, flagFadeBright: 98
+    flagFadeStart: 30, flagFadeEnd: 98, flagFadeAngle: 22, flagWidth: 96,
+    flagOpacity: 100, flagZoom: 112, flagShiftX: 0,
+    flagSaturation: 110, flagBrightness: 98
   };
 
   function makeScorebar(theme, p1, p2, ov = {}) {
     return {
       theme, visible: true, round: ov.round || 'WINNERS FINALS', format: 'FT3',
-      showFlags: 'both', showChars: true, showMatchPoint: true, showCasters: Boolean(ov.casters),
-      casters: { c1: 'NORDI5KE', c1Social: '@Nordi5ke', c2: 'STARFEST', c2Social: '@FGCCommunity' },
+      flagMode: 'both', showFlags: true, showCharacters: true, showMatchPoint: true,
+      showCommentators: Boolean(ov.casters),
+      commentators: { c1Name: 'NORDI5KE', c1Handle: '@Nordi5ke', c2Name: 'STARFEST', c2Handle: '@StarfestFGC' },
       p1: { ...p1, ...(ov.p1 || {}) },
       p2: { ...p2, ...(ov.p2 || {}) },
       style: { ...BASE_STYLE, ...(ov.style || {}) },
@@ -490,19 +541,19 @@
       p1: { ...p1 }, p2: { ...p2 },
       vs: {
         visible: true, design, source: 'live', game: 'tekken8', pack: 'vs_renders',
-        eyebrow: '', footerText: 'STARFEST 2026',
+        eyebrow: '', subtitle: 'STARFEST 2026',
         logoUrl: REAL_LOGO, logoPos: ov.logoPos || 'top-left', logoScale: 100, h2hOffsetY: 90,
-        bgMode: 'theme', frameStyle: 'theme', pattern: 'theme', patternDir: 'diag',
+        bgMode: 'theme', frameStyle: 'theme', pattern: 'theme', patternDir: 'diag-dr',
         patternSpeed: 34, patternOpacity: -1, patternScale: 100,
-        dividerStyle: 'theme', dividerAnim: 'scroll-down', dividerSpeed: 42, dividerWidth: 0, dividerTilt: -999,
+        dividerStyle: 'theme', dividerAnim: 'scroll-down', dividerSpeed: 42, dividerWidth: 0, dividerTilt: null,
         emblemStyle: 'theme', emblemText: 'VS', emblemAnim: 'float', emblemScale: 100, emblemOffsetY: 0,
-        plateStyle: 'theme', plateFont: 'theme', plateBottom: -1, plateWidth: 790, plateScale: 100, plateOpacity: 96,
-        nameScale: 100, flagMode: ov.flagMode || 'both', flagSize: 100, bgFlagOpacity: -1,
-        showH2H: false, showSponsors: true, showCharName: true, showLogo: true,
-        avatarMode: 'badge', charMotion: 'breathe', charShadow: 58,
-        p1Zoom: 100, p2Zoom: 100, p1OffsetX: 0, p2OffsetX: 0, p1OffsetY: 0, p2OffsetY: 0, p1Flip: false, p2Flip: false,
+        plateStyle: 'theme', fontDisplay: 'theme', plateBottom: -1, plateWidth: 790, plateScale: 100, plateOpacity: 96,
+        nameScale: 100, flagMode: ov.flagMode || 'both', flagSize: 100, flagWatermarkOpacity: -1,
+        showH2H: false, showScore: ov.showScore !== false, showSponsor: true, showCharName: true, showLogo: true,
+        avatarMode: 'badge', charIdleAnim: 'breathe', charShadow: 58,
+        p1Zoom: 162, p2Zoom: 162, p1OffsetX: 0, p2OffsetX: 0, p1OffsetY: -22, p2OffsetY: -22, p1Flip: false, p2Flip: false,
         headerStyle: 'theme', headerScale: 100, headerOffsetY: 0,
-        entryAnim: ov.entry || 'slam-split', entrySpeed: 100, ambientFx: ov.fx || 'aura'
+        entryAnim: ov.entry || 'slam-split', entrySpeed: 100, ambientAnim: ov.fx || 'aura'
       }
     };
   }
@@ -688,164 +739,142 @@
     el.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(${scale})`;
   }
 
-  function cutPulse(alpha = 0.36) {
-    const v = document.getElementById('cut-veil');
-    v.style.transition = 'none';
-    v.style.opacity = String(alpha);
-    requestAnimationFrame(() => {
-      v.style.transition = 'opacity 0.34s ease-out';
-      v.style.opacity = '0';
-    });
+  function setSbCaption(idx) {
+    const item = COPY[lang].sbCues[idx] || COPY[lang].sbCues[0];
+    document.getElementById('sbc-k').textContent = item.k;
+    document.getElementById('sbc-t').textContent = item.t;
+    document.getElementById('sbc-s').textContent = item.s;
   }
+
+  function setCommentary(show, badge = '', html = '') {
+    const el = document.getElementById('section-commentary');
+    el.classList.toggle('show', show);
+    if (!show) return;
+    document.getElementById('sc-badge').textContent = badge;
+    document.getElementById('sc-text').innerHTML = html;
+  }
+
+  let suppressEntry = false;
+  let sbEntryTimer = null, vsEntryTimer = null, resEntryTimer = null;
 
   function pushScorebar(st, bg = 't8', entry = false) {
     const w = frameScorebar.contentWindow;
     if (!w) return;
+    clearTimeout(sbEntryTimer);
     w.postMessage({ type: 'preview-config', bg, guides: false }, '*');
     w.postMessage({ type: 'state-update', state: st }, '*');
-    if (entry) setTimeout(() => w.postMessage({ type: 'test-entry-anim', useSceneDelay: false }, '*'), 45);
+    if (entry && !suppressEntry) sbEntryTimer = setTimeout(() => w.postMessage({ type: 'test-entry-anim', useSceneDelay: false }, '*'), 45);
   }
   function pushVs(st, entry = true) {
     const w = frameVs.contentWindow;
     if (!w) return;
+    clearTimeout(vsEntryTimer);
     w.postMessage({ type: 'vs-interactive-config', interactive: false, drag: false }, '*');
     w.postMessage({ type: 'state-update', state: st }, '*');
-    if (entry) setTimeout(() => w.postMessage({ type: 'test-vs-entry' }, '*'), 55);
+    if (entry && !suppressEntry) vsEntryTimer = setTimeout(() => w.postMessage({ type: 'test-vs-entry' }, '*'), 55);
   }
   function pushResults(st, entry = true) {
     const w = frameResults.contentWindow;
     if (!w) return;
+    clearTimeout(resEntryTimer);
     w.postMessage({ type: 'state-update', state: st }, '*');
-    if (entry) setTimeout(() => w.postMessage({ type: 'test-results-entry' }, '*'), 60);
+    if (entry && !suppressEntry) resEntryTimer = setTimeout(() => w.postMessage({ type: 'test-results-entry' }, '*'), 60);
   }
 
   function setScene(id) {
     ['scene-intro', 'scene-scorebar', 'scene-vs', 'scene-results', 'scene-outro']
       .forEach(s => document.getElementById(s).classList.toggle('active', s === id));
     document.getElementById('sb-caption').classList.toggle('show', id === 'scene-scorebar');
+    if (id !== 'scene-vs' && id !== 'scene-results') setCommentary(false);
   }
 
   /* =========================================================================
-     5-SCENE CLEAN STORYBOARD WITH DYNAMIC CAMERA ZOOMS ON EVERY CHANGE (~53s)
+     5-SCENE CLEAN STORYBOARD (ZOOM ONLY ON SCOREBARS · RICH COMMENTARY ON ALL!)
      ========================================================================= */
   const CUES = [
     // 01: SIMPLE INTRO (0..7 beats = 0:00..0:04.9)
     { beat: 0, sc: 0, run: () => {
       document.getElementById('fade-black').classList.remove('solid');
       setCam('cam-scorebar', 1, 0, 0, true);
-      setCam('cam-vs', 1, 0, 0, true);
-      setCam('cam-results', 1, 0, 0, true);
       setScene('scene-intro');
     }},
 
-    // 02: LIVE SCOREBARS WITH DYNAMIC ZOOM-INS ON EVERY CHANGE (7..26 beats = 0:04.9..0:18.1)
+    // 02: LIVE SCOREBARS WITH TOP-ANCHORED CAMERA ZOOM (7..26 beats = 0:04.9..0:18.1)
     { beat: 7, sc: 1, run: () => {
-      cutPulse(0.42);
       setCam('cam-scorebar', 1.0, 0, 0, true);
       setScene('scene-scorebar');
-      document.getElementById('sbc-t').textContent = '★ Tekken 8 Native HUD';
+      setSbCaption(0);
       pushScorebar(makeScorebar('t8-native-hud', ROPESU, ORACLE, { round: 'WINNERS FINALS' }), 't8', true);
     }},
     { beat: 9.2, sc: 1, run: () => {
-      // Smooth zoom RIGHT IN onto the full Tekken 8 Native HUD Scorebar (1.22x fits 100% width with 0 clipping!)
       setCam('cam-scorebar', 1.22, 0, 0, false);
     }},
     { beat: 12, sc: 1, run: () => {
-      // Switch to TWT 2026 Blade + Flag Fade & zoom close onto P1 Flag Fade detail!
-      cutPulse(0.24);
-      document.getElementById('sbc-t').textContent = '★ TWT 2026 Blade · Flag Fade';
+      setSbCaption(1);
       pushScorebar(makeScorebar('t8-twt-2026-official', CORRALES, BADCAT, {
-        round: 'GRAND FINALS', casters: true, style: { flagStyle: 'fade', flagFadeMode: 'out' }
+        round: 'GRAND FINALS', casters: true, style: { flagStyle: 'fade-blend', flagFadeMode: 'out' }
       }), 't8', false);
-      setCam('cam-scorebar', 1.56, 260, 0, false);
+      setCam('cam-scorebar', 1.45, 210, 0, false);
     }},
     { beat: 14.5, sc: 1, run: () => {
-      // Pan smoothly across center Match Point & P2!
-      setCam('cam-scorebar', 1.56, -260, 0, false);
+      setCam('cam-scorebar', 1.45, -210, 0, false);
     }},
     { beat: 17, sc: 1, run: () => {
-      // Pull back to full SF6 gameplay, slam in SF6 Native Drive!
-      cutPulse(0.36);
       setCam('cam-scorebar', 1.0, 0, 0, true);
-      document.getElementById('sbc-t').textContent = '🥊 SF6 Native Drive HUD';
+      setSbCaption(2);
       pushScorebar(makeScorebar('sf6-native-drive', CORRALES, ORACLE, {
         round: 'TOP 8 FINALS', p1: { character: 'Ryu' }, p2: { character: 'Chun-Li' }
       }), 'sf6', true);
     }},
     { beat: 19.2, sc: 1, run: () => {
-      // Zoom into the full SF6 top strip proving 0 px HUD overlap with 0 side clipping!
       setCam('cam-scorebar', 1.22, 0, 0, false);
     }},
     { beat: 22.5, sc: 1, run: () => {
-      // Crisp switch to SF6 White Studio with clean zoom settle!
-      cutPulse(0.24);
-      document.getElementById('sbc-t').textContent = '🥊 SF6 Broadcast White Studio';
+      setSbCaption(3);
       pushScorebar(makeScorebar('sf6-white-broadcast', BADCAT, SILMAD, {
         round: 'GRAND FINALS', p1: { character: 'Ken' }, p2: { character: 'Juri' }
       }), 'sf6', false);
       setCam('cam-scorebar', 1.18, 0, 0, false);
     }},
 
-    // 03: REAL VS SPLASH WITH SMOOTH ZOOM PUNCH TRANSITIONS (26..44 beats = 0:18.1..0:30.7)
+    // 03: REAL VS SPLASH — CLEAN 1:1 FULL FRAME, VERTICAL DIVIDER, BIG RENDERS + COMMENTARY!
     { beat: 26, sc: 2, run: () => {
-      cutPulse(0.44);
-      setCam('cam-vs', 1.12, 0, 0, true);
       setScene('scene-vs');
+      const v0 = COPY[lang].vsCues[0];
+      setCommentary(true, v0.b, v0.tx);
       pushVs(makeVs('mishima-ewgf', ROPESU, ORACLE, { round: 'WINNERS FINALS', logoPos: 'top-left', entry: 'slam-split', fx: 'aura' }), true);
-      requestAnimationFrame(() => setCam('cam-vs', 1.0, 0, 0, false));
-    }},
-    { beat: 29.5, sc: 2, run: () => {
-      // Gentle hero push-in on Ropesu vs Oracle_99
-      setCam('cam-vs', 1.07, 0, -10, false);
     }},
     { beat: 32, sc: 2, run: () => {
-      // Zoom-punch cut into Corrales46 vs Oracle_99 (t8-clash)!
-      cutPulse(0.34);
-      setCam('cam-vs', 1.14, 0, 0, true);
-      pushVs(makeVs('t8-clash', CORRALES, ORACLE, { round: 'GRAND FINALS', logoPos: 'top-left', entry: 'katana-slash', fx: 'sparks' }), true);
-      requestAnimationFrame(() => setCam('cam-vs', 1.0, 0, 0, false));
+      const v1 = COPY[lang].vsCues[1];
+      setCommentary(true, v1.b, v1.tx);
+      pushVs(makeVs('t8-clash', CORRALES, ORACLE, { round: 'GRAND FINALS', logoPos: 'top-left', entry: 'diag-slash', fx: 'sparks' }), true);
     }},
     { beat: 38, sc: 2, run: () => {
-      // Zoom-punch cut into BadCat vs Silmad (arcade-pop)!
-      cutPulse(0.34);
-      setCam('cam-vs', 1.12, 0, 0, true);
+      const v2 = COPY[lang].vsCues[2];
+      setCommentary(true, v2.b, v2.tx);
       pushVs(makeVs('arcade-pop', BADCAT, SILMAD, { round: 'LOSERS FINALS', logoPos: 'top-left', entry: 'zoom-burst', fx: 'sheen' }), true);
-      requestAnimationFrame(() => setCam('cam-vs', 1.0, 0, 0, false));
     }},
 
-    // 04: REAL TOP 8 RESULTS — CHAMPION CORRALES46 ZOOM-IN + PULLBACK! (44..64 beats = 0:30.7..0:44.6)
+    // 04: REAL TOP 8 RESULTS — CLEAN 1:1 FULL FRAME, CORRALES46 #1ST, BIG RENDERS + COMMENTARY!
     { beat: 44, sc: 3, run: () => {
-      cutPulse(0.45);
-      // Start ZOOMED IN on Champion 1ST Corrales46 on the left!
-      setCam('cam-results', 1.38, 290, -25, true);
       setScene('scene-results');
+      const r0 = COPY[lang].resCues[0];
+      setCommentary(true, r0.b, r0.tx);
       pushResults(makeResults('res-evo-gold', { entry: 'cascade-slam', fx: 'confetti' }), true);
     }},
-    { beat: 47.2, sc: 3, run: () => {
-      // Smooth dramatic pullback revealing ALL 8 players!
-      setCam('cam-results', 1.0, 0, 0, false);
-    }},
     { beat: 51, sc: 3, run: () => {
-      // Smooth zoom transition into Top 3 Podium (Oracle_99 · Corrales46 · BadCat)!
-      cutPulse(0.34);
-      setCam('cam-results', 1.12, 0, -15, true);
+      const r1 = COPY[lang].resCues[1];
+      setCommentary(true, r1.b, r1.tx);
       pushResults(makeResults('res-podium-trophy', { entry: 'podium-rise', fx: 'confetti' }), true);
-      requestAnimationFrame(() => setCam('cam-results', 1.0, 0, 0, false));
     }},
     { beat: 57.5, sc: 3, run: () => {
-      // Smooth zoom onto 8-Row Ladder on left -> then pan across to Champion Corrales46!
-      cutPulse(0.34);
-      setCam('cam-results', 1.24, 170, -12, true);
+      const r2 = COPY[lang].resCues[2];
+      setCommentary(true, r2.b, r2.tx);
       pushResults(makeResults('res-iron-fist', { entry: 'curtain-rise', fx: 'confetti' }), true);
-    }},
-    { beat: 60.5, sc: 3, run: () => {
-      // Glide smoothly across to full-frame revealing both Ladder & Champion!
-      setCam('cam-results', 1.0, 0, 0, false);
     }},
 
     // 05: SIMPLE CLEAN OUTRO (64..76 beats = 0:44.6..0:53.0)
     { beat: 64, sc: 4, run: () => {
-      cutPulse(0.45);
       setScene('scene-outro');
     }},
     { beat: 74, sc: 4, run: () => {
@@ -874,8 +903,7 @@
     document.getElementById('intro-pill').textContent = c.introPill;
     document.getElementById('intro-sub').textContent = c.introSub;
     c.it.forEach((t, i) => { document.getElementById(`it-${i + 1}`).textContent = t; });
-    document.getElementById('sbc-k').textContent = c.sbcK;
-    document.getElementById('sbc-s').textContent = c.sbcS;
+    setSbCaption(0);
     document.getElementById('out-kicker').textContent = c.outKicker;
     document.getElementById('out-title').innerHTML = c.outTitle;
     document.getElementById('out-sub').textContent = c.outSub;
@@ -926,7 +954,9 @@
     let idx = 0;
     for (let i = 0; i < CUES.length; i++) if (CUES[i].beat <= tb) idx = i;
     const sc = CUES[idx]?.sc ?? 0;
+    suppressEntry = true;
     for (let i = 0; i <= idx; i++) if (CUES[i].sc === sc) CUES[i].run();
+    suppressEntry = false;
     lastCue = idx; curScene = sc;
     updateReadout();
     playing = keepPlaying;
