@@ -1,0 +1,18 @@
+# Local runtime state, player DB, match history, and PRIVATE API tokens (start.gg / Challonge)
+# NEVER commit data/ — server.mjs auto-generates fresh defaults on first launch!
+data/
+*.tmp
+
+# Environment & credentials
+.env
+.env.*
+*.key
+*.pem
+
+# OS & editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
+.vscode/
+.idea/
