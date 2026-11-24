@@ -119,6 +119,13 @@
     transition: opacity 0.32s ease;
   }
   #res-stage.is-hidden { opacity: 0; pointer-events: none; }
+  #res-stage.is-booting,
+  #res-stage.is-booting * {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transition: none !important;
+    animation: none !important;
+  }
 
   /* =========================================================================
      1. BACKDROP, PATTERNS & 8 CONTINUOUS AMBIENT FX LAYERS
@@ -933,7 +940,7 @@
 </head>
 <body>
 <div id="res-scaler">
-  <div id="res-stage" data-layout="champ-left" data-card="angled" data-bg-mode="theme" data-ambient="confetti-gold" data-card-idle="champ-glow" data-crown="1" data-light="0">
+  <div id="res-stage" class="is-booting" data-layout="champ-left" data-card="angled" data-bg-mode="theme" data-ambient="confetti-gold" data-card-idle="champ-glow" data-crown="1" data-light="0">
     <div class="res-bg"></div>
     <div class="res-pattern-wrap"><div class="res-pattern" id="res-pattern" data-pat="diagonal" data-pat-dir="diag-dr" data-light="0"></div></div>
     <div class="res-ambient"></div>
@@ -1271,7 +1278,12 @@
     });
     rescalePreview();
 
-    if (res.introNonce && res.introNonce !== lastIntroNonce) {
+    const wasBooting = stage.classList.contains('is-booting');
+    if (wasBooting) {
+      void stage.offsetWidth;
+      stage.classList.remove('is-booting');
+      lastIntroNonce = res.introNonce || 0;
+    } else if (res.introNonce && res.introNonce !== lastIntroNonce) {
       lastIntroNonce = res.introNonce;
       triggerEntryAnim(effEntry);
     }
@@ -1597,10 +1609,12 @@
   } catch {}
 
   if (isHttp) {
-    fetch('/api/state').then(r => r.json()).then(st => {
+    fetch('/api/state', { cache: 'no-store' }).then(r => r.json()).then(st => {
       render(st);
       if (!isPreview && st?.results?.visible !== false) onSceneShow();
-    }).catch(() => {});
+    }).catch(() => {
+      $('res-stage')?.classList.remove('is-booting');
+    });
 
     if (!isPreview) {
       let activeEs = null, reconnectTimer = null, pageUnloading = false;
@@ -1644,6 +1658,12 @@
         connectSSE();
       }
     }
+  } else {
+    try {
+      const cached = localStorage.getItem('fgc_open_scorebar_state_v1');
+      if (cached) render(JSON.parse(cached));
+      else $('res-stage')?.classList.remove('is-booting');
+    } catch { $('res-stage')?.classList.remove('is-booting'); }
   }
 })();
 </script>

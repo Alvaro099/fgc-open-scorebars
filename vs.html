@@ -91,6 +91,13 @@
     transition: opacity 0.32s ease;
   }
   #vs-stage.is-hidden { opacity: 0; pointer-events: none; }
+  #vs-stage.is-booting,
+  #vs-stage.is-booting * {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transition: none !important;
+    animation: none !important;
+  }
 
   /* =========================================================================
      1. BACKDROP & SPLIT GEOMETRIES (9 ARCHITECTURES)
@@ -1252,7 +1259,7 @@
 <body>
 <div id="vs-hover-pill"></div>
 <div id="vs-scaler">
-  <div id="vs-stage" data-design="arcade-pop" data-bg-mode="theme" data-split="vertical" data-frame="arcade-teeth" data-emblem="winged" data-plate="arcade-box" data-header="trapezoid" data-ambient="none">
+  <div id="vs-stage" class="is-booting" data-design="arcade-pop" data-bg-mode="theme" data-split="vertical" data-frame="arcade-teeth" data-emblem="winged" data-plate="arcade-box" data-header="trapezoid" data-ambient="none">
     <!-- Background Halves & Pattern -->
     <div class="vs-bg vs-hit" data-vs-el="backdrop" data-vs-label="🖼️ Backdrop &amp; Pattern">
       <div class="vs-bg-half left"></div>
@@ -1738,8 +1745,15 @@
       logoSlot.classList.remove('active');
     }
     $('vs-subtitle').textContent = vs.subtitle || st.tournament || '';
+    rescalePreview();
 
-    if (vs.introNonce && vs.introNonce !== lastIntroNonce) {
+    const wasBooting = stage.classList.contains('is-booting');
+    if (wasBooting) {
+      // Flush final styles before revealing so zero yellow/default frame or CSS transition ever flashes!
+      void stage.offsetWidth;
+      stage.classList.remove('is-booting');
+      lastIntroNonce = vs.introNonce || 0;
+    } else if (vs.introNonce && vs.introNonce !== lastIntroNonce) {
       lastIntroNonce = vs.introNonce;
       triggerEntryAnim(vs.entryAnim);
     }
@@ -2100,11 +2114,13 @@
 
   // NOTE: Preview iframes inside panel.html NEVER open EventSource (prevents Chrome 6-socket HTTP/1.1 deadlock).
   if (isHttp) {
-    fetch('/api/history').then(r => r.json()).then(list => { historyDb = list; if (currentState) render(currentState); }).catch(() => {});
-    fetch('/api/state').then(r => r.json()).then(st => {
+    fetch('/api/history', { cache: 'no-store' }).then(r => r.json()).then(list => { historyDb = list; if (currentState) render(currentState); }).catch(() => {});
+    fetch('/api/state', { cache: 'no-store' }).then(r => r.json()).then(st => {
       render(st);
       if (!isPreview && st?.vs?.visible !== false) triggerEntryAnim(st?.vs?.entryAnim || 'slam-split');
-    }).catch(() => {});
+    }).catch(() => {
+      $('vs-stage')?.classList.remove('is-booting');
+    });
 
     if (!isPreview) {
       let activeEs = null;
@@ -2150,6 +2166,12 @@
         connectSSE();
       }
     }
+  } else {
+    try {
+      const cached = localStorage.getItem('fgc_open_scorebar_state_v1');
+      if (cached) render(JSON.parse(cached));
+      else $('vs-stage')?.classList.remove('is-booting');
+    } catch { $('vs-stage')?.classList.remove('is-booting'); }
   }
 })();
 </script>
