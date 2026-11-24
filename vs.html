@@ -59,17 +59,16 @@
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body {
-    width: 1920px;
-    height: 1080px;
+    width: 100vw;
+    height: 100vh;
     overflow: hidden;
     background: transparent;
     font-family: var(--vs-font);
     -webkit-font-smoothing: antialiased;
     user-select: none;
   }
-  body.preview-mode {
-    width: 100vw;
-    height: 100vh;
+  body.preview-mode,
+  body.fitted-letterbox {
     background: #080a10;
   }
 
@@ -1405,19 +1404,26 @@
   let dragEnabled = isPreview;
   let selectedElement = '';
 
-  let rescalePreview = () => {};
-  if (isPreview) {
-    document.body.classList.add('preview-mode', 'interactive-edit');
-    rescalePreview = () => {
-      if (!window.innerWidth || !window.innerHeight) return;
-      currentScale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
-      const ox = Math.max(0, (window.innerWidth - 1920 * currentScale) / 2);
-      const oy = Math.max(0, (window.innerHeight - 1080 * currentScale) / 2);
-      $('vs-scaler').style.transform = `translate(${ox.toFixed(1)}px, ${oy.toFixed(1)}px) scale(${currentScale})`;
-    };
-    window.addEventListener('resize', rescalePreview);
-    rescalePreview();
-  }
+  if (isPreview) document.body.classList.add('preview-mode', 'interactive-edit');
+  const rescalePreview = () => {
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    if (!w || !h) return;
+    if (!isPreview && w === 1920 && h === 1080) {
+      currentScale = 1;
+      $('vs-scaler').style.transform = 'none';
+      document.body.classList.remove('fitted-letterbox');
+      return;
+    }
+    currentScale = Math.min(w / 1920, h / 1080);
+    const ox = Math.max(0, (w - 1920 * currentScale) / 2);
+    const oy = Math.max(0, (h - 1080 * currentScale) / 2);
+    $('vs-scaler').style.transform = `translate(${ox.toFixed(1)}px, ${oy.toFixed(1)}px) scale(${currentScale})`;
+    const isTransparent = currentState?.vs?.bgMode === 'transparent';
+    document.body.classList.toggle('fitted-letterbox', !window.obsstudio && !isTransparent);
+  };
+  window.addEventListener('resize', rescalePreview);
+  rescalePreview();
 
   let currentState = null;
   let historyDb = [];

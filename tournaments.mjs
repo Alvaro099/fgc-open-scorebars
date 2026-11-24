@@ -626,6 +626,7 @@ export async function fetchStartGGStandings(eventId, token) {
       event(id: $eventId) {
         id
         name
+        state
         numEntrants
         videogame { name }
         tournament {
@@ -661,6 +662,9 @@ export async function fetchStartGGStandings(eventId, token) {
   const t = ev.tournament || {};
   const { logoUrl } = extractTournamentImages(t);
   const nodes = ev.standings?.nodes || [];
+  const rawState = String(ev.state || '').toUpperCase();
+  const isCompleted = rawState === 'COMPLETED';
+  const status = isCompleted ? 'completed' : (rawState === 'ACTIVE' || nodes.length > 0 ? 'live' : 'upcoming');
   const placements = nodes.slice(0, 8).map((n, idx) => {
     const ent = n.entrant || {};
     const p = ent.participants?.[0];
@@ -689,6 +693,8 @@ export async function fetchStartGGStandings(eventId, token) {
     entrantsCount: Number(ev.numEntrants || 0),
     location: [t.city, t.countryCode].filter(Boolean).join(', '),
     logoUrl,
+    status,
+    isCompleted,
     placements
   };
 }
@@ -863,15 +869,32 @@ export async function fetchChallongeStandings(urlOrSlug, apiKey) {
   const { slug } = parseChallongeUrl(urlOrSlug);
   if (!slug) throw new Error('Enter a valid Challonge tournament URL or slug first.');
   if (!apiKey || !String(apiKey).trim()) throw new Error('Missing Challonge API key.');
-  const url = `${CHALLONGE_BASE}/tournaments/${encodeURIComponent(slug)}.json?api_key=${encodeURIComponent(String(apiKey).trim())}&include_participants=1`;
+  const url = `${CHALLONGE_BASE}/tournaments/${encodeURIComponent(slug)}.json?api_key=${encodeURIComponent(String(apiKey).trim())}&include_participants=1&include_matches=1`;
   const res = await fetch(url, { headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(8000) });
   const json = await res.json().catch(() => null);
   if (!res.ok || !json?.tournament) throw new Error(`Challonge HTTP ${res.status}`);
   const t = json.tournament;
   const parts = (t.participants || []).map(w => w.participant || w);
+  const matches = (t.matches || []).map(w => w.match || w);
+  const winsById = new Map();
+  for (const m of matches) {
+    if (m.winner_id) winsById.set(String(m.winner_id), (winsById.get(String(m.winner_id)) || 0) + 1);
+  }
+  const tState = String(t.state || '').toLowerCase();
+  const isCompleted = tState === 'complete' || tState === 'awaiting_review';
+  const status = isCompleted ? 'completed' : (tState === 'underway' || winsById.size > 0 ? 'live' : 'upcoming');
+
   const ranked = parts
     .filter(p => p.final_rank != null || p.seed != null)
-    .sort((a, b) => (a.final_rank ?? 999) - (b.final_rank ?? 999) || (a.seed ?? 999) - (b.seed ?? 999))
+    .sort((a, b) => {
+      const ra = a.final_rank ?? 999;
+      const rb = b.final_rank ?? 999;
+      if (ra !== rb) return ra - rb;
+      const wa = winsById.get(String(a.id)) || 0;
+      const wb = winsById.get(String(b.id)) || 0;
+      if (wa !== wb) return wb - wa;
+      return (a.seed ?? 999) - (b.seed ?? 999);
+    })
     .slice(0, 8);
   const placements = ranked.map((p, idx) => {
     const { sponsor, name } = splitSponsorAndName(p.display_name || p.name || p.username || `Player ${idx + 1}`);
@@ -895,6 +918,8 @@ export async function fetchChallongeStandings(urlOrSlug, apiKey) {
     entrantsCount: parts.length,
     location: 'Challonge',
     logoUrl: String(t.organization_logo_url || t.logo_url || t.avatar_url || t.image_url || '').trim(),
+    status,
+    isCompleted,
     placements
   };
 }
@@ -998,6 +1023,8 @@ export function getDemoStandings() {
     entrantsCount: 64,
     location: 'Offline Demo',
     logoUrl: DEMO_EVENT_LOGO_SVG,
+    status: 'completed',
+    isCompleted: true,
     placements: sample
   };
 }

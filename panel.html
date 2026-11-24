@@ -2329,6 +2329,71 @@
     letter-spacing: 0.04em;
     text-transform: uppercase;
   }
+  .res-player-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .res-frame-drawer {
+    display: none;
+    grid-template-columns: 1fr 1fr 1fr auto;
+    gap: 10px;
+    align-items: center;
+    padding: 8px 12px;
+    margin-top: -2px;
+    background: #0a0f1c;
+    border: 1px solid rgba(0, 229, 255, 0.45);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+  }
+  .res-frame-drawer.open { display: grid; }
+  @media (max-width: 960px) { .res-frame-drawer { grid-template-columns: 1fr 1fr; } }
+  .res-frame-drawer .slider-row { margin-top: 0; }
+  .res-frame-drawer .slider-head { font-size: 10px; margin-bottom: 2px; }
+  .res-trn-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 9px 12px;
+    margin-bottom: 12px;
+    border-radius: 9px;
+    background: linear-gradient(90deg, rgba(37, 99, 235, 0.12), rgba(16, 22, 38, 0.92));
+    border: 1px solid rgba(96, 165, 250, 0.35);
+  }
+  .res-trn-bar.is-completed {
+    background: linear-gradient(90deg, rgba(34, 197, 94, 0.14), rgba(16, 22, 38, 0.92));
+    border-color: rgba(34, 197, 94, 0.45);
+  }
+  .res-trn-bar.is-live {
+    background: linear-gradient(90deg, rgba(245, 158, 11, 0.15), rgba(16, 22, 38, 0.92));
+    border-color: rgba(245, 158, 11, 0.45);
+  }
+  .res-trn-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    background: rgba(148, 163, 184, 0.16);
+    color: #cbd5e1;
+  }
+  .res-trn-status.completed { background: rgba(34, 197, 94, 0.22); color: #86efac; border: 1px solid rgba(34, 197, 94, 0.45); }
+  .res-trn-status.live { background: rgba(245, 158, 11, 0.22); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.45); }
+  .pop-av {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid rgba(255,255,255,0.22);
+    background: #0d1220;
+  }
 </style>
 </head>
 <body>
@@ -3886,7 +3951,8 @@
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
             <label class="toggle-item" style="padding:4px 8px;" title="Automatically load the tournament's official logo into the VS Splash on connect"><input type="checkbox" id="chk-trn-auto-logo" checked /> Auto Event Logo</label>
             <label class="toggle-item" style="padding:4px 8px;"><input type="checkbox" id="chk-trn-autosync" /> Auto-Sync (15s)</label>
-            <span id="trn-token-hint" style="font-size:11px;color:var(--muted);">Tokens stored locally on your PC only</span>
+            <label class="toggle-item" style="padding:4px 8px;" title="When unchecked, your API token stays only in RAM for this session and is never written to disk"><input type="checkbox" id="chk-trn-remember-token" /> Save Token on PC</label>
+            <span id="trn-token-hint" style="font-size:11px;color:var(--muted);">Session-only by default · never uploaded</span>
           </div>
         </div>
 
@@ -3899,11 +3965,12 @@
             <label for="trn-token-input" id="trn-token-label">
               Free API Token (<a id="trn-token-link" href="https://start.gg/admin/profile/developer" target="_blank" rel="noopener" style="color:#60a5fa;">Get free token ↗</a>)
             </label>
-            <input type="password" id="trn-token-input" autocomplete="off" placeholder="Paste your personal token (masked on stream)" />
+            <input type="password" id="trn-token-input" autocomplete="off" placeholder="Paste your personal token (hidden · never shown)" />
           </div>
           <div style="display:flex;gap:6px;flex-wrap:wrap;">
             <button type="button" id="btn-trn-connect" class="primary" style="height:33px;">🔌 Connect</button>
-            <button type="button" id="btn-trn-refresh" style="height:33px;" title="Refresh Stream Queue & Sets">↻</button>
+            <button type="button" id="btn-trn-refresh" style="height:33px;" title="Refresh Stream Queue &amp; Sets">↻</button>
+            <button type="button" id="btn-trn-clear-token" style="height:33px;display:none;" title="Immediately erase API token from memory and local disk">🗑 Clear Token</button>
           </div>
         </div>
 
@@ -3918,6 +3985,7 @@
           <div class="trn-banner-controls">
             <select id="trn-event-select" style="width:auto;min-width:175px;"></select>
             <button type="button" id="btn-trn-use-logo" style="display:none;" title="Apply this tournament's official logo to the VS Splash overlay">🏷️ Use Event Logo</button>
+            <button type="button" id="btn-trn-to-results" title="Sync Top 8 Standings (live or final) directly into the Results Studio">🏅 Top 8 → Results</button>
             <button type="button" id="btn-trn-import" title="Import entrants, sponsors, avatars, and country/region flags into your local roster">👥 Import Entrants</button>
             <button type="button" id="btn-trn-load-next" class="primary">⏭ Load Next Set</button>
           </div>
@@ -3982,6 +4050,34 @@
         </div>
         <div class="vs-preview-stage">
           <iframe id="results-preview-frame" src="results.html?preview=1"></iframe>
+        </div>
+        <!-- DIRECT IMAGE FRAMING BAR -->
+        <div class="vs-sel-bar" id="res-frame-bar">
+          <span class="vs-sel-pill" id="res-frame-hint">✋ Drag any character portrait above to move · Wheel to zoom · Click to open sliders</span>
+          <div class="vs-sel-jumps" id="res-frame-jumps">
+            <button type="button" data-res-jump="0">1st</button>
+            <button type="button" data-res-jump="1">2nd</button>
+            <button type="button" data-res-jump="2">3rd</button>
+            <button type="button" data-res-jump="3">4th</button>
+            <button type="button" data-res-jump="4">5th</button>
+            <button type="button" data-res-jump="5">6th</button>
+            <button type="button" data-res-jump="6">7th</button>
+            <button type="button" data-res-jump="7">8th</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- LIVE TOURNAMENT STANDINGS LINK BAR (START.GG / CHALLONGE AUTO-SYNC) -->
+      <section class="res-trn-bar" id="res-trn-bar">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span class="res-trn-status" id="res-trn-status">🔌 NOT LINKED</span>
+          <strong id="res-trn-name" style="font-size:12px;">Connect a Start.gg or Challonge tournament to auto-populate live &amp; final Top 8 results</strong>
+          <span id="res-trn-meta" style="font-size:11px;color:var(--muted);"></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <label class="toggle-item" style="padding:3px 8px;" title="Automatically update Top 8 standings whenever you connect, refresh, switch events, or report matches in Tournaments"><input type="checkbox" id="chk-res-autosync" checked /> Auto-Sync Standings</label>
+          <button type="button" id="btn-res-sync-now" class="primary" style="padding:4px 9px;font-size:11px;">🔄 Sync Now</button>
+          <button type="button" id="btn-res-go-trn" style="padding:4px 9px;font-size:11px;">🏆 Tournaments</button>
         </div>
       </section>
 
@@ -4670,15 +4766,20 @@
     charZoom: 100,
     charOffsetY: 0,
     introNonce: 0,
+    autoSyncTournament: true,
+    linkedProvider: '',
+    linkedTournament: '',
+    tournamentStatus: '',
+    lastSyncAt: 0,
     placements: [
-      { place: 1, name: 'PLAYER 1', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '' },
-      { place: 2, name: 'PLAYER 2', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '' },
-      { place: 3, name: 'PLAYER 3', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '' },
-      { place: 4, name: 'PLAYER 4', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '' },
-      { place: 5, name: 'PLAYER 5', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '' },
-      { place: 5, name: 'PLAYER 6', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '' },
-      { place: 7, name: 'PLAYER 7', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '' },
-      { place: 7, name: 'PLAYER 8', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '' }
+      { place: 1, name: 'PLAYER 1', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '', charZoom: 100, charX: 0, charY: 0, charFlip: false },
+      { place: 2, name: 'PLAYER 2', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '', charZoom: 100, charX: 0, charY: 0, charFlip: false },
+      { place: 3, name: 'PLAYER 3', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '', charZoom: 100, charX: 0, charY: 0, charFlip: false },
+      { place: 4, name: 'PLAYER 4', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '', charZoom: 100, charX: 0, charY: 0, charFlip: false },
+      { place: 5, name: 'PLAYER 5', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '', charZoom: 100, charX: 0, charY: 0, charFlip: false },
+      { place: 5, name: 'PLAYER 6', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '', charZoom: 100, charX: 0, charY: 0, charFlip: false },
+      { place: 7, name: 'PLAYER 7', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '', charZoom: 100, charX: 0, charY: 0, charFlip: false },
+      { place: 7, name: 'PLAYER 8', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '', charZoom: 100, charX: 0, charY: 0, charFlip: false }
     ]
   };
   const RESULTS_DESIGNS = window.FGC_RESULTS_DESIGNS || [];
@@ -4688,6 +4789,7 @@
   let resRosterLoadingKey = '';
   const failedResRosterKeys = new Set();
   let resAvatarUploadIdx = 0;
+  let resSelectedIdx = -1;
 
   const FLAG_CATALOG = window.FGC_FLAG_CATALOG || [];
   const FLAGS_MAP = window.FGC_FLAGS || {};
@@ -5577,6 +5679,27 @@
     comboOpenSide = null;
   }
 
+  function lookupPlayerProfile(name) {
+    const key = normText(name).trim();
+    if (!key) return null;
+    const saved = playersDb.find(x => normText(x.name).trim() === key);
+    let avatar = saved?.avatar || '';
+    const snap = trnState.snapshot;
+    if (!avatar && snap) {
+      const part = (snap.participants || []).find(x => normText(x.name).trim() === key && x.avatar);
+      if (part?.avatar) avatar = part.avatar;
+      if (!avatar) {
+        const allSets = [...(snap.streamQueue || []), ...(snap.sets || [])];
+        for (const s of allSets) {
+          if (normText(s.p1?.name).trim() === key && s.p1?.avatar) { avatar = s.p1.avatar; break; }
+          if (normText(s.p2?.name).trim() === key && s.p2?.avatar) { avatar = s.p2.avatar; break; }
+        }
+      }
+    }
+    if (!saved && !avatar) return null;
+    return { ...(saved || {}), avatar };
+  }
+
   function applyPlayerToSide(side, p) {
     const idx = playersDb.findIndex(x => x.name.toLowerCase() === p.name.toLowerCase());
     if (idx > 0) {
@@ -5584,6 +5707,8 @@
       playersDb.unshift(moved);
       renderPlayersDb();
     }
+    const prof = lookupPlayerProfile(p.name);
+    const nextAvatar = p.avatar || prof?.avatar || '';
     commitState({
       [side]: {
         name: p.name,
@@ -5591,7 +5716,7 @@
         flag: p.flag || '',
         region: p.region || '',
         character: p.character || state[side].character,
-        avatar: p.avatar !== undefined ? p.avatar : (state[side].avatar || '')
+        avatar: nextAvatar
       }
     }, true);
     $(`${side}-name`).value = p.name;
@@ -5613,9 +5738,12 @@
       const flags = (f1 || f2) ? `<span class="pop-flags">${f1}${f2}</span>` : '';
       const sp = p.sponsor ? `<span class="pop-sp">${p.sponsor}</span>` : '';
       const ch = p.character ? `<span class="pop-ch">${p.character}</span>` : '';
+      const rawAv = p.avatar || lookupPlayerProfile(p.name)?.avatar || '';
+      const avSrc = rawAv ? (/^https?:\/\//i.test(rawAv) && isHttp ? `/api/avatar-proxy?url=${encodeURIComponent(rawAv)}` : rawAv) : '';
+      const avHtml = avSrc ? `<img class="pop-av" src="${avSrc}" alt="" />` : '';
       return `
         <button type="button" class="pop-item ${i === comboHighlight ? 'hl' : ''}" data-pop-name="${p.name.replace(/"/g, '&quot;')}">
-          <span class="pop-item-left">${flags}${sp}<span class="pop-nm">${p.name}</span></span>
+          <span class="pop-item-left">${avHtml}${flags}${sp}<span class="pop-nm">${p.name}</span></span>
           ${ch}
         </button>`;
     }).join('');
@@ -5816,7 +5944,15 @@
       inp.addEventListener('focus', () => openPlayerPopover(side, ''));
       inp.addEventListener('input', (e) => {
         const val = e.target.value;
-        commitState({ [side]: { name: val } });
+        const matched = lookupPlayerProfile(val);
+        const patch = { name: val };
+        if (matched?.avatar) {
+          patch.avatar = matched.avatar;
+        } else if (state[side]?.avatar && !state[side].avatar.startsWith('/media/')) {
+          // Clear stale remote tournament avatar when switching to a different player without a match
+          patch.avatar = '';
+        }
+        commitState({ [side]: patch });
         if (comboOpenSide !== side) openPlayerPopover(side, val);
         else { comboHighlight = 0; renderPlayerPopover(side, val); }
       });
@@ -6468,10 +6604,18 @@
       const del = e.target.closest('[data-del-player]');
       if (b1) {
         const p = playersDb[Number(b1.dataset.loadP1)];
-        if (p) { commitState({ p1: { name: p.name, sponsor: p.sponsor || '', flag: p.flag || '', region: p.region || '', character: p.character || '', avatar: p.avatar || '' } }, true); toast(`P1 → ${p.name}`); }
+        if (p) {
+          const av = p.avatar || lookupPlayerProfile(p.name)?.avatar || '';
+          commitState({ p1: { name: p.name, sponsor: p.sponsor || '', flag: p.flag || '', region: p.region || '', character: p.character || '', avatar: av } }, true);
+          toast(`P1 → ${p.name}`);
+        }
       } else if (b2) {
         const p = playersDb[Number(b2.dataset.loadP2)];
-        if (p) { commitState({ p2: { name: p.name, sponsor: p.sponsor || '', flag: p.flag || '', region: p.region || '', character: p.character || '', avatar: p.avatar || '' } }, true); toast(`P2 → ${p.name}`); }
+        if (p) {
+          const av = p.avatar || lookupPlayerProfile(p.name)?.avatar || '';
+          commitState({ p2: { name: p.name, sponsor: p.sponsor || '', flag: p.flag || '', region: p.region || '', character: p.character || '', avatar: av } }, true);
+          toast(`P2 → ${p.name}`);
+        }
       } else if (del) {
         const p = playersDb[Number(del.dataset.delPlayer)];
         if (p) deletePlayer(p.name);
@@ -6626,7 +6770,10 @@
     const urlInp = $('trn-url-input');
     const tokInp = $('trn-token-input');
     const link = $('trn-token-link');
+    const clrBtn = $('btn-trn-clear-token');
+    const remChk = $('chk-trn-remember-token');
     const cfg = trnState.config || {};
+    if (remChk) remChk.checked = Boolean(cfg.persistTokens);
 
     if (prov === 'demo') {
       $('trn-url-label').textContent = 'Offline Demo Tournament (No Token Required)';
@@ -6636,6 +6783,7 @@
       tokInp.disabled = true;
       tokInp.placeholder = 'No token required — click Connect!';
       $('trn-token-hint').textContent = '100% offline test bracket with 5 sample sets & flags';
+      if (clrBtn) clrBtn.style.display = 'none';
     } else if (prov === 'startgg') {
       urlInp.disabled = false;
       tokInp.disabled = false;
@@ -6644,8 +6792,11 @@
       urlInp.value = cfg.startggUrl || '';
       link.href = 'https://start.gg/admin/profile/developer';
       tokInp.value = '';
-      tokInp.placeholder = cfg.hasStartggToken ? `Saved (${cfg.startggTokenHint}) — leave blank to reuse` : 'Paste your start.gg Personal Access Token';
-      $('trn-token-hint').textContent = cfg.hasStartggToken ? `✅ start.gg token saved (${cfg.startggTokenHint})` : 'Token saved locally on your PC only (data/integrations.json)';
+      tokInp.placeholder = cfg.hasStartggToken ? '🔒 Token loaded (hidden) — leave blank to reuse' : 'Paste your personal start.gg token (hidden)';
+      $('trn-token-hint').textContent = cfg.hasStartggToken
+        ? (cfg.persistTokens ? '🔒 Token saved locally on this PC (never uploaded)' : '🔒 Token active in RAM only (cleared on restart)')
+        : 'Session-only by default · never uploaded';
+      if (clrBtn) clrBtn.style.display = cfg.hasStartggToken ? 'inline-flex' : 'none';
     } else {
       urlInp.disabled = false;
       tokInp.disabled = false;
@@ -6654,8 +6805,11 @@
       urlInp.value = cfg.challongeUrl || '';
       link.href = 'https://challonge.com/settings/developer';
       tokInp.value = '';
-      tokInp.placeholder = cfg.hasChallongeKey ? `Saved (${cfg.challongeKeyHint}) — leave blank to reuse` : 'Paste your free Challonge API Key';
-      $('trn-token-hint').textContent = cfg.hasChallongeKey ? `✅ Challonge API Key saved (${cfg.challongeKeyHint})` : 'API Key saved locally on your PC only (data/integrations.json)';
+      tokInp.placeholder = cfg.hasChallongeKey ? '🔒 API key loaded (hidden) — leave blank to reuse' : 'Paste your personal Challonge API Key (hidden)';
+      $('trn-token-hint').textContent = cfg.hasChallongeKey
+        ? (cfg.persistTokens ? '🔒 API key saved locally on this PC (never uploaded)' : '🔒 API key active in RAM only (cleared on restart)')
+        : 'Session-only by default · never uploaded';
+      if (clrBtn) clrBtn.style.display = cfg.hasChallongeKey ? 'inline-flex' : 'none';
     }
   }
 
@@ -6815,7 +6969,8 @@
         body: JSON.stringify({
           provider: trnState.provider,
           url: $('trn-url-input').value.trim(),
-          token: rawTok ? rawTok : '__KEEP__'
+          token: rawTok ? rawTok : '__KEEP__',
+          rememberToken: Boolean($('chk-trn-remember-token')?.checked)
         })
       });
       const data = await res.json();
@@ -6856,7 +7011,14 @@
         commitState({ tournament: data.tournament.name }, true);
       }
 
-      if (!silent) toast(`🏆 Connected: ${data.tournament.name}${logoApplied ? ' · Event logo loaded' : ''}`);
+      // Auto-sync live or final Top 8 standings to the Results workspace when enabled!
+      if (state.results?.autoSyncTournament !== false) {
+        pullTournamentStandings(data.provider, true);
+      } else {
+        renderResultsUI();
+      }
+
+      if (!silent) toast(`🏆 Connected: ${data.tournament.name}${logoApplied ? ' · Logo & Top 8 synced' : ''}`);
     } catch (err) {
       if (!silent) toast(`⚠️ ${err.message}`);
     } finally {
@@ -7011,6 +7173,42 @@
     });
     $('btn-trn-connect').addEventListener('click', () => connectTournament(false));
     $('btn-trn-refresh').addEventListener('click', () => connectTournament(false));
+    $('btn-trn-clear-token').addEventListener('click', async () => {
+      if (!isHttp) return;
+      try {
+        const res = await fetch('/api/integrations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'clear', provider: trnState.provider })
+        });
+        if (res.ok) {
+          const cfg = await fetch('/api/integrations').then(r => r.json());
+          trnState.config = cfg;
+          $('trn-token-input').value = '';
+          updateProviderFormUI();
+          toast('🔒 API token erased from memory and disk');
+        }
+      } catch {}
+    });
+    $('chk-trn-remember-token').addEventListener('change', async (e) => {
+      if (!isHttp) return;
+      const persist = e.target.checked;
+      try {
+        await fetch('/api/integrations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ persistTokens: persist })
+        });
+        const cfg = await fetch('/api/integrations').then(r => r.json());
+        trnState.config = cfg;
+        updateProviderFormUI();
+        toast(persist ? 'Token will be stored locally in gitignored data/ only' : '🔒 Disk token cleared (RAM session only)');
+      } catch {}
+    });
+    $('btn-trn-to-results').addEventListener('click', async () => {
+      await pullTournamentStandings(trnState.snapshot?.provider || trnState.provider, false);
+      setActiveWorkspace('results');
+    });
     $('trn-event-select').addEventListener('change', async (e) => {
       try {
         const res = await fetch('/api/tournament/sets', {
@@ -7023,6 +7221,9 @@
           trnState.snapshot.selectedEventId = e.target.value;
           trnState.snapshot.sets = data.sets || [];
           renderTournamentSets();
+        }
+        if (state.results?.autoSyncTournament !== false) {
+          pullTournamentStandings(trnState.provider, true);
         }
         toast('Event updated');
       } catch (err) {
@@ -7942,7 +8143,11 @@
         region: p.region || '',
         character: p.character || '',
         avatar: p.avatar || '',
-        handle: p.handle || ''
+        handle: p.handle || '',
+        charZoom: Number(p.charZoom ?? 100),
+        charX: Number(p.charX ?? 0),
+        charY: Number(p.charY ?? 0),
+        charFlip: Boolean(p.charFlip)
       });
     }
     return out;
@@ -7987,24 +8192,69 @@
     const rankOpts = [1, 2, 3, 4, 5, 7, 9].map(r => `<option value="${r}">${r === 1 ? '1st' : r === 2 ? '2nd' : r === 3 ? '3rd' : `${r}th`}</option>`).join('');
     const charOpts = getResCharOptionsHtml('');
     host.innerHTML = Array.from({ length: 8 }, (_, i) => `
-      <div class="res-player-row" id="res-row-${i}" data-row-idx="${i}" data-rank="${[1,2,3,4,5,5,7,7][i]}">
-        <select class="res-rank-sel" id="res-p-place-${i}" data-res-field="place" data-idx="${i}" title="Placement Rank">${rankOpts}</select>
-        <input type="text" id="res-p-sponsor-${i}" data-res-field="sponsor" data-idx="${i}" placeholder="TAG" maxlength="14" />
-        <input type="text" id="res-p-name-${i}" data-res-field="name" data-idx="${i}" placeholder="Player ${i + 1}" maxlength="32" />
-        <div class="res-flag-btns">
-          <button type="button" class="res-mini-flag-btn" id="res-p-flag-${i}" data-res-flag="${i}" data-slot="flag" title="Pick Country Flag">🌍</button>
-          <button type="button" class="res-mini-flag-btn" id="res-p-region-${i}" data-res-flag="${i}" data-slot="region" title="Pick Region / State Flag">🏳</button>
+      <div class="res-player-wrap">
+        <div class="res-player-row" id="res-row-${i}" data-row-idx="${i}" data-rank="${[1,2,3,4,5,5,7,7][i]}">
+          <select class="res-rank-sel" id="res-p-place-${i}" data-res-field="place" data-idx="${i}" title="Placement Rank">${rankOpts}</select>
+          <input type="text" id="res-p-sponsor-${i}" data-res-field="sponsor" data-idx="${i}" placeholder="TAG" maxlength="14" />
+          <input type="text" id="res-p-name-${i}" data-res-field="name" data-idx="${i}" placeholder="Player ${i + 1}" maxlength="32" />
+          <div class="res-flag-btns">
+            <button type="button" class="res-mini-flag-btn" id="res-p-flag-${i}" data-res-flag="${i}" data-slot="flag" title="Pick Country Flag">🌍</button>
+            <button type="button" class="res-mini-flag-btn" id="res-p-region-${i}" data-res-flag="${i}" data-slot="region" title="Pick Region / State Flag">🏳</button>
+          </div>
+          <select id="res-p-char-${i}" data-res-field="character" data-idx="${i}" title="Character Render">${charOpts}</select>
+          <input type="text" id="res-p-handle-${i}" data-res-field="handle" data-idx="${i}" placeholder="@handle" maxlength="24" />
+          <div class="res-row-actions">
+            <button type="button" class="res-frame-btn" id="res-p-framebtn-${i}" data-res-frame-toggle="${i}" title="Adjust this character's Vertical Y, Horizontal X, Zoom &amp; Flip">🎯</button>
+            <button type="button" class="res-av-btn" id="res-p-av-${i}" data-res-av-up="${i}" title="Upload Player Photo / Avatar">📷</button>
+            <button type="button" id="res-p-avclr-${i}" data-res-av-clr="${i}" title="Clear Avatar" style="display:none;">✕</button>
+            <button type="button" data-res-move="${i}" data-dir="-1" title="Move Up" ${i === 0 ? 'disabled' : ''}>↑</button>
+            <button type="button" data-res-move="${i}" data-dir="1" title="Move Down" ${i === 7 ? 'disabled' : ''}>↓</button>
+          </div>
         </div>
-        <select id="res-p-char-${i}" data-res-field="character" data-idx="${i}" title="Character Render">${charOpts}</select>
-        <input type="text" id="res-p-handle-${i}" data-res-field="handle" data-idx="${i}" placeholder="@handle" maxlength="24" />
-        <div class="res-row-actions">
-          <button type="button" class="res-av-btn" id="res-p-av-${i}" data-res-av-up="${i}" title="Upload Player Photo / Avatar">📷</button>
-          <button type="button" id="res-p-avclr-${i}" data-res-av-clr="${i}" title="Clear Avatar" style="display:none;">✕</button>
-          <button type="button" data-res-move="${i}" data-dir="-1" title="Move Up" ${i === 0 ? 'disabled' : ''}>↑</button>
-          <button type="button" data-res-move="${i}" data-dir="1" title="Move Down" ${i === 7 ? 'disabled' : ''}>↓</button>
+        <div class="res-frame-drawer" id="res-frame-drawer-${i}">
+          <div class="slider-row">
+            <div class="slider-head"><span>↕ Vertical Y</span><b id="val-res-py-${i}">0 px</b></div>
+            <input type="range" id="res-p-y-${i}" data-res-frame="charY" data-idx="${i}" min="-240" max="240" step="2" value="0" />
+          </div>
+          <div class="slider-row">
+            <div class="slider-head"><span>↔ Horizontal X</span><b id="val-res-px-${i}">0 px</b></div>
+            <input type="range" id="res-p-x-${i}" data-res-frame="charX" data-idx="${i}" min="-240" max="240" step="2" value="0" />
+          </div>
+          <div class="slider-row">
+            <div class="slider-head"><span>🔍 Zoom</span><b id="val-res-pz-${i}">100%</b></div>
+            <input type="range" id="res-p-zoom-${i}" data-res-frame="charZoom" data-idx="${i}" min="50" max="240" step="2" value="100" />
+          </div>
+          <div style="display:flex;gap:4px;align-items:center;">
+            <button type="button" id="res-p-flip-${i}" data-res-flip="${i}" style="padding:4px 8px;font-size:11px;" title="Mirror character horizontally">⇄ Flip</button>
+            <button type="button" data-res-frame-reset="${i}" style="padding:4px 8px;font-size:11px;" title="Reset framing to 0, 0, 100%">↺</button>
+          </div>
         </div>
       </div>
     `).join('');
+  }
+
+  function selectResultsPlayerForFraming(idx, scrollIntoView = false) {
+    resSelectedIdx = (idx >= 0 && idx < 8) ? idx : -1;
+    for (let i = 0; i < 8; i++) {
+      $(`res-frame-drawer-${i}`)?.classList.toggle('open', i === resSelectedIdx);
+      $(`res-p-framebtn-${i}`)?.classList.toggle('active-chip', i === resSelectedIdx);
+    }
+    $('res-frame-jumps')?.querySelectorAll('button[data-res-jump]').forEach(b => {
+      b.classList.toggle('active-chip', Number(b.dataset.resJump) === resSelectedIdx);
+    });
+    const list = getResPlacementsClone();
+    const pl = resSelectedIdx >= 0 ? list[resSelectedIdx] : null;
+    if ($('res-frame-hint')) {
+      $('res-frame-hint').textContent = pl
+        ? `🎯 Framing #${pl.place} ${pl.name} · Drag portrait or use sliders (Y:${pl.charY}px · X:${pl.charX}px · ${pl.charZoom}%)`
+        : '✋ Drag any character portrait above to move · Wheel to zoom · Click to open sliders';
+    }
+    resultsPreviewFrame?.contentWindow?.postMessage({ type: 'res-highlight-player', idx: resSelectedIdx }, '*');
+    if (scrollIntoView && resSelectedIdx >= 0) {
+      $('res-insp-tabs')?.querySelectorAll('button').forEach(b => b.classList.toggle('active-chip', b.dataset.respane === 'players'));
+      document.querySelectorAll('.res-insp-pane').forEach(p => p.classList.toggle('active', p.id === 'respane-players'));
+      $(`res-row-${resSelectedIdx}`)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
   }
 
   function populateResCharDropdowns() {
@@ -8109,6 +8359,52 @@
       const avClr = $(`res-p-avclr-${i}`);
       if (avBtn) avBtn.classList.toggle('has-av', Boolean(pl.avatar));
       if (avClr) avClr.style.display = pl.avatar ? 'inline-flex' : 'none';
+      // Per-player framing sliders
+      if ($(`res-p-y-${i}`)) {
+        $(`res-p-y-${i}`).value = pl.charY ?? 0;
+        $(`val-res-py-${i}`).textContent = `${pl.charY ?? 0} px`;
+        $(`res-p-x-${i}`).value = pl.charX ?? 0;
+        $(`val-res-px-${i}`).textContent = `${pl.charX ?? 0} px`;
+        $(`res-p-zoom-${i}`).value = pl.charZoom ?? 100;
+        $(`val-res-pz-${i}`).textContent = `${pl.charZoom ?? 100}%`;
+        $(`res-p-flip-${i}`)?.classList.toggle('active-chip', Boolean(pl.charFlip));
+        $(`res-frame-drawer-${i}`)?.classList.toggle('open', i === resSelectedIdx);
+        $(`res-p-framebtn-${i}`)?.classList.toggle('active-chip', i === resSelectedIdx);
+      }
+    }
+    if (resSelectedIdx >= 0 && placements[resSelectedIdx] && $('res-frame-hint')) {
+      const sp = placements[resSelectedIdx];
+      $('res-frame-hint').textContent = `🎯 Framing #${sp.place} ${sp.name} · Drag portrait or use sliders (Y:${sp.charY}px · X:${sp.charX}px · ${sp.charZoom}%)`;
+    }
+
+    // Live Tournament Link Banner in Results workspace
+    const bar = $('res-trn-bar');
+    if (bar) {
+      const snap = trnState.snapshot;
+      const prov = snap?.provider || res.linkedProvider || '';
+      const tName = snap?.tournament?.name || res.linkedTournament || '';
+      const status = res.tournamentStatus || (snap ? 'live' : '');
+      const statusEl = $('res-trn-status');
+      bar.classList.toggle('is-completed', status === 'completed');
+      bar.classList.toggle('is-live', status === 'live');
+      if (prov && tName) {
+        const provLabel = prov === 'startgg' ? '🟣 START.GG' : prov === 'challonge' ? '🟠 CHALLONGE' : '⚡ DEMO';
+        statusEl.className = `res-trn-status ${status === 'completed' ? 'completed' : 'live'}`;
+        statusEl.textContent = status === 'completed'
+          ? `${provLabel} · ✅ FINAL RESULTS`
+          : status === 'live'
+            ? `${provLabel} · 🔴 LIVE STANDINGS`
+            : `${provLabel} · ⏳ UPCOMING`;
+        $('res-trn-name').textContent = tName;
+        const tsStr = res.lastSyncAt ? `Last synced ${new Date(res.lastSyncAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}` : 'Ready to sync';
+        $('res-trn-meta').textContent = `${res.entrantsCount ? `${res.entrantsCount} entrants · ` : ''}${tsStr}`;
+      } else {
+        statusEl.className = 'res-trn-status';
+        statusEl.textContent = '🔌 NOT LINKED';
+        $('res-trn-name').textContent = 'Connect a Start.gg or Challonge tournament to auto-populate live & final Top 8 results';
+        $('res-trn-meta').textContent = '';
+      }
+      if ($('chk-res-autosync')) $('chk-res-autosync').checked = res.autoSyncTournament !== false;
     }
 
     // Style & Colors
@@ -8179,12 +8475,12 @@
     }
   }
 
-  async function pullTournamentStandings(forceProvider) {
-    if (!isHttp) return toast('Start the local server first (Start_Scorebar.bat)');
+  async function pullTournamentStandings(forceProvider, silent = false) {
+    if (!isHttp) return !silent && toast('Start the local server first (Start_Scorebar.bat)');
     const provider = forceProvider || trnState.snapshot?.provider || trnState.provider || 'startgg';
     const btn = forceProvider === 'demo' ? $('btn-res-demo') : $('btn-res-pull');
     const origText = btn?.textContent || '';
-    if (btn) { btn.disabled = true; btn.textContent = '⏳ Loading...'; }
+    if (!silent && btn) { btn.disabled = true; btn.textContent = '⏳ Loading...'; }
     try {
       const resp = await fetch('/api/tournament/standings', {
         method: 'POST',
@@ -8197,18 +8493,25 @@
       const data = await resp.json();
       if (!resp.ok) throw new Error(data.error || 'Could not load standings');
       const incoming = Array.isArray(data.placements) ? data.placements : [];
+      const existing = getResPlacementsClone();
       const defaultRanks = [1, 2, 3, 4, 5, 5, 7, 7];
       const placements = Array.from({ length: 8 }, (_, i) => {
         const pl = incoming[i] || {};
+        // Preserve previously chosen character & per-player framing if same player name already framed!
+        const prevMatch = pl.name ? existing.find(e => normText(e.name).trim() === normText(pl.name).trim()) : null;
         return {
           place: Number(pl.place || defaultRanks[i]),
           name: pl.name || `PLAYER ${i + 1}`,
           sponsor: pl.sponsor || '',
           flag: pl.flag || '',
           region: pl.region || '',
-          character: pl.character || '',
-          avatar: pl.avatar || '',
-          handle: pl.handle || ''
+          character: pl.character || prevMatch?.character || '',
+          avatar: pl.avatar || prevMatch?.avatar || '',
+          handle: pl.handle || prevMatch?.handle || '',
+          charZoom: prevMatch ? Number(prevMatch.charZoom ?? 100) : 100,
+          charX: prevMatch ? Number(prevMatch.charX ?? 0) : 0,
+          charY: prevMatch ? Number(prevMatch.charY ?? 0) : 0,
+          charFlip: prevMatch ? Boolean(prevMatch.charFlip) : false
         };
       });
       const patch = {
@@ -8216,17 +8519,24 @@
         title: data.tournamentName ? `${data.tournamentName.toUpperCase()} — TOP 8` : 'TOP 8 RESULTS',
         subtitle: data.eventName ? data.eventName.toUpperCase() : 'TOURNAMENT FINALS',
         entrantsCount: data.entrantsCount ? String(data.entrantsCount) : (state.results?.entrantsCount || ''),
-        introNonce: Date.now()
+        linkedProvider: data.provider || provider,
+        linkedTournament: data.tournamentName || '',
+        tournamentStatus: data.status || (data.isCompleted ? 'completed' : 'live'),
+        lastSyncAt: Date.now(),
+        introNonce: silent ? (state.results?.introNonce || 0) : Date.now()
       };
       if (data.cachedLogoUrl || data.logoUrl) {
         patch.logoUrl = data.cachedLogoUrl || data.logoUrl;
       }
       commitState({ results: patch }, true);
-      toast(`🏅 Loaded Top ${Math.min(8, incoming.length || 8)} standings (${provider.toUpperCase()})`);
+      if (!silent) {
+        const stTag = patch.tournamentStatus === 'completed' ? 'Final Results' : 'Live Standings';
+        toast(`🏅 Synced Top ${Math.min(8, incoming.length || 8)} ${stTag} (${provider.toUpperCase()})`);
+      }
     } catch (err) {
-      toast(`⚠️ ${err.message}`);
+      if (!silent) toast(`⚠️ ${err.message}`);
     } finally {
-      if (btn) { btn.disabled = false; btn.textContent = origText; }
+      if (!silent && btn) { btn.disabled = false; btn.textContent = origText; }
     }
   }
 
@@ -8250,8 +8560,37 @@
     $('btn-res-test-anim').addEventListener('click', replayResultsIntro);
     $('btn-res-test-entry2').addEventListener('click', replayResultsIntro);
 
-    $('btn-res-pull').addEventListener('click', () => pullTournamentStandings());
-    $('btn-res-demo').addEventListener('click', () => pullTournamentStandings('demo'));
+    $('btn-res-pull').addEventListener('click', () => pullTournamentStandings(undefined, false));
+    $('btn-res-sync-now').addEventListener('click', () => pullTournamentStandings(undefined, false));
+    $('btn-res-go-trn').addEventListener('click', () => setActiveWorkspace('tournaments'));
+    $('chk-res-autosync').addEventListener('change', (e) => {
+      const on = e.target.checked;
+      commitState({ results: { autoSyncTournament: on } }, true);
+      toast(on ? '🔄 Auto-Sync Results from Tournament enabled' : 'Auto-Sync Results paused');
+      if (on && trnState.snapshot) pullTournamentStandings(trnState.snapshot.provider, true);
+    });
+    $('btn-res-demo').addEventListener('click', () => pullTournamentStandings('demo', false));
+    $('res-frame-jumps').addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-res-jump]');
+      if (!btn) return;
+      const idx = Number(btn.dataset.resJump);
+      selectResultsPlayerForFraming(resSelectedIdx === idx ? -1 : idx, true);
+    });
+
+    // Receive live drag / wheel zoom / click-to-select from results.html preview iframe!
+    window.addEventListener('message', (ev) => {
+      const msg = ev.data;
+      if (!msg || typeof msg !== 'object') return;
+      if (msg.type === 'res-select-player') {
+        selectResultsPlayerForFraming(Number(msg.idx), false);
+      } else if (msg.type === 'res-frame-patch' && msg.patch) {
+        const idx = Number(msg.idx);
+        const list = getResPlacementsClone();
+        if (!list[idx]) return;
+        list[idx] = { ...list[idx], ...msg.patch };
+        commitState({ results: { placements: list } }, Boolean(msg.commit));
+      }
+    });
     $('btn-res-export-png').addEventListener('click', () => {
       resultsPreviewFrame?.contentWindow?.postMessage({ type: 'export-results-png' }, '*');
       toast('⬇ Generating 1920x1080 PNG results graphic...');
@@ -8295,6 +8634,16 @@
     // Top 8 Players Editor delegated events
     const editor = $('res-players-editor');
     editor.addEventListener('input', (e) => {
+      const frm = e.target.closest('input[data-res-frame]');
+      if (frm) {
+        const idx = Number(frm.dataset.idx);
+        const key = frm.dataset.resFrame;
+        const list = getResPlacementsClone();
+        if (!list[idx]) return;
+        list[idx][key] = Number(frm.value);
+        commitState({ results: { placements: list } });
+        return;
+      }
       const el = e.target.closest('[data-res-field]');
       if (!el || el.tagName === 'SELECT') return;
       const idx = Number(el.dataset.idx);
@@ -8302,6 +8651,16 @@
       const list = getResPlacementsClone();
       if (!list[idx]) return;
       list[idx][field] = el.value;
+      if (field === 'name') {
+        const prof = lookupPlayerProfile(el.value);
+        if (prof) {
+          if (prof.avatar) list[idx].avatar = prof.avatar;
+          if (!list[idx].sponsor && prof.sponsor) list[idx].sponsor = prof.sponsor;
+          if (!list[idx].flag && prof.flag) list[idx].flag = prof.flag;
+          if (!list[idx].region && prof.region) list[idx].region = prof.region;
+          if (!list[idx].character && prof.character) list[idx].character = prof.character;
+        }
+      }
       commitState({ results: { placements: list } });
     });
     editor.addEventListener('change', (e) => {
@@ -8315,6 +8674,36 @@
       commitState({ results: { placements: list } }, true);
     });
     editor.addEventListener('click', (e) => {
+      const fTog = e.target.closest('[data-res-frame-toggle]');
+      if (fTog) {
+        const idx = Number(fTog.dataset.resFrameToggle);
+        selectResultsPlayerForFraming(resSelectedIdx === idx ? -1 : idx, false);
+        return;
+      }
+      const fFlip = e.target.closest('[data-res-flip]');
+      if (fFlip) {
+        const idx = Number(fFlip.dataset.resFlip);
+        const list = getResPlacementsClone();
+        if (list[idx]) {
+          list[idx].charFlip = !list[idx].charFlip;
+          commitState({ results: { placements: list } }, true);
+        }
+        return;
+      }
+      const fReset = e.target.closest('[data-res-frame-reset]');
+      if (fReset) {
+        const idx = Number(fReset.dataset.resFrameReset);
+        const list = getResPlacementsClone();
+        if (list[idx]) {
+          list[idx].charZoom = 100;
+          list[idx].charX = 0;
+          list[idx].charY = 0;
+          list[idx].charFlip = false;
+          commitState({ results: { placements: list } }, true);
+          toast(`↺ Reset framing for #${list[idx].place} ${list[idx].name}`);
+        }
+        return;
+      }
       const flagBtn = e.target.closest('[data-res-flag]');
       if (flagBtn) {
         openFlagPicker(`res-${flagBtn.dataset.resFlag}`, flagBtn.dataset.slot);

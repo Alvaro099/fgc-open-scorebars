@@ -34,8 +34,8 @@
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body {
-    width: 1920px;
-    height: 1080px;
+    width: 100vw;
+    height: 100vh;
     overflow: hidden;
     background: transparent;
     font-family: var(--res-font);
@@ -43,10 +43,55 @@
     -webkit-font-smoothing: antialiased;
     user-select: none;
   }
-  body.preview-mode {
-    width: 100vw;
-    height: 100vh;
+  body.preview-mode,
+  body.fitted-letterbox {
     background: #070910;
+  }
+  body.preview-mode .res-card,
+  body.preview-mode .res-champ-spotlight {
+    cursor: grab;
+    transition: outline-color 0.14s, box-shadow 0.14s;
+  }
+  body.preview-mode .res-card:hover,
+  body.preview-mode .res-champ-spotlight:hover {
+    outline: 3px dashed rgba(0, 229, 255, 0.85);
+    outline-offset: -3px;
+  }
+  body.preview-mode .res-card.res-selected,
+  body.preview-mode .res-champ-spotlight.res-selected {
+    outline: 4px solid #00e5ff;
+    outline-offset: -4px;
+    box-shadow: 0 0 0 2px rgba(0,229,255,0.45), 0 18px 40px rgba(0,0,0,0.6);
+  }
+  body.preview-mode.is-dragging,
+  body.preview-mode.is-dragging .res-card,
+  body.preview-mode.is-dragging .res-champ-spotlight {
+    cursor: grabbing !important;
+  }
+  .res-drag-badge {
+    position: absolute;
+    bottom: 8px;
+    right: 10px;
+    z-index: 20;
+    padding: 3px 9px;
+    border-radius: 99px;
+    background: rgba(6, 12, 24, 0.88);
+    border: 1px solid rgba(0, 229, 255, 0.7);
+    color: #67e8f9;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.14s;
+    display: none;
+  }
+  body.preview-mode .res-drag-badge { display: block; }
+  body.preview-mode .res-card:hover .res-drag-badge,
+  body.preview-mode .res-champ-spotlight:hover .res-drag-badge,
+  body.preview-mode .res-card.res-selected .res-drag-badge,
+  body.preview-mode .res-champ-spotlight.res-selected .res-drag-badge {
+    opacity: 1;
   }
 
   #res-scaler {
@@ -578,9 +623,10 @@
     object-fit: cover;
     object-position: center 12%;
     display: none;
-    transform: translateY(var(--char-y, 0px)) scale(var(--char-zoom, 1));
-    transform-origin: center top;
+    transform: translate(var(--p-x, 0px), calc(var(--char-y, 0px) + var(--p-y, 0px))) scale(calc(var(--char-zoom, 1) * var(--p-zoom, 1))) scaleX(var(--p-flip, 1));
+    transform-origin: center 22%;
     filter: drop-shadow(0 12px 24px rgba(0,0,0,0.6));
+    will-change: transform;
   }
   .res-char-img.loaded { display: block; }
   .res-card[data-idx="0"] .res-char-img,
@@ -591,6 +637,7 @@
     object-fit: contain;
     object-position: center bottom;
     margin-top: 24px;
+    transform-origin: center center;
   }
 
   .res-hero-avatar {
@@ -611,7 +658,14 @@
   .res-card[data-idx="0"] .res-hero-avatar,
   .res-champ-spotlight .res-hero-avatar { width: 240px; height: 240px; border-width: 6px; border-color: var(--res-gold); }
   .res-hero-avatar.active { display: block; }
-  .res-hero-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .res-hero-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transform: translate(var(--p-x, 0px), var(--p-y, 0px)) scale(var(--p-zoom, 1)) scaleX(var(--p-flip, 1));
+    transform-origin: center center;
+  }
 
   /* Bottom Legibility Gradient Scrim */
   .res-scrim {
@@ -947,20 +1001,33 @@
   let currentState = null;
   let lastIntroNonce = 0;
   let lastRenderedCardsSig = '';
+  let currentScale = 1;
+  let selectedIdx = -1;
 
-  let rescalePreview = () => {};
-  if (isPreview) {
-    document.body.classList.add('preview-mode');
-    rescalePreview = () => {
-      if (!window.innerWidth || !window.innerHeight) return;
-      const s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
-      const ox = Math.max(0, (window.innerWidth - 1920 * s) / 2);
-      const oy = Math.max(0, (window.innerHeight - 1080 * s) / 2);
-      $('res-scaler').style.transform = `translate(${ox.toFixed(1)}px, ${oy.toFixed(1)}px) scale(${s})`;
-    };
-    window.addEventListener('resize', rescalePreview);
-    rescalePreview();
-  }
+  if (isPreview) document.body.classList.add('preview-mode');
+
+  // Always keep internal 1920x1080 broadcast resolution; scale cleanly to fit any browser tab (Open Results)
+  // while staying 1:1 native pixel-exact (scale=1, ox=0, oy=0, transparent) inside a 1920x1080 OBS Browser Source!
+  const rescalePreview = () => {
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    if (!w || !h) return;
+    const isExact1080 = w === 1920 && h === 1080;
+    if (!isPreview && isExact1080) {
+      currentScale = 1;
+      $('res-scaler').style.transform = 'none';
+      document.body.classList.remove('fitted-letterbox');
+      return;
+    }
+    currentScale = Math.min(w / 1920, h / 1080);
+    const ox = Math.max(0, (w - 1920 * currentScale) / 2);
+    const oy = Math.max(0, (h - 1080 * currentScale) / 2);
+    $('res-scaler').style.transform = `translate(${ox.toFixed(1)}px, ${oy.toFixed(1)}px) scale(${currentScale})`;
+    const isTransparent = currentState?.results?.bgMode === 'transparent';
+    document.body.classList.toggle('fitted-letterbox', !window.obsstudio && !isTransparent);
+  };
+  window.addEventListener('resize', rescalePreview);
+  rescalePreview();
 
   function ordinal(n) {
     const num = Number(n) || 1;
@@ -1024,10 +1091,17 @@
     const avMode = res.avatarMode || 'badge';
     const charUrl = avMode === 'avatar-only' ? '' : buildCharRenderUrl(res.game || 'tekken8', res.pack || 'full', pl.character);
     const cls = isSpotlight ? 'res-champ-spotlight res-anim-item' : 'res-card res-anim-item';
-    const dataAttrs = isSpotlight ? `data-rank="1" style="--stagger-idx:0"` : `data-idx="${idx}" data-rank="${rank}" style="--stagger-idx:${idx}"`;
+    const pz = (Number(pl.charZoom ?? 100) / 100).toFixed(2);
+    const px = `${Number(pl.charX ?? 0)}px`;
+    const py = `${Number(pl.charY ?? 0)}px`;
+    const pf = pl.charFlip ? '-1' : '1';
+    const selCls = selectedIdx === (isSpotlight ? 0 : idx) ? ' res-selected' : '';
+    const dataAttrs = isSpotlight
+      ? `data-idx="0" data-spotlight="1" data-rank="1" style="--stagger-idx:0;--p-zoom:${pz};--p-x:${px};--p-y:${py};--p-flip:${pf}"`
+      : `data-idx="${idx}" data-rank="${rank}" style="--stagger-idx:${idx};--p-zoom:${pz};--p-x:${px};--p-y:${py};--p-flip:${pf}"`;
 
     return `
-      <article class="${cls}" ${dataAttrs}>
+      <article class="${cls}${selCls}" ${dataAttrs}>
         <div class="res-char-layer">
           ${charUrl ? `<img class="res-char-img" data-char-src="${escHtml(charUrl)}" alt="" crossorigin="anonymous" />` : ''}
         </div>
@@ -1036,6 +1110,7 @@
         </div>
         <div class="res-scrim"></div>
         <div class="res-sheen"></div>
+        <div class="res-drag-badge">✋ Drag · Wheel Zoom</div>
         <div class="res-rank-badge">${isSpotlight ? '🏆 CHAMPION' : ordinal(rank)}</div>
         <div class="res-crown">👑</div>
         <div class="res-info">
@@ -1165,12 +1240,15 @@
     const footLeft = res.footerText || st.tournament || '';
     footerEl.innerHTML = footLeft ? `<span>${escHtml(footLeft)}</span><span>${escHtml(res.game ? res.game.toUpperCase() : '')}</span>` : '';
 
-    // Rebuild 8 placement cards only when content/flags/game/avatar settings change (zero image flicker on color/pattern edits!)
+    // Rebuild 8 placement cards only when content/flags/game/avatar settings change (zero image flicker on framing/color/pattern edits!)
     const placements = Array.isArray(res.placements) && res.placements.length ? res.placements : [];
     const cardsSig = JSON.stringify({
       g: res.game, p: res.pack, fm: res.flagMode, sf: res.showFlags,
       am: res.avatarMode, sp: res.showSponsor, sc: res.showCharName, sh: res.showHandles,
-      pl: placements
+      pl: placements.slice(0, 8).map(x => ({
+        place: x.place, name: x.name, sponsor: x.sponsor, flag: x.flag,
+        region: x.region, character: x.character, avatar: x.avatar, handle: x.handle
+      }))
     });
     if (cardsSig !== lastRenderedCardsSig) {
       lastRenderedCardsSig = cardsSig;
@@ -1180,6 +1258,18 @@
       bodyEl.innerHTML = cardsHtml + spotHtml;
       hydrateCardImages(res);
     }
+
+    // Update per-player image framing CSS variables in-place at 60fps (no image reload!)
+    $('res-body').querySelectorAll('[data-idx]').forEach(card => {
+      const i = Number(card.dataset.idx);
+      const pl = placements[i] || {};
+      card.style.setProperty('--p-zoom', (Number(pl.charZoom ?? 100) / 100).toFixed(2));
+      card.style.setProperty('--p-x', `${Number(pl.charX ?? 0)}px`);
+      card.style.setProperty('--p-y', `${Number(pl.charY ?? 0)}px`);
+      card.style.setProperty('--p-flip', pl.charFlip ? '-1' : '1');
+      card.classList.toggle('res-selected', isPreview && selectedIdx === i);
+    });
+    rescalePreview();
 
     if (res.introNonce && res.introNonce !== lastIntroNonce) {
       lastIntroNonce = res.introNonce;
@@ -1300,15 +1390,28 @@
       ctx.fillRect(r.x, r.y, r.w, r.h);
 
       const cim = charImgs[i];
+      const pZoom = Number(pl.charZoom ?? 100) / 100;
+      const pX = Number(pl.charX ?? 0);
+      const pY = Number(pl.charY ?? 0);
+      const pFlip = pl.charFlip ? -1 : 1;
       if (cim && res.avatarMode !== 'avatar-only') {
-        const s = Math.max(r.w / cim.naturalWidth, (r.h * 0.95) / cim.naturalHeight) * (Number(res.charZoom ?? 100) / 100);
+        const s = Math.max(r.w / cim.naturalWidth, (r.h * 0.95) / cim.naturalHeight) * (Number(res.charZoom ?? 100) / 100) * pZoom;
         const dw = cim.naturalWidth * s, dh = cim.naturalHeight * s;
-        ctx.drawImage(cim, r.x + (r.w - dw) / 2, r.y + 18 + Number(res.charOffsetY ?? 0), dw, dh);
+        ctx.save();
+        const cx = r.x + r.w / 2 + pX;
+        const cy = r.y + 18 + Number(res.charOffsetY ?? 0) + pY;
+        ctx.translate(cx, cy);
+        ctx.scale(pFlip, 1);
+        ctx.drawImage(cim, -dw / 2, 0, dw, dh);
+        ctx.restore();
       } else if (avImgs[i]) {
         const aim = avImgs[i];
         const sz = Math.min(r.w, r.h) * 0.45;
-        ctx.save(); ctx.beginPath(); ctx.arc(r.x + r.w / 2, r.y + r.h * 0.4, sz / 2, 0, Math.PI * 2); ctx.clip();
-        ctx.drawImage(aim, r.x + r.w / 2 - sz / 2, r.y + r.h * 0.4 - sz / 2, sz, sz);
+        ctx.save();
+        ctx.beginPath(); ctx.arc(r.x + r.w / 2, r.y + r.h * 0.4, sz / 2, 0, Math.PI * 2); ctx.clip();
+        ctx.translate(r.x + r.w / 2 + pX, r.y + r.h * 0.4 + pY);
+        ctx.scale(pFlip * pZoom, pZoom);
+        ctx.drawImage(aim, -sz / 2, -sz / 2, sz, sz);
         ctx.restore();
       }
 
@@ -1358,13 +1461,111 @@
   }
 
   /* =========================================================================
+     INTERACTIVE DIRECT IMAGE FRAMING (DRAG TO MOVE + WHEEL TO ZOOM IN PREVIEW)
+     ========================================================================= */
+  if (isPreview) {
+    let dragCtx = null;
+    const setSelectedCard = (idx) => {
+      selectedIdx = idx;
+      $('res-body').querySelectorAll('[data-idx]').forEach(el => {
+        el.classList.toggle('res-selected', Number(el.dataset.idx) === idx);
+      });
+    };
+
+    $('res-body').addEventListener('pointerdown', (e) => {
+      const card = e.target.closest('[data-idx]');
+      if (!card) return;
+      const idx = Number(card.dataset.idx);
+      const pl = (currentState?.results?.placements || [])[idx] || {};
+      setSelectedCard(idx);
+      window.parent?.postMessage({ type: 'res-select-player', idx }, '*');
+      dragCtx = {
+        idx,
+        startClientX: e.clientX,
+        startClientY: e.clientY,
+        origX: Number(pl.charX ?? 0),
+        origY: Number(pl.charY ?? 0),
+        curX: Number(pl.charX ?? 0),
+        curY: Number(pl.charY ?? 0),
+        moved: false
+      };
+      document.body.classList.add('is-dragging');
+      try { card.setPointerCapture(e.pointerId); } catch {}
+      e.preventDefault();
+    });
+
+    window.addEventListener('pointermove', (e) => {
+      if (!dragCtx) return;
+      const sc = currentScale || 1;
+      const dx = Math.round((e.clientX - dragCtx.startClientX) / sc);
+      const dy = Math.round((e.clientY - dragCtx.startClientY) / sc);
+      if (Math.abs(dx) > 2 || Math.abs(dy) > 2) dragCtx.moved = true;
+      dragCtx.curX = Math.max(-240, Math.min(240, dragCtx.origX + dx));
+      dragCtx.curY = Math.max(-240, Math.min(240, dragCtx.origY + dy));
+      $('res-body').querySelectorAll(`[data-idx="${dragCtx.idx}"]`).forEach(el => {
+        el.style.setProperty('--p-x', `${dragCtx.curX}px`);
+        el.style.setProperty('--p-y', `${dragCtx.curY}px`);
+      });
+      window.parent?.postMessage({
+        type: 'res-frame-patch',
+        idx: dragCtx.idx,
+        patch: { charX: dragCtx.curX, charY: dragCtx.curY },
+        commit: false
+      }, '*');
+    });
+
+    const endDrag = () => {
+      if (!dragCtx) return;
+      const ctx = dragCtx;
+      dragCtx = null;
+      document.body.classList.remove('is-dragging');
+      if (ctx.moved) {
+        window.parent?.postMessage({
+          type: 'res-frame-patch',
+          idx: ctx.idx,
+          patch: { charX: ctx.curX, charY: ctx.curY },
+          commit: true
+        }, '*');
+      }
+    };
+    window.addEventListener('pointerup', endDrag);
+    window.addEventListener('pointercancel', endDrag);
+
+    $('res-body').addEventListener('wheel', (e) => {
+      const card = e.target.closest('[data-idx]');
+      if (!card) return;
+      e.preventDefault();
+      const idx = Number(card.dataset.idx);
+      const pl = (currentState?.results?.placements || [])[idx] || {};
+      const curZoom = Number(pl.charZoom ?? 100);
+      const delta = e.deltaY < 0 ? 6 : -6;
+      const nextZoom = Math.max(50, Math.min(240, curZoom + delta));
+      setSelectedCard(idx);
+      $('res-body').querySelectorAll(`[data-idx="${idx}"]`).forEach(el => {
+        el.style.setProperty('--p-zoom', (nextZoom / 100).toFixed(2));
+      });
+      window.parent?.postMessage({
+        type: 'res-frame-patch',
+        idx,
+        patch: { charZoom: nextZoom },
+        commit: true
+      }, '*');
+    }, { passive: false });
+  }
+
+  /* =========================================================================
      SYNC ENGINE: Zero-SSE Preview + Web Locks Single-SSE Leader + OBS Hooks
      ========================================================================= */
   window.addEventListener('message', (ev) => {
     const d = ev.data;
     if (!d) return;
     if (d.type === 'state-update' && d.state) { rescalePreview(); render(d.state); }
-    else if (d.type === 'test-results-entry') {
+    else if (d.type === 'res-highlight-player') {
+      selectedIdx = Number(d.idx ?? -1);
+      $('res-body').querySelectorAll('[data-idx]').forEach(el => {
+        el.classList.toggle('res-selected', Number(el.dataset.idx) === selectedIdx);
+      });
+    } else if (d.type === 'test-results-entry') {
       const res = currentState?.results || {};
       const des = DESIGN_MAP[res.design] || FALLBACK_DESIGN;
       triggerEntryAnim((res.entryAnim && res.entryAnim !== 'theme') ? res.entryAnim : des.entry);

@@ -257,15 +257,21 @@ export const DEFAULT_RESULTS = {
   charZoom: 100,
   charOffsetY: 0,
   introNonce: 0,
+  // Live Tournament Auto-Sync Link
+  autoSyncTournament: true,
+  linkedProvider: '',
+  linkedTournament: '',
+  tournamentStatus: '',      // '' | 'live' | 'completed' | 'upcoming'
+  lastSyncAt: 0,
   placements: [
-    { place: 1, name: 'PLAYER 1', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '' },
-    { place: 2, name: 'PLAYER 2', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '' },
-    { place: 3, name: 'PLAYER 3', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '' },
-    { place: 4, name: 'PLAYER 4', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '' },
-    { place: 5, name: 'PLAYER 5', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '' },
-    { place: 5, name: 'PLAYER 6', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '' },
-    { place: 7, name: 'PLAYER 7', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '' },
-    { place: 7, name: 'PLAYER 8', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '' }
+    { place: 1, name: 'PLAYER 1', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '', charZoom: 100, charX: 0, charY: 0, charFlip: false },
+    { place: 2, name: 'PLAYER 2', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '', charZoom: 100, charX: 0, charY: 0, charFlip: false },
+    { place: 3, name: 'PLAYER 3', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '', charZoom: 100, charX: 0, charY: 0, charFlip: false },
+    { place: 4, name: 'PLAYER 4', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '', charZoom: 100, charX: 0, charY: 0, charFlip: false },
+    { place: 5, name: 'PLAYER 5', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '', charZoom: 100, charX: 0, charY: 0, charFlip: false },
+    { place: 5, name: 'PLAYER 6', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '', charZoom: 100, charX: 0, charY: 0, charFlip: false },
+    { place: 7, name: 'PLAYER 7', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '', charZoom: 100, charX: 0, charY: 0, charFlip: false },
+    { place: 7, name: 'PLAYER 8', sponsor: '', flag: '', region: '', character: '', avatar: '', handle: '', charZoom: 100, charX: 0, charY: 0, charFlip: false }
   ]
 };
 
@@ -386,8 +392,32 @@ let integrationsCfg = {
   startggUrl: '',
   challongeKey: '',
   challongeUrl: '',
+  persistTokens: false,
   ...readJsonSafe(INTEGRATIONS_FILE, {})
 };
+// Keep active API tokens in RAM by default; only persist to local gitignored data/integrations.json if user opts in
+const sessionTokens = {
+  startgg: integrationsCfg.startggToken || '',
+  challonge: integrationsCfg.challongeKey || ''
+};
+function getAuthToken(provider, bodyToken) {
+  if (bodyToken && bodyToken !== '__KEEP__') return String(bodyToken).trim();
+  if (provider === 'startgg') return sessionTokens.startgg || integrationsCfg.startggToken || '';
+  if (provider === 'challonge') return sessionTokens.challonge || integrationsCfg.challongeKey || '';
+  return '';
+}
+function saveIntegrationsSafe() {
+  const onDisk = {
+    provider: integrationsCfg.provider || 'startgg',
+    startggUrl: integrationsCfg.startggUrl || '',
+    challongeUrl: integrationsCfg.challongeUrl || '',
+    persistTokens: Boolean(integrationsCfg.persistTokens),
+    startggToken: integrationsCfg.persistTokens ? (sessionTokens.startgg || '') : '',
+    challongeKey: integrationsCfg.persistTokens ? (sessionTokens.challonge || '') : ''
+  };
+  integrationsCfg = onDisk;
+  writeJsonAtomic(INTEGRATIONS_FILE, onDisk);
+}
 let historyDb = readJsonSafe(HISTORY_FILE, []);
 let lastTournamentSnapshot = null;
 
@@ -712,36 +742,55 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
-  // --- API: Tournament Integrations Config (Tokens stored strictly locally, masked on GET) ---
+  // --- API: Tournament Integrations Config (NEVER sends any token characters or hints to the browser!) ---
   if (pathname === '/api/integrations') {
     if (req.method === 'GET') {
       return sendJson(res, 200, {
         provider: integrationsCfg.provider || 'startgg',
         startggUrl: integrationsCfg.startggUrl || '',
-        hasStartggToken: Boolean(integrationsCfg.startggToken),
-        startggTokenHint: integrationsCfg.startggToken ? `••••${integrationsCfg.startggToken.slice(-4)}` : '',
+        hasStartggToken: Boolean(getAuthToken('startgg')),
         challongeUrl: integrationsCfg.challongeUrl || '',
-        hasChallongeKey: Boolean(integrationsCfg.challongeKey),
-        challongeKeyHint: integrationsCfg.challongeKey ? `••••${integrationsCfg.challongeKey.slice(-4)}` : ''
+        hasChallongeKey: Boolean(getAuthToken('challonge')),
+        persistTokens: Boolean(integrationsCfg.persistTokens)
       });
     }
     if (req.method === 'POST') {
       try {
         const body = await readBody(req);
+        if (body.action === 'clear') {
+          const target = body.provider || 'all';
+          if (target === 'all' || target === 'startgg') {
+            sessionTokens.startgg = '';
+            integrationsCfg.startggToken = '';
+          }
+          if (target === 'all' || target === 'challonge') {
+            sessionTokens.challonge = '';
+            integrationsCfg.challongeKey = '';
+          }
+          saveIntegrationsSafe();
+          return sendJson(res, 200, {
+            ok: true,
+            hasStartggToken: Boolean(getAuthToken('startgg')),
+            hasChallongeKey: Boolean(getAuthToken('challonge')),
+            persistTokens: Boolean(integrationsCfg.persistTokens)
+          });
+        }
         if (body.provider) integrationsCfg.provider = body.provider;
+        if (body.persistTokens !== undefined) integrationsCfg.persistTokens = Boolean(body.persistTokens);
         if (body.startggUrl !== undefined) integrationsCfg.startggUrl = String(body.startggUrl).trim();
         if (body.startggToken !== undefined && body.startggToken !== '__KEEP__') {
-          integrationsCfg.startggToken = String(body.startggToken).trim();
+          sessionTokens.startgg = String(body.startggToken).trim();
         }
         if (body.challongeUrl !== undefined) integrationsCfg.challongeUrl = String(body.challongeUrl).trim();
         if (body.challongeKey !== undefined && body.challongeKey !== '__KEEP__') {
-          integrationsCfg.challongeKey = String(body.challongeKey).trim();
+          sessionTokens.challonge = String(body.challongeKey).trim();
         }
-        writeJsonAtomic(INTEGRATIONS_FILE, integrationsCfg);
+        saveIntegrationsSafe();
         return sendJson(res, 200, {
           ok: true,
-          hasStartggToken: Boolean(integrationsCfg.startggToken),
-          hasChallongeKey: Boolean(integrationsCfg.challongeKey)
+          hasStartggToken: Boolean(getAuthToken('startgg')),
+          hasChallongeKey: Boolean(getAuthToken('challonge')),
+          persistTokens: Boolean(integrationsCfg.persistTokens)
         });
       } catch (err) {
         return sendJson(res, 400, { error: err.message });
@@ -774,12 +823,11 @@ const server = http.createServer(async (req, res) => {
 
       if (provider === 'startgg') {
         const url = String(body.url ?? integrationsCfg.startggUrl ?? '').trim();
-        const token = (body.token && body.token !== '__KEEP__')
-          ? String(body.token).trim()
-          : integrationsCfg.startggToken;
+        const token = getAuthToken('startgg', body.token);
         if (url) integrationsCfg.startggUrl = url;
-        if (body.token && body.token !== '__KEEP__') integrationsCfg.startggToken = token;
-        writeJsonAtomic(INTEGRATIONS_FILE, integrationsCfg);
+        if (body.rememberToken !== undefined) integrationsCfg.persistTokens = Boolean(body.rememberToken);
+        if (body.token && body.token !== '__KEEP__') sessionTokens.startgg = token;
+        saveIntegrationsSafe();
 
         const data = await attachCachedTournamentLogo(await connectStartGG(url, token));
         lastTournamentSnapshot = data;
@@ -788,12 +836,11 @@ const server = http.createServer(async (req, res) => {
 
       if (provider === 'challonge') {
         const url = String(body.url ?? integrationsCfg.challongeUrl ?? '').trim();
-        const key = (body.token && body.token !== '__KEEP__')
-          ? String(body.token).trim()
-          : integrationsCfg.challongeKey;
+        const key = getAuthToken('challonge', body.token);
         if (url) integrationsCfg.challongeUrl = url;
-        if (body.token && body.token !== '__KEEP__') integrationsCfg.challongeKey = key;
-        writeJsonAtomic(INTEGRATIONS_FILE, integrationsCfg);
+        if (body.rememberToken !== undefined) integrationsCfg.persistTokens = Boolean(body.rememberToken);
+        if (body.token && body.token !== '__KEEP__') sessionTokens.challonge = key;
+        saveIntegrationsSafe();
 
         const data = await attachCachedTournamentLogo(await connectChallonge(url, key));
         lastTournamentSnapshot = data;
@@ -832,9 +879,7 @@ const server = http.createServer(async (req, res) => {
         rawLogo = demo.tournament.logoUrl;
       } else if (provider === 'startgg') {
         const url = String(body.url || integrationsCfg.startggUrl || '').trim();
-        const token = (body.token && body.token !== '__KEEP__')
-          ? String(body.token).trim()
-          : integrationsCfg.startggToken;
+        const token = getAuthToken('startgg', body.token);
         if (!url || !token) {
           return sendJson(res, 400, { error: 'Connect a start.gg tournament first in the Tournaments tab.' });
         }
@@ -844,9 +889,7 @@ const server = http.createServer(async (req, res) => {
         rawLogo = meta.logoUrl;
       } else if (provider === 'challonge') {
         const url = String(body.url || integrationsCfg.challongeUrl || '').trim();
-        const key = (body.token && body.token !== '__KEEP__')
-          ? String(body.token).trim()
-          : integrationsCfg.challongeKey;
+        const key = getAuthToken('challonge', body.token);
         if (!url || !key) {
           return sendJson(res, 400, { error: 'Connect a Challonge tournament first in the Tournaments tab.' });
         }
@@ -887,7 +930,7 @@ const server = http.createServer(async (req, res) => {
         return sendJson(res, 200, { sets: demo.sets, streamQueue: demo.streamQueue });
       }
       if (provider === 'startgg') {
-        const token = integrationsCfg.startggToken;
+        const token = getAuthToken('startgg');
         const sets = await fetchStartGGEventSets(body.eventId, token);
         if (lastTournamentSnapshot) {
           lastTournamentSnapshot.selectedEventId = String(body.eventId);
@@ -896,7 +939,7 @@ const server = http.createServer(async (req, res) => {
         return sendJson(res, 200, { sets });
       }
       if (provider === 'challonge') {
-        const data = await connectChallonge(integrationsCfg.challongeUrl, integrationsCfg.challongeKey);
+        const data = await connectChallonge(integrationsCfg.challongeUrl, getAuthToken('challonge'));
         lastTournamentSnapshot = data;
         return sendJson(res, 200, { sets: data.sets, streamQueue: data.streamQueue });
       }
@@ -916,7 +959,7 @@ const server = http.createServer(async (req, res) => {
         result = getDemoStandings();
       } else if (provider === 'startgg') {
         let eventId = body.eventId || lastTournamentSnapshot?.selectedEventId;
-        const token = (body.token && body.token !== '__KEEP__') ? String(body.token).trim() : integrationsCfg.startggToken;
+        const token = getAuthToken('startgg', body.token);
         const url = String(body.url || integrationsCfg.startggUrl || '').trim();
         if (!eventId && url && token) {
           const snap = await attachCachedTournamentLogo(await connectStartGG(url, token));
@@ -927,7 +970,7 @@ const server = http.createServer(async (req, res) => {
         result = await fetchStartGGStandings(eventId, token);
       } else if (provider === 'challonge') {
         const url = String(body.url || integrationsCfg.challongeUrl || '').trim();
-        const key = (body.token && body.token !== '__KEEP__') ? String(body.token).trim() : integrationsCfg.challongeKey;
+        const key = getAuthToken('challonge', body.token);
         if (!url || !key) throw new Error('Connect a Challonge tournament first in the Tournaments tab.');
         result = await fetchChallongeStandings(url, key);
       } else {
@@ -967,11 +1010,11 @@ const server = http.createServer(async (req, res) => {
       } else if (provider === 'startgg') {
         const eventId = body.eventId || lastTournamentSnapshot?.selectedEventId;
         if (!eventId) throw new Error('Connect a start.gg event first.');
-        imported = await fetchStartGGEntrants(eventId, integrationsCfg.startggToken);
+        imported = await fetchStartGGEntrants(eventId, getAuthToken('startgg'));
       } else if (provider === 'challonge') {
         const snap = lastTournamentSnapshot?.provider === 'challonge'
           ? lastTournamentSnapshot
-          : await connectChallonge(integrationsCfg.challongeUrl, integrationsCfg.challongeKey);
+          : await connectChallonge(integrationsCfg.challongeUrl, getAuthToken('challonge'));
         imported = snap.participants || [];
       }
       const stats = mergeImportedPlayers(imported);
@@ -992,7 +1035,7 @@ const server = http.createServer(async (req, res) => {
       } else if (provider === 'startgg') {
         result = await reportStartGGSet({
           setId, winnerEntrantId, p1EntrantId, p2EntrantId, p1Score, p2Score,
-          token: integrationsCfg.startggToken
+          token: getAuthToken('startgg')
         });
       } else if (provider === 'challonge') {
         result = await reportChallongeMatch({
@@ -1001,7 +1044,7 @@ const server = http.createServer(async (req, res) => {
           winnerEntrantId,
           p1Score,
           p2Score,
-          apiKey: integrationsCfg.challongeKey,
+          apiKey: getAuthToken('challonge'),
           liveOnly: Boolean(liveOnly)
         });
       } else {
