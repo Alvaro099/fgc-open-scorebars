@@ -1026,6 +1026,9 @@
   const qs = new URLSearchParams(location.search);
   const isPreview = qs.has('preview');
   const isHttp = location.protocol === 'http:' || location.protocol === 'https:';
+  if (!isHttp) {
+    document.querySelectorAll('img[crossorigin]').forEach(im => im.removeAttribute('crossorigin'));
+  }
   const $ = (id) => document.getElementById(id);
 
   let currentState = null;
@@ -1145,13 +1148,14 @@
       ? `data-idx="0" data-spotlight="1" data-rank="1" style="--stagger-idx:0;--p-zoom:${pz};--p-x:${px};--p-y:${py};--p-flip:${pf}"`
       : `data-idx="${idx}" data-rank="${rank}" style="--stagger-idx:${idx};--p-zoom:${pz};--p-x:${px};--p-y:${py};--p-flip:${pf}"`;
 
+    const corsAttr = isHttp ? ' crossorigin="anonymous"' : '';
     return `
       <article class="${cls}${selCls}" ${dataAttrs}>
         <div class="res-char-layer">
-          ${charUrl ? `<img class="res-char-img" data-char-src="${escHtml(charUrl)}" alt="" crossorigin="anonymous" />` : ''}
+          ${charUrl ? `<img class="res-char-img" data-char-src="${escHtml(charUrl)}" alt=""${corsAttr} />` : ''}
         </div>
         <div class="res-hero-avatar" data-hero-av="${escHtml(avUrl)}">
-          ${avUrl ? `<img src="${escHtml(avUrl)}" alt="" crossorigin="anonymous" />` : ''}
+          ${avUrl ? `<img src="${escHtml(avUrl)}" alt=""${corsAttr} />` : ''}
         </div>
         <div class="res-scrim"></div>
         <div class="res-sheen"></div>
@@ -1160,7 +1164,7 @@
         <div class="res-crown">👑</div>
         <div class="res-info">
           <div class="res-av-badge" data-badge-av="${escHtml(avUrl)}">
-            ${avUrl ? `<img src="${escHtml(avUrl)}" alt="" crossorigin="anonymous" />` : ''}
+            ${avUrl ? `<img src="${escHtml(avUrl)}" alt=""${corsAttr} />` : ''}
           </div>
           <div class="res-info-text">
             <div>

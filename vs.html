@@ -1407,6 +1407,9 @@
   const qs = new URLSearchParams(location.search);
   const isPreview = qs.has('preview');
   const isHttp = location.protocol === 'http:' || location.protocol === 'https:';
+  if (!isHttp) {
+    document.querySelectorAll('img[crossorigin]').forEach(im => im.removeAttribute('crossorigin'));
+  }
   const $ = (id) => document.getElementById(id);
 
   let currentScale = 1;
