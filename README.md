@@ -1,35 +1,25 @@
-# FGC Open Scorebars — Tekken 8 Broadcast Edition
+# FGC Open Scorebars — Broadcast Suite (Tekken 8, Street Fighter 6 & FGC)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B%20Zero%20Dependencies-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![OBS Ready](https://img.shields.io/badge/OBS%20Studio-1920x1080%20Browser%20Source-302E31?logo=obsstudio&logoColor=white)](https://obsproject.com/)
 [![Start.gg & Challonge](https://img.shields.io/badge/Tournaments-Start.gg%20%2B%20Challonge-7C3AED)](#tournament-integration-startgg--challonge)
+[![Ko-fi Support](https://img.shields.io/badge/Ko--fi-Optional%20Tip-FF5E5B?logo=ko-fi&logoColor=white)](https://ko-fi.com/nordi5ke)
 
-A **100% free, open-source, zero-dependency** broadcast scorebar overlay and live control cockpit crafted for **Tekken 8** and Fighting Game Community (FGC) tournaments.
+A **100% free, open-source, zero-dependency** OBS broadcast suite crafted for **Tekken 8**, **Street Fighter 6**, and the entire Fighting Game Community (FGC).
 
-Built on pure HTML/CSS/JS and a lightweight native Node.js HTTP/SSE server — **no cloud accounts, no subscriptions, no Electron bloat, and no `npm install` required**.
+Built on pure HTML/CSS/JS and a lightweight native Node.js HTTP/SSE server — **no cloud accounts, no paywalls, no subscriptions, no Electron bloat, and no `npm install` required**.
 
 ---
 
 ## Key Highlights
 
-- **32 Broadcast Scorebar Designs** calibrated around the Tekken 8 `1920×1080` in-game HUD — led by **`★ Tekken 8 Native HUD`** (matching Tekken 8's chrome-beveled healthbar frame, molten gold-orange energy, smoked glass, and UE5 italic typography), plus TWT Blade, Crown, Split-Wing, Stepped Arch, character-inspired themes, and classic FGC styles (2XKO, SF6, GGST, EVO, MvC, Tekken 3).
-- **2-Column Real-Time Workspace** with a **Pinned Live Preview** (`📌 Pin Top`) rendered over real Tekken 8 gameplay (or Transparent / Chroma + HUD Alignment Guides) and a collapsible **`Scorebar Designs`** sidebar with instant search and independent scroll. Automatically folds into a tab on narrow screens and **OBS Custom Browser Docks** (`<= 1320px`).
-- **Adaptive Colors & Surfaces Studio** with 5 surface modes (**Gradient**, **Solid**, **Frosted Glass** with Blur & Edge sliders, **Metallic**, and **Theme BG**), **38 mode-specific 1-click palettes**, a live preview swatch, and automatic high-contrast score typography.
-- **114 Offline Vector Flags (`flags.js`)** across 4 categories (**World FGC**, **Europe & Regions**, **US States**, **Spain Autonomous Communities**) with dual slots (**Country + State/Region**), visual search picker, and 6 integrated broadcast flag styles (`TWT Integrated Blade`, `Fade Blend`, `Blade + ISO Tag`, `Dual Split Block`, `Recessed Bezel`, `Classic Compact`).
-- **OBS Native Scene-Entry Transitions** hooking `obsSourceActiveChanged`, `obsSourceVisibleChanged`, and `visibilitychange`:
-  - 8 entry animations (`Split Wings`, `Broadcast Cascade`, `Tekken 8 Slash`, `Slide from Top`, `Broadcast Slam`, `Horizontal Wipe`, `Cyber Glitch`, `Smooth Fade`).
-  - **OBS Stinger Sync Delay** (`0–2000 ms`) with quick presets (`0ms`, `250ms`, `500ms`, `850ms`).
-  - Precision **Animation Duration** (`0.15s–2.50s`) and **Score Pop Duration** (`0.20s–1.50s`) sliders.
-  - Staggered choreography (`Center → Wings`), metallic landing sheen, and live OBS replay (`Alt+E`).
-- **Customizable Match Point Indicator**: 5 layouts (default **Side Fin Beside Score** engineered to stay inside the `1920×1080` frame and above Tekken 8 round orbs), 5 color modes, and customizable badge text.
-- **Full-Screen VS / "Up Next" Match Splash (`vs.html`)** with **6 Broadcast Layouts** (`Arcade Pop Split`, `Tekken 8 Clash`, `TWT Broadcast`, `Player Spotlight`, `Cyber Manga Neon`, `Liquid Frosted Glass`):
-  - **Multi-Game Character Asset Manager (`assets.mjs`):** Browse and cache transparent character renders for **Tekken 8, Street Fighter 6, Guilty Gear -STRIVE-, 2XKO, Fatal Fury: CotW, Granblue Fantasy Versus: Rising, DNF Duel, DBFZ, UNI2, UMvC3, MK1, SSBU** — plus **240+ fighting games** via the open community `StreamHelperAssets` catalog. Auto-downloads on demand or pre-caches entire game packs locally in `data/assets/` for 100% offline tournaments.
-  - **Player Profile Photos (Dual Modes):** Automatically pulls Start.gg profile avatars or accepts local photo uploads, displaying them either as a crisp nameplate medallion alongside the character render (`Badge + Char` / `Auto Fallback`) or front-and-center in a framed portrait spotlight (`Photo Spotlight`).
-  - **Live Match, Auto "Up Next" Queue, or Custom VS** modes, Tournament Logo upload, OBS native scene-entry animations, P1/P2 flip/zoom/offset framing, and **1-click 1920×1080 PNG export** for X/Twitter/Discord.
-- **Native Start.gg (GraphQL v4) & Challonge (API v1) Integration**:
-  - Automatic Stream Queue & set loading in 1 click, complexity-safe pagination, entrant roster import with automatic country/region flag detection, side-swap-aware result reporting, live score sync (Challonge), **Local Match History & H2H** (JSON & CSV export), and a 100% offline **Demo Tournament** mode.
-- **LAN Mobile/Tablet Control + OBS Dock**: Share the local Wi-Fi URL from the panel so a co-producer or phone can update scores in real time via Server-Sent Events (SSE).
+- **56 Broadcast Scorebar Designs** calibrated around both **Tekken 8** (32 designs) and **Street Fighter 6** (24 designs in `sf6-themes.js` engineered with pixel-verified clearance around SF6 healthbars, Drive Gauges, Control Type badges, and Round Win diamonds).
+- **42 Full-Screen VS / "Up Next" Match Splash Designs (`vs.html` & `vs-designs.js`)** with **Click-to-Edit**, direct canvas drag-to-reposition, animated scrolling center dividers, 10 VS emblem architectures, 10 entry choreographies, automatic official tournament logo loading, region-only flag option, **240+ fighting game character packs** (`StreamHelperAssets`), and **1920×1080 PNG export**.
+- **24 Tournament Final Results Designs (`results.html` & `results-designs.js`)** across 6 layouts (**Champion Left Top 8**, **Elevated Top 3 Podium + 4th–8th**, **4×2 Esports Grid**, **Champion Spotlight + 8-Row Ladder**, **Top 4 Towers**, and **Grand Top 3 Podium**), 10 staggered entry choreographies, 8 ambient FX, global + per-player direct drag/wheel portrait framing, automatic live/final standings sync from Start.gg & Challonge, and **1920×1080 PNG social graphic export**.
+- **Adaptive Colors, Surfaces & Dedicated Flag Fade Studio** with 5 surface modes (**Gradient**, **Solid**, **Frosted Glass**, **Metallic**, **Theme BG**), **38 1-click palettes**, and **114 Offline Vector Flags (`flags.js`)** (World FGC, Europe & Regions, US States, Spain Regions).
+- **Native Start.gg (GraphQL v4) & Challonge (API v1) Integration** with privacy-first local token handling (RAM-only by default, zero token characters exposed in the UI, 1-click **Clear Token**), Stream Queue, entrant & avatar import, side-swap-aware result reporting, **Match History & H2H**, and offline **Demo Tournament** mode.
+- **OBS Native Scene-Entry Transitions + LAN Mobile/Tablet Control + OBS Custom Dock** (`<= 1320px` responsive layout).
 
 ---
 
@@ -51,6 +41,7 @@ node server.mjs
 ```
 - **Scorebar Overlay URL (OBS Browser Source):** `http://localhost:8787/`
 - **VS Match Splash URL (OBS Browser Source):** `http://localhost:8787/vs.html`
+- **Tournament Results URL (OBS Browser Source):** `http://localhost:8787/results.html`
 - **Control Panel URL:** `http://localhost:8787/panel.html`
 
 > You can customize the port with `PORT=9090 node server.mjs`.
@@ -152,6 +143,20 @@ Because everything runs over clean local JSON endpoints, you can integrate Strea
 | `/api/assets/download-pack` | `POST` | Pre-download an entire game/pack character render set for 100% offline use. |
 | `/api/assets/download-status` | `GET` | Poll live pack download progress (`done`, `total`, `currentChar`). |
 | `/api/upload` | `POST` | Upload local Player Profile Photo, Tournament Logo, or Custom Character PNG into `data/`. |
+
+---
+
+## Creator, Community & Optional Support
+
+Created with love for the Fighting Game Community by **Nordi5ke** ([N5K-dev](https://github.com/N5K-dev)).
+
+**FGC Open Scorebars is and will always remain 100% free & open-source** — zero paywalls, zero subscriptions, and zero locked features. If this tool helped power your local, weekly, major, or stream and you would like to leave an optional tip to support future updates, feel free to buy a coffee on Ko-fi!
+
+[![X / Twitter](https://img.shields.io/badge/X-@Nordi5ke-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/Nordi5ke)
+[![YouTube](https://img.shields.io/badge/YouTube-@nordi5ke-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/@nordi5ke)
+[![Twitch](https://img.shields.io/badge/Twitch-Nordi5ke-9146FF?style=for-the-badge&logo=twitch&logoColor=white)](https://www.twitch.tv/nordi5ke)
+[![GitHub](https://img.shields.io/badge/GitHub-N5K--dev-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/N5K-dev)
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-Support%20(Optional)-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white)](https://ko-fi.com/nordi5ke)
 
 ---
 
