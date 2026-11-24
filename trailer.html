@@ -51,16 +51,32 @@
   }
   body.clean-mode #stage-1080 { box-shadow: none; }
 
-  /* CLEAN SCENES (ZERO CLUTTER) */
+  /* CLEAN SCENES WITH SMOOTH GPU CAMERA ZOOM & TRANSITIONS */
   .scene {
     position: absolute; inset: 0; z-index: 5;
     opacity: 0; pointer-events: none;
-    transition: opacity 0.55s ease;
+    transform: scale(1.045);
+    transition: opacity 0.52s cubic-bezier(.22, 1, .36, 1), transform 0.72s cubic-bezier(.22, 1, .36, 1);
+    overflow: hidden;
   }
-  .scene.active { opacity: 1; }
+  .scene.active { opacity: 1; transform: scale(1); }
+  .cam-rig {
+    width: 1920px; height: 1080px;
+    transform-origin: center center;
+    transform: translate3d(0, 0, 0) scale(1);
+    transition: transform 1.25s cubic-bezier(.22, 1, .36, 1);
+    will-change: transform;
+  }
+  #cam-scorebar { transform-origin: 50% 0%; }
+  .cam-rig.snap { transition-duration: 0.48s; }
   .scene iframe {
     width: 1920px; height: 1080px; border: 0; display: block;
     pointer-events: none;
+  }
+  #cut-veil {
+    position: absolute; inset: 0; z-index: 25;
+    background: #06070a; opacity: 0; pointer-events: none;
+    transition: opacity 0.28s ease-out;
   }
 
   /* SCENE 01 — SIMPLE CLEAN INTRO */
@@ -251,9 +267,11 @@
       </div>
     </section>
 
-    <!-- 02: LIVE SCOREBARS (FULL 1080p) -->
+    <!-- 02: LIVE SCOREBARS (FULL 1080p + DYNAMIC CAMERA ZOOM) -->
     <section class="scene" id="scene-scorebar">
-      <iframe id="frame-scorebar" src="index.html?preview=1" title="Live Scorebars"></iframe>
+      <div class="cam-rig" id="cam-scorebar">
+        <iframe id="frame-scorebar" title="Live Scorebars"></iframe>
+      </div>
     </section>
     <div class="sb-caption" id="sb-caption">
       <small id="sbc-k">56 HUD-CALIBRATED SCOREBARS</small>
@@ -261,14 +279,18 @@
       <span id="sbc-s">Zero HUD overlap · Flag Fade · Live Match Point</span>
     </div>
 
-    <!-- 03: REAL VS SPLASH (FULL 1080p UNOBSTRUCTED) -->
+    <!-- 03: REAL VS SPLASH (FULL 1080p UNOBSTRUCTED + ZOOM TRANSITIONS) -->
     <section class="scene" id="scene-vs">
-      <iframe id="frame-vs" src="vs.html?preview=1" title="Live VS Splash"></iframe>
+      <div class="cam-rig" id="cam-vs">
+        <iframe id="frame-vs" title="Live VS Splash"></iframe>
+      </div>
     </section>
 
-    <!-- 04: REAL TOP 8 RESULTS (FULL 1080p UNOBSTRUCTED) -->
+    <!-- 04: REAL TOP 8 RESULTS (FULL 1080p UNOBSTRUCTED + CHAMPION ZOOM & PULLBACK) -->
     <section class="scene" id="scene-results">
-      <iframe id="frame-results" src="results.html?preview=1" title="Live Top 8 Results"></iframe>
+      <div class="cam-rig" id="cam-results">
+        <iframe id="frame-results" title="Live Top 8 Results"></iframe>
+      </div>
     </section>
 
     <!-- 05: SIMPLE CLEAN OUTRO -->
@@ -294,6 +316,7 @@
       </div>
     </section>
 
+    <div id="cut-veil"></div>
     <div id="fade-black"></div>
   </div>
 </div>
@@ -359,7 +382,7 @@
   const isHttp = location.protocol === 'http:' || location.protocol === 'https:';
   const BPM = 86;
   const BEAT = 60 / BPM; // 0.69767s
-  const TOTAL_BEATS = 70; // ~48.8s
+  const TOTAL_BEATS = 76; // ~53.0s
   const TOTAL_SEC = TOTAL_BEATS * BEAT;
 
   const qs = new URLSearchParams(location.search);
@@ -627,16 +650,16 @@
         { sub: 110.00, ch: [164.81, 220.00, 277.18, 329.63], mel: [659.25, 0, 587.33, 554.37, 440.00, 0, 493.88, 0] }
       ];
       const cur = prog[bar % 4];
-      if (beat < 66) {
+      if (beat < 72) {
         if (in8 === 0) { this.pad(cur.ch, BEAT * 3.8, 0.09); this.sub(cur.sub, BEAT * 3.5, beat >= 7 ? 0.25 : 0.16); }
         const n = cur.mel[in8];
         if (n && beat >= 1) this.lead(n, BEAT * (in8 === 4 ? 0.95 : 0.55), beat >= 16 ? 0.16 : 0.12);
-        if (beat >= 7 && beat < 64) {
+        if (beat >= 7 && beat < 70) {
           if (in8 === 0 || in8 === 3 || (in8 === 5 && beat >= 22)) this.kick(0.45);
           if (in8 === 2 || in8 === 6) this.snare(0.19);
           if (in8 % 2 === 1) this.hat(0.06);
         }
-      } else if (beat === 66 && in8 === 0) {
+      } else if (beat === 72 && in8 === 0) {
         this.pad([146.83, 220.00, 277.18, 329.63, 369.99, 587.33], 4.0, 0.10);
         this.sub(73.42, 3.4, 0.20);
       }
@@ -646,11 +669,34 @@
   const audio = new ChillBitAudio();
 
   /* =========================================================================
-     OVERLAY DISPATCH
+     OVERLAY DISPATCH + CACHE-BUSTED FRESH IFRAME BOOT + CAMERA ZOOM RIG
      ========================================================================= */
   const frameScorebar = document.getElementById('frame-scorebar');
   const frameVs = document.getElementById('frame-vs');
   const frameResults = document.getElementById('frame-results');
+
+  // Force fresh non-cached iframes on every load (fixes Ctrl+F5 stale iframe cache!)
+  const CB = Date.now();
+  frameScorebar.src = `index.html?preview=1&cb=${CB}`;
+  frameVs.src = `vs.html?preview=1&cb=${CB}`;
+  frameResults.src = `results.html?preview=1&cb=${CB}`;
+
+  function setCam(id, scale = 1, tx = 0, ty = 0, snap = false) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.toggle('snap', snap);
+    el.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(${scale})`;
+  }
+
+  function cutPulse(alpha = 0.36) {
+    const v = document.getElementById('cut-veil');
+    v.style.transition = 'none';
+    v.style.opacity = String(alpha);
+    requestAnimationFrame(() => {
+      v.style.transition = 'opacity 0.34s ease-out';
+      v.style.opacity = '0';
+    });
+  }
 
   function pushScorebar(st, bg = 't8', entry = false) {
     const w = frameScorebar.contentWindow;
@@ -680,74 +726,134 @@
   }
 
   /* =========================================================================
-     5-SCENE SIMPLE CLEAN STORYBOARD (70 BEATS = 48.8s)
+     5-SCENE CLEAN STORYBOARD WITH DYNAMIC CAMERA ZOOMS ON EVERY CHANGE (~53s)
      ========================================================================= */
   const CUES = [
     // 01: SIMPLE INTRO (0..7 beats = 0:00..0:04.9)
     { beat: 0, sc: 0, run: () => {
       document.getElementById('fade-black').classList.remove('solid');
+      setCam('cam-scorebar', 1, 0, 0, true);
+      setCam('cam-vs', 1, 0, 0, true);
+      setCam('cam-results', 1, 0, 0, true);
       setScene('scene-intro');
     }},
 
-    // 02: LIVE SCOREBARS (7..22 beats = 0:04.9..0:15.3)
+    // 02: LIVE SCOREBARS WITH DYNAMIC ZOOM-INS ON EVERY CHANGE (7..26 beats = 0:04.9..0:18.1)
     { beat: 7, sc: 1, run: () => {
+      cutPulse(0.42);
+      setCam('cam-scorebar', 1.0, 0, 0, true);
       setScene('scene-scorebar');
       document.getElementById('sbc-t').textContent = '★ Tekken 8 Native HUD';
       pushScorebar(makeScorebar('t8-native-hud', ROPESU, ORACLE, { round: 'WINNERS FINALS' }), 't8', true);
     }},
-    { beat: 11, sc: 1, run: () => {
+    { beat: 9.2, sc: 1, run: () => {
+      // Smooth zoom RIGHT IN onto the full Tekken 8 Native HUD Scorebar (1.22x fits 100% width with 0 clipping!)
+      setCam('cam-scorebar', 1.22, 0, 0, false);
+    }},
+    { beat: 12, sc: 1, run: () => {
+      // Switch to TWT 2026 Blade + Flag Fade & zoom close onto P1 Flag Fade detail!
+      cutPulse(0.24);
       document.getElementById('sbc-t').textContent = '★ TWT 2026 Blade · Flag Fade';
       pushScorebar(makeScorebar('t8-twt-2026-official', CORRALES, BADCAT, {
         round: 'GRAND FINALS', casters: true, style: { flagStyle: 'fade', flagFadeMode: 'out' }
       }), 't8', false);
+      setCam('cam-scorebar', 1.56, 260, 0, false);
     }},
-    { beat: 15, sc: 1, run: () => {
+    { beat: 14.5, sc: 1, run: () => {
+      // Pan smoothly across center Match Point & P2!
+      setCam('cam-scorebar', 1.56, -260, 0, false);
+    }},
+    { beat: 17, sc: 1, run: () => {
+      // Pull back to full SF6 gameplay, slam in SF6 Native Drive!
+      cutPulse(0.36);
+      setCam('cam-scorebar', 1.0, 0, 0, true);
       document.getElementById('sbc-t').textContent = '🥊 SF6 Native Drive HUD';
       pushScorebar(makeScorebar('sf6-native-drive', CORRALES, ORACLE, {
         round: 'TOP 8 FINALS', p1: { character: 'Ryu' }, p2: { character: 'Chun-Li' }
       }), 'sf6', true);
     }},
-    { beat: 18.5, sc: 1, run: () => {
+    { beat: 19.2, sc: 1, run: () => {
+      // Zoom into the full SF6 top strip proving 0 px HUD overlap with 0 side clipping!
+      setCam('cam-scorebar', 1.22, 0, 0, false);
+    }},
+    { beat: 22.5, sc: 1, run: () => {
+      // Crisp switch to SF6 White Studio with clean zoom settle!
+      cutPulse(0.24);
       document.getElementById('sbc-t').textContent = '🥊 SF6 Broadcast White Studio';
       pushScorebar(makeScorebar('sf6-white-broadcast', BADCAT, SILMAD, {
         round: 'GRAND FINALS', p1: { character: 'Ken' }, p2: { character: 'Juri' }
       }), 'sf6', false);
+      setCam('cam-scorebar', 1.18, 0, 0, false);
     }},
 
-    // 03: REAL VS SPLASH (22..38 beats = 0:15.3..0:26.5) — MATCHES REFERENCE SCREENSHOT!
-    { beat: 22, sc: 2, run: () => {
+    // 03: REAL VS SPLASH WITH SMOOTH ZOOM PUNCH TRANSITIONS (26..44 beats = 0:18.1..0:30.7)
+    { beat: 26, sc: 2, run: () => {
+      cutPulse(0.44);
+      setCam('cam-vs', 1.12, 0, 0, true);
       setScene('scene-vs');
       pushVs(makeVs('mishima-ewgf', ROPESU, ORACLE, { round: 'WINNERS FINALS', logoPos: 'top-left', entry: 'slam-split', fx: 'aura' }), true);
+      requestAnimationFrame(() => setCam('cam-vs', 1.0, 0, 0, false));
     }},
-    { beat: 27.5, sc: 2, run: () => {
+    { beat: 29.5, sc: 2, run: () => {
+      // Gentle hero push-in on Ropesu vs Oracle_99
+      setCam('cam-vs', 1.07, 0, -10, false);
+    }},
+    { beat: 32, sc: 2, run: () => {
+      // Zoom-punch cut into Corrales46 vs Oracle_99 (t8-clash)!
+      cutPulse(0.34);
+      setCam('cam-vs', 1.14, 0, 0, true);
       pushVs(makeVs('t8-clash', CORRALES, ORACLE, { round: 'GRAND FINALS', logoPos: 'top-left', entry: 'katana-slash', fx: 'sparks' }), true);
+      requestAnimationFrame(() => setCam('cam-vs', 1.0, 0, 0, false));
     }},
-    { beat: 33, sc: 2, run: () => {
+    { beat: 38, sc: 2, run: () => {
+      // Zoom-punch cut into BadCat vs Silmad (arcade-pop)!
+      cutPulse(0.34);
+      setCam('cam-vs', 1.12, 0, 0, true);
       pushVs(makeVs('arcade-pop', BADCAT, SILMAD, { round: 'LOSERS FINALS', logoPos: 'top-left', entry: 'zoom-burst', fx: 'sheen' }), true);
+      requestAnimationFrame(() => setCam('cam-vs', 1.0, 0, 0, false));
     }},
 
-    // 04: REAL TOP 8 RESULTS — CORRALES46 #1ST, EXACT 3 REFERENCE LAYOUTS! (38..57 beats = 0:26.5..0:39.8)
-    { beat: 38, sc: 3, run: () => {
+    // 04: REAL TOP 8 RESULTS — CHAMPION CORRALES46 ZOOM-IN + PULLBACK! (44..64 beats = 0:30.7..0:44.6)
+    { beat: 44, sc: 3, run: () => {
+      cutPulse(0.45);
+      // Start ZOOMED IN on Champion 1ST Corrales46 on the left!
+      setCam('cam-results', 1.38, 290, -25, true);
       setScene('scene-results');
       pushResults(makeResults('res-evo-gold', { entry: 'cascade-slam', fx: 'confetti' }), true);
     }},
-    { beat: 44.5, sc: 3, run: () => {
-      pushResults(makeResults('res-podium-trophy', { entry: 'podium-rise', fx: 'confetti' }), true);
+    { beat: 47.2, sc: 3, run: () => {
+      // Smooth dramatic pullback revealing ALL 8 players!
+      setCam('cam-results', 1.0, 0, 0, false);
     }},
     { beat: 51, sc: 3, run: () => {
+      // Smooth zoom transition into Top 3 Podium (Oracle_99 · Corrales46 · BadCat)!
+      cutPulse(0.34);
+      setCam('cam-results', 1.12, 0, -15, true);
+      pushResults(makeResults('res-podium-trophy', { entry: 'podium-rise', fx: 'confetti' }), true);
+      requestAnimationFrame(() => setCam('cam-results', 1.0, 0, 0, false));
+    }},
+    { beat: 57.5, sc: 3, run: () => {
+      // Smooth zoom onto 8-Row Ladder on left -> then pan across to Champion Corrales46!
+      cutPulse(0.34);
+      setCam('cam-results', 1.24, 170, -12, true);
       pushResults(makeResults('res-iron-fist', { entry: 'curtain-rise', fx: 'confetti' }), true);
     }},
+    { beat: 60.5, sc: 3, run: () => {
+      // Glide smoothly across to full-frame revealing both Ladder & Champion!
+      setCam('cam-results', 1.0, 0, 0, false);
+    }},
 
-    // 05: SIMPLE CLEAN OUTRO (57..70 beats = 0:39.8..0:48.8)
-    { beat: 57, sc: 4, run: () => {
+    // 05: SIMPLE CLEAN OUTRO (64..76 beats = 0:44.6..0:53.0)
+    { beat: 64, sc: 4, run: () => {
+      cutPulse(0.45);
       setScene('scene-outro');
     }},
-    { beat: 68, sc: 4, run: () => {
+    { beat: 74, sc: 4, run: () => {
       document.getElementById('fade-black').classList.add('solid');
     }}
   ];
 
-  const SC_BEATS = [0, 7, 22, 38, 57];
+  const SC_BEATS = [0, 7, 26, 44, 64];
   document.getElementById('scrub-ticks').innerHTML = SC_BEATS.slice(1).map(b =>
     `<i style="left:${(b / TOTAL_BEATS * 100).toFixed(2)}%"></i>`
   ).join('');

@@ -973,7 +973,7 @@
     <!-- TOP EVENT HEADER -->
     <header class="res-header">
       <div class="res-header-left">
-        <div class="res-logo-wrap" id="res-logo-wrap"><img id="res-logo-img" alt="" crossorigin="anonymous" /></div>
+        <div class="res-logo-wrap" id="res-logo-wrap"><img id="res-logo-img" alt="" /></div>
         <div class="res-titles">
           <div class="res-subtitle" id="res-subtitle">TOURNAMENT FINALS</div>
           <div class="res-title" id="res-title">TOP 8 RESULTS</div>
@@ -1198,9 +1198,21 @@
         badgeAv?.classList.toggle('active', showBadge);
       };
       if (charImg && charImg.dataset.charSrc) {
-        charImg.onload = () => { charImg.classList.add('loaded'); syncAv(); };
-        charImg.onerror = () => { charImg.classList.remove('loaded'); syncAv(); };
+        let triedLocal = false;
+        const markOk = () => { charImg.classList.add('loaded'); syncAv(); };
+        charImg.onload = markOk;
+        charImg.onerror = () => {
+          const chName = (card.querySelector('.res-char-name')?.textContent || '').trim().toLowerCase();
+          const code = LOCAL_T8_CODES[chName];
+          if (!triedLocal && code && !charImg.src.includes(`/${code}_0.png`)) {
+            triedLocal = true;
+            charImg.src = `data/assets/tekken8/vs_renders/${code}_0.png`;
+            return;
+          }
+          charImg.classList.remove('loaded'); syncAv();
+        };
         charImg.src = charImg.dataset.charSrc;
+        if (charImg.complete && charImg.naturalWidth > 0) markOk();
       }
       syncAv();
     });
