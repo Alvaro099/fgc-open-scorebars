@@ -2696,6 +2696,57 @@
     border-color: rgba(34, 197, 94, 0.4);
     color: #dcfce7;
   }
+
+  /* OFFLINE MOBILE / TABLET LAN QR CODE CARD & ZOOM MODAL */
+  .lan-qr-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+    padding: 10px 12px;
+    border-radius: 9px;
+    background: #0b0f1a;
+    border: 1px solid rgba(56, 189, 248, 0.35);
+  }
+  .lan-qr-box {
+    width: 112px;
+    height: 112px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #ffffff;
+    padding: 4px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+    cursor: pointer;
+    transition: transform 0.14s;
+  }
+  .lan-qr-box:hover { transform: scale(1.04); }
+  .lan-qr-box svg { width: 100%; height: 100%; display: block; }
+  .qr-zoom-modal {
+    width: min(400px, 92vw);
+    background: var(--panel);
+    border: 1px solid var(--border-hi);
+    border-radius: 14px;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.78);
+    overflow: hidden;
+    text-align: center;
+  }
+  .qr-zoom-stage {
+    padding: 18px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .qr-zoom-svg {
+    width: 276px;
+    height: 276px;
+    border-radius: 12px;
+    background: #ffffff;
+    padding: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+  }
+  .qr-zoom-svg svg { width: 100%; height: 100%; display: block; }
 </style>
 </head>
 <body>
@@ -3675,9 +3726,22 @@
             <span id="lan-url-text">Detecting local IP...</span>
             <button id="copy-lan" style="padding:3px 8px;font-size:11px;">Copy</button>
           </div>
+          <div class="lan-qr-row">
+            <div class="lan-qr-box" id="lan-qr-box" title="Click to enlarge QR code for scanning from a distance"></div>
+            <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px;">
+              <strong style="font-size:12px;color:#fff;">📱 Scan with Phone or Tablet Camera</strong>
+              <span style="font-size:11px;color:var(--muted);line-height:1.38;">
+                Point any iOS or Android camera on the same Wi-Fi/router to open the live Control Panel instantly (100% offline QR).
+              </span>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:2px;">
+                <button type="button" id="btn-lan-qr-zoom" class="primary" style="padding:4px 9px;font-size:11px;">🔍 Enlarge QR</button>
+                <button type="button" id="btn-lan-copy-fw" style="padding:4px 9px;font-size:11px;" title="Copy Windows PowerShell Firewall command for port 8787 (if tablet times out)">🛡️ Copy Firewall Fix</button>
+              </div>
+            </div>
+          </div>
           <div id="lan-alt-list" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;"></div>
           <div style="font-size:10.5px;color:var(--muted);margin-top:5px;line-height:1.4;">
-            Tip: VPN/virtual adapters (Radmin, Hamachi, WSL) are skipped automatically. If your phone or tablet still times out on the same Wi-Fi, allow <b>Node.js / TCP port 8787</b> in <b>Windows Defender Firewall (Private networks)</b>.
+            Tip: VPN/virtual adapters (Radmin, Hamachi, WSL) are skipped automatically. Click any alternate chip above to switch the QR code to that interface.
           </div>
         </div>
         <div>
@@ -5090,6 +5154,24 @@
   </div>
 </div>
 
+<!-- ENLARGED MOBILE / TABLET LAN QR CODE MODAL -->
+<div class="flag-modal-backdrop" id="qr-modal" role="dialog" aria-modal="true" aria-labelledby="qr-modal-title">
+  <div class="qr-zoom-modal">
+    <div class="flag-modal-head">
+      <div class="flag-modal-title">
+        <span id="qr-modal-title">📱 Scan to Open Mobile / Tablet Control</span>
+      </div>
+      <button type="button" id="btn-close-qr-modal" title="Close (Esc)">✕</button>
+    </div>
+    <div class="qr-zoom-stage">
+      <div class="qr-zoom-svg" id="qr-zoom-svg"></div>
+      <code id="qr-zoom-url" style="font-size:12px;color:#7dd3fc;word-break:break-all;">http://localhost:8787/panel.html</code>
+      <span style="font-size:11px;color:var(--muted);line-height:1.4;">Make sure your phone or tablet is on the same Wi-Fi / router network.</span>
+      <button type="button" id="btn-qr-zoom-copy" class="primary" style="padding:5px 12px;font-size:11.5px;">📋 Copy LAN URL</button>
+    </div>
+  </div>
+</div>
+
 <!-- CLEAN CONTROL PANEL COMMUNITY FOOTER (Never visible inside OBS overlays) -->
 <footer class="app-footer">
   <span><strong>FGC Open Scorebars</strong> · 100% Free &amp; Open-Source for the FGC by <b>Nordi5ke</b></span>
@@ -5110,6 +5192,7 @@
 <script src="vs-designs.js"></script>
 <script src="sf6-themes.js"></script>
 <script src="results-designs.js"></script>
+<script src="qr.js"></script>
 <script>
 (() => {
   /* =========================================================================
@@ -6793,6 +6876,7 @@
         if (pickerState.open) closeFlagPicker();
         $('share-modal')?.classList.remove('open');
         $('guide-modal')?.classList.remove('open');
+        $('qr-modal')?.classList.remove('open');
       }
     });
 
@@ -7461,10 +7545,42 @@
     $('btn-copy-results').addEventListener('click', () => copyText($('results-url-text').textContent, 'Tournament Results OBS URL'));
     $('copy-results-2').addEventListener('click', () => copyText($('results-url-text').textContent, 'Tournament Results OBS URL'));
     $('copy-dock').addEventListener('click', () => copyText($('dock-url-text').textContent, 'Dock URL'));
+    let lastRenderedQrUrl = '';
+    const renderLanQr = (url) => {
+      const clean = String(url || '').trim();
+      if (!clean || clean === lastRenderedQrUrl || !window.FGC_QR) return;
+      lastRenderedQrUrl = clean;
+      try {
+        const svg = window.FGC_QR.renderSvg(clean, { quiet: 3 });
+        if ($('lan-qr-box')) $('lan-qr-box').innerHTML = svg;
+        if ($('qr-zoom-svg')) $('qr-zoom-svg').innerHTML = svg;
+        if ($('qr-zoom-url')) $('qr-zoom-url').textContent = clean;
+      } catch {}
+    };
+    const openQrModal = () => {
+      const cur = $('lan-url-text')?.textContent || '';
+      if (cur.startsWith('http')) renderLanQr(cur);
+      $('qr-modal')?.classList.add('open');
+    };
+    const closeQrModal = () => $('qr-modal')?.classList.remove('open');
+    $('lan-qr-box')?.addEventListener('click', openQrModal);
+    $('btn-lan-qr-zoom')?.addEventListener('click', openQrModal);
+    $('btn-close-qr-modal')?.addEventListener('click', closeQrModal);
+    $('qr-modal')?.addEventListener('click', (e) => { if (e.target === $('qr-modal')) closeQrModal(); });
+    $('btn-qr-zoom-copy')?.addEventListener('click', () => copyText($('qr-zoom-url')?.textContent || '', 'LAN Mobile URL'));
+    $('btn-lan-copy-fw')?.addEventListener('click', () => {
+      const port = (location.port || '8787');
+      const cmd = `New-NetFirewallRule -DisplayName "FGC Open Scorebars (LAN ${port})" -Direction Inbound -Protocol TCP -LocalPort ${port} -Profile Private -Action Allow`;
+      copyText(cmd, 'Windows Firewall PowerShell command');
+    });
+
     $('copy-lan').addEventListener('click', () => copyText($('lan-url-text').textContent, 'LAN Mobile URL'));
     $('lan-alt-list')?.addEventListener('click', (e) => {
       const btn = e.target.closest('[data-copy-alt-lan]');
-      if (btn) copyText(btn.dataset.copyAltLan, 'Alternate Network URL');
+      if (!btn) return;
+      const altUrl = btn.dataset.copyAltLan;
+      renderLanQr(altUrl);
+      copyText(altUrl, 'Alternate Network URL (QR updated)');
     });
     $('btn-open-overlay').addEventListener('click', () => window.open('index.html', '_blank'));
     $('btn-open-vs').addEventListener('click', () => window.open('vs.html', '_blank'));
@@ -9790,7 +9906,16 @@
         $('dock-url-text').textContent = info.panelUrl;
         const ifaces = Array.isArray(info.networkInterfaces) ? info.networkInterfaces : [];
         const primaryLan = ifaces.find(n => n.kind === 'lan') || ifaces[0];
-        $('lan-url-text').textContent = primaryLan?.url || info.lanPanelUrls?.[0] || info.panelUrl;
+        const finalLanUrl = primaryLan?.url || info.lanPanelUrls?.[0] || info.panelUrl;
+        $('lan-url-text').textContent = finalLanUrl;
+        if (window.FGC_QR && finalLanUrl && !$('lan-qr-box')?.innerHTML) {
+          try {
+            const svg = window.FGC_QR.renderSvg(finalLanUrl, { quiet: 3 });
+            if ($('lan-qr-box')) $('lan-qr-box').innerHTML = svg;
+            if ($('qr-zoom-svg')) $('qr-zoom-svg').innerHTML = svg;
+            if ($('qr-zoom-url')) $('qr-zoom-url').textContent = finalLanUrl;
+          } catch {}
+        }
         if ($('lan-iface-badge')) {
           $('lan-iface-badge').textContent = primaryLan ? `(${primaryLan.name})` : '';
         }
