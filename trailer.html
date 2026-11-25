@@ -508,7 +508,7 @@
 
   const BASE_STYLE = {
     customColors: false, bgMode: 'gradient', fontName: 'theme', fontScore: 'theme',
-    fontScale: 100, letterSpacing: 0, italic: 'theme', scoreSlant: 'mirror',
+    fontScale: 96, letterSpacing: 0, italic: 'theme', scoreSlant: 'mirror',
     textShadow: 'broadcast', uppercase: true, flagStyle: 'theme',
     layoutOverride: 'theme', shape: 'theme', centerStyle: 'theme',
     outerBlade: 'theme', scorePosOverride: 'theme', borderStyle: 'theme', showIsoCode: 'theme',
@@ -517,7 +517,7 @@
     introStagger: true, introFlash: true, scoreAnim: 'pop',
     mpStyle: 'side-peek', mpColor: 'gold', mpText: 'MATCH POINT',
     flagFadeMode: 'out', flagFadeCurve: 'smooth', flagFadeIn: 0,
-    flagFadeStart: 30, flagFadeEnd: 98, flagFadeAngle: 22, flagWidth: 96,
+    flagFadeStart: 30, flagFadeEnd: 98, flagFadeAngle: 22, flagWidth: 46,
     flagOpacity: 100, flagZoom: 112, flagShiftX: 0,
     flagSaturation: 110, flagBrightness: 98
   };
@@ -525,8 +525,8 @@
   function makeScorebar(theme, p1, p2, ov = {}) {
     return {
       theme, visible: true, round: ov.round || 'WINNERS FINALS', format: 'FT3',
-      flagMode: 'both', showFlags: true, showCharacters: true, showMatchPoint: true,
-      showCommentators: Boolean(ov.casters),
+      flagMode: ov.flagMode || 'both', showFlags: true, showCharacters: false, showMatchPoint: true,
+      showCommentators: false,
       commentators: { c1Name: 'NORDI5KE', c1Handle: '@Nordi5ke', c2Name: 'STARFEST', c2Handle: '@StarfestFGC' },
       p1: { ...p1, ...(ov.p1 || {}) },
       p2: { ...p2, ...(ov.p2 || {}) },
@@ -804,37 +804,42 @@
       setCam('cam-scorebar', 1.0, 0, 0, true);
       setScene('scene-scorebar');
       setSbCaption(0);
-      pushScorebar(makeScorebar('t8-native-hud', ROPESU, ORACLE, { round: 'WINNERS FINALS' }), 't8', true);
+      pushScorebar(makeScorebar('t8-native-hud', ROPESU, ORACLE, {
+        round: 'WINNERS FINALS', p1: { score: 2 }, p2: { score: 1 }
+      }), 't8', true);
     }},
     { beat: 9.2, sc: 1, run: () => {
-      setCam('cam-scorebar', 1.22, 0, 0, false);
+      setCam('cam-scorebar', 1.18, 0, 0, false);
     }},
     { beat: 12, sc: 1, run: () => {
       setSbCaption(1);
       pushScorebar(makeScorebar('t8-twt-2026-official', CORRALES, BADCAT, {
-        round: 'GRAND FINALS', casters: true, style: { flagStyle: 'fade-blend', flagFadeMode: 'out' }
+        round: 'GRAND FINALS', p1: { score: 2 }, p2: { score: 1 },
+        style: { flagStyle: 'fade-blend', flagFadeMode: 'out', flagWidth: 50 }
       }), 't8', false);
-      setCam('cam-scorebar', 1.45, 210, 0, false);
+      setCam('cam-scorebar', 1.24, 110, 0, false);
     }},
     { beat: 14.5, sc: 1, run: () => {
-      setCam('cam-scorebar', 1.45, -210, 0, false);
+      setCam('cam-scorebar', 1.24, -110, 0, false);
     }},
     { beat: 17, sc: 1, run: () => {
       setCam('cam-scorebar', 1.0, 0, 0, true);
       setSbCaption(2);
       pushScorebar(makeScorebar('sf6-native-drive', CORRALES, ORACLE, {
-        round: 'TOP 8 FINALS', p1: { character: 'Ryu' }, p2: { character: 'Chun-Li' }
+        round: 'TOP 8 FINALS', p1: { score: 2 }, p2: { score: 1 },
+        style: { mpStyle: 'score-glow', flagWidth: 42 }
       }), 'sf6', true);
     }},
     { beat: 19.2, sc: 1, run: () => {
-      setCam('cam-scorebar', 1.22, 0, 0, false);
+      setCam('cam-scorebar', 1.18, 0, 0, false);
     }},
     { beat: 22.5, sc: 1, run: () => {
       setSbCaption(3);
       pushScorebar(makeScorebar('sf6-white-broadcast', BADCAT, SILMAD, {
-        round: 'GRAND FINALS', p1: { character: 'Ken' }, p2: { character: 'Juri' }
+        round: 'GRAND FINALS', p1: { score: 2 }, p2: { score: 1 },
+        style: { mpStyle: 'under-wing', flagWidth: 44 }
       }), 'sf6', false);
-      setCam('cam-scorebar', 1.18, 0, 0, false);
+      setCam('cam-scorebar', 1.16, 0, 0, false);
     }},
 
     // 03: REAL VS SPLASH — CLEAN 1:1 FULL FRAME, VERTICAL DIVIDER, BIG RENDERS + COMMENTARY!
