@@ -1130,6 +1130,20 @@
     'Filter installed PC fonts...': 'Filtrar fuentes instaladas en el PC...',
     'No custom PC fonts added yet. Upload a .ttf / .otf / .woff2 file or add an installed system font to unlock it across Scorebars, VS Splash & Top 8 Results.': 'Aún no hay fuentes propias del PC. Sube un archivo .ttf / .otf / .woff2 o añade una fuente del sistema para usarla en Marcadores, Pantalla VS y Resultados Top 8.',
 
+    // Auto-Updater & Version Modal
+    '🔄 Version & Auto-Updater': '🔄 Versión y Actualizaciones',
+    'Installed Version': 'Versión Instalada',
+    'Latest on GitHub': 'Última en GitHub',
+    'Checking...': 'Comprobando...',
+    'Release Notes': 'Notas de la Versión',
+    '🔄 Check Again': '🔄 Comprobar Ahora',
+    'Keep Current Version': 'Mantener Versión Actual',
+    '⬇ Auto-Update Now': '⬇ Actualizar Ahora',
+    'Details': 'Detalles',
+    'GitHub Releases ↗': 'Releases en GitHub ↗',
+    'Check application version & updates': 'Comprobar versión y actualizaciones',
+    '🛡️ 100% Data-Safe Update: Updating only refreshes the app files — your data/ folder (saved players, Start.gg/Challonge tokens, presets, custom PC fonts, and cached renders) is never touched.': '🛡️ Actualización 100% Segura: Solo actualiza los archivos del programa — tu carpeta data/ (jugadores, tokens de Start.gg/Challonge, presets, fuentes del PC y renders en caché) nunca se toca.',
+
     // Placeholders
     'Player 1': 'Jugador 1',
     'Player 2': 'Jugador 2',

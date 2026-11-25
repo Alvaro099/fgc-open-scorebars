@@ -18,6 +18,7 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
+import { execFile, spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import {
   connectStartGG,
@@ -39,6 +40,8 @@ import { createAssetManager } from './assets.mjs';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+export const APP_VERSION = '2.1.0';
+const GITHUB_REPO = 'N5K-dev/fgc-open-scorebars';
 const PORT = Number(process.env.PORT || 8787);
 const HOST = process.env.HOST || '0.0.0.0';
 const DATA_DIR = path.join(__dirname, 'data');
@@ -681,6 +684,208 @@ function deepMergeState(prev, patch) {
     updatedAt: Date.now()
   };
   return next;
+}
+
+/* ============================================================================
+   GITHUB RELEASES VERSION CHECKER & DATA-SAFE 1-CLICK SELF-UPDATER (0 DEPS)
+   ============================================================================ */
+let updateCache = null;
+
+function parseSemver(raw) {
+  const m = String(raw || '').trim().replace(/^v/i, '').match(/^(\d+)\.(\d+)\.(\d+)/);
+  return m ? [Number(m[1]), Number(m[2]), Number(m[3])] : [0, 0, 0];
+}
+
+export function compareSemver(a, b) {
+  const pa = parseSemver(a), pb = parseSemver(b);
+  for (let i = 0; i < 3; i++) {
+    if (pa[i] !== pb[i]) return pa[i] - pb[i];
+  }
+  return 0;
+}
+
+export function isAllowedUpdateHost(urlStr) {
+  try {
+    const u = new URL(urlStr);
+    if (u.protocol !== 'https:') return false;
+    const allowed = [
+      'github.com',
+      'api.github.com',
+      'objects.githubusercontent.com',
+      'codeload.github.com',
+      'release-assets.githubusercontent.com'
+    ];
+    return allowed.some(h => u.hostname === h || u.hostname.endsWith(`.${h}`));
+  } catch {
+    return false;
+  }
+}
+
+async function checkGithubUpdate(force = false) {
+  const now = Date.now();
+  if (!force && updateCache && (now - updateCache.checkedAt) < 10 * 60 * 1000) {
+    return updateCache;
+  }
+  try {
+    const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases/latest`, {
+      headers: {
+        'User-Agent': `FGC-Open-Scorebars/${APP_VERSION}`,
+        'Accept': 'application/vnd.github+json'
+      },
+      signal: AbortSignal.timeout(6500)
+    });
+    if (!res.ok) throw new Error(`GitHub API HTTP ${res.status}`);
+    const rel = await res.json();
+    const latestTag = String(rel.tag_name || '').trim();
+    const latestVersion = latestTag.replace(/^v/i, '') || APP_VERSION;
+    const cmp = compareSemver(latestVersion, APP_VERSION);
+    const status = cmp > 0 ? 'update-available' : (cmp < 0 ? 'ahead' : 'up-to-date');
+    const zipAsset = (Array.isArray(rel.assets) ? rel.assets : []).find(a =>
+      /\.zip$/i.test(String(a?.name || '')) && a?.browser_download_url
+    );
+    const downloadUrl = zipAsset?.browser_download_url || rel.zipball_url || '';
+    const notesRaw = String(rel.body || '').replace(/\r\n/g, '\n').trim();
+    const result = {
+      status,
+      currentVersion: APP_VERSION,
+      latestVersion,
+      latestTag: latestTag || `v${latestVersion}`,
+      releaseTitle: String(rel.name || latestTag || `v${latestVersion}`).trim(),
+      releaseUrl: String(rel.html_url || `https://github.com/${GITHUB_REPO}/releases`),
+      publishedAt: rel.published_at || '',
+      downloadUrl,
+      assetName: zipAsset?.name || `FGC-Open-Scorebars-${latestTag}.zip`,
+      assetSize: Number(zipAsset?.size || 0),
+      notes: notesRaw.slice(0, 1400),
+      checkedAt: now
+    };
+    updateCache = result;
+    return result;
+  } catch (err) {
+    return {
+      status: 'offline',
+      currentVersion: APP_VERSION,
+      latestVersion: '',
+      releaseUrl: `https://github.com/${GITHUB_REPO}/releases`,
+      error: err.message,
+      checkedAt: now
+    };
+  }
+}
+
+function runExecFile(cmd, args, timeoutMs = 45000) {
+  return new Promise((resolve, reject) => {
+    execFile(cmd, args, { timeout: timeoutMs, windowsHide: true }, (err, stdout, stderr) => {
+      if (err) reject(new Error(stderr?.trim() || err.message));
+      else resolve({ stdout, stderr });
+    });
+  });
+}
+
+async function extractZipNative(zipFile, destDir) {
+  fs.mkdirSync(destDir, { recursive: true });
+  if (process.platform === 'win32') {
+    const psCmd = `Expand-Archive -LiteralPath '${zipFile.replace(/'/g, "''")}' -DestinationPath '${destDir.replace(/'/g, "''")}' -Force`;
+    await runExecFile('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', psCmd]);
+    return;
+  }
+  try {
+    await runExecFile('unzip', ['-oq', zipFile, '-d', destDir]);
+  } catch {
+    await runExecFile('python3', ['-m', 'zipfile', '-e', zipFile, destDir]);
+  }
+}
+
+function findExtractedAppRoot(dir) {
+  if (fs.existsSync(path.join(dir, 'server.mjs'))) return dir;
+  const entries = fs.readdirSync(dir, { withFileTypes: true }).filter(d => d.isDirectory());
+  for (const d of entries) {
+    const sub = path.join(dir, d.name);
+    if (fs.existsSync(path.join(sub, 'server.mjs'))) return sub;
+  }
+  return null;
+}
+
+export async function applySafeUpdateFromZip(zipFile, targetDir = __dirname) {
+  const resolvedTarget = path.resolve(targetDir);
+  const workDir = path.join(os.tmpdir(), `fgc-scorebars-extract-${Date.now()}`);
+  try {
+    await extractZipNative(zipFile, workDir);
+    const appRoot = findExtractedAppRoot(workDir);
+    if (!appRoot) {
+      throw new Error('Downloaded archive is missing server.mjs — update aborted safely');
+    }
+    const ALLOWED_ROOT_FILE = /^([a-zA-Z0-9._-]+\.(html|js|mjs|bat|css|md)|LICENSE)$/i;
+    const BLOCKED_ROOT_FILE = /^(trailer|\.env)/i;
+    const ALLOWED_ASSET_FILE = /^[a-zA-Z0-9._-]+\.(png|jpe?g|webp|svg)$/i;
+
+    let filesUpdated = 0;
+    const safeWriteFile = (srcPath, destRel) => {
+      const normalized = path.normalize(destRel).replace(/^(\.\.[/\\])+/, '');
+      if (/^[/\\]?(data|\.git|docs)([/\\]|$)/i.test(normalized)) return;
+      const dstPath = path.join(resolvedTarget, normalized);
+      if (!dstPath.startsWith(resolvedTarget + path.sep)) return;
+      fs.mkdirSync(path.dirname(dstPath), { recursive: true });
+      const tmp = `${dstPath}.upd.tmp`;
+      fs.copyFileSync(srcPath, tmp);
+      try {
+        fs.renameSync(tmp, dstPath);
+      } catch {
+        // Windows fallback if file lock momentarily resists rename
+        fs.copyFileSync(srcPath, dstPath);
+        try { fs.unlinkSync(tmp); } catch {}
+      }
+      filesUpdated++;
+    };
+
+    for (const ent of fs.readdirSync(appRoot, { withFileTypes: true })) {
+      if (ent.isFile() && ALLOWED_ROOT_FILE.test(ent.name) && !BLOCKED_ROOT_FILE.test(ent.name)) {
+        safeWriteFile(path.join(appRoot, ent.name), ent.name);
+      }
+    }
+    const assetsSrc = path.join(appRoot, 'assets');
+    if (fs.existsSync(assetsSrc) && fs.statSync(assetsSrc).isDirectory()) {
+      for (const ent of fs.readdirSync(assetsSrc, { withFileTypes: true })) {
+        if (ent.isFile() && ALLOWED_ASSET_FILE.test(ent.name)) {
+          safeWriteFile(path.join(assetsSrc, ent.name), path.join('assets', ent.name));
+        }
+      }
+    }
+    if (filesUpdated === 0) {
+      throw new Error('No valid app files found in release archive');
+    }
+    return { filesUpdated };
+  } finally {
+    try { fs.rmSync(workDir, { recursive: true, force: true }); } catch {}
+  }
+}
+
+async function applySafeUpdate(downloadUrl) {
+  if (!isAllowedUpdateHost(downloadUrl)) {
+    throw new Error('Refused update download from untrusted host');
+  }
+  const tmpDir = path.join(os.tmpdir(), `fgc-scorebars-dl-${Date.now()}`);
+  fs.mkdirSync(tmpDir, { recursive: true });
+  const zipPath = path.join(tmpDir, 'release.zip');
+  try {
+    const res = await fetch(downloadUrl, {
+      headers: { 'User-Agent': `FGC-Open-Scorebars/${APP_VERSION}` },
+      redirect: 'follow',
+      signal: AbortSignal.timeout(45000)
+    });
+    if (!res.ok) throw new Error(`Download failed (HTTP ${res.status})`);
+    if (res.url && !isAllowedUpdateHost(res.url)) {
+      throw new Error('Redirected to untrusted host — update aborted');
+    }
+    const buf = Buffer.from(await res.arrayBuffer());
+    if (buf.length < 1024 || buf.length > 50 * 1024 * 1024) {
+      throw new Error('Unexpected archive size — update aborted');
+    }
+    fs.writeFileSync(zipPath, buf);
+    return await applySafeUpdateFromZip(zipPath);
+  } finally {
+    try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch {}
+  }
 }
 
 const server = http.createServer(async (req, res) => {
@@ -1398,11 +1603,89 @@ const server = http.createServer(async (req, res) => {
     return fs.createReadStream(fp).pipe(res);
   }
 
-  // --- API: Server Info (URLs, LAN IPs, client count) ---
+  // --- API: Version Check & 1-Click Data-Safe Auto-Updater (GitHub Releases) ---
+  if (pathname === '/api/update/check' && req.method === 'GET') {
+    const force = urlObj.searchParams.get('force') === '1';
+    const info = await checkGithubUpdate(force);
+    return sendJson(res, 200, info);
+  }
+
+  if (pathname === '/api/update/apply' && req.method === 'POST') {
+    try {
+      const info = await checkGithubUpdate(true);
+      if (info.status === 'offline') {
+        throw new Error('No internet connection to reach GitHub Releases');
+      }
+      if (info.status !== 'update-available') {
+        return sendJson(res, 200, {
+          ok: true,
+          alreadyUpToDate: true,
+          previousVersion: APP_VERSION,
+          updatedTo: APP_VERSION,
+          filesUpdated: 0,
+          canAutoRestart: true
+        });
+      }
+      if (!info.downloadUrl) {
+        throw new Error('No downloadable release package found on GitHub');
+      }
+      const result = await applySafeUpdate(info.downloadUrl);
+      updateCache = null;
+      return sendJson(res, 200, {
+        ok: true,
+        previousVersion: APP_VERSION,
+        updatedTo: info.latestVersion,
+        filesUpdated: result.filesUpdated,
+        canAutoRestart: true
+      });
+    } catch (err) {
+      return sendJson(res, 400, { ok: false, error: err.message });
+    }
+  }
+
+  if (pathname === '/api/update/restart' && req.method === 'POST') {
+    sendJson(res, 200, { ok: true, restarting: true, launcher: process.env.FGC_LAUNCHER === '1' });
+    setTimeout(() => {
+      for (const client of sseClients) {
+        try { client.end(); } catch {}
+      }
+      sseClients.clear();
+      const finishRestart = () => {
+        if (process.env.FGC_LAUNCHER === '1') {
+          process.exit(42);
+        } else {
+          try {
+            const childEnv = { ...process.env, FGC_BOOT_DELAY_MS: '650' };
+            const child = spawn(process.execPath, [__filename], {
+              cwd: __dirname,
+              detached: true,
+              stdio: 'ignore',
+              env: childEnv
+            });
+            child.unref();
+          } catch {}
+          process.exit(0);
+        }
+      };
+      try {
+        server.close(finishRestart);
+        server.closeAllConnections?.();
+      } catch {
+        finishRestart();
+      }
+      setTimeout(finishRestart, 450).unref?.();
+    }, 220);
+    return;
+  }
+
+  // --- API: Server Info (URLs, LAN IPs, client count, app version) ---
   if (pathname === '/api/info' && req.method === 'GET') {
     const ranked = getRankedNetworkInterfaces();
     const lanIps = getLanIps();
     return sendJson(res, 200, {
+      version: APP_VERSION,
+      repo: GITHUB_REPO,
+      canAutoRestart: true,
       port: PORT,
       overlayUrl: `http://localhost:${PORT}/`,
       vsOverlayUrl: `http://localhost:${PORT}/vs.html`,
@@ -1452,18 +1735,26 @@ const server = http.createServer(async (req, res) => {
   });
 });
 
-server.listen(PORT, HOST, () => {
-  const ranked = getRankedNetworkInterfaces();
-  const primaryLan = ranked.find(n => n.kind === 'lan') || ranked[0];
-  console.log('\n=======================================================');
-  console.log('  FGC OPEN SCOREBARS — LOCAL SERVER RUNNING (0 deps)');
-  console.log('=======================================================');
-  console.log(`  Scorebar Overlay (OBS):   http://localhost:${PORT}/`);
-  console.log(`  VS Splash Overlay (OBS):  http://localhost:${PORT}/vs.html`);
-  console.log(`  Results Overlay (OBS):    http://localhost:${PORT}/results.html`);
-  console.log(`  Local Control Panel:      http://localhost:${PORT}/panel.html`);
-  if (primaryLan) {
-    console.log(`  Mobile / Tablet LAN UI:   http://${primaryLan.ip}:${PORT}/panel.html (${primaryLan.name})`);
-  }
-  console.log('=======================================================\n');
-});
+function startListening() {
+  server.listen(PORT, HOST, () => {
+    const ranked = getRankedNetworkInterfaces();
+    const primaryLan = ranked.find(n => n.kind === 'lan') || ranked[0];
+    console.log('\n=======================================================');
+    console.log(`  FGC OPEN SCOREBARS v${APP_VERSION} — LOCAL SERVER RUNNING (0 deps)`);
+    console.log('=======================================================');
+    console.log(`  Scorebar Overlay (OBS):   http://localhost:${PORT}/`);
+    console.log(`  VS Splash Overlay (OBS):  http://localhost:${PORT}/vs.html`);
+    console.log(`  Results Overlay (OBS):    http://localhost:${PORT}/results.html`);
+    console.log(`  Local Control Panel:      http://localhost:${PORT}/panel.html`);
+    if (primaryLan) {
+      console.log(`  Mobile / Tablet LAN UI:   http://${primaryLan.ip}:${PORT}/panel.html (${primaryLan.name})`);
+    }
+    console.log('=======================================================\n');
+  });
+}
+
+if (process.env.FGC_NO_LISTEN !== '1') {
+  const bootDelay = Math.max(0, Math.min(5000, Number(process.env.FGC_BOOT_DELAY_MS || 0) || 0));
+  if (bootDelay > 0) setTimeout(startListening, bootDelay);
+  else startListening();
+}

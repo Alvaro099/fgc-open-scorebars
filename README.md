@@ -19,7 +19,7 @@ Built on pure HTML/CSS/JS and a lightweight native Node.js HTTP/SSE server — *
 
 ## Visual Showcase & Live Demos
 
-### 1. Live Broadcast Scorebars (56 HUD-Calibrated Designs)
+### 1. Live Broadcast Scorebars (57 HUD-Calibrated Designs)
 
 <p align="center">
   <img src="docs/media/demo-scorebars.gif" alt="Live Broadcast Scorebars Demo" width="88%" />
@@ -55,8 +55,9 @@ Built on pure HTML/CSS/JS and a lightweight native Node.js HTTP/SSE server — *
 
 ## Key Highlights
 
-- **57 Broadcast Scorebar Designs** calibrated around **Tekken 8** (33 designs — including **🥊 PBRD Kazuya Fists**, featuring Kazuya's studded crimson gloves framing all 3 in-game round orbs) and **Street Fighter 6** (24 designs in `sf6-themes.js` engineered with pixel-verified clearance around SF6 healthbars, Drive Gauges, Control Type badges, and Round Win diamonds) — built to expand across more fighting games.
+- **57 Broadcast Scorebar Designs** calibrated around **Tekken 8** (33 designs — including **🥊 PBRD Kazuya Fists**, featuring Kazuya's studded gloves framing all 3 in-game round orbs with full dynamic recoloring across all themes & custom colors) and **Street Fighter 6** (24 designs in `sf6-themes.js` engineered with pixel-verified clearance around SF6 healthbars, Drive Gauges, Control Type badges, and Round Win diamonds) — built to expand across more fighting games.
 - **Global Custom PC Fonts (`custom-fonts.js`)** — upload any `.ttf`, `.otf`, `.woff`, or `.woff2` font file directly from your PC (served locally to OBS Browser Sources & LAN devices) or pick locally installed system fonts, and apply them individually or **globally in 1 click** across Scorebars, VS Splash, Top 8 Results, and 1080p PNG exports.
+- **Built-In Version Checker & 1-Click Data-Safe Auto-Updater** — shows your live version status right in the Control Panel header, notifies you when a new GitHub Release is available, and lets you either **auto-download & update in 1 click** (preserving your entire `data/` folder: players, tokens, presets, custom fonts, and cached renders) or **keep your current version**.
 - **42 Full-Screen VS / "Up Next" Match Splash Designs (`vs.html` & `vs-designs.js`)** with **Click-to-Edit**, direct canvas drag-to-reposition, animated scrolling center dividers, 10 VS emblem architectures, 10 entry choreographies, automatic official tournament logo loading, region-only flag option, **240+ fighting game character packs** (`StreamHelperAssets`), and **1920×1080 PNG export**.
 - **24 Tournament Final Results Designs (`results.html` & `results-designs.js`)** across 6 layouts (**Champion Left Top 8**, **Elevated Top 3 Podium + 4th–8th**, **4×2 Esports Grid**, **Champion Spotlight + 8-Row Ladder**, **Top 4 Towers**, and **Grand Top 3 Podium**), 10 staggered entry choreographies, 8 ambient FX, global + per-player direct drag/wheel portrait framing, automatic live/final standings sync from Start.gg & Challonge, and **1920×1080 PNG social graphic export**.
 - **Adaptive Colors, Surfaces & Dedicated Flag Fade Studio** with 5 surface modes (**Gradient**, **Solid**, **Frosted Glass**, **Metallic**, **Theme BG**), **38 1-click palettes**, and **114 Offline Vector Flags (`flags.js`)** (World FGC, Europe & Regions, US States, Spain Regions).
@@ -149,7 +150,7 @@ Available whenever the Control Panel window or OBS Dock has focus:
 
 | File | Purpose |
 | :--- | :--- |
-| [`index.html`](index.html) | `1920×1080` OBS Browser Source scorebar overlay (56 themes, adaptive surfaces, Match Point, OBS native transitions, SSE + BroadcastChannel client). |
+| [`index.html`](index.html) | `1920×1080` OBS Browser Source scorebar overlay (57 themes, adaptive surfaces, Match Point, OBS native transitions, SSE + BroadcastChannel client). |
 | [`vs.html`](vs.html) | `1920×1080` OBS Browser Source VS / Up Next Match Splash overlay (42 designs, character renders, avatars, H2H, tournament logo, 1920×1080 PNG exporter). |
 | [`results.html`](results.html) | `1920×1080` OBS Browser Source Top 8 & Podium Final Results overlay (24 designs, 6 layouts, direct portrait drag/zoom, 1920×1080 PNG exporter). |
 | [`panel.html`](panel.html) | 2-column Broadcast Control Panel with pinned live preview, Style Studio, VS Studio, Results Studio, Asset Manager, Flag Picker, Tournament sync, and H2H History. |
@@ -158,8 +159,8 @@ Available whenever the Control Panel window or OBS Dock has focus:
 | [`tournaments.mjs`](tournaments.mjs) | Native Start.gg GraphQL v4 client, Challonge REST API v1 client, country/region flag resolver, and offline Demo generator. |
 | [`sf6-themes.js`](sf6-themes.js) / [`vs-designs.js`](vs-designs.js) / [`results-designs.js`](results-designs.js) | Declarative theme & design catalogs for Street Fighter 6 scorebars, VS splash layouts, and Top 8 results layouts. |
 | [`flags.js`](flags.js) / [`i18n.js`](i18n.js) / [`qr.js`](qr.js) / [`custom-fonts.js`](custom-fonts.js) | 114 offline SVG flags, English/Spanish bilingual UI engine, offline QR generator for mobile LAN remote control, and global custom PC font loader. |
-| [`Start_Scorebar.bat`](Start_Scorebar.bat) / [`Install_NodeJS.bat`](Install_NodeJS.bat) | 1-click Windows launcher and standalone Node.js LTS installer (`winget` + official `nodejs.org` MSI fallback). |
-| [`assets/`](assets/) | Reference gameplay backdrops (`t8-gameplay-ref.jpg`, `sf6-gameplay-ref.jpg`) used exclusively in the Control Panel Live Preview. |
+| [`Start_Scorebar.bat`](Start_Scorebar.bat) / [`Install_NodeJS.bat`](Install_NodeJS.bat) | 1-click Windows launcher (with automatic restart loop after in-panel updates) and standalone Node.js LTS installer (`winget` + official `nodejs.org` MSI fallback). |
+| [`assets/`](assets/) | Reference gameplay backdrops (`t8-gameplay-ref.jpg`, `sf6-gameplay-ref.jpg`) for the Control Panel Live Preview and dynamic Kazuya Fists overlay masks/shading layers. |
 
 > Runtime state, saved players, custom presets, match history, and API tokens are stored in `data/` (created automatically at runtime and ignored by Git).
 
@@ -173,7 +174,10 @@ Because everything runs over clean local JSON endpoints, you can integrate Strea
 | :--- | :--- | :--- |
 | `/api/state` | `GET` / `POST` | Read or patch live overlay state (broadcasts immediately via SSE). |
 | `/api/events` | `GET` (SSE) | Real-time state stream consumed by OBS overlays and remote panels. |
-| `/api/info` | `GET` | Server port, connected overlay count, and detected LAN IP URLs. |
+| `/api/info` | `GET` | App version, server port, connected overlay count, and detected LAN IP URLs. |
+| `/api/update/check` | `GET` | Compare installed version against the latest GitHub Release (`?force=1` bypasses 10-min cache). |
+| `/api/update/apply` | `POST` | Data-safe 1-click download & update of app files from the latest GitHub Release (never touches `data/`). |
+| `/api/update/restart` | `POST` | Gracefully restart the local server after an update (`Start_Scorebar.bat` auto-restarts on exit code `42`). |
 | `/api/players` | `GET` / `POST` | Read, upsert, or delete local saved players. |
 | `/api/presets` | `GET` / `POST` | Read, save, or delete custom Style Studio presets. |
 | `/api/fonts` | `GET` / `POST` | List, upload (`.ttf`/`.otf`/`.woff`/`.woff2`), register installed PC system fonts, or delete global custom fonts. |

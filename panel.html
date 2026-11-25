@@ -200,6 +200,95 @@
   .status-pill.online .status-dot { background: var(--green); box-shadow: 0 0 8px var(--green); }
   .status-pill.online { color: #dcfce7; border-color: rgba(34, 197, 94, 0.35); }
 
+  /* VERSION / AUTO-UPDATE PILL, BANNER & MODAL */
+  .ver-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.16s ease;
+  }
+  .ver-pill:hover { border-color: var(--border-hi); color: #fff; }
+  .ver-pill.is-latest { color: #86efac; border-color: rgba(34, 197, 94, 0.38); background: rgba(20, 83, 45, 0.25); }
+  .ver-pill.has-update {
+    color: #fef08a;
+    border-color: rgba(250, 204, 21, 0.72);
+    background: linear-gradient(135deg, rgba(217, 119, 6, 0.35), rgba(234, 88, 12, 0.28));
+    box-shadow: 0 0 14px rgba(250, 204, 21, 0.28);
+    animation: updPulse 2.2s ease-in-out infinite;
+  }
+  @keyframes updPulse {
+    0%, 100% { box-shadow: 0 0 8px rgba(250, 204, 21, 0.22); }
+    50% { box-shadow: 0 0 18px rgba(250, 204, 21, 0.55); }
+  }
+  .update-banner-wrap {
+    max-width: 1860px;
+    margin: 8px auto 0;
+    padding: 0 16px;
+    display: none;
+  }
+  .update-banner-wrap.show { display: block; }
+  .update-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 8px 14px;
+    border-radius: 10px;
+    background: linear-gradient(90deg, rgba(217, 119, 6, 0.22), rgba(30, 41, 59, 0.92));
+    border: 1px solid rgba(250, 204, 21, 0.52);
+    font-size: 12px;
+    color: #fef3c7;
+  }
+  .update-modal-box {
+    width: min(560px, 94vw);
+    background: var(--panel);
+    border: 1px solid var(--border-hi);
+    border-radius: 14px;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.8);
+    overflow: hidden;
+  }
+  .update-modal-body {
+    padding: 16px 18px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .upd-ver-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .upd-ver-card {
+    padding: 10px 12px;
+    border-radius: 9px;
+    background: #0d111b;
+    border: 1px solid var(--border);
+  }
+  .upd-ver-card small { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 700; }
+  .upd-ver-card strong { display: block; font-size: 18px; color: #fff; margin-top: 2px; }
+  .upd-notes-box {
+    max-height: 170px;
+    overflow-y: auto;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: #0a0d16;
+    border: 1px solid var(--border);
+    font-size: 11.5px;
+    color: #cbd5e1;
+    line-height: 1.48;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
   /* Generic Buttons & Inputs */
   button {
     font: inherit;
@@ -2809,6 +2898,7 @@
       <span class="status-dot"></span>
       <span id="conn-text">Connecting...</span>
     </div>
+    <button type="button" class="ver-pill" id="btn-update-pill" title="Check application version &amp; updates">v2.1.0</button>
     <!-- Contextual actions for Scorebars & Tournaments -->
     <div class="hdr-ws-group" id="hdr-group-scorebars">
       <button id="btn-toggle-sidebar" class="active-chip" title="Show or hide the Scorebar Designs sidebar">🎨 Designs</button>
@@ -2840,6 +2930,21 @@
     <button type="button" id="btn-open-share" class="btn-support-hdr" title="Creator socials, GitHub repository, share link &amp; optional Ko-fi support">☕ Share &amp; Support</button>
   </div>
 </header>
+
+<!-- OPTIONAL NON-BLOCKING UPDATE BANNER (Only shown when a newer GitHub Release exists & not dismissed) -->
+<div class="update-banner-wrap" id="update-banner-wrap">
+  <div class="update-banner">
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <span style="padding:2px 8px;border-radius:999px;background:#f59e0b;color:#0b0d14;font-weight:800;font-size:10.5px;">UPDATE</span>
+      <span id="update-banner-text">New version available on GitHub! Your data/ folder stays 100% intact.</span>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+      <button type="button" id="btn-banner-update-now" class="primary" style="padding:4px 11px;font-size:11.5px;background:linear-gradient(135deg,#16a34a,#15803d);border-color:#22c55e;">⬇ Auto-Update Now</button>
+      <button type="button" id="btn-banner-details" style="padding:4px 9px;font-size:11.5px;">Details</button>
+      <button type="button" id="btn-banner-keep" style="padding:4px 9px;font-size:11.5px;color:var(--muted);">Keep Current Version</button>
+    </div>
+  </div>
+</div>
 
 <!-- SHARED ACTIVE LINKED TOURNAMENT MATCH BAR (Visible across all workspaces whenever a tournament set is linked) -->
 <div class="shared-match-wrap">
@@ -5256,6 +5361,56 @@
   </div>
 </div>
 
+<!-- VERSION STATUS & 1-CLICK AUTO-UPDATE MODAL -->
+<div class="flag-modal-backdrop" id="update-modal" role="dialog" aria-modal="true" aria-labelledby="update-modal-title">
+  <div class="update-modal-box">
+    <div class="flag-modal-head">
+      <div class="flag-modal-title">
+        <span id="update-modal-title">🔄 Version &amp; Auto-Updater</span>
+      </div>
+      <button type="button" id="btn-close-update-modal" title="Close (Esc)">✕</button>
+    </div>
+    <div class="update-modal-body">
+      <div class="upd-ver-grid">
+        <div class="upd-ver-card">
+          <small>Installed Version</small>
+          <strong id="upd-cur-ver">v2.1.0</strong>
+        </div>
+        <div class="upd-ver-card">
+          <small>Latest on GitHub</small>
+          <strong id="upd-lat-ver" style="color:#7dd3fc;">Checking...</strong>
+        </div>
+      </div>
+
+      <div class="guide-callout safe" id="upd-status-callout">
+        Checking GitHub Releases for the latest version...
+      </div>
+
+      <div id="upd-notes-wrap" style="display:none;">
+        <label style="margin-bottom:4px;">Release Notes</label>
+        <div class="upd-notes-box" id="upd-notes-box"></div>
+      </div>
+
+      <div id="upd-safe-notice" class="guide-callout" style="background:rgba(56,189,248,0.09);border-color:rgba(56,189,248,0.35);color:#e0f2fe;">
+        🛡️ <b>100% Data-Safe Update:</b> Updating only refreshes the app files — your <code>data/</code> folder (saved players, Start.gg/Challonge tokens, presets, custom PC fonts, and cached renders) is never touched.
+      </div>
+
+      <div id="upd-progress-msg" style="display:none;font-size:12px;font-weight:700;color:#fef08a;padding:6px 10px;border-radius:7px;background:rgba(245,185,53,0.12);border:1px solid rgba(245,185,53,0.35);"></div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-top:2px;">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button type="button" id="btn-upd-recheck" style="padding:6px 10px;font-size:11.5px;">🔄 Check Again</button>
+          <a id="lnk-upd-github" href="https://github.com/N5K-dev/fgc-open-scorebars/releases" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;padding:6px 10px;font-size:11.5px;border-radius:7px;background:#141926;border:1px solid var(--border);color:#cbd5e1;text-decoration:none;font-weight:600;">GitHub Releases ↗</a>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button type="button" id="btn-upd-keep" style="padding:6px 11px;font-size:11.5px;">Keep Current Version</button>
+          <button type="button" id="btn-upd-apply" class="primary" style="display:none;padding:6px 13px;font-size:12px;background:linear-gradient(135deg,#16a34a,#15803d);border-color:#22c55e;">⬇ Auto-Update Now</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- CLEAN CONTROL PANEL COMMUNITY FOOTER (Never visible inside OBS overlays) -->
 <footer class="app-footer">
   <span><strong>FGC Open Scorebars</strong> · 100% Free &amp; Open-Source for the FGC by <b>Nordi5ke</b></span>
@@ -7047,6 +7202,9 @@
         $('share-modal')?.classList.remove('open');
         $('guide-modal')?.classList.remove('open');
         $('qr-modal')?.classList.remove('open');
+        if (typeof updateBusy === 'undefined' || !updateBusy) {
+          $('update-modal')?.classList.remove('open');
+        }
       }
     });
 
@@ -10365,8 +10523,225 @@
     const next = btn.dataset.lang;
     window.FGC_I18N.setLang(next);
     toast(next === 'es' ? '🌐 Idioma: Español' : '🌐 Language: English');
+    if (lastUpdateInfo) renderUpdateUI(lastUpdateInfo);
   });
   window.FGC_I18N?.init();
+
+  /* =========================================================================
+     VERSION CHECKER & 1-CLICK DATA-SAFE AUTO-UPDATER UI
+     ========================================================================= */
+  const DISMISSED_VER_KEY = 'fgc_dismissed_update_ver_v1';
+  let lastUpdateInfo = null;
+  let updateBusy = false;
+
+  const isEs = () => (window.FGC_I18N?.getLang?.() === 'es');
+
+  function renderUpdateUI(info) {
+    lastUpdateInfo = info;
+    const pill = $('btn-update-pill');
+    const banner = $('update-banner-wrap');
+    const bannerTxt = $('update-banner-text');
+    const curEl = $('upd-cur-ver');
+    const latEl = $('upd-lat-ver');
+    const callout = $('upd-status-callout');
+    const notesWrap = $('upd-notes-wrap');
+    const notesBox = $('upd-notes-box');
+    const applyBtn = $('btn-upd-apply');
+    const ghLnk = $('lnk-upd-github');
+
+    const curV = info?.currentVersion ? `v${info.currentVersion}` : 'v2.1.0';
+    const latV = info?.latestVersion ? `v${info.latestVersion}` : (isEs() ? 'Sin conexión' : 'Offline');
+    if (curEl) curEl.textContent = curV;
+    if (latEl) latEl.textContent = latV;
+    if (ghLnk && info?.releaseUrl) ghLnk.href = info.releaseUrl;
+    const safeNotice = $('upd-safe-notice');
+    if (safeNotice) {
+      safeNotice.innerHTML = isEs()
+        ? '🛡️ <b>Actualización 100% segura para tus datos:</b> Solo se actualizan los archivos de la app — tu carpeta <code>data/</code> (jugadores guardados, tokens de Start.gg/Challonge, presets, fuentes propias del PC y renders en caché) nunca se toca.'
+        : '🛡️ <b>100% Data-Safe Update:</b> Updating only refreshes the app files — your <code>data/</code> folder (saved players, Start.gg/Challonge tokens, presets, custom PC fonts, and cached renders) is never touched.';
+    }
+
+    pill?.classList.remove('is-latest', 'has-update');
+    if (info?.status === 'update-available') {
+      if (pill) {
+        pill.classList.add('has-update');
+        pill.textContent = isEs() ? `⬇ Actualizar ${latV}` : `⬇ Update ${latV}`;
+        pill.title = isEs() ? `Nueva versión ${latV} disponible (tienes ${curV})` : `New version ${latV} available (installed ${curV})`;
+      }
+      if (latEl) latEl.style.color = '#fef08a';
+      if (callout) {
+        callout.className = 'guide-callout';
+        callout.innerHTML = isEs()
+          ? `🚀 <b>Nueva versión disponible: ${latV}</b> (${info.releaseTitle || latV}). Puedes autodescargarla e instalarla en 1 clic o mantener tu versión actual (${curV}).`
+          : `🚀 <b>New version available: ${latV}</b> (${info.releaseTitle || latV}). Auto-download and install in 1 click, or stay on your current version (${curV}).`;
+      }
+      if (bannerTxt) {
+        bannerTxt.textContent = isEs()
+          ? `Nueva versión disponible: ${latV} (tienes ${curV}). Puedes actualizar en 1 clic o quedarte en la actual.`
+          : `New version available: ${latV} (installed ${curV}). Auto-update in 1 click or stay on your current version.`;
+      }
+      if (applyBtn) applyBtn.style.display = 'inline-flex';
+      if (notesWrap && notesBox) {
+        notesWrap.style.display = info.notes ? 'block' : 'none';
+        notesBox.textContent = info.notes || '';
+      }
+      let dismissed = '';
+      try { dismissed = localStorage.getItem(DISMISSED_VER_KEY) || ''; } catch {}
+      if (banner) banner.classList.toggle('show', dismissed !== info.latestVersion);
+    } else if (info?.status === 'up-to-date' || info?.status === 'ahead') {
+      if (pill) {
+        pill.classList.add('is-latest');
+        pill.textContent = `✓ ${curV}`;
+        pill.title = isEs() ? 'Tienes la versión más reciente — clic para comprobar' : 'Up to date — click to check for updates';
+      }
+      if (latEl) latEl.style.color = '#86efac';
+      if (callout) {
+        callout.className = 'guide-callout safe';
+        callout.innerHTML = info.status === 'ahead'
+          ? (isEs() ? `✅ <b>Versión local más reciente (${curV})</b> — Estás por delante de la última release publicada (${latV}).`
+                    : `✅ <b>Local build ahead (${curV})</b> — Newer than the latest published GitHub release (${latV}).`)
+          : (isEs() ? `✅ <b>¡Estás al día!</b> Tienes instalada la última versión disponible (${curV}).`
+                    : `✅ <b>You're up to date!</b> You already have the latest version (${curV}).`);
+      }
+      if (applyBtn) applyBtn.style.display = 'none';
+      if (notesWrap) notesWrap.style.display = 'none';
+      if (banner) banner.classList.remove('show');
+    } else {
+      if (pill) {
+        pill.textContent = `${curV}`;
+        pill.title = isEs() ? 'Sin conexión para comprobar actualizaciones' : 'Offline — could not check GitHub for updates';
+      }
+      if (latEl) latEl.style.color = '#94a3b8';
+      if (callout) {
+        callout.className = 'guide-callout';
+        callout.innerHTML = isEs()
+          ? `📡 <b>Modo sin conexión:</b> No se pudo conectar con GitHub Releases. Todo funciona 100% en local con tu versión actual (${curV}).`
+          : `📡 <b>Offline mode:</b> Could not reach GitHub Releases. Everything continues working 100% locally on ${curV}.`;
+      }
+      if (applyBtn) applyBtn.style.display = 'none';
+      if (notesWrap) notesWrap.style.display = 'none';
+      if (banner) banner.classList.remove('show');
+    }
+  }
+
+  async function checkForUpdates(force = false) {
+    if (!isHttp) {
+      renderUpdateUI({ status: 'offline', currentVersion: '2.1.0' });
+      return;
+    }
+    try {
+      const r = await fetch(`/api/update/check${force ? '?force=1' : ''}`, { cache: 'no-store' });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const info = await r.json();
+      renderUpdateUI(info);
+      if (force) {
+        if (info.status === 'update-available') toast(isEs() ? `⬇ Nueva versión v${info.latestVersion} disponible` : `⬇ Update v${info.latestVersion} available`);
+        else if (info.status === 'offline') toast(isEs() ? '📡 Sin conexión con GitHub' : '📡 Offline — cannot reach GitHub');
+        else toast(isEs() ? `✅ Estás al día (v${info.currentVersion})` : `✅ Up to date (v${info.currentVersion})`);
+      }
+    } catch {
+      renderUpdateUI({ status: 'offline', currentVersion: lastUpdateInfo?.currentVersion || '2.1.0' });
+    }
+  }
+
+  async function runAutoUpdateNow() {
+    if (updateBusy || !isHttp) return;
+    updateBusy = true;
+    const prog = $('upd-progress-msg');
+    const applyBtn = $('btn-upd-apply');
+    const keepBtn = $('btn-upd-keep');
+    const recheckBtn = $('btn-upd-recheck');
+    $('update-modal')?.classList.add('open');
+    if (applyBtn) applyBtn.disabled = true;
+    if (keepBtn) keepBtn.disabled = true;
+    if (recheckBtn) recheckBtn.disabled = true;
+    if (prog) {
+      prog.style.display = 'block';
+      prog.textContent = isEs()
+        ? '⏳ Descargando e instalando la última versión desde GitHub (tus datos en data/ están a salvo)...'
+        : '⏳ Downloading & installing latest release from GitHub (your data/ folder stays safe)...';
+    }
+    try {
+      const res = await fetch('/api/update/apply', { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error || 'Update failed');
+      if (data.alreadyUpToDate) {
+        if (prog) {
+          prog.style.color = '#86efac';
+          prog.textContent = isEs()
+            ? `✅ Ya tienes la versión más reciente (v${data.updatedTo}).`
+            : `✅ You already have the latest version (v${data.updatedTo}).`;
+        }
+        if (applyBtn) applyBtn.disabled = false;
+        if (keepBtn) keepBtn.disabled = false;
+        if (recheckBtn) recheckBtn.disabled = false;
+        updateBusy = false;
+        return;
+      }
+      try { localStorage.removeItem(DISMISSED_VER_KEY); } catch {}
+      if (prog) {
+        prog.style.color = '#86efac';
+        prog.textContent = isEs()
+          ? `✅ ¡Actualizado a v${data.updatedTo} (${data.filesUpdated} archivos)! Reiniciando servidor y recargando panel...`
+          : `✅ Updated to v${data.updatedTo} (${data.filesUpdated} files)! Restarting server & reloading panel...`;
+      }
+      await fetch('/api/update/restart', { method: 'POST' }).catch(() => {});
+      // Poll /api/info until freshly restarted server responds, then reload!
+      let tries = 0;
+      const pollRestart = setInterval(async () => {
+        tries++;
+        try {
+          const ping = await fetch('/api/info', { cache: 'no-store' });
+          if (ping.ok) {
+            clearInterval(pollRestart);
+            location.reload();
+          }
+        } catch {}
+        if (tries >= 25) {
+          clearInterval(pollRestart);
+          if (prog) {
+            prog.textContent = isEs()
+              ? '✅ Archivos actualizados. Reinicia Start_Scorebar.bat y pulsa Ctrl+F5 para recargar.'
+              : '✅ Files updated! Restart Start_Scorebar.bat and press Ctrl+F5 to reload.';
+          }
+          updateBusy = false;
+        }
+      }, 650);
+    } catch (err) {
+      if (prog) {
+        prog.style.color = '#fca5a5';
+        prog.textContent = `⚠️ ${err.message}`;
+      }
+      if (applyBtn) applyBtn.disabled = false;
+      if (keepBtn) keepBtn.disabled = false;
+      if (recheckBtn) recheckBtn.disabled = false;
+      updateBusy = false;
+    }
+  }
+
+  const dismissCurrentUpdate = () => {
+    if (lastUpdateInfo?.latestVersion) {
+      try { localStorage.setItem(DISMISSED_VER_KEY, lastUpdateInfo.latestVersion); } catch {}
+    }
+    $('update-banner-wrap')?.classList.remove('show');
+    $('update-modal')?.classList.remove('open');
+    toast(isEs() ? '✓ Manteniendo tu versión actual' : '✓ Keeping your current version');
+  };
+
+  $('btn-update-pill')?.addEventListener('click', () => {
+    $('update-modal')?.classList.add('open');
+    if (!lastUpdateInfo) checkForUpdates(false);
+  });
+  $('btn-close-update-modal')?.addEventListener('click', () => { if (!updateBusy) $('update-modal')?.classList.remove('open'); });
+  $('update-modal')?.addEventListener('click', (e) => { if (e.target === $('update-modal') && !updateBusy) $('update-modal').classList.remove('open'); });
+  $('btn-upd-recheck')?.addEventListener('click', () => checkForUpdates(true));
+  $('btn-upd-keep')?.addEventListener('click', dismissCurrentUpdate);
+  $('btn-banner-keep')?.addEventListener('click', dismissCurrentUpdate);
+  $('btn-banner-details')?.addEventListener('click', () => $('update-modal')?.classList.add('open'));
+  $('btn-banner-update-now')?.addEventListener('click', runAutoUpdateNow);
+  $('btn-upd-apply')?.addEventListener('click', runAutoUpdateNow);
+
+  setTimeout(() => checkForUpdates(false), 900);
 })();
 </script>
 </body>

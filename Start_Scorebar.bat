@@ -53,7 +53,17 @@ echo  Keep this window open while streaming. Press Ctrl+C to stop.
 echo.
 
 start "" "http://localhost:8787/panel.html"
+set "FGC_LAUNCHER=1"
+
+:run_server
 node server.mjs
+if %ERRORLEVEL% EQU 42 (
+  echo.
+  echo  [*] Update applied! Restarting FGC Open Scorebars server...
+  echo.
+  timeout /t 1 /nobreak >nul
+  goto :run_server
+)
 pause
 exit /b 0
 

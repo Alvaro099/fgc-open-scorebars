@@ -325,21 +325,40 @@
 
     /* =========================================================================
        ARCHETYPE 3B: PBRD KAZUYA FISTS (Exact 1920x1080 Tekken 8 Round-Orb Framing!)
-       Kazuya crimson studded gloves punch 3 transparent windows directly around T8 Orbs!
+       Dynamically recolorable Kazuya studded gloves — adapts to ANY Theme or Custom Color!
        ========================================================================= */
-    #scorebar-root[data-layout="kazuya-fists"] {
+    .kazuya-glove-fx,
+    .kazuya-wing-bg {
+      display: none;
+    }
+
+    #scorebar-root[data-theme="t8-pbrd-kazuya-fists"] {
       --font-display: 'Oswald', 'Barlow Condensed', 'Bahnschrift', sans-serif;
       --font-score: 'Oswald', 'Barlow Condensed', 'Bahnschrift', sans-serif;
       --p1-accent: #e51942;
       --p2-accent: #e51942;
       --center-accent: #e51942;
-      --bg-main: transparent;
+      --bg-main: linear-gradient(180deg, rgba(28, 30, 38, 0.92), rgba(10, 10, 14, 0.97));
       --bg-secondary: linear-gradient(180deg, rgba(235, 22, 72, 0.92), rgba(154, 12, 46, 0.94));
       --text-main: #ffffff;
       --sponsor-color: #fda4af;
-      --score-bg-p1: transparent;
-      --score-bg-p2: transparent;
+      --score-bg-p1: linear-gradient(135deg, #f3184a, #c70f38);
+      --score-bg-p2: linear-gradient(225deg, #f3184a, #c70f38);
       --score-text: #ffffff;
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"] {
+      --kazuya-glove-p1: var(--score-bg-p1, var(--p1-accent, #e51942));
+      --kazuya-glove-p2: var(--score-bg-p2, var(--p2-accent, #e51942));
+      --kazuya-wing-bg-p1: var(--bg-main, linear-gradient(180deg, rgba(28, 30, 38, 0.92), rgba(10, 10, 14, 0.97)));
+      --kazuya-wing-bg-p2: var(--bg-main, linear-gradient(180deg, rgba(28, 30, 38, 0.92), rgba(10, 10, 14, 0.97)));
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"][data-sf6="1"] {
+      --kazuya-glove-p1: var(--sf6-sc1, var(--sf6-p1, #e51942));
+      --kazuya-glove-p2: var(--sf6-sc2, var(--sf6-p2, #2563eb));
+      --kazuya-wing-bg-p1: var(--sf6-bg-p1, rgba(16, 18, 26, 0.94));
+      --kazuya-wing-bg-p2: var(--sf6-bg-p2, rgba(16, 18, 26, 0.94));
     }
 
     #scorebar-root[data-layout="kazuya-fists"] .sb-wing {
@@ -358,28 +377,78 @@
       right: calc(131px - var(--wing-spread));
     }
 
-    #scorebar-root[data-layout="kazuya-fists"] .sb-wing.p1::before,
-    #scorebar-root[data-layout="kazuya-fists"] .sb-wing.p2::before {
-      content: '';
+    #scorebar-root[data-layout="kazuya-fists"] .kazuya-glove-fx {
+      display: block;
       position: absolute;
       top: 0;
       width: 170.25px;
       height: 72px;
-      background-size: 100% 100%;
-      background-repeat: no-repeat;
       z-index: 4;
       pointer-events: none;
       filter: drop-shadow(0 3px 7px rgba(0, 0, 0, 0.52));
     }
 
-    #scorebar-root[data-layout="kazuya-fists"] .sb-wing.p1::before {
+    #scorebar-root[data-layout="kazuya-fists"] .sb-wing.p1 .kazuya-glove-fx {
       right: 0;
-      background-image: url('assets/pbrd-kazuya-glove-p1.png');
     }
 
-    #scorebar-root[data-layout="kazuya-fists"] .sb-wing.p2::before {
+    #scorebar-root[data-layout="kazuya-fists"] .sb-wing.p2 .kazuya-glove-fx {
       left: 0;
-      background-image: url('assets/pbrd-kazuya-glove-p2.png');
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"] .kazuya-glove-body {
+      position: absolute;
+      inset: 0;
+      isolation: isolate;
+      -webkit-mask-size: 100% 100%;
+      mask-size: 100% 100%;
+      -webkit-mask-repeat: no-repeat;
+      mask-repeat: no-repeat;
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"] .sb-wing.p1 .kazuya-glove-body {
+      background: var(--kazuya-glove-p1);
+      -webkit-mask-image: url('assets/pbrd-kazuya-glove-p1-mask.png');
+      mask-image: url('assets/pbrd-kazuya-glove-p1-mask.png');
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"] .sb-wing.p2 .kazuya-glove-body {
+      background: var(--kazuya-glove-p2);
+      -webkit-mask-image: url('assets/pbrd-kazuya-glove-p2-mask.png');
+      mask-image: url('assets/pbrd-kazuya-glove-p2-mask.png');
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"] .kazuya-glove-body::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-size: 100% 100%;
+      background-repeat: no-repeat;
+      mix-blend-mode: multiply;
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"] .sb-wing.p1 .kazuya-glove-body::after {
+      background-image: url('assets/pbrd-kazuya-glove-p1-shade.png');
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"] .sb-wing.p2 .kazuya-glove-body::after {
+      background-image: url('assets/pbrd-kazuya-glove-p2-shade.png');
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"] .kazuya-glove-studs {
+      position: absolute;
+      inset: 0;
+      background-size: 100% 100%;
+      background-repeat: no-repeat;
+      z-index: 2;
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"] .sb-wing.p1 .kazuya-glove-studs {
+      background-image: url('assets/pbrd-kazuya-studs-p1.png');
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"] .sb-wing.p2 .kazuya-glove-studs {
+      background-image: url('assets/pbrd-kazuya-studs-p2.png');
     }
 
     #scorebar-root[data-layout="kazuya-fists"] .sb-wing .wing-plate {
@@ -388,31 +457,48 @@
       margin-top: 1px;
       width: calc(100% - 120px);
       height: var(--bar-h, 37px);
+      background: transparent !important;
       clip-path: none !important;
       border: none !important;
       border-radius: 0 !important;
       box-shadow: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
       overflow: visible;
-    }
-
-    #scorebar-root[data-layout="kazuya-fists"] .sb-wing.p1 .wing-plate {
-      background: linear-gradient(90deg, rgba(10, 10, 14, 0) 0%, rgba(22, 24, 30, 0.72) 22%, rgba(30, 32, 38, 0.88) 54%, rgba(6, 6, 10, 0.96) 91%, rgba(6, 6, 10, 0) 92%);
     }
 
     #scorebar-root[data-layout="kazuya-fists"] .sb-wing.p2 .wing-plate {
       margin-left: auto;
-      background: linear-gradient(270deg, rgba(10, 10, 14, 0) 0%, rgba(22, 24, 30, 0.72) 22%, rgba(30, 32, 38, 0.88) 54%, rgba(6, 6, 10, 0.96) 91%, rgba(6, 6, 10, 0) 92%);
     }
 
-    #scorebar-root[data-layout="kazuya-fists"].custom-colors .sb-wing.p1 .wing-plate {
-      background: linear-gradient(90deg, transparent 0%, var(--c-bg-glass, rgba(18, 21, 32, 0.82)) 26%, var(--c-bg-glass, rgba(12, 14, 22, 0.95)) 91%, transparent 92%) !important;
+    /* Smooth smoked fade wing backdrop that inherits ANY Theme or Custom Surface color! */
+    #scorebar-root[data-layout="kazuya-fists"] .kazuya-wing-bg {
+      display: block;
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
     }
 
-    #scorebar-root[data-layout="kazuya-fists"].custom-colors .sb-wing.p2 .wing-plate {
-      background: linear-gradient(270deg, transparent 0%, var(--c-bg-glass, rgba(18, 21, 32, 0.82)) 26%, var(--c-bg-glass, rgba(12, 14, 22, 0.95)) 91%, transparent 92%) !important;
+    #scorebar-root[data-layout="kazuya-fists"] .sb-wing.p1 .kazuya-wing-bg {
+      background: var(--kazuya-wing-bg-p1);
+      -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.78) 22%, #000 50%, #000 91%, transparent 92%);
+      mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.78) 22%, #000 50%, #000 91%, transparent 92%);
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"] .sb-wing.p2 .kazuya-wing-bg {
+      background: var(--kazuya-wing-bg-p2);
+      -webkit-mask-image: linear-gradient(270deg, transparent 0%, rgba(0, 0, 0, 0.78) 22%, #000 50%, #000 91%, transparent 92%);
+      mask-image: linear-gradient(270deg, transparent 0%, rgba(0, 0, 0, 0.78) 22%, #000 50%, #000 91%, transparent 92%);
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"].custom-colors[data-fill-mode="glass"] .kazuya-wing-bg {
+      backdrop-filter: blur(var(--c-glass-blur, 14px)) saturate(145%);
+      -webkit-backdrop-filter: blur(var(--c-glass-blur, 14px)) saturate(145%);
     }
 
     #scorebar-root[data-layout="kazuya-fists"] .blade-edge,
+    #scorebar-root[data-layout="kazuya-fists"] .wing-plate::before,
     #scorebar-root[data-layout="kazuya-fists"] .wing-plate::after {
       display: none !important;
     }
@@ -485,8 +571,8 @@
       box-shadow: none !important;
       font-size: 27px;
       font-weight: 700;
-      color: #ffffff;
-      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+      color: var(--score-text, #ffffff);
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.72);
       padding: 0 !important;
     }
 
@@ -505,10 +591,16 @@
       height: 26px;
       padding: 0 22px;
       z-index: 10;
-      background: linear-gradient(180deg, rgba(235, 22, 72, 0.90) 0%, rgba(154, 12, 46, 0.94) 100%);
+      background: var(--bg-secondary, linear-gradient(180deg, rgba(235, 22, 72, 0.90), rgba(154, 12, 46, 0.94)));
       clip-path: polygon(0 0, 100% 0, calc(100% - 14px) 100%, 14px 100%);
-      border-bottom: 1.5px solid rgba(255, 195, 210, 0.45);
-      filter: drop-shadow(0 3px 10px rgba(180, 10, 48, 0.55));
+      border-bottom: 1.5px solid var(--center-accent, rgba(255, 195, 210, 0.45));
+      filter: drop-shadow(0 3px 10px rgba(0, 0, 0, 0.55));
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"][data-sf6="1"] .sb-center {
+      background: var(--sf6-cbg);
+      border-bottom-color: var(--sf6-cborder, var(--sf6-p1));
+      color: var(--sf6-ct, #ffffff);
     }
 
     #scorebar-root[data-layout="kazuya-fists"] .round-text {
@@ -3914,6 +4006,37 @@
       color: var(--c-sponsor) !important;
     }
 
+    /* Kazuya Fists Dynamic Color Override (Wins over .custom-colors so Gloves recolor cleanly & Wrist Cuff stays 3D!) */
+    #scorebar-root[data-layout="kazuya-fists"].custom-colors {
+      --kazuya-glove-p1: var(--c-p1-score-bg, linear-gradient(135deg, var(--c-p1-1), var(--c-p1-2)));
+      --kazuya-glove-p2: var(--c-p2-score-bg, linear-gradient(225deg, var(--c-p2-1), var(--c-p2-2)));
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"].custom-colors[data-fill-mode="solid"],
+    #scorebar-root[data-layout="kazuya-fists"].custom-colors[data-fill-mode="gradient"],
+    #scorebar-root[data-layout="kazuya-fists"].custom-colors[data-fill-mode="metallic"] {
+      --kazuya-wing-bg-p1: var(--c-bg-fill);
+      --kazuya-wing-bg-p2: var(--c-bg-fill);
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"].custom-colors[data-fill-mode="glass"] {
+      --kazuya-wing-bg-p1: var(--c-bg-glass);
+      --kazuya-wing-bg-p2: var(--c-bg-glass);
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"].custom-colors .sb-wing .wing-plate {
+      background: transparent !important;
+      box-shadow: none !important;
+      border: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"].custom-colors .sb-wing.p1 .score-box,
+    #scorebar-root[data-layout="kazuya-fists"].custom-colors .sb-wing.p2 .score-box {
+      background: transparent !important;
+    }
+
     /* --- 6. Visual FX Engine (Glow, Sheen Sweep, Animated Border, Textures) --- */
     #scorebar-root[data-glow="none"] .sb-wing,
     #scorebar-root[data-glow="none"] .sb-center {
@@ -4386,7 +4509,12 @@
 
       <!-- PLAYER 1 WING -->
       <div class="sb-wing p1" id="wing-p1">
+        <div class="kazuya-glove-fx" aria-hidden="true">
+          <div class="kazuya-glove-body"></div>
+          <div class="kazuya-glove-studs"></div>
+        </div>
         <div class="wing-plate">
+          <div class="kazuya-wing-bg" aria-hidden="true"></div>
           <div class="blade-edge" aria-hidden="true"></div>
           <div class="flags-group hidden-el" id="p1-flags">
             <span class="flag-wrap flag-primary hidden-el" id="p1-flag"></span>
@@ -4418,7 +4546,12 @@
 
       <!-- PLAYER 2 WING -->
       <div class="sb-wing p2" id="wing-p2">
+        <div class="kazuya-glove-fx" aria-hidden="true">
+          <div class="kazuya-glove-body"></div>
+          <div class="kazuya-glove-studs"></div>
+        </div>
         <div class="wing-plate">
+          <div class="kazuya-wing-bg" aria-hidden="true"></div>
           <div class="blade-edge" aria-hidden="true"></div>
           <div class="flags-group hidden-el" id="p2-flags">
             <span class="flag-wrap flag-primary hidden-el" id="p2-flag"></span>
