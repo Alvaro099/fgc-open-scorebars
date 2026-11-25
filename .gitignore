@@ -3,6 +3,19 @@
 data/
 *.tmp
 
+# Local promo/trailer studio files & raw video/audio recordings (never ship in repo)
+trailer.html
+trailer*.html
+*.mp4
+*.webm
+*.mkv
+*.mov
+*.avi
+*.mp3
+*.wav
+*.ogg
+*.m4a
+
 # Environment & credentials
 .env
 .env.*
