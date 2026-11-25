@@ -324,6 +324,242 @@
     }
 
     /* =========================================================================
+       ARCHETYPE 3B: PBRD KAZUYA FISTS (Exact 1920x1080 Tekken 8 Round-Orb Framing!)
+       Kazuya crimson studded gloves punch 3 transparent windows directly around T8 Orbs!
+       ========================================================================= */
+    #scorebar-root[data-layout="kazuya-fists"] {
+      --font-display: 'Oswald', 'Barlow Condensed', 'Bahnschrift', sans-serif;
+      --font-score: 'Oswald', 'Barlow Condensed', 'Bahnschrift', sans-serif;
+      --p1-accent: #e51942;
+      --p2-accent: #e51942;
+      --center-accent: #e51942;
+      --bg-main: transparent;
+      --bg-secondary: linear-gradient(180deg, rgba(235, 22, 72, 0.92), rgba(154, 12, 46, 0.94));
+      --text-main: #ffffff;
+      --sponsor-color: #fda4af;
+      --score-bg-p1: transparent;
+      --score-bg-p2: transparent;
+      --score-text: #ffffff;
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"] .sb-wing {
+      top: 0;
+      width: calc(702px + var(--wing-spread));
+      height: 72px;
+      align-items: flex-start;
+      overflow: visible;
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"] .sb-wing.p1 {
+      left: calc(133px - var(--wing-spread));
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"] .sb-wing.p2 {
+      right: calc(131px - var(--wing-spread));
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"] .sb-wing.p1::before,
+    #scorebar-root[data-layout="kazuya-fists"] .sb-wing.p2::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      width: 170.25px;
+      height: 72px;
+      background-size: 100% 100%;
+      background-repeat: no-repeat;
+      z-index: 4;
+      pointer-events: none;
+      filter: drop-shadow(0 3px 7px rgba(0, 0, 0, 0.52));
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"] .sb-wing.p1::before {
+      right: 0;
+      background-image: url('assets/pbrd-kazuya-glove-p1.png');
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"] .sb-wing.p2::before {
+      left: 0;
+      background-image: url('assets/pbrd-kazuya-glove-p2.png');
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"] .sb-wing .wing-plate {
+      position: relative;
+      z-index: auto;
+      margin-top: 1px;
+      width: calc(100% - 120px);
+      height: var(--bar-h, 37px);
+      clip-path: none !important;
+      border: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      overflow: visible;
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"] .sb-wing.p1 .wing-plate {
+      background: linear-gradient(90deg, rgba(10, 10, 14, 0) 0%, rgba(22, 24, 30, 0.72) 22%, rgba(30, 32, 38, 0.88) 54%, rgba(6, 6, 10, 0.96) 91%, rgba(6, 6, 10, 0) 92%);
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"] .sb-wing.p2 .wing-plate {
+      margin-left: auto;
+      background: linear-gradient(270deg, rgba(10, 10, 14, 0) 0%, rgba(22, 24, 30, 0.72) 22%, rgba(30, 32, 38, 0.88) 54%, rgba(6, 6, 10, 0.96) 91%, rgba(6, 6, 10, 0) 92%);
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"].custom-colors .sb-wing.p1 .wing-plate {
+      background: linear-gradient(90deg, transparent 0%, var(--c-bg-glass, rgba(18, 21, 32, 0.82)) 26%, var(--c-bg-glass, rgba(12, 14, 22, 0.95)) 91%, transparent 92%) !important;
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"].custom-colors .sb-wing.p2 .wing-plate {
+      background: linear-gradient(270deg, transparent 0%, var(--c-bg-glass, rgba(18, 21, 32, 0.82)) 26%, var(--c-bg-glass, rgba(12, 14, 22, 0.95)) 91%, transparent 92%) !important;
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"] .blade-edge,
+    #scorebar-root[data-layout="kazuya-fists"] .wing-plate::after {
+      display: none !important;
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"] .flags-group {
+      position: relative;
+      z-index: 6;
+      height: 22px;
+      align-self: center;
+      padding: 0 4px !important;
+      gap: 4px;
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"] .sb-wing.p1 .flags-group {
+      margin-left: 86px;
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"] .sb-wing.p2 .flags-group {
+      margin-right: 86px;
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"] .flag-wrap {
+      height: 20px !important;
+      width: 30px !important;
+      border-radius: 2px !important;
+      clip-path: none !important;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"] .player-info {
+      position: relative;
+      z-index: 6;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 0 11px 0 16px;
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"] .sb-wing.p1 .flags-group.hidden-el ~ .player-info {
+      padding-left: 86px;
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"] .sb-wing.p2 .player-info {
+      padding: 0 16px 0 11px;
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"] .sb-wing.p2 .flags-group.hidden-el ~ .player-info {
+      padding-right: 86px;
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"] .player-name {
+      font-size: calc(25px * var(--font-scale));
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      font-style: normal;
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"] .sponsor-tag {
+      font-size: calc(18px * var(--font-scale));
+      font-weight: 700;
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"] .score-box {
+      position: relative;
+      z-index: 7;
+      width: 50px !important;
+      height: 37px;
+      background: transparent !important;
+      clip-path: none !important;
+      border: none !important;
+      box-shadow: none !important;
+      font-size: 27px;
+      font-weight: 700;
+      color: #ffffff;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+      padding: 0 !important;
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"] .sb-center {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      min-width: 186px;
+      max-width: 260px;
+      height: 26px;
+      padding: 0 22px;
+      z-index: 10;
+      background: linear-gradient(180deg, rgba(235, 22, 72, 0.90) 0%, rgba(154, 12, 46, 0.94) 100%);
+      clip-path: polygon(0 0, 100% 0, calc(100% - 14px) 100%, 14px 100%);
+      border-bottom: 1.5px solid rgba(255, 195, 210, 0.45);
+      filter: drop-shadow(0 3px 10px rgba(180, 10, 48, 0.55));
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"] .round-text {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"] .format-pill {
+      background: rgba(12, 8, 14, 0.72);
+      color: #ffffff;
+      font-size: 10.5px;
+      line-height: 1;
+      padding: 2px 6px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    /* Match Point on Kazuya Fists: dock cleanly beneath name wing, NEVER blocking the 3 orbs inside Kazuya's gloves! */
+    #scorebar-root[data-layout="kazuya-fists"][data-mp-style="side-peek"] .mp-tag,
+    #scorebar-root[data-layout="kazuya-fists"][data-mp-style="under-wing"] .mp-tag {
+      top: 39px;
+      height: 18px;
+      font-size: 8.5px;
+      padding: 0 12px;
+      z-index: 8;
+      transform: translateY(-8px);
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"][data-mp-style="side-peek"] .sb-wing.p1 .mp-tag,
+    #scorebar-root[data-layout="kazuya-fists"][data-mp-style="under-wing"] .sb-wing.p1 .mp-tag {
+      left: auto;
+      right: 174px;
+      clip-path: polygon(0 0, 100% 0, calc(100% - 7px) 100%, 7px 100%);
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"][data-mp-style="side-peek"] .sb-wing.p2 .mp-tag,
+    #scorebar-root[data-layout="kazuya-fists"][data-mp-style="under-wing"] .sb-wing.p2 .mp-tag {
+      right: auto;
+      left: 174px;
+      clip-path: polygon(0 0, 100% 0, calc(100% - 7px) 100%, 7px 100%);
+    }
+
+    #scorebar-root[data-layout="kazuya-fists"][data-mp-style="side-peek"] .sb-wing.match-point .mp-tag {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* =========================================================================
        STREET FIGHTER 6 NATIVE BROADCAST ARCHETYPES (4 HUD-CALIBRATED LAYOUTS)
        Exact SF6 1920x1080 pixel-verified clearances (ZERO overlap with Round Wins!):
          Portraits:    x = 0..202 & 1718..1920, y = 24..102
@@ -4111,8 +4347,10 @@
       <div id="hud-guides-t8">
         <div class="guide-box danger" style="left:0;top:0;width:188px;height:120px;">P1 PORTRAIT</div>
         <div class="guide-box danger" style="right:0;top:0;width:188px;height:120px;">P2 PORTRAIT</div>
-        <div class="guide-box danger" style="left:195px;top:70px;width:675px;height:46px;">P1 HEALTH BAR (y:70-116)</div>
-        <div class="guide-box danger" style="right:195px;top:70px;width:675px;height:46px;">P2 HEALTH BAR (y:70-116)</div>
+        <div class="guide-box danger" style="left:195px;top:70px;width:675px;height:46px;">P1 HEALTH BAR (y:70-116)
+        </div>
+        <div class="guide-box danger" style="right:195px;top:70px;width:675px;height:46px;">P2 HEALTH BAR (y:70-116)
+        </div>
         <div class="guide-box danger" style="left:716px;top:38px;width:110px;height:26px;">P1 ORBS</div>
         <div class="guide-box danger" style="right:716px;top:38px;width:110px;height:26px;">P2 ORBS</div>
         <div class="guide-box danger" style="left:890px;top:40px;width:140px;height:95px;">TIMER (y:40-135)</div>
@@ -4127,8 +4365,10 @@
         <div class="guide-box danger" style="right:208px;top:24px;width:30px;height:32px;">M/C</div>
         <div class="guide-box danger" style="left:754px;top:33px;width:78px;height:18px;">P1 WINS</div>
         <div class="guide-box danger" style="right:754px;top:33px;width:78px;height:18px;">P2 WINS</div>
-        <div class="guide-box danger" style="left:180px;top:62px;width:692px;height:34px;">SF6 P1 HEALTH BAR (y:62-96)</div>
-        <div class="guide-box danger" style="right:180px;top:62px;width:692px;height:34px;">SF6 P2 HEALTH BAR (y:62-96)</div>
+        <div class="guide-box danger" style="left:180px;top:62px;width:692px;height:34px;">SF6 P1 HEALTH BAR (y:62-96)
+        </div>
+        <div class="guide-box danger" style="right:180px;top:62px;width:692px;height:34px;">SF6 P2 HEALTH BAR (y:62-96)
+        </div>
         <div class="guide-box danger" style="left:564px;top:112px;width:323px;height:20px;">P1 DRIVE GAUGE</div>
         <div class="guide-box danger" style="right:564px;top:112px;width:323px;height:20px;">P2 DRIVE GAUGE</div>
         <div class="guide-box danger" style="left:912px;top:52px;width:96px;height:70px;">TIMER 99</div>
@@ -4227,14 +4467,16 @@
 
   <script src="flags.js"></script>
   <script src="sf6-themes.js"></script>
+  <script src="custom-fonts.js"></script>
   <script>
     (() => {
       /* =========================================================================
-         THEME METADATA REGISTRY (32 Tekken 8/FGC + 24 Street Fighter 6 Themes)
+         THEME METADATA REGISTRY (33 Tekken 8/FGC + 24 Street Fighter 6 Themes)
          ========================================================================= */
       const SF6_THEME_MAP = window.FGC_SF6_THEME_MAP || {};
       const THEME_CONFIG = {
         't8-native-hud': { layout: 'blade', scorePos: 'inner', flagStyle: 'blade-twt', centerStyle: 'trapezoid', outerBlade: 'on', slant: 26 },
+        't8-pbrd-kazuya-fists': { layout: 'kazuya-fists', scorePos: 'inner', flagStyle: 'classic', centerStyle: 'trapezoid', outerBlade: 'off', slant: 0 },
         't8-twt-2026-official': { layout: 'blade', scorePos: 'inner', flagStyle: 'blade-twt', centerStyle: 'floating', outerBlade: 'on', slant: 26 },
         't8-twt-finals-pro': { layout: 'crown', scorePos: 'inner', flagStyle: 'blade-twt', centerStyle: 'trapezoid', outerBlade: 'off', slant: 14 },
         't8-blade-cyber-gold': { layout: 'blade', scorePos: 'inner', flagStyle: 'fade-blend', centerStyle: 'trapezoid', outerBlade: 'on', slant: 26 },
@@ -4751,16 +4993,22 @@
         els.root.style.setProperty('--flag-sat', (Number(st.flagSaturation ?? 100) / 100).toFixed(2));
         els.root.style.setProperty('--flag-bright', (Number(st.flagBrightness ?? 96) / 100).toFixed(2));
 
-        // Typography variables
-        if (st.fontName && st.fontName !== 'theme' && FONT_STACKS[st.fontName]) {
+        // Typography variables (supports built-in Google fonts + Global Custom PC Fonts!)
+        const resolvedNameFont = (st.fontName && st.fontName !== 'theme')
+          ? (window.FGC_CUSTOM_FONTS?.resolveFontStack(st.fontName, FONT_STACKS) || FONT_STACKS[st.fontName])
+          : null;
+        if (resolvedNameFont) {
           els.root.dataset.customFontName = '1';
-          els.root.style.setProperty('--user-font-name', FONT_STACKS[st.fontName]);
+          els.root.style.setProperty('--user-font-name', resolvedNameFont);
         } else {
           delete els.root.dataset.customFontName;
         }
-        if (st.fontScore && st.fontScore !== 'theme' && FONT_STACKS[st.fontScore]) {
+        const resolvedScoreFont = (st.fontScore && st.fontScore !== 'theme')
+          ? (window.FGC_CUSTOM_FONTS?.resolveFontStack(st.fontScore, FONT_STACKS) || FONT_STACKS[st.fontScore])
+          : null;
+        if (resolvedScoreFont) {
           els.root.dataset.customFontScore = '1';
-          els.root.style.setProperty('--user-font-score', FONT_STACKS[st.fontScore]);
+          els.root.style.setProperty('--user-font-score', resolvedScoreFont);
         } else {
           delete els.root.dataset.customFontScore;
         }
@@ -4954,6 +5202,9 @@
           applyPreviewMode(msg.bg, msg.guides);
         } else if (msg.type === 'state-update' && msg.state) {
           applyState(msg.state);
+        } else if (msg.type === 'fonts-update' && Array.isArray(msg.fonts)) {
+          window.FGC_CUSTOM_FONTS?.setFonts(msg.fonts);
+          if (latestState) applyState(latestState);
         } else if (msg.type === 'test-score-anim') {
           triggerScorePop(els.p1ScoreBox);
           triggerScorePop(els.p2ScoreBox);
@@ -4969,6 +5220,10 @@
         bc = new BroadcastChannel('fgc_open_scorebar');
         bc.onmessage = (ev) => {
           if (ev.data && ev.data.type === 'state' && ev.data.payload) applyState(ev.data.payload);
+          else if (ev.data && ev.data.type === 'fonts' && Array.isArray(ev.data.payload)) {
+            window.FGC_CUSTOM_FONTS?.setFonts(ev.data.payload);
+            if (latestState) applyState(latestState);
+          }
         };
       } catch { }
       window.addEventListener('storage', (ev) => {
@@ -4987,6 +5242,7 @@
       // NOTE: Preview iframes inside panel.html NEVER open EventSource (prevents Chrome 6-socket HTTP/1.1 exhaustion).
       const isHttp = location.protocol === 'http:' || location.protocol === 'https:';
       if (isHttp) {
+        window.FGC_CUSTOM_FONTS?.fetchAndSync().then(() => { if (latestState) applyState(latestState); });
         fetch('/api/state').then(r => r.json()).then(s => applyState(s)).catch(() => { });
 
         if (!isPreviewMode) {
@@ -5012,6 +5268,14 @@
                 applyState(data);
                 try { localStorage.setItem(STORAGE_KEY, ev.data); } catch { }
                 if (bc) bc.postMessage({ type: 'state', payload: data, fromSse: true });
+              } catch { }
+            });
+            es.addEventListener('fonts', (ev) => {
+              try {
+                const list = JSON.parse(ev.data);
+                window.FGC_CUSTOM_FONTS?.setFonts(list);
+                if (latestState) applyState(latestState);
+                if (bc) bc.postMessage({ type: 'fonts', payload: list, fromSse: true });
               } catch { }
             });
             es.onerror = () => {

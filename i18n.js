@@ -1112,6 +1112,24 @@
     '☕ Ko-fi (Optional)': '☕ Ko-fi (Opcional)',
     '🔗 Share': '🔗 Compartir',
 
+    // PBRD Kazuya Fists & Global Custom PC Fonts
+    '🥊 PBRD Kazuya Fists': '🥊 PBRD Puños Kazuya',
+    '🥊 PBRD Kazuya Fists (T8 Round-Orb Gloves)': '🥊 PBRD Puños Kazuya (Guantes Orbes T8)',
+    '🥊 Built-In Series Preset — PBRD Kazuya Fists': '🥊 Preset Integrado de Serie — PBRD Puños Kazuya',
+    "Pibardos / PBRD Tekken 8 FT overlay with Kazuya's crimson studded gloves framing the 3 in-game round orbs + smoked fade nameplates & ruby FT center.": 'Overlay de Tekken 8 serie Pibardos / PBRD con los guantes carmesí de Kazuya encuadrando los 3 orbes de ronda, barras difuminadas y centro FT rubí.',
+    '🥊 Apply PBRD Kazuya Preset': '🥊 Aplicar Preset PBRD Kazuya',
+    '💻 Global Custom PC Fonts (Scorebars · VS · Top 8)': '💻 Fuentes Propias del PC Globales (Marcadores · VS · Top 8)',
+    'Upload any .ttf, .otf, .woff, or .woff2 from your PC (works in OBS & LAN devices) or add a locally installed system font name.': 'Sube cualquier .ttf, .otf, .woff o .woff2 de tu PC (funciona en OBS y móvil LAN) o añade el nombre de una fuente instalada en tu PC.',
+    '⬆ Upload PC Font (.ttf / .otf / .woff2)': '⬆ Subir Fuente del PC (.ttf / .otf / .woff2)',
+    '🔍 Pick System Font': '🔍 Elegir Fuente del Sistema',
+    '+ Add System Font': '+ Añadir Fuente del PC',
+    '💻 PC Fonts': '💻 Fuentes PC',
+    '🌐 Apply Globally': '🌐 Aplicar a Todo',
+    '💻 Custom PC Fonts': '💻 Fuentes del PC',
+    'Or type an installed PC font name (e.g., Cervo Regular, Impact, Eurostile...)': 'O escribe el nombre de una fuente instalada (ej. Cervo Regular, Impact...)',
+    'Filter installed PC fonts...': 'Filtrar fuentes instaladas en el PC...',
+    'No custom PC fonts added yet. Upload a .ttf / .otf / .woff2 file or add an installed system font to unlock it across Scorebars, VS Splash & Top 8 Results.': 'Aún no hay fuentes propias del PC. Sube un archivo .ttf / .otf / .woff2 o añade una fuente del sistema para usarla en Marcadores, Pantalla VS y Resultados Top 8.',
+
     // Placeholders
     'Player 1': 'Jugador 1',
     'Player 2': 'Jugador 2',

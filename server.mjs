@@ -47,8 +47,11 @@ const PLAYERS_FILE = path.join(DATA_DIR, 'players.json');
 const PRESETS_FILE = path.join(DATA_DIR, 'presets.json');
 const INTEGRATIONS_FILE = path.join(DATA_DIR, 'integrations.json');
 const HISTORY_FILE = path.join(DATA_DIR, 'history.json');
+const FONTS_DIR = path.join(DATA_DIR, 'fonts');
+const FONTS_FILE = path.join(FONTS_DIR, 'fonts.json');
 
 fs.mkdirSync(DATA_DIR, { recursive: true });
+fs.mkdirSync(FONTS_DIR, { recursive: true });
 const assets = createAssetManager(DATA_DIR);
 
 export const DEFAULT_VS = {
@@ -421,6 +424,11 @@ function saveIntegrationsSafe() {
   writeJsonAtomic(INTEGRATIONS_FILE, onDisk);
 }
 let historyDb = readJsonSafe(HISTORY_FILE, []);
+let fontsDb = readJsonSafe(FONTS_FILE, []).filter(f => {
+  if (!f || !f.id) return false;
+  if (f.kind === 'file') return Boolean(f.file && fs.existsSync(path.join(FONTS_DIR, path.basename(f.file))));
+  return f.kind === 'system' && Boolean(f.family);
+});
 let lastTournamentSnapshot = null;
 
 if (!fs.existsSync(STATE_FILE)) writeJsonAtomic(STATE_FILE, currentState);
@@ -428,6 +436,7 @@ if (!fs.existsSync(PLAYERS_FILE)) writeJsonAtomic(PLAYERS_FILE, playersDb);
 if (!fs.existsSync(PRESETS_FILE)) writeJsonAtomic(PRESETS_FILE, presetsDb);
 if (!fs.existsSync(INTEGRATIONS_FILE)) writeJsonAtomic(INTEGRATIONS_FILE, integrationsCfg);
 if (!fs.existsSync(HISTORY_FILE)) writeJsonAtomic(HISTORY_FILE, historyDb);
+if (!fs.existsSync(FONTS_FILE)) writeJsonAtomic(FONTS_FILE, fontsDb);
 
 function mergeImportedPlayers(list) {
   let added = 0;
@@ -476,6 +485,17 @@ function broadcastState() {
   }
 }
 
+function broadcastFonts() {
+  const payload = `event: fonts\ndata: ${JSON.stringify(fontsDb)}\n\n`;
+  for (const res of sseClients) {
+    try {
+      res.write(payload);
+    } catch {
+      sseClients.delete(res);
+    }
+  }
+}
+
 // Keep-alive heartbeat so OBS CEF never drops the SSE socket
 setInterval(() => {
   for (const res of sseClients) {
@@ -499,6 +519,9 @@ const MIME_TYPES = {
   '.jpeg': 'image/jpeg',
   '.webp': 'image/webp',
   '.ico': 'image/x-icon',
+  '.ttf': 'font/ttf',
+  '.otf': 'font/otf',
+  '.woff': 'font/woff',
   '.woff2': 'font/woff2',
   '.mp3': 'audio/mpeg',
   '.wav': 'audio/wav',
@@ -687,6 +710,7 @@ const server = http.createServer(async (req, res) => {
       'X-Accel-Buffering': 'no'
     });
     res.write(`event: state\ndata: ${JSON.stringify(currentState)}\n\n`);
+    res.write(`event: fonts\ndata: ${JSON.stringify(fontsDb)}\n\n`);
     sseClients.add(res);
     const cleanup = () => sseClients.delete(res);
     req.on('close', cleanup);
@@ -1259,6 +1283,102 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(404);
       return res.end('Avatar error');
     }
+  }
+
+  // --- API: Global Custom PC Fonts (Upload .ttf/.otf/.woff/.woff2 OR Register System Font) ---
+  if (pathname === '/api/fonts') {
+    if (req.method === 'GET') {
+      return sendJson(res, 200, fontsDb);
+    }
+    if (req.method === 'POST') {
+      try {
+        const body = await readBody(req, 16 * 1024 * 1024);
+        const action = String(body.action || 'upload').toLowerCase();
+        if (action === 'delete' && body.id) {
+          const id = String(body.id);
+          const target = fontsDb.find(f => f.id === id);
+          if (target && target.kind === 'file' && target.file) {
+            const fp = path.join(FONTS_DIR, path.basename(target.file));
+            if (fs.existsSync(fp)) { try { fs.unlinkSync(fp); } catch {} }
+          }
+          fontsDb = fontsDb.filter(f => f.id !== id);
+          writeJsonAtomic(FONTS_FILE, fontsDb);
+          broadcastFonts();
+          return sendJson(res, 200, { ok: true, fonts: fontsDb });
+        }
+        if (action === 'add-system') {
+          const family = String(body.family || body.name || '').trim().slice(0, 80);
+          if (!family) throw new Error('Font family name is required');
+          const name = String(body.name || family).trim().slice(0, 60);
+          const slug = 'sys-' + family.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40);
+          const id = slug || `sys-${Date.now()}`;
+          const entry = { id, name, kind: 'system', family, addedAt: Date.now() };
+          const idx = fontsDb.findIndex(f => f.id === id || (f.kind === 'system' && f.family.toLowerCase() === family.toLowerCase()));
+          if (idx >= 0) fontsDb[idx] = entry;
+          else fontsDb.unshift(entry);
+          fontsDb = fontsDb.slice(0, 80);
+          writeJsonAtomic(FONTS_FILE, fontsDb);
+          broadcastFonts();
+          return sendJson(res, 200, { ok: true, font: entry, fonts: fontsDb });
+        }
+        // Default: upload font file (.ttf, .otf, .woff, .woff2)
+        const rawFilename = String(body.filename || 'custom-font.ttf').trim();
+        const ext = path.extname(rawFilename).toLowerCase();
+        const fmtMap = { '.ttf': 'truetype', '.otf': 'opentype', '.woff': 'woff', '.woff2': 'woff2' };
+        if (!fmtMap[ext]) throw new Error('Supported font formats: .ttf, .otf, .woff, .woff2');
+        const rawData = String(body.dataUrl || body.base64 || '');
+        const commaIdx = rawData.indexOf(',');
+        const b64 = commaIdx >= 0 ? rawData.slice(commaIdx + 1) : rawData;
+        if (!b64) throw new Error('Missing font file data');
+        const buf = Buffer.from(b64, 'base64');
+        if (buf.length < 32 || buf.length > 11 * 1024 * 1024) {
+          throw new Error('Font file must be between 32 bytes and 11 MB');
+        }
+        const baseClean = path.basename(rawFilename, ext).replace(/[_-]+/g, ' ').trim();
+        const displayName = String(body.name || baseClean || 'Custom Font').trim().slice(0, 60);
+        const slug = displayName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 42) || `font-${Date.now()}`;
+        const fileName = `${slug}${ext}`;
+        fs.mkdirSync(FONTS_DIR, { recursive: true });
+        fs.writeFileSync(path.join(FONTS_DIR, fileName), buf);
+        const entry = {
+          id: slug,
+          name: displayName,
+          kind: 'file',
+          file: fileName,
+          url: `/media/fonts/${encodeURIComponent(fileName)}`,
+          format: fmtMap[ext],
+          sizeBytes: buf.length,
+          addedAt: Date.now()
+        };
+        const idx = fontsDb.findIndex(f => f.id === slug);
+        if (idx >= 0) fontsDb[idx] = entry;
+        else fontsDb.unshift(entry);
+        fontsDb = fontsDb.slice(0, 80);
+        writeJsonAtomic(FONTS_FILE, fontsDb);
+        broadcastFonts();
+        return sendJson(res, 200, { ok: true, font: entry, fonts: fontsDb });
+      } catch (err) {
+        return sendJson(res, 400, { error: err.message });
+      }
+    }
+  }
+
+  // --- Local Uploaded Font Serving (/media/fonts/filename) ---
+  const fontMediaMatch = pathname.match(/^\/media\/fonts\/(.+)$/);
+  if (fontMediaMatch && req.method === 'GET') {
+    const safeName = path.basename(decodeURIComponent(fontMediaMatch[1]));
+    const fp = path.join(FONTS_DIR, safeName);
+    const ext = path.extname(fp).toLowerCase();
+    if (!['.ttf', '.otf', '.woff', '.woff2'].includes(ext) || !fs.existsSync(fp)) {
+      res.writeHead(404);
+      return res.end('Font not found');
+    }
+    res.writeHead(200, {
+      'Content-Type': MIME_TYPES[ext] || 'application/octet-stream',
+      'Access-Control-Allow-Origin': '*',
+      'Cache-Control': 'public, max-age=86400'
+    });
+    return fs.createReadStream(fp).pipe(res);
   }
 
   // --- Local Uploaded Media Serving (/media/avatars|branding|custom/filename) ---

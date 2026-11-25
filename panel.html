@@ -3264,6 +3264,33 @@
             <label class="toggle-item"><input type="checkbox" id="chk-uppercase" checked /> Force UPPERCASE</label>
           </div>
         </div>
+
+        <!-- GLOBAL CUSTOM PC FONTS MANAGER (WORKS ACROSS SCOREBARS, VS SPLASH & TOP 8!) -->
+        <div class="studio-box" style="margin-top:10px;border-color:rgba(56,189,248,0.42);background:#0f1422;">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+            <div>
+              <h3 style="margin:0;color:#7dd3fc;">💻 Global Custom PC Fonts (Scorebars · VS · Top 8)</h3>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px;">Upload any <code>.ttf</code>, <code>.otf</code>, <code>.woff</code>, or <code>.woff2</code> from your PC (works in OBS &amp; LAN devices) or add a locally installed system font name.</div>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button type="button" id="btn-upload-pc-font" class="primary" style="padding:5px 11px;font-size:11.5px;">⬆ Upload PC Font (.ttf / .otf / .woff2)</button>
+              <button type="button" id="btn-pick-local-font" style="padding:5px 10px;font-size:11.5px;" title="Browse fonts installed in Windows / macOS">🔍 Pick System Font</button>
+              <input type="file" id="file-custom-font" accept=".ttf,.otf,.woff,.woff2,font/ttf,font/otf,font/woff,font/woff2" style="display:none;" />
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px;">
+            <input type="text" id="sys-font-input" placeholder="Or type an installed PC font name (e.g., Cervo Regular, Impact, Eurostile...)" style="flex:1;min-width:220px;" maxlength="70" />
+            <button type="button" id="btn-add-sys-font" style="padding:5px 11px;font-size:11.5px;">+ Add System Font</button>
+          </div>
+          <div id="local-font-picker-wrap" style="display:none;margin-bottom:8px;padding:8px;border-radius:8px;background:#0a0e18;border:1px solid var(--border);">
+            <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;">
+              <input type="text" id="local-font-filter" placeholder="Filter installed PC fonts..." style="flex:1;" />
+              <button type="button" id="btn-close-local-picker" style="padding:4px 8px;font-size:11px;">✕</button>
+            </div>
+            <div id="local-font-chips" style="display:flex;flex-wrap:wrap;gap:5px;max-height:140px;overflow-y:auto;"></div>
+          </div>
+          <div id="custom-fonts-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:7px;"></div>
+        </div>
       </div>
 
       <!-- SUB-PANE 3: SHAPE, INTEGRATED FLAGS & HUD GEOMETRY -->
@@ -3309,6 +3336,7 @@
             <select id="st-layout" style="margin-bottom:8px;">
               <option value="theme">— From Active Theme —</option>
               <option value="blade">⚡ T8 Blade (Flush Above Healthbars)</option>
+              <option value="kazuya-fists">🥊 PBRD Kazuya Fists (T8 Round-Orb Gloves)</option>
               <option value="crown">T8 Crown 36px (Top Broadcast Strip)</option>
               <option value="split">T8 Split-Wing (Between Portrait &amp; Orbs)</option>
               <option value="arch">T8 Stepped Arch (Connected Visor)</option>
@@ -3692,6 +3720,15 @@
 
       <!-- SUB-PANE 5: CUSTOM PRESETS (SAVE / EXPORT / IMPORT JSON) -->
       <div class="studio-pane" id="spane-presets">
+        <div class="studio-box" style="margin-bottom:10px;border-color:rgba(229,25,66,0.48);background:#160c14;">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+            <div>
+              <strong style="font-size:12.5px;color:#fda4af;">🥊 Built-In Series Preset — PBRD Kazuya Fists</strong>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px;">Pibardos / PBRD Tekken 8 FT overlay with Kazuya's crimson studded gloves framing the 3 in-game round orbs + smoked fade nameplates &amp; ruby FT center.</div>
+            </div>
+            <button type="button" id="btn-apply-pbrd-preset" class="primary" style="background:linear-gradient(135deg,#e51942,#9a0c2e);border-color:#fb7185;padding:6px 12px;font-size:11.5px;white-space:nowrap;">🥊 Apply PBRD Kazuya Preset</button>
+          </div>
+        </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
           <input type="text" id="preset-name-input" placeholder="Preset name (e.g., Weekly Local T8, Neon Major...)" style="flex:1;min-width:220px;" maxlength="40" />
           <button type="button" id="btn-save-preset" class="primary">💾 Save Current Style</button>
@@ -4081,7 +4118,10 @@
                   </select>
                 </div>
                 <div>
-                  <label for="vs-fontDisplay">Display Typography</label>
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:4px;">
+                    <label for="vs-fontDisplay">Display Typography</label>
+                    <button type="button" class="mini-tool-btn btn-jump-pc-fonts" title="Upload or manage Global Custom PC Fonts">💻 PC Fonts</button>
+                  </div>
                   <select id="vs-fontDisplay">
                     <option value="theme">— Active Design —</option>
                     <option value="Russo One">Russo One (Heavy Arcade)</option>
@@ -4577,7 +4617,10 @@
               </div>
               <div class="row" style="margin-top:8px;">
                 <div>
-                  <label for="res-fontDisplay">Display Typography</label>
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:4px;">
+                    <label for="res-fontDisplay">Display Typography</label>
+                    <button type="button" class="mini-tool-btn btn-jump-pc-fonts" title="Upload or manage Global Custom PC Fonts">💻 PC Fonts</button>
+                  </div>
                   <select id="res-fontDisplay"></select>
                 </div>
                 <div>
@@ -5234,16 +5277,20 @@
 <script src="sf6-themes.js"></script>
 <script src="results-designs.js"></script>
 <script src="qr.js"></script>
+<script src="custom-fonts.js"></script>
 <script src="i18n.js"></script>
 <script>
 (() => {
   /* =========================================================================
-     CATALOGS: 32 DESIGNS, 12 FONTS, 38 SURFACE PALETTES, 114 FLAGS, T8 ROSTER
+     CATALOGS: 33 T8/FGC + 24 SF6 DESIGNS, 12+ CUSTOM PC FONTS, 114 FLAGS
      ========================================================================= */
   const THEMES = [
     { id: 't8-native-hud',        name: '★ Tekken 8 Native HUD',     cat: 'blade',   layout: 'Native HUD',   colors: ['#ffae19','#18121a','#ef4444'],
       pv: { lay:'blade', sh:'blade', fs:'blade', cs:'trap',  edge:true,  bg:'linear-gradient(180deg,rgba(22,19,28,0.92),rgba(12,10,16,0.96))', p1:'#ff9d1c', p2:'#ff9d1c', sc1:'linear-gradient(145deg,#fff8c7,#ffbe26 32%,#e84800)', sc2:'linear-gradient(215deg,#fff8c7,#ffbe26 32%,#e84800)', sct:'#160602', cbg:'#161018', ct:'#fff', tx:'#fff', sp1:'#ffc845', sp2:'#ffc845' },
       desc: 'Matches Tekken 8 in-game healthbar aesthetics 1:1: chrome-silver bevels, molten gold-orange energy, smoked glass, and UE5 italic typography.' },
+    { id: 't8-pbrd-kazuya-fists', name: '🥊 PBRD Kazuya Fists',       cat: 'blade',   layout: 'Kazuya Orbs',  colors: ['#e51942','#18181f','#e51942'],
+      pv: { lay:'blade', sh:'flat',  fs:'classic', cs:'trap', edge:false, bg:'linear-gradient(90deg,rgba(12,12,16,0.2),rgba(18,18,24,0.96))', p1:'#e51942', p2:'#e51942', sc1:'linear-gradient(180deg,#b91c3a,#7a0c24)', sc2:'linear-gradient(180deg,#b91c3a,#7a0c24)', sct:'#fff', cbg:'linear-gradient(180deg,#eb1648,#9a0c2e)', ct:'#fff', tx:'#fff', sp1:'#fda4af', sp2:'#fda4af' },
+      desc: 'Pibardos (PBRD) signature Tekken 8 overlay: Kazuya Mishima crimson studded gloves framing all 3 in-game round orbs with smoked fade nameplates.' },
     { id: 't8-twt-2026-official', name: '★ TWT 2026 Official Blade', cat: 'blade',   layout: 'Blade T8',     colors: ['#f41f64','#181822','#f41f64'],
       pv: { lay:'blade', sh:'blade', fs:'blade', cs:'float', edge:true,  bg:'rgba(20,20,30,0.9)',  p1:'#f41f64', p2:'#f41f64', sc1:'linear-gradient(135deg,#f41f64,#a50f46)', sc2:'linear-gradient(135deg,#f41f64,#a50f46)', sct:'#fff', cbg:'transparent', ct:'#fff', tx:'#fff', sp1:'#f43f5e', sp2:'#f43f5e' },
       desc: 'Modern TWT broadcast blade: smoked dark glass, crimson-magenta portrait edge, slanted score trapezoid, and integrated flags.' },
@@ -5702,17 +5749,21 @@
   }
 
   function pushPreviewConfig() {
+    const fontsPayload = window.FGC_CUSTOM_FONTS?.getFonts() || [];
     if (previewFrame.contentWindow) {
       previewFrame.contentWindow.postMessage({ type: 'preview-config', bg: previewBg, guides: previewGuides }, '*');
+      previewFrame.contentWindow.postMessage({ type: 'fonts-update', fonts: fontsPayload }, '*');
       previewFrame.contentWindow.postMessage({ type: 'state-update', state }, '*');
     }
     if (vsPreviewFrame?.contentWindow) {
+      vsPreviewFrame.contentWindow.postMessage({ type: 'fonts-update', fonts: fontsPayload }, '*');
       vsPreviewFrame.contentWindow.postMessage({ type: 'state-update', state }, '*');
       vsPreviewFrame.contentWindow.postMessage({ type: 'history-update', history: historyDb }, '*');
       vsPreviewFrame.contentWindow.postMessage({ type: 'vs-interactive-config', interactive: vsInteractiveEdit, drag: vsDragEnabled }, '*');
       if (vsSelectedEl) vsPreviewFrame.contentWindow.postMessage({ type: 'vs-highlight-element', element: vsSelectedEl }, '*');
     }
     if (resultsPreviewFrame?.contentWindow) {
+      resultsPreviewFrame.contentWindow.postMessage({ type: 'fonts-update', fonts: fontsPayload }, '*');
       resultsPreviewFrame.contentWindow.postMessage({ type: 'state-update', state }, '*');
     }
   }
@@ -6171,12 +6222,87 @@
     }
   }
 
+  let customFontsDb = window.FGC_CUSTOM_FONTS?.getFonts() || [];
+  let cachedLocalPcFonts = [];
+
+  const VS_FONT_OPTIONS = [
+    ['theme', '— Active Design —'],
+    ['Russo One', 'Russo One (Heavy Arcade)'],
+    ['Barlow Condensed', 'Barlow Condensed (Broadcast)'],
+    ['Chakra Petch', 'Chakra Petch (Cyber T8)'],
+    ['Orbitron', 'Orbitron (Sci-Fi HUD)'],
+    ['Teko', 'Teko (Tall Fighter)'],
+    ['Anton', 'Anton (Manga Impact)'],
+    ['Bebas Neue', 'Bebas Neue (Arena Poster)'],
+    ['Oswald', 'Oswald (Clean TV)'],
+    ['Exo 2', 'Exo 2 (Modern Sport)'],
+    ['Black Ops One', 'Black Ops One (Cage)'],
+    ['Montserrat', 'Montserrat (Minimalist)']
+  ];
+
+  function refreshAllFontSelects() {
+    const build = (opts) => window.FGC_CUSTOM_FONTS
+      ? window.FGC_CUSTOM_FONTS.buildSelectOptionsHtml(opts, customFontsDb)
+      : opts.map(([v, l]) => `<option value="${v}">${l}</option>`).join('');
+    const sbHtml = build(FONT_OPTIONS);
+    const vsHtml = build(VS_FONT_OPTIONS);
+    const syncSel = (id, html, val) => {
+      const el = $(id);
+      if (!el) return;
+      el.innerHTML = html;
+      el.value = val || 'theme';
+      if (el.value !== (val || 'theme')) el.value = 'theme';
+    };
+    syncSel('st-font-name', sbHtml, state.style?.fontName);
+    syncSel('st-font-score', sbHtml, state.style?.fontScore);
+    syncSel('vs-fontDisplay', vsHtml, state.vs?.fontDisplay);
+    syncSel('res-fontDisplay', sbHtml, state.results?.fontDisplay);
+  }
+
+  function renderCustomFontsUI() {
+    const host = $('custom-fonts-list');
+    if (!host) return;
+    if (!customFontsDb.length) {
+      host.innerHTML = '<div style="grid-column:1/-1;color:var(--muted);font-size:11px;padding:4px 2px;">No custom PC fonts added yet. Upload a <b>.ttf / .otf / .woff2</b> file or add an installed system font to unlock it across Scorebars, VS Splash &amp; Top 8 Results.</div>';
+      return;
+    }
+    host.innerHTML = customFontsDb.map((f) => {
+      const key = window.FGC_CUSTOM_FONTS ? window.FGC_CUSTOM_FONTS.getFontKey(f) : `custom:${f.id}`;
+      const stack = window.FGC_CUSTOM_FONTS ? window.FGC_CUSTOM_FONTS.resolveFontStack(key) : 'inherit';
+      const badge = f.kind === 'system' ? '🖥️ PC System' : `📁 ${String(f.file || '').split('.').pop().toUpperCase() || 'FONT'}`;
+      const safeName = String(f.name || f.family || f.id).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const safeKey = String(key).replace(/"/g, '&quot;');
+      const safeId = String(f.id).replace(/"/g, '&quot;');
+      return `
+        <div class="preset-item" style="flex-direction:column;align-items:stretch;gap:6px;padding:8px 10px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;">
+            <strong style="font-size:12px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${safeName}</strong>
+            <span style="font-size:9.5px;padding:2px 6px;border-radius:4px;background:rgba(56,189,248,0.16);color:#7dd3fc;font-weight:700;flex-shrink:0;">${badge}</span>
+          </div>
+          <div style="font-family:${stack};font-size:18px;letter-spacing:0.04em;color:#f8fafc;background:rgba(0,0,0,0.34);border:1px solid rgba(255,255,255,0.08);border-radius:6px;padding:5px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+            PLAYER 1 · 3 - 2 · GRAND FINALS
+          </div>
+          <div style="display:flex;gap:5px;justify-content:flex-end;">
+            <button type="button" data-apply-global-font="${safeKey}" class="primary" style="padding:3px 9px;font-size:10.5px;" title="Apply this font to Scorebars, VS Splash &amp; Top 8 Results at once">🌐 Apply Globally</button>
+            <button type="button" data-del-custom-font="${safeId}" style="padding:3px 7px;font-size:10.5px;" title="Remove custom font">✕</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function applyFontsListUpdate(list) {
+    customFontsDb = Array.isArray(list) ? list : [];
+    window.FGC_CUSTOM_FONTS?.setFonts(customFontsDb);
+    refreshAllFontSelects();
+    renderCustomFontsUI();
+    pushPreviewConfig();
+  }
+
   function initSelects() {
     populateCharSelects([], 'Tekken 8');
-    const fontHtml = FONT_OPTIONS.map(([v, l]) => `<option value="${v}">${l}</option>`).join('');
-    $('st-font-name').innerHTML = fontHtml;
-    $('st-font-score').innerHTML = fontHtml;
-    if ($('res-fontDisplay')) $('res-fontDisplay').innerHTML = fontHtml;
+    refreshAllFontSelects();
+    renderCustomFontsUI();
     renderAdaptiveColorStudio(DEFAULT_STYLE);
     renderVsDesignCards();
     renderResultsDesignCards();
@@ -7469,6 +7595,178 @@
         style: { ...DEFAULT_STYLE }
       }, true);
       toast('↺ Style Studio reset to active theme defaults');
+    });
+
+    // Built-in PBRD Kazuya Fists Series Preset (1-click)
+    $('btn-apply-pbrd-preset')?.addEventListener('click', () => {
+      setPreviewBackdrop('t8');
+      commitState({
+        theme: 't8-pbrd-kazuya-fists',
+        tweaks: { offsetY: 0, scale: 100, wingSpread: 0, opacity: 100, customColors: false },
+        style: {
+          ...DEFAULT_STYLE,
+          customColors: false,
+          layoutOverride: 'theme',
+          shape: 'theme',
+          flagStyle: 'classic',
+          centerStyle: 'trapezoid',
+          outerBlade: 'off',
+          bladeSlant: 0,
+          barHeight: 0,
+          fontName: 'theme',
+          fontScore: 'theme',
+          italic: 'off',
+          scoreSlant: 'upright',
+          uppercase: true,
+          mpStyle: 'under-wing'
+        }
+      }, true);
+      toast('🥊 Applied PBRD Kazuya Fists preset');
+    });
+
+    // Global Custom PC Fonts Manager (Upload .ttf/.otf/.woff/.woff2, Pick System Font, Apply Globally, Delete)
+    $('btn-upload-pc-font')?.addEventListener('click', () => $('file-custom-font')?.click());
+    $('file-custom-font')?.addEventListener('change', async (e) => {
+      const file = e.target.files?.[0];
+      e.target.value = '';
+      if (!file) return;
+      if (file.size > 11 * 1024 * 1024) return toast('⚠️ Font file exceeds 11 MB limit');
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const dataUrl = String(reader.result || '');
+        const cleanName = file.name.replace(/\.(ttf|otf|woff2?)$/i, '').replace(/[_-]+/g, ' ').trim();
+        if (isHttp) {
+          try {
+            const res = await fetch('/api/fonts', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: 'upload', name: cleanName, filename: file.name, dataUrl })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Upload failed');
+            applyFontsListUpdate(data.fonts);
+            if (bc) bc.postMessage({ type: 'fonts', payload: data.fonts });
+            toast(`💻 PC Font added globally: ${data.font?.name || cleanName}`);
+          } catch (err) {
+            toast(`⚠️ ${err.message}`);
+          }
+        } else {
+          const ext = (file.name.match(/\.(ttf|otf|woff2?)$/i) || ['', 'ttf'])[1].toLowerCase();
+          const fmtMap = { ttf: 'truetype', otf: 'opentype', woff: 'woff', woff2: 'woff2' };
+          const id = cleanName.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40) || `font-${Date.now()}`;
+          const next = [{ id, name: cleanName, kind: 'file', file: file.name, url: dataUrl, format: fmtMap[ext] || 'truetype' }, ...customFontsDb.filter(x => x.id !== id)];
+          applyFontsListUpdate(next);
+          toast(`💻 PC Font loaded locally: ${cleanName}`);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+
+    const addSystemPcFont = async (rawFamily) => {
+      const fam = String(rawFamily || '').trim();
+      if (!fam) return toast('Enter an installed PC font name first');
+      if (isHttp) {
+        try {
+          const res = await fetch('/api/fonts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'add-system', name: fam, family: fam })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Failed to add font');
+          applyFontsListUpdate(data.fonts);
+          if (bc) bc.postMessage({ type: 'fonts', payload: data.fonts });
+          if ($('sys-font-input')) $('sys-font-input').value = '';
+          toast(`🖥️ System font added: ${fam}`);
+        } catch (err) {
+          toast(`⚠️ ${err.message}`);
+        }
+      } else {
+        const id = 'sys-' + fam.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 38);
+        const next = [{ id, name: fam, kind: 'system', family: fam }, ...customFontsDb.filter(x => x.id !== id)];
+        applyFontsListUpdate(next);
+        if ($('sys-font-input')) $('sys-font-input').value = '';
+        toast(`🖥️ System font added: ${fam}`);
+      }
+    };
+
+    $('btn-add-sys-font')?.addEventListener('click', () => addSystemPcFont($('sys-font-input')?.value));
+    $('sys-font-input')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addSystemPcFont(e.target.value); } });
+
+    const renderLocalFontChips = (query = '') => {
+      const chips = $('local-font-chips');
+      if (!chips) return;
+      const q = normText(query.trim());
+      const list = cachedLocalPcFonts.filter(f => !q || normText(f).includes(q)).slice(0, 120);
+      chips.innerHTML = list.map(f => {
+        const esc = f.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+        return `<button type="button" data-pick-sys-font="${esc}" style="padding:3px 8px;font-size:11px;font-family:'${esc}',sans-serif;">${esc}</button>`;
+      }).join('') || '<span style="color:var(--muted);font-size:11px;">No matching system fonts.</span>';
+    };
+
+    $('btn-pick-local-font')?.addEventListener('click', async () => {
+      if (typeof window.queryLocalFonts !== 'function') {
+        return toast('Use "Upload PC Font" (.ttf/.otf) or type your installed font name below');
+      }
+      try {
+        const list = await window.queryLocalFonts();
+        const uniq = [...new Set(list.map(f => f.family).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+        cachedLocalPcFonts = uniq;
+        $('local-font-picker-wrap').style.display = 'block';
+        renderLocalFontChips($('local-font-filter')?.value || '');
+        toast(`🔍 Loaded ${uniq.length} PC system fonts`);
+      } catch {
+        toast('Permission declined — upload a .ttf/.otf file or type the font name below');
+      }
+    });
+    $('local-font-filter')?.addEventListener('input', (e) => renderLocalFontChips(e.target.value));
+    $('btn-close-local-picker')?.addEventListener('click', () => { $('local-font-picker-wrap').style.display = 'none'; });
+    $('local-font-chips')?.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-pick-sys-font]');
+      if (!btn) return;
+      addSystemPcFont(btn.dataset.pickSysFont);
+      $('local-font-picker-wrap').style.display = 'none';
+    });
+
+    $('custom-fonts-list')?.addEventListener('click', async (e) => {
+      const ap = e.target.closest('[data-apply-global-font]');
+      const dl = e.target.closest('[data-del-custom-font]');
+      if (ap) {
+        const key = ap.dataset.applyGlobalFont;
+        commitState({
+          style: { fontName: key, fontScore: key },
+          vs: { fontDisplay: key },
+          results: { fontDisplay: key }
+        }, true);
+        toast('🌐 Custom font applied globally (Scorebars · VS · Top 8)');
+      } else if (dl) {
+        const id = dl.dataset.delCustomFont;
+        if (isHttp) {
+          const res = await fetch('/api/fonts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'delete', id })
+          });
+          if (res.ok) {
+            const data = await res.json();
+            applyFontsListUpdate(data.fonts);
+            if (bc) bc.postMessage({ type: 'fonts', payload: data.fonts });
+            toast('🗑️ Custom font removed');
+          }
+        } else {
+          applyFontsListUpdate(customFontsDb.filter(f => f.id !== id));
+          toast('🗑️ Custom font removed');
+        }
+      }
+    });
+
+    document.querySelectorAll('.btn-jump-pc-fonts').forEach(btn => {
+      btn.addEventListener('click', () => {
+        setActiveWorkspace('scorebars');
+        $('bottom-tabs')?.querySelector('button[data-tab="tweaks"]')?.click();
+        $('studio-subtabs')?.querySelector('button[data-spane="fonts"]')?.click();
+        $('custom-fonts-list')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
     });
 
     // Custom Presets Save / Apply / Delete / Export / Import
@@ -9925,6 +10223,7 @@
     }).catch(() => {});
     fetch('/api/players').then(r => r.json()).then(list => { playersDb = list; renderPlayersDb(); }).catch(() => {});
     fetch('/api/presets').then(r => r.json()).then(list => { presetsDb = list; renderPresetsList(); }).catch(() => {});
+    fetch('/api/fonts').then(r => r.json()).then(list => { applyFontsListUpdate(list); }).catch(() => {});
     fetch('/api/history').then(r => r.json()).then(list => { historyDb = list; renderHistoryList(); pushPreviewConfig(); }).catch(() => {});
     const cfgReady = fetch('/api/integrations').then(r => r.json()).then(cfg => {
       trnState.config = cfg;
@@ -9989,6 +10288,8 @@
           state = incoming;
           renderUI();
           pushPreviewConfig();
+        } else if (ev.data?.type === 'fonts' && Array.isArray(ev.data.payload)) {
+          applyFontsListUpdate(ev.data.payload);
         }
       };
     }
@@ -10019,6 +10320,13 @@
           renderUI();
           pushPreviewConfig();
           if (bc) bc.postMessage({ type: 'state', payload: data, fromSse: true });
+        } catch {}
+      });
+      es.addEventListener('fonts', (ev) => {
+        try {
+          const list = JSON.parse(ev.data);
+          applyFontsListUpdate(list);
+          if (bc) bc.postMessage({ type: 'fonts', payload: list, fromSse: true });
         } catch {}
       });
       es.onerror = () => {

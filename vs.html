@@ -2487,6 +2487,7 @@
 
   <script src="flags.js"></script>
   <script src="vs-designs.js"></script>
+  <script src="custom-fonts.js"></script>
   <script>
     (() => {
       const FLAGS_MAP = window.FGC_FLAGS || {};
@@ -2758,7 +2759,8 @@
         root.style.setProperty('--vs-header-text', d.headerText);
         root.style.setProperty('--vs-frame-color', d.frameColor);
         root.style.setProperty('--vs-frame-accent', d.frameAccent);
-        root.style.setProperty('--vs-font-display', FONT_STACKS[effFont] || FONT_STACKS['Russo One']);
+        const resolvedVsFont = window.FGC_CUSTOM_FONTS?.resolveFontStack(effFont, FONT_STACKS) || FONT_STACKS[effFont] || FONT_STACKS['Russo One'];
+        root.style.setProperty('--vs-font-display', resolvedVsFont);
 
         // Pattern Engine (Speed, Direction, Opacity, Scale)
         const patEl = $('vs-pattern');
@@ -3037,6 +3039,9 @@
         const st = currentState;
         const vs = st.vs || {};
         const d = DESIGN_MAP[vs.design] || FALLBACK_DESIGN;
+        const effFont = (vs.fontDisplay && vs.fontDisplay !== 'theme') ? vs.fontDisplay : (d.font || 'Russo One');
+        const cFont = window.FGC_CUSTOM_FONTS?.resolveCanvasFamily(effFont, '"Russo One", "Barlow Condensed", sans-serif') || '"Russo One", "Barlow Condensed", sans-serif';
+        if (document.fonts?.ready) { try { await document.fonts.ready; } catch {} }
         const match = getActiveMatchData(st);
         const p1 = match.p1 || {}, p2 = match.p2 || {};
         const pickHex = (str, fb) => (String(str || '').match(/#[0-9a-fA-F]{6}/) || [fb])[0];
@@ -3123,7 +3128,7 @@
             ctx.fillText(String(vs.eyebrow).toUpperCase(), 960, hdrY + 34);
           }
           ctx.fillStyle = d.headerText || '#ffffff';
-          ctx.font = '900 42px "Russo One", "Barlow Condensed", sans-serif';
+          ctx.font = `900 42px ${cFont}`;
           const roundTitle = `${(match.round || 'ROUND 1').toUpperCase()}${(st.showFormat !== false && match.format) ? `  ·  ${match.format}` : ''}`;
           ctx.fillText(roundTitle, 960, hdrY + 84);
           ctx.restore();
@@ -3134,7 +3139,7 @@
           ctx.save();
           const ey = 508 + Number(vs.emblemOffsetY ?? 0);
           const sz = Math.round(112 * (Number(vs.emblemScale ?? 100) / 100));
-          ctx.font = `italic 900 ${sz}px "Russo One", "Barlow Condensed", sans-serif`;
+          ctx.font = `italic 900 ${sz}px ${cFont}`;
           ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
           ctx.lineWidth = 14; ctx.strokeStyle = '#090b10';
           const txt = (vs.emblemText && vs.emblemText.trim()) ? vs.emblemText.trim() : 'VS';
@@ -3191,7 +3196,7 @@
             ctx.fillText(metaLabel.toUpperCase(), isLeft ? textX + metaOffset : textX - metaOffset, y + 41);
           }
           ctx.fillStyle = d.plateText || '#ffffff';
-          ctx.font = `900 ${Math.round(58 * (Number(vs.nameScale ?? 100) / 100))}px "Russo One", "Barlow Condensed", sans-serif`;
+          ctx.font = `900 ${Math.round(58 * (Number(vs.nameScale ?? 100) / 100))}px ${cFont}`;
           ctx.fillText((player.name || (isLeft ? 'PLAYER 1' : 'PLAYER 2')).slice(0, 22), textX, y + 98);
           if (vs.showCharName !== false && player.character) {
             ctx.fillStyle = d.plateText === '#0f172a' ? 'rgba(15,23,42,0.72)' : 'rgba(255,255,255,0.75)';
@@ -3226,6 +3231,10 @@
         const d = ev.data;
         if (!d) return;
         if (d.type === 'state-update' && d.state) { rescalePreview(); render(d.state); }
+        else if (d.type === 'fonts-update' && Array.isArray(d.fonts)) {
+          window.FGC_CUSTOM_FONTS?.setFonts(d.fonts);
+          if (currentState) render(currentState);
+        }
         else if (d.type === 'history-update' && Array.isArray(d.history)) { historyDb = d.history; if (currentState) render(currentState); }
         else if (d.type === 'test-vs-entry') triggerEntryAnim(currentState?.vs?.entryAnim || 'slam-split');
         else if (d.type === 'export-vs-png') exportPngGraphic();
@@ -3249,11 +3258,18 @@
       let bc = null;
       try {
         bc = new BroadcastChannel('fgc_open_scorebar');
-        bc.onmessage = (ev) => { if (ev.data?.type === 'state' && ev.data.payload) render(ev.data.payload); };
+        bc.onmessage = (ev) => {
+          if (ev.data?.type === 'state' && ev.data.payload) render(ev.data.payload);
+          else if (ev.data?.type === 'fonts' && Array.isArray(ev.data.payload)) {
+            window.FGC_CUSTOM_FONTS?.setFonts(ev.data.payload);
+            if (currentState) render(currentState);
+          }
+        };
       } catch { }
 
       // NOTE: Preview iframes inside panel.html NEVER open EventSource (prevents Chrome 6-socket HTTP/1.1 deadlock).
       if (isHttp) {
+        window.FGC_CUSTOM_FONTS?.fetchAndSync().then(() => { if (currentState) render(currentState); });
         fetch('/api/history', { cache: 'no-store' }).then(r => r.json()).then(list => { historyDb = list; if (currentState) render(currentState); }).catch(() => { });
         fetch('/api/state', { cache: 'no-store' }).then(r => r.json()).then(st => {
           render(st);
@@ -3284,6 +3300,14 @@
                 const data = JSON.parse(ev.data);
                 render(data);
                 if (bc) bc.postMessage({ type: 'state', payload: data, fromSse: true });
+              } catch { }
+            });
+            es.addEventListener('fonts', (ev) => {
+              try {
+                const list = JSON.parse(ev.data);
+                window.FGC_CUSTOM_FONTS?.setFonts(list);
+                if (currentState) render(currentState);
+                if (bc) bc.postMessage({ type: 'fonts', payload: list, fromSse: true });
               } catch { }
             });
             es.onerror = () => {

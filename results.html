@@ -994,6 +994,7 @@
 
 <script src="flags.js"></script>
 <script src="results-designs.js"></script>
+<script src="custom-fonts.js"></script>
 <script>
 (() => {
   const FLAGS_MAP = window.FGC_FLAGS || {};
@@ -1256,7 +1257,8 @@
     root.style.setProperty('--res-card-border', d.cardBorder);
     root.style.setProperty('--res-text', d.text);
     root.style.setProperty('--res-muted', d.muted);
-    root.style.setProperty('--res-font-display', FONT_STACKS[effFont] || FONT_STACKS['Russo One']);
+    const resolvedResFont = window.FGC_CUSTOM_FONTS?.resolveFontStack(effFont, FONT_STACKS) || FONT_STACKS[effFont] || FONT_STACKS['Russo One'];
+    root.style.setProperty('--res-font-display', resolvedResFont);
 
     const patEl = $('res-pattern');
     patEl.dataset.pat = effPat;
@@ -1407,10 +1409,13 @@
       titleX = 104 + lw;
     }
     ctx.fillStyle = accent;
+    const effFont = (res.fontDisplay && res.fontDisplay !== 'theme') ? res.fontDisplay : (d.font || 'Russo One');
+    const cFont = window.FGC_CUSTOM_FONTS?.resolveCanvasFamily(effFont, '"Russo One", "Barlow Condensed", sans-serif') || '"Russo One", "Barlow Condensed", sans-serif';
+    if (document.fonts?.ready) { try { await document.fonts.ready; } catch {} }
     ctx.font = '800 22px "Barlow Condensed", sans-serif';
     ctx.fillText(String(res.subtitle || 'TOURNAMENT FINALS').toUpperCase(), titleX, 74);
     ctx.fillStyle = d.text || '#ffffff';
-    ctx.font = '900 50px "Russo One", "Barlow Condensed", sans-serif';
+    ctx.font = `900 50px ${cFont}`;
     ctx.fillText(String(res.title || st.tournament || 'TOP 8 RESULTS').toUpperCase(), titleX, 126);
 
     const placements = (res.placements || []).slice(0, effLayout === 'podium-3' ? 3 : effLayout === 'top4-quad' ? 4 : 8);
@@ -1524,7 +1529,7 @@
         ctx.fillText(String(pl.sponsor).toUpperCase(), fx, r.y + r.h - 77);
       }
       ctx.fillStyle = d.text || '#ffffff';
-      ctx.font = `900 ${i === 0 ? 44 : 28}px "Russo One", "Barlow Condensed", sans-serif`;
+      ctx.font = `900 ${i === 0 ? 44 : 28}px ${cFont}`;
       ctx.fillText(String(pl.name || `PLAYER ${i + 1}`).slice(0, 18), r.x + 16, r.y + r.h - 42);
       if (res.showCharName !== false && pl.character) {
         ctx.fillStyle = d.muted || '#94a3b8';
@@ -1644,6 +1649,10 @@
     const d = ev.data;
     if (!d) return;
     if (d.type === 'state-update' && d.state) { rescalePreview(); render(d.state); }
+    else if (d.type === 'fonts-update' && Array.isArray(d.fonts)) {
+      window.FGC_CUSTOM_FONTS?.setFonts(d.fonts);
+      if (currentState) render(currentState);
+    }
     else if (d.type === 'res-highlight-player') {
       selectedIdx = Number(d.idx ?? -1);
       $('res-body').querySelectorAll('[data-idx]').forEach(el => {
@@ -1672,10 +1681,17 @@
   let bc = null;
   try {
     bc = new BroadcastChannel('fgc_open_scorebar');
-    bc.onmessage = (ev) => { if (ev.data?.type === 'state' && ev.data.payload) render(ev.data.payload); };
+    bc.onmessage = (ev) => {
+      if (ev.data?.type === 'state' && ev.data.payload) render(ev.data.payload);
+      else if (ev.data?.type === 'fonts' && Array.isArray(ev.data.payload)) {
+        window.FGC_CUSTOM_FONTS?.setFonts(ev.data.payload);
+        if (currentState) render(currentState);
+      }
+    };
   } catch {}
 
   if (isHttp) {
+    window.FGC_CUSTOM_FONTS?.fetchAndSync().then(() => { if (currentState) render(currentState); });
     fetch('/api/state', { cache: 'no-store' }).then(r => r.json()).then(st => {
       render(st);
       if (!isPreview && st?.results?.visible !== false) onSceneShow();
@@ -1703,6 +1719,14 @@
             const data = JSON.parse(ev.data);
             render(data);
             if (bc) bc.postMessage({ type: 'state', payload: data, fromSse: true });
+          } catch {}
+        });
+        es.addEventListener('fonts', (ev) => {
+          try {
+            const list = JSON.parse(ev.data);
+            window.FGC_CUSTOM_FONTS?.setFonts(list);
+            if (currentState) render(currentState);
+            if (bc) bc.postMessage({ type: 'fonts', payload: list, fromSse: true });
           } catch {}
         });
         es.onerror = () => {
