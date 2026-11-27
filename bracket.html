@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Top 8 Bracket Overlay — Valquiria (1920x1080)</title>
+<title>Top 8 Bracket Overlay(1920x1080)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
@@ -270,7 +270,7 @@
 
     if (bgMode !== 'transparent') {
       const useResetBg = bgMode === 'reset' || (bgMode === 'auto' && (Boolean(brk.showReset) || hasResetPlayers));
-      const targetSrc = useResetBg ? 'assets/valquiria-bracket-top8-reset.png' : 'assets/valquiria-bracket-top8.png';
+      const targetSrc = useResetBg ? 'assets/valquiria-bracket-top8-reset.png' : 'assets/valquiria-bracket-top8.png'; ##hoy ta hardcodeado pero toca cambiarlo para que sea un bracket de ejemplo o algo
       if (!bgImg.getAttribute('src')?.endsWith(targetSrc)) {
         bgImg.src = targetSrc;
       }
