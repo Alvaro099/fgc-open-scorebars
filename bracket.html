@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Top 8 Bracket Overlay — Valquiria (1920x1080)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: transparent;
+    font-family: 'Bebas Neue', 'Segoe UI', sans-serif;
+    user-select: none;
+    -webkit-font-smoothing: antialiased;
+  }
+  body.preview-mode {
+    background-color: #0b0d14;
+    background-image:
+      linear-gradient(45deg, #121622 25%, transparent 25%),
+      linear-gradient(-45deg, #121622 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #121622 75%),
+      linear-gradient(-45deg, transparent 75%, #121622 75%);
+    background-size: 32px 32px;
+    background-position: 0 0, 0 16px, 16px -16px, -16px 0;
+  }
+
+  #bracket-scaler {
+    width: 1920px;
+    height: 1080px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform-origin: top left;
+    overflow: hidden;
+  }
+
+  #bracket-stage {
+    position: relative;
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    opacity: 1;
+    transform: scale(1);
+    transition: opacity 0.35s ease, transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  #bracket-stage.is-hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+  #bracket-stage.is-entering {
+    opacity: 0;
+    transform: scale(0.985);
+    transition: none;
+  }
+
+  #bracket-bg {
+    position: absolute;
+    inset: 0;
+    width: 1920px;
+    height: 1080px;
+    object-fit: cover;
+    pointer-events: none;
+    z-index: 1;
+  }
+  #bracket-stage[data-bg-mode="transparent"] #bracket-bg {
+    display: none;
+  }
+
+  #bracket-nodes {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .brk-slot {
+    position: absolute;
+    color: #FFFFFF;
+    font-family: 'Bebas Neue', Impact, sans-serif;
+    font-size: 45px;
+    line-height: 1;
+    white-space: nowrap;
+    text-align: center;
+    transform: translateX(-50%);
+    transform-origin: center top;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.55);
+    transition: opacity 0.25s ease, color 0.25s ease;
+  }
+  .brk-slot.is-fading {
+    opacity: 0;
+  }
+  .brk-slot.is-loser {
+    color: #7d7d7c;
+  }
+  .brk-bottom-text {
+    position: absolute;
+    left: 960px;
+    top: 1022px;
+    color: #FFFFFF;
+    font-family: 'Bebas Neue', Impact, sans-serif;
+    font-size: 40px;
+    line-height: 1;
+    white-space: nowrap;
+    text-align: center;
+    transform: translateX(-50%);
+    transform-origin: center top;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.75);
+    transition: opacity 0.25s ease;
+  }
+  .brk-bottom-text.is-fading {
+    opacity: 0;
+  }
+</style>
+</head>
+<body>
+<div id="bracket-scaler">
+  <div id="bracket-stage" data-bg-mode="auto">
+    <img id="bracket-bg" src="assets/valquiria-bracket-top8.png" alt="" />
+    <div id="bracket-nodes"></div>
+  </div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  const params = new URLSearchParams(location.search);
+  const isPreview = params.get('preview') === '1';
+  const isHttp = location.protocol === 'http:' || location.protocol === 'https:';
+  if (isPreview) document.body.classList.add('preview-mode');
+
+  const $ = (id) => document.getElementById(id);
+  const scaler = $('bracket-scaler');
+  const stage = $('bracket-stage');
+  const bgImg = $('bracket-bg');
+  const nodesRoot = $('bracket-nodes');
+
+  // Exact match coordinates from BRACKET - Top 8.html
+  const MATCH_COORDS = [
+    { key: 'ws1',    x: 103,  y: 148 },
+    { key: 'ws2',    x: 103,  y: 350 },
+    { key: 'wf',     x: 564,  y: 250 },
+    { key: 'ltop81', x: 103,  y: 610 },
+    { key: 'ltop82', x: 103,  y: 810 },
+    { key: 'lq1',    x: 568,  y: 612 },
+    { key: 'lq2',    x: 568,  y: 814 },
+    { key: 'ls',     x: 1033, y: 712 },
+    { key: 'lf',     x: 1500, y: 642 },
+    { key: 'gf',     x: 1033, y: 322 },
+    { key: 'gfr',    x: 1500, y: 322 }
+  ];
+
+  const MAX_NAME_WIDTH = 280;
+  const MAX_SCORE_WIDTH = 50;
+  const MAX_BOTTOM_WIDTH = 1000;
+
+  let currentState = null;
+  let lastIntroNonce = -1;
+  const cachedVals = {};
+
+  function buildBracketNodes() {
+    const frag = document.createDocumentFragment();
+    for (const m of MATCH_COORDS) {
+      const specs = [
+        { suffix: 'p1',  dx: 178, dy: 0,  maxW: MAX_NAME_WIDTH },
+        { suffix: 'p1s', dx: 0,   dy: 0,  maxW: MAX_SCORE_WIDTH },
+        { suffix: 'p2',  dx: 178, dy: 70, maxW: MAX_NAME_WIDTH },
+        { suffix: 'p2s', dx: 0,   dy: 70, maxW: MAX_SCORE_WIDTH }
+      ];
+      for (const sp of specs) {
+        const div = document.createElement('div');
+        div.id = `brk-${m.key}-${sp.suffix}`;
+        div.className = 'brk-slot';
+        div.dataset.maxw = String(sp.maxW);
+        div.style.left = `${m.x + sp.dx}px`;
+        div.style.top = `${m.y + sp.dy}px`;
+        frag.appendChild(div);
+      }
+    }
+    const bot = document.createElement('div');
+    bot.id = 'brk-bottom-text';
+    bot.className = 'brk-bottom-text';
+    bot.dataset.maxw = String(MAX_BOTTOM_WIDTH);
+    frag.appendChild(bot);
+    nodesRoot.appendChild(frag);
+  }
+  buildBracketNodes();
+
+  function rescaleStage() {
+    const sx = window.innerWidth / 1920;
+    const sy = window.innerHeight / 1080;
+    const sc = Math.min(sx, sy);
+    const ox = Math.max(0, (window.innerWidth - 1920 * sc) / 2);
+    const oy = Math.max(0, (window.innerHeight - 1080 * sc) / 2);
+    scaler.style.transform = `translate(${ox}px, ${oy}px) scale(${sc})`;
+  }
+  window.addEventListener('resize', rescaleStage);
+  rescaleStage();
+
+  function fitSlotWidth(el) {
+    const maxW = Number(el.dataset.maxw || 0);
+    if (!maxW) return;
+    el.style.transform = 'translateX(-50%)';
+    const w = el.scrollWidth;
+    if (w > maxW && w > 0) {
+      el.style.transform = `translateX(-50%) scaleX(${(maxW / w).toFixed(4)})`;
+    }
+  }
+
+  function setSlotText(id, nextText, immediate = false) {
+    const val = String(nextText ?? '');
+    if (cachedVals[id] === val) return;
+    const el = $(id);
+    if (!el) return;
+
+    if (immediate || cachedVals[id] === undefined) {
+      cachedVals[id] = val;
+      el.textContent = val;
+      fitSlotWidth(el);
+      return;
+    }
+
+    cachedVals[id] = val;
+    clearTimeout(el._fadeT);
+    el.classList.add('is-fading');
+    el._fadeT = setTimeout(() => {
+      el.textContent = val;
+      fitSlotWidth(el);
+      requestAnimationFrame(() => el.classList.remove('is-fading'));
+    }, 220);
+  }
+
+  function applyLoserColors(key, m) {
+    const el1 = $(`brk-${key}-p1`);
+    const el2 = $(`brk-${key}-p2`);
+    if (!el1 || !el2) return;
+    const s1 = parseInt(String(m?.p1s ?? '').trim(), 10);
+    const s2 = parseInt(String(m?.p2s ?? '').trim(), 10);
+    if (!Number.isNaN(s1) && !Number.isNaN(s2) && s1 !== s2) {
+      el1.classList.toggle('is-loser', s1 < s2);
+      el2.classList.toggle('is-loser', s2 < s1);
+    } else {
+      el1.classList.remove('is-loser');
+      el2.classList.remove('is-loser');
+    }
+  }
+
+  function triggerEntryAnim() {
+    stage.classList.add('is-entering');
+    void stage.offsetWidth;
+    requestAnimationFrame(() => stage.classList.remove('is-entering'));
+  }
+
+  function render(st) {
+    if (!st) return;
+    currentState = st;
+    const brk = st.bracket || {};
+    const matches = brk.matches || {};
+    const isVis = brk.visible !== false;
+    stage.classList.toggle('is-hidden', !isVis);
+
+    const gfr = matches.gfr || {};
+    const hasResetPlayers = Boolean(String(gfr.p1 || '').trim() || String(gfr.p2 || '').trim());
+    const bgMode = brk.bgMode || 'auto';
+    stage.dataset.bgMode = bgMode;
+
+    if (bgMode !== 'transparent') {
+      const useResetBg = bgMode === 'reset' || (bgMode === 'auto' && (Boolean(brk.showReset) || hasResetPlayers));
+      const targetSrc = useResetBg ? 'assets/valquiria-bracket-top8-reset.png' : 'assets/valquiria-bracket-top8.png';
+      if (!bgImg.getAttribute('src')?.endsWith(targetSrc)) {
+        bgImg.src = targetSrc;
+      }
+    }
+
+    const immediate = isPreview;
+    for (const mc of MATCH_COORDS) {
+      const m = matches[mc.key] || {};
+      const hideGfrEmpty = mc.key === 'gfr' && bgMode === 'standard' && !hasResetPlayers;
+      setSlotText(`brk-${mc.key}-p1`, hideGfrEmpty ? '' : (m.p1 || ''), immediate);
+      setSlotText(`brk-${mc.key}-p1s`, hideGfrEmpty ? '' : (m.p1s ?? ''), immediate);
+      setSlotText(`brk-${mc.key}-p2`, hideGfrEmpty ? '' : (m.p2 || ''), immediate);
+      setSlotText(`brk-${mc.key}-p2s`, hideGfrEmpty ? '' : (m.p2s ?? ''), immediate);
+      applyLoserColors(mc.key, m);
+    }
+    setSlotText('brk-bottom-text', brk.bottomText || '', immediate);
+
+    const nonce = Number(brk.introNonce || 0);
+    if (lastIntroNonce !== -1 && nonce !== lastIntroNonce && nonce > 0) {
+      triggerEntryAnim();
+    }
+    lastIntroNonce = nonce;
+  }
+
+  if (document.fonts?.ready) {
+    document.fonts.ready.then(() => {
+      nodesRoot.querySelectorAll('[data-maxw]').forEach(fitSlotWidth);
+    }).catch(() => {});
+  }
+
+  window.addEventListener('message', (ev) => {
+    const d = ev.data;
+    if (!d) return;
+    if (d.type === 'state-update' && d.state) {
+      rescaleStage();
+      render(d.state);
+    } else if (d.type === 'test-bracket-entry') {
+      triggerEntryAnim();
+    }
+  });
+
+  const onSceneShow = () => {
+    if (currentState?.bracket?.visible !== false) triggerEntryAnim();
+  };
+  window.addEventListener('obsSourceActiveChanged', (e) => { if (e?.detail?.active) onSceneShow(); });
+  window.addEventListener('obsSourceVisibleChanged', (e) => { if (e?.detail?.visible) onSceneShow(); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) onSceneShow(); });
+
+  let bc = null;
+  try {
+    bc = new BroadcastChannel('fgc_open_scorebar');
+    bc.onmessage = (ev) => {
+      if (ev.data?.type === 'state' && ev.data.payload) render(ev.data.payload);
+    };
+  } catch {}
+
+  if (isHttp) {
+    fetch('/api/state', { cache: 'no-store' }).then(r => r.json()).then(st => {
+      render(st);
+      if (!isPreview && st?.bracket?.visible !== false) triggerEntryAnim();
+    }).catch(() => {});
+
+    if (!isPreview) {
+      let activeEs = null, reconnectTimer = null, pageUnloading = false;
+      const closeSSE = () => {
+        pageUnloading = true;
+        clearTimeout(reconnectTimer);
+        if (activeEs) { try { activeEs.close(); } catch {} activeEs = null; }
+      };
+      window.addEventListener('pagehide', closeSSE);
+      window.addEventListener('beforeunload', closeSSE);
+
+      const connectSSE = () => {
+        if (pageUnloading) return;
+        if (activeEs) { try { activeEs.close(); } catch {} }
+        const es = new EventSource('/api/events');
+        activeEs = es;
+        es.addEventListener('state', (ev) => {
+          try {
+            const data = JSON.parse(ev.data);
+            render(data);
+            if (bc) bc.postMessage({ type: 'state', payload: data, fromSse: true });
+          } catch {}
+        });
+        es.onerror = () => {
+          if (activeEs === es) activeEs = null;
+          try { es.close(); } catch {}
+          clearTimeout(reconnectTimer);
+          if (!pageUnloading) reconnectTimer = setTimeout(connectSSE, 1500);
+        };
+      };
+
+      const isObs = Boolean(window.obsstudio);
+      if (!isObs && navigator.locks && typeof navigator.locks.request === 'function' && bc) {
+        navigator.locks.request('fgc_open_scorebar_sse_leader', () => new Promise((resolve) => {
+          if (pageUnloading) return resolve();
+          connectSSE();
+          window.addEventListener('pagehide', resolve, { once: true });
+          window.addEventListener('beforeunload', resolve, { once: true });
+        })).catch(() => connectSSE());
+      } else {
+        connectSSE();
+      }
+    }
+  } else {
+    try {
+      const cached = localStorage.getItem('fgc_open_scorebar_state_v1');
+      if (cached) render(JSON.parse(cached));
+    } catch {}
+  }
+})();
+</script>
+</body>
+</html>

@@ -29,3 +29,4 @@ desktop.ini
 *.log
 .vscode/
 .idea/
+/assets

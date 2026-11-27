@@ -1005,14 +1005,14 @@ export function getDemoTournament() {
 
 export function getDemoStandings() {
   const sample = [
-    { place: 1, name: 'PLAYER ALPHA',   sponsor: 'TEAM A', flag: 'JP', region: '',       character: 'Jin Kazama',     avatar: '', handle: '@player_alpha' },
-    { place: 2, name: 'PLAYER BRAVO',   sponsor: 'TEAM B', flag: 'KR', region: '',       character: 'Kazuya Mishima', avatar: '', handle: '@player_bravo' },
-    { place: 3, name: 'PLAYER CHARLIE', sponsor: 'FGC',    flag: 'US', region: 'US-CA',  character: 'Reina',          avatar: '', handle: '@player_charlie' },
-    { place: 4, name: 'PLAYER DELTA',   sponsor: 'PRO',    flag: 'ES', region: 'ES-MD',  character: 'Jun Kazama',     avatar: '', handle: '@player_delta' },
-    { place: 5, name: 'PLAYER ECHO',    sponsor: 'UK',     flag: 'GB', region: 'GB-SCT', character: 'Bryan Fury',     avatar: '', handle: '@player_echo' },
-    { place: 5, name: 'PLAYER FOXTROT', sponsor: 'T8',     flag: 'PK', region: '',       character: 'Dragunov',       avatar: '', handle: '@player_foxtrot' },
-    { place: 7, name: 'PLAYER GULF',    sponsor: 'WEST',   flag: 'US', region: 'US-NV',  character: 'Victor',         avatar: '', handle: '@player_gulf' },
-    { place: 7, name: 'PLAYER HOTEL',   sponsor: 'EAST',   flag: 'FR', region: 'FR-BRE', character: 'King',           avatar: '', handle: '@player_hotel' }
+    { place: 1, name: 'PLAYER ALPHA', sponsor: 'TEAM A', flag: 'JP', region: '', character: 'Jin Kazama', avatar: '', handle: '@player_alpha' },
+    { place: 2, name: 'PLAYER BRAVO', sponsor: 'TEAM B', flag: 'KR', region: '', character: 'Kazuya Mishima', avatar: '', handle: '@player_bravo' },
+    { place: 3, name: 'PLAYER CHARLIE', sponsor: 'FGC', flag: 'US', region: 'US-CA', character: 'Reina', avatar: '', handle: '@player_charlie' },
+    { place: 4, name: 'PLAYER DELTA', sponsor: 'PRO', flag: 'ES', region: 'ES-MD', character: 'Jun Kazama', avatar: '', handle: '@player_delta' },
+    { place: 5, name: 'PLAYER ECHO', sponsor: 'UK', flag: 'GB', region: 'GB-SCT', character: 'Bryan Fury', avatar: '', handle: '@player_echo' },
+    { place: 5, name: 'PLAYER FOXTROT', sponsor: 'T8', flag: 'PK', region: '', character: 'Dragunov', avatar: '', handle: '@player_foxtrot' },
+    { place: 7, name: 'PLAYER GULF', sponsor: 'WEST', flag: 'US', region: 'US-NV', character: 'Victor', avatar: '', handle: '@player_gulf' },
+    { place: 7, name: 'PLAYER HOTEL', sponsor: 'EAST', flag: 'FR', region: 'FR-BRE', character: 'King', avatar: '', handle: '@player_hotel' }
   ];
   return {
     provider: 'demo',
@@ -1037,4 +1037,230 @@ export function reportDemoSet({ setId, winnerEntrantId, p1Score, p2Score }) {
   target.winnerId = String(winnerEntrantId);
   target.state = 'complete';
   return { ok: true, set: target };
+}
+
+/* =========================================================================
+   TOP 8 BRACKET TREE MAPPING (Start.gg / Challonge / Demo)
+   Matches ValquiriaStreamControl StartGgService.MapTop8Sets slot layout:
+     ws1, ws2, wf, ltop81, ltop82, lq1, lq2, ls, lf, gf, gfr
+   ========================================================================= */
+function formatBracketPlayerName(slot) {
+  if (!slot || !slot.entrantId) return '';
+  const name = String(slot.name || '').trim();
+  if (!name || name === 'TBD') return '';
+  const sponsor = String(slot.sponsor || '').trim();
+  if (!sponsor) return name;
+  return `${sponsor} | ${name}`;
+}
+
+function setToBracketSlot(s) {
+  const p1 = formatBracketPlayerName(s?.p1);
+  const p2 = formatBracketPlayerName(s?.p2);
+  const hasAny = Boolean(p1 || p2);
+  return {
+    p1,
+    p1s: hasAny ? String(s?.p1?.score ?? 0) : '',
+    p2,
+    p2s: hasAny ? String(s?.p2?.score ?? 0) : ''
+  };
+}
+
+export function mapTop8SetsToBracket(sets) {
+  const slots = {
+    ws1: { p1: '', p1s: '', p2: '', p2s: '' },
+    ws2: { p1: '', p1s: '', p2: '', p2s: '' },
+    wf: { p1: '', p1s: '', p2: '', p2s: '' },
+    ltop81: { p1: '', p1s: '', p2: '', p2s: '' },
+    ltop82: { p1: '', p1s: '', p2: '', p2s: '' },
+    lq1: { p1: '', p1s: '', p2: '', p2s: '' },
+    lq2: { p1: '', p1s: '', p2: '', p2s: '' },
+    ls: { p1: '', p1s: '', p2: '', p2s: '' },
+    lf: { p1: '', p1s: '', p2: '', p2s: '' },
+    gf: { p1: '', p1s: '', p2: '', p2s: '' },
+    gfr: { p1: '', p1s: '', p2: '', p2s: '' }
+  };
+
+  const ordered = [...(sets || [])].sort((a, b) => {
+    const ra = Number(a.roundNum || 0);
+    const rb = Number(b.roundNum || 0);
+    if (ra !== rb) return ra - rb;
+    return String(a.id || '').localeCompare(String(b.id || ''), undefined, { numeric: true });
+  });
+
+  const plainLosersRounds = [];
+  let wsIdx = 1;
+  let lqIdx = 1;
+
+  for (const s of ordered) {
+    const rt = norm(s.roundText).replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim();
+    if (!rt) continue;
+    const val = setToBracketSlot(s);
+
+    if (rt.includes('grand final') && rt.includes('reset')) {
+      slots.gfr = val;
+    } else if (rt.includes('grand final')) {
+      slots.gf = val;
+    } else if (rt.includes('winners final')) {
+      slots.wf = val;
+    } else if (rt.includes('losers final')) {
+      slots.lf = val;
+    } else if (rt.includes('losers semi')) {
+      slots.ls = val;
+    } else if (rt.includes('losers quarter')) {
+      if (lqIdx <= 2) slots[`lq${lqIdx}`] = val;
+      lqIdx++;
+    } else if (rt.includes('winners semi')) {
+      if (wsIdx <= 2) slots[`ws${wsIdx}`] = val;
+      wsIdx++;
+    } else if (rt.includes('losers')) {
+      plainLosersRounds.push(s);
+    }
+  }
+
+  // Group remaining plain Losers rounds ("Losers Round 1", "Losers Round 2", ...)
+  // In Start.gg, losers rounds have negative round numbers (-1, -2, -3... getting more negative later).
+  const byRound = new Map();
+  for (const s of plainLosersRounds) {
+    const key = Number(s.roundNum || 0);
+    if (!byRound.has(key)) byRound.set(key, []);
+    byRound.get(key).push(s);
+  }
+  const roundEntries = [...byRound.entries()].sort((a, b) => Math.abs(a[0]) - Math.abs(b[0]));
+
+  if (lqIdx === 1 && roundEntries.length > 1) {
+    // Last round is Losers Quarters, previous round is Losers Top 8
+    const ltopGroup = roundEntries[roundEntries.length - 2][1];
+    const lqGroup = roundEntries[roundEntries.length - 1][1];
+    ltopGroup.slice(0, 2).forEach((s, i) => { slots[`ltop8${i + 1}`] = setToBracketSlot(s); });
+    lqGroup.slice(0, 2).forEach((s, i) => { slots[`lq${i + 1}`] = setToBracketSlot(s); });
+  } else if (roundEntries.length >= 1) {
+    // When Losers Quarters matched explicitly, the latest remaining losers round is Losers Top 8
+    const ltopGroup = roundEntries[roundEntries.length - 1][1];
+    ltopGroup.slice(0, 2).forEach((s, i) => { slots[`ltop8${i + 1}`] = setToBracketSlot(s); });
+  }
+
+  return slots;
+}
+
+export async function fetchStartGGTop8Bracket(eventId, token) {
+  if (!eventId) throw new Error('Connect a start.gg event first.');
+  const phasesQuery = `
+    query EventPhasesForBracket($eventId: ID!) {
+      event(id: $eventId) {
+        id
+        name
+        tournament { name slug }
+        phases {
+          id
+          name
+          phaseOrder
+          bracketType
+        }
+      }
+    }`;
+
+  const phaseData = await startggQuery(token, phasesQuery, { eventId });
+  const ev = phaseData?.event;
+  if (!ev) throw new Error('Event not found on start.gg.');
+
+  const phases = [...(ev.phases || [])].sort((a, b) => {
+    const poDiff = Number(b.phaseOrder || 0) - Number(a.phaseOrder || 0);
+    if (poDiff !== 0) return poDiff;
+    const aTop = /top\s*8|final/i.test(a.name || '') ? 1 : 0;
+    const bTop = /top\s*8|final/i.test(b.name || '') ? 1 : 0;
+    if (aTop !== bTop) return bTop - aTop;
+    return Number(b.id || 0) - Number(a.id || 0);
+  });
+
+  const phaseSetsQuery = `
+    query PhaseSetsForBracket($phaseId: ID!, $page: Int!, $perPage: Int!) {
+      phase(id: $phaseId) {
+        id
+        name
+        sets(page: $page, perPage: $perPage, sortType: ROUND) {
+          pageInfo { totalPages }
+          nodes {
+            id
+            state
+            round
+            fullRoundText
+            winnerId
+            slots {
+              standing { stats { score { value } } }
+              entrant {
+                id
+                name
+                participants {
+                  gamerTag
+                  prefix
+                }
+              }
+            }
+          }
+        }
+      }
+    }`;
+
+  let chosenSets = [];
+  let chosenPhaseName = '';
+  for (const ph of phases) {
+    const collected = [];
+    for (let page = 1; page <= 6; page++) {
+      const pRes = await startggQuery(token, phaseSetsQuery, { phaseId: String(ph.id), page, perPage: 30 });
+      const conn = pRes?.phase?.sets;
+      const nodes = conn?.nodes || [];
+      collected.push(...nodes);
+      if (!conn?.pageInfo?.totalPages || page >= conn.pageInfo.totalPages) break;
+    }
+    if (collected.length > 0) {
+      chosenSets = collected.map(s => normalizeStartGGSet(s));
+      chosenPhaseName = ph.name || '';
+      break;
+    }
+  }
+
+  if (!chosenSets.length) {
+    chosenSets = await fetchStartGGEventSets(eventId, token);
+  }
+
+  return {
+    provider: 'startgg',
+    tournamentName: ev.tournament?.name || ev.name || '',
+    eventName: ev.name || '',
+    phaseName: chosenPhaseName,
+    matches: mapTop8SetsToBracket(chosenSets)
+  };
+}
+
+export async function fetchChallongeTop8Bracket(urlOrSlug, apiKey) {
+  const snap = await connectChallonge(urlOrSlug, apiKey);
+  return {
+    provider: 'challonge',
+    tournamentName: snap.tournament?.name || '',
+    eventName: snap.events?.[0]?.name || '',
+    phaseName: 'Top 8',
+    matches: mapTop8SetsToBracket(snap.sets || [])
+  };
+}
+
+export function getDemoTop8Bracket() {
+  return {
+    provider: 'demo',
+    tournamentName: 'FGC OPEN CHAMPIONSHIP',
+    eventName: 'Tekken 8 Singles · Top 8',
+    phaseName: 'Top 8',
+    matches: {
+      ws1: { p1: 'TEAM A | PLAYER ALPHA', p1s: '3', p2: 'PLAYER ECHO', p2s: '1' },
+      ws2: { p1: 'TEAM B | PLAYER BRAVO', p1s: '3', p2: 'WEST | PLAYER GULF', p2s: '2' },
+      wf:  { p1: 'TEAM A | PLAYER ALPHA', p1s: '3', p2: 'TEAM B | PLAYER BRAVO', p2s: '1' },
+      ltop81: { p1: 'FGC | PLAYER CHARLIE', p1s: '3', p2: 'T8 | PLAYER FOXTROT', p2s: '2' },
+      ltop82: { p1: 'PRO | PLAYER DELTA', p1s: '3', p2: 'EAST | PLAYER HOTEL', p2s: '1' },
+      lq1: { p1: 'WEST | PLAYER GULF', p1s: '1', p2: 'FGC | PLAYER CHARLIE', p2s: '3' },
+      lq2: { p1: 'PLAYER ECHO', p1s: '2', p2: 'PRO | PLAYER DELTA', p2s: '3' },
+      ls:  { p1: 'FGC | PLAYER CHARLIE', p1s: '3', p2: 'PRO | PLAYER DELTA', p2s: '2' },
+      lf:  { p1: 'TEAM B | PLAYER BRAVO', p1s: '3', p2: 'FGC | PLAYER CHARLIE', p2s: '1' },
+      gf:  { p1: 'TEAM A | PLAYER ALPHA', p1s: '3', p2: 'TEAM B | PLAYER BRAVO', p2s: '2' },
+      gfr: { p1: '', p1s: '', p2: '', p2s: '' }
+    }
+  };
 }

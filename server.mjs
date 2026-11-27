@@ -26,13 +26,16 @@ import {
   fetchStartGGEntrants,
   fetchStartGGTournamentLogo,
   fetchStartGGStandings,
+  fetchStartGGTop8Bracket,
   reportStartGGSet,
   connectChallonge,
   fetchChallongeTournamentLogo,
   fetchChallongeStandings,
+  fetchChallongeTop8Bracket,
   reportChallongeMatch,
   getDemoTournament,
   getDemoStandings,
+  getDemoTop8Bracket,
   reportDemoSet
 } from './tournaments.mjs';
 import { createAssetManager } from './assets.mjs';
@@ -283,6 +286,27 @@ export const DEFAULT_RESULTS = {
   ]
 };
 
+export const DEFAULT_BRACKET = {
+  visible: true,
+  bgMode: 'auto', // 'auto' | 'standard' | 'reset' | 'transparent'
+  showReset: false,
+  introNonce: 0,
+  bottomText: '',
+  matches: {
+    ws1:    { p1: '', p1s: '', p2: '', p2s: '' },
+    ws2:    { p1: '', p1s: '', p2: '', p2s: '' },
+    wf:     { p1: '', p1s: '', p2: '', p2s: '' },
+    ltop81: { p1: '', p1s: '', p2: '', p2s: '' },
+    ltop82: { p1: '', p1s: '', p2: '', p2s: '' },
+    lq1:    { p1: '', p1s: '', p2: '', p2s: '' },
+    lq2:    { p1: '', p1s: '', p2: '', p2s: '' },
+    ls:     { p1: '', p1s: '', p2: '', p2s: '' },
+    lf:     { p1: '', p1s: '', p2: '', p2s: '' },
+    gf:     { p1: '', p1s: '', p2: '', p2s: '' },
+    gfr:    { p1: '', p1s: '', p2: '', p2s: '' }
+  }
+};
+
 export const DEFAULT_STATE = {
   version: 1,
   updatedAt: Date.now(),
@@ -322,7 +346,11 @@ export const DEFAULT_STATE = {
     c1Name: 'CASTER 1',
     c1Handle: '@caster1',
     c2Name: 'CASTER 2',
-    c2Handle: '@caster2'
+    c2Handle: '@caster2',
+    visible: true,
+    bgMode: 'valquiria', // 'valquiria' | 'transparent'
+    introNonce: 0,
+    saved: []
   },
   tweaks: {
     offsetY: 0,
@@ -337,6 +365,7 @@ export const DEFAULT_STATE = {
   style: structuredClone(DEFAULT_STYLE),
   vs: structuredClone(DEFAULT_VS),
   results: structuredClone(DEFAULT_RESULTS),
+  bracket: structuredClone(DEFAULT_BRACKET),
   activeMatch: null,
   lastEvent: {
     type: 'init',
@@ -391,6 +420,17 @@ currentState.results = {
     ? currentState.results.placements.slice(0, 8).map((p, i) => ({ ...DEFAULT_RESULTS.placements[i], ...(p || {}) }))
     : structuredClone(DEFAULT_RESULTS.placements)
 };
+{
+  const brkMatches = { ...structuredClone(DEFAULT_BRACKET.matches) };
+  for (const k of Object.keys(brkMatches)) {
+    brkMatches[k] = { ...brkMatches[k], ...(currentState.bracket?.matches?.[k] || {}) };
+  }
+  currentState.bracket = {
+    ...structuredClone(DEFAULT_BRACKET),
+    ...(currentState.bracket || {}),
+    matches: brkMatches
+  };
+}
 
 let playersDb = readJsonSafe(PLAYERS_FILE, DEFAULT_PLAYERS);
 let presetsDb = readJsonSafe(PRESETS_FILE, []);
@@ -669,18 +709,45 @@ function deepMergeState(prev, patch) {
           : (prev.results?.placements || structuredClone(DEFAULT_RESULTS.placements))
       }
     : (prev.results || structuredClone(DEFAULT_RESULTS));
+  const prevBrk = prev.bracket || structuredClone(DEFAULT_BRACKET);
+  let nextBrk = prevBrk;
+  if (patch.bracket) {
+    const mergedMatches = { ...structuredClone(DEFAULT_BRACKET.matches), ...(prevBrk.matches || {}) };
+    if (patch.bracket.matches) {
+      for (const slotKey of Object.keys(DEFAULT_BRACKET.matches)) {
+        if (patch.bracket.matches[slotKey]) {
+          mergedMatches[slotKey] = {
+            ...(mergedMatches[slotKey] || { p1: '', p1s: '', p2: '', p2s: '' }),
+            ...patch.bracket.matches[slotKey]
+          };
+        }
+      }
+    }
+    nextBrk = {
+      ...prevBrk,
+      ...patch.bracket,
+      matches: mergedMatches
+    };
+  }
   const next = {
     ...prev,
     ...patch,
     p1: patch.p1 ? { ...prev.p1, ...patch.p1 } : prev.p1,
     p2: patch.p2 ? { ...prev.p2, ...patch.p2 } : prev.p2,
     commentators: patch.commentators
-      ? { ...prev.commentators, ...patch.commentators }
+      ? {
+          ...prev.commentators,
+          ...patch.commentators,
+          saved: Array.isArray(patch.commentators.saved)
+            ? patch.commentators.saved
+            : (Array.isArray(prev.commentators?.saved) ? prev.commentators.saved : [])
+        }
       : prev.commentators,
     tweaks: patch.tweaks ? { ...prev.tweaks, ...patch.tweaks } : prev.tweaks,
     style: patch.style ? { ...prev.style, ...patch.style } : prev.style,
     vs: nextVs,
     results: nextResults,
+    bracket: nextBrk,
     updatedAt: Date.now()
   };
   return next;
@@ -1275,6 +1342,39 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
+  // --- API: Pull Top 8 Bracket Tree from Start.gg / Challonge / Demo ---
+  if (pathname === '/api/tournament/top8-bracket' && req.method === 'POST') {
+    try {
+      const body = await readBody(req).catch(() => ({}));
+      const provider = body.provider || lastTournamentSnapshot?.provider || integrationsCfg.provider || 'startgg';
+      let result = null;
+      if (provider === 'demo') {
+        result = getDemoTop8Bracket();
+      } else if (provider === 'startgg') {
+        let eventId = body.eventId || lastTournamentSnapshot?.selectedEventId;
+        const token = getAuthToken('startgg', body.token);
+        const url = String(body.url || integrationsCfg.startggUrl || '').trim();
+        if (!eventId && url && token) {
+          const snap = await attachCachedTournamentLogo(await connectStartGG(url, token));
+          lastTournamentSnapshot = snap;
+          eventId = snap.selectedEventId;
+        }
+        if (!eventId) throw new Error('Connect a start.gg event first in the Tournaments tab.');
+        result = await fetchStartGGTop8Bracket(eventId, token);
+      } else if (provider === 'challonge') {
+        const url = String(body.url || integrationsCfg.challongeUrl || '').trim();
+        const key = getAuthToken('challonge', body.token);
+        if (!url || !key) throw new Error('Connect a Challonge tournament first in the Tournaments tab.');
+        result = await fetchChallongeTop8Bracket(url, key);
+      } else {
+        throw new Error(`Unsupported provider: ${provider}`);
+      }
+      return sendJson(res, 200, { ok: true, ...result });
+    } catch (err) {
+      return sendJson(res, 400, { error: err.message });
+    }
+  }
+
   // --- API: Import Tournament Participants into local players.json ---
   if (pathname === '/api/tournament/import-players' && req.method === 'POST') {
     try {
@@ -1690,6 +1790,8 @@ const server = http.createServer(async (req, res) => {
       overlayUrl: `http://localhost:${PORT}/`,
       vsOverlayUrl: `http://localhost:${PORT}/vs.html`,
       resultsOverlayUrl: `http://localhost:${PORT}/results.html`,
+      bracketOverlayUrl: `http://localhost:${PORT}/bracket.html`,
+      castersOverlayUrl: `http://localhost:${PORT}/casters.html`,
       panelUrl: `http://localhost:${PORT}/panel.html`,
       lanPanelUrls: lanIps.map(ip => `http://${ip}:${PORT}/panel.html`),
       networkInterfaces: ranked.map(n => ({
@@ -1702,12 +1804,50 @@ const server = http.createServer(async (req, res) => {
     });
   }
 
+  // --- Valquiria StreamControl JSON compatibility endpoint ---
+  if (pathname === '/streamcontrol.json' && req.method === 'GET') {
+    const m = currentState.bracket?.matches || {};
+    const cm = currentState.commentators || {};
+    const flat = {
+      timestamp: String(Math.floor((currentState.updatedAt || Date.now()) / 1000)),
+      p1Team: currentState.p1?.sponsor || '',
+      pName1: currentState.p1?.name || '',
+      pCountry1: currentState.p1?.flag || '',
+      pScore1: String(currentState.p1?.score ?? 0),
+      p2Team: currentState.p2?.sponsor || '',
+      pName2: currentState.p2?.name || '',
+      pCountry2: currentState.p2?.flag || '',
+      pScore2: String(currentState.p2?.score ?? 0),
+      round: currentState.round || '',
+      textbottom: currentState.round || '',
+      comm1name: cm.c1Name || '',
+      comm1twit: cm.c1Handle || '',
+      comm2name: cm.c2Name || '',
+      comm2twit: cm.c2Handle || '',
+      TOP8text: currentState.bracket?.bottomText || '',
+      ws1p1: m.ws1?.p1 || '', ws1p1s: m.ws1?.p1s || '', ws1p2: m.ws1?.p2 || '', ws1p2s: m.ws1?.p2s || '',
+      ws2p1: m.ws2?.p1 || '', ws2p1s: m.ws2?.p1s || '', ws2p2: m.ws2?.p2 || '', ws2p2s: m.ws2?.p2s || '',
+      wfp1: m.wf?.p1 || '', wfp1s: m.wf?.p1s || '', wfp2: m.wf?.p2 || '', wfp2s: m.wf?.p2s || '',
+      ltop81p1: m.ltop81?.p1 || '', ltop81p1s: m.ltop81?.p1s || '', ltop81p2: m.ltop81?.p2 || '', ltop81p2s: m.ltop81?.p2s || '',
+      ltop82p1: m.ltop82?.p1 || '', ltop82p1s: m.ltop82?.p1s || '', ltop82p2: m.ltop82?.p2 || '', ltop82p2s: m.ltop82?.p2s || '',
+      lq1p1: m.lq1?.p1 || '', lq1p1s: m.lq1?.p1s || '', lq1p2: m.lq1?.p2 || '', lq1p2s: m.lq1?.p2s || '',
+      lq2p1: m.lq2?.p1 || '', lq2p1s: m.lq2?.p1s || '', lq2p2: m.lq2?.p2 || '', lq2p2s: m.lq2?.p2s || '',
+      lsp1: m.ls?.p1 || '', lsp1s: m.ls?.p1s || '', lsp2: m.ls?.p2 || '', lsp2s: m.ls?.p2s || '',
+      lfp1: m.lf?.p1 || '', lfp1s: m.lf?.p1s || '', lfp2: m.lf?.p2 || '', lfp2s: m.lf?.p2s || '',
+      gfp1: m.gf?.p1 || '', gfp1s: m.gf?.p1s || '', gfp2: m.gf?.p2 || '', gfp2s: m.gf?.p2s || '',
+      gfrp1: m.gfr?.p1 || '', gfrp1s: m.gfr?.p1s || '', gfrp2: m.gfr?.p2 || '', gfrp2s: m.gfr?.p2s || ''
+    };
+    return sendJson(res, 200, flat);
+  }
+
   // --- Static file serving (strictly blocks /data/ so tokens/state JSON are never served publicly!) ---
   let relPath =
     pathname === '/' ? '/index.html' :
     pathname === '/panel' ? '/panel.html' :
     pathname === '/vs' ? '/vs.html' :
-    pathname === '/results' ? '/results.html' : pathname;
+    pathname === '/results' ? '/results.html' :
+    pathname === '/bracket' ? '/bracket.html' :
+    pathname === '/casters' ? '/casters.html' : pathname;
   relPath = decodeURIComponent(relPath);
   const safePath = path.normalize(relPath).replace(/^(\.\.[/\\])+/, '');
   if (/^[/\\]?data([/\\]|$)/i.test(safePath)) {
@@ -1745,6 +1885,8 @@ function startListening() {
     console.log(`  Scorebar Overlay (OBS):   http://localhost:${PORT}/`);
     console.log(`  VS Splash Overlay (OBS):  http://localhost:${PORT}/vs.html`);
     console.log(`  Results Overlay (OBS):    http://localhost:${PORT}/results.html`);
+    console.log(`  Bracket Overlay (OBS):    http://localhost:${PORT}/bracket.html`);
+    console.log(`  Casters Overlay (OBS):    http://localhost:${PORT}/casters.html`);
     console.log(`  Local Control Panel:      http://localhost:${PORT}/panel.html`);
     if (primaryLan) {
       console.log(`  Mobile / Tablet LAN UI:   http://${primaryLan.ip}:${PORT}/panel.html (${primaryLan.name})`);

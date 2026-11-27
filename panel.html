@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -2484,6 +2484,153 @@
     background: #0d1220;
   }
 
+  /* =========================================================================
+     WORKSPACE 5 & 6: TOP 8 BRACKET TREE & CASTERS 
+     ========================================================================= */
+  .brk-workspace-shell {
+    max-width: 1520px;
+    margin: 0 auto;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .brk-preview-stage {
+    position: relative;
+    width: 100%;
+    max-width: min(860px, calc(38vh * 16 / 9));
+    margin: 0 auto;
+    aspect-ratio: 16 / 9;
+    background: #070910;
+    overflow: hidden;
+  }
+  #ws-casters .brk-preview-stage {
+    max-width: min(820px, calc(35vh * 16 / 9));
+  }
+  @media (max-height: 1000px), (max-width: 1440px) {
+    .brk-workspace-shell .vs-preview-card.is-pinned {
+      position: static;
+      box-shadow: none;
+    }
+  }
+  .brk-preview-stage iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    pointer-events: none;
+  }
+  .brk-tree-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    align-items: center;
+  }
+  @media (max-width: 1060px) {
+    .brk-tree-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 620px) {
+    .brk-tree-grid { grid-template-columns: 1fr; }
+  }
+  .brk-col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .brk-col-title {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding-left: 4px;
+  }
+  .brk-col-title.winners { color: #38bdf8; }
+  .brk-col-title.losers  { color: #fb7185; }
+  .brk-col-title.grand   { color: #34d399; }
+  .brk-match-card {
+    background: #0d1018;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .brk-match-card.is-gf {
+    background: #0c1614;
+    border-color: #164e3e;
+  }
+  .brk-slot-row {
+    display: grid;
+    grid-template-columns: 1fr 48px;
+    gap: 5px;
+    align-items: center;
+  }
+  .brk-slot-row input {
+    padding: 5px 8px;
+    font-size: 12px;
+    height: 30px;
+  }
+  .brk-slot-row input.brk-score {
+    text-align: center;
+    font-weight: 800;
+    padding: 5px 4px;
+  }
+  .brk-footer-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 12px;
+    padding: 10px 12px;
+    background: #0d1018;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .cas-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  @media (max-width: 900px) {
+    .cas-grid { grid-template-columns: 1fr; }
+  }
+  .cas-card {
+    background: #0d1018;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+  }
+  @media (max-width: 560px) {
+    .cas-card .row { grid-template-columns: 1fr; }
+  }
+  .cas-card.c1 { border-top: 3px solid var(--p1); }
+  .cas-card.c2 { border-top: 3px solid var(--p2); }
+  .cas-saved-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 7px;
+    margin-top: 8px;
+  }
+  .cas-saved-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 7px 10px;
+    background: #0d1018;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+  }
+  .cas-saved-item strong { font-size: 12px; color: #fff; display: block; }
+  .cas-saved-item small { font-size: 11px; color: var(--muted); display: block; }
+
   /* SHARE, CREATOR SOCIALS & VOLUNTARY KO-FI SUPPORT */
   .btn-support-hdr {
     background: linear-gradient(135deg, rgba(255, 94, 91, 0.2), rgba(245, 185, 53, 0.16));
@@ -2890,6 +3037,8 @@
     <button type="button" data-ws="scorebars" class="active-ws">🎛 Scorebars</button>
     <button type="button" data-ws="vs">⚔️ VS Splash</button>
     <button type="button" data-ws="results">🏅 Results</button>
+    <button type="button" data-ws="bracket">🗂️ Bracket</button>
+    <button type="button" data-ws="casters">🎙 Casters</button>
     <button type="button" data-ws="tournaments">🏆 Tournaments <span class="ws-badge" id="trn-ws-badge">Start.gg / Challonge</span></button>
   </nav>
 
@@ -2920,6 +3069,20 @@
       <button type="button" id="btn-open-results" title="Open results.html in a new tab">↗ Open Results</button>
       <button type="button" id="btn-res-replay" class="primary">🎬 Results Intro</button>
       <button type="button" id="btn-res-vis" class="btn-vis">👁 Results ON</button>
+    </div>
+    <!-- Contextual actions for Top 8 Bracket workspace -->
+    <div class="hdr-ws-group hidden" id="hdr-group-bracket">
+      <button type="button" id="btn-copy-bracket" title="Copy Top 8 Bracket Browser Source URL for OBS">📋 Copy Bracket URL</button>
+      <button type="button" id="btn-open-bracket" title="Open bracket.html in a new tab">↗ Open Bracket</button>
+      <button type="button" id="btn-bracket-replay" class="primary">🎬 Bracket Intro</button>
+      <button type="button" id="btn-bracket-vis" class="btn-vis">👁 Bracket ON</button>
+    </div>
+    <!-- Contextual actions for Casters workspace -->
+    <div class="hdr-ws-group hidden" id="hdr-group-casters">
+      <button type="button" id="btn-copy-casters" title="Copy Casters Browser Source URL for OBS">📋 Copy Casters URL</button>
+      <button type="button" id="btn-open-casters" title="Open casters.html in a new tab">↗ Open Casters</button>
+      <button type="button" id="btn-casters-replay" class="primary">🎬 Casters Intro</button>
+      <button type="button" id="btn-casters-vis" class="btn-vis">👁 Casters ON</button>
     </div>
     <div class="lang-switch" id="seg-lang" role="group" aria-label="Language" title="Switch interface language (English / Español)">
       <span class="lang-globe" aria-hidden="true" data-no-i18n>🌐</span>
@@ -2998,7 +3161,7 @@
   <section class="cockpit">
     <!-- PLAYER 1 -->
     <div class="card p1-card">
-      <div class="card-head">
+      <div class="card-head" style="flex-wrap:wrap;gap:8px;">
         <span class="card-title">Player 1 (Left)</span>
         <span class="big-score" id="ui-p1-score">0</span>
       </div>
@@ -3065,7 +3228,7 @@
 
     <!-- CENTER MATCH CONTROLS -->
     <div class="card mid-card">
-      <div class="card-head">
+      <div class="card-head" style="flex-wrap:wrap;gap:8px;">
         <span class="card-title">Round Control</span>
         <span style="font-size:11px;color:var(--gold);font-weight:700;" id="ui-format-badge">FT3</span>
       </div>
@@ -3116,13 +3279,12 @@
         <label class="toggle-item"><input type="checkbox" id="chk-format" /> Format</label>
         <label class="toggle-item"><input type="checkbox" id="chk-mp" /> Match Point</label>
         <label class="toggle-item"><input type="checkbox" id="chk-chars" /> Characters</label>
-        <label class="toggle-item"><input type="checkbox" id="chk-casters" /> Commentators</label>
       </div>
     </div>
 
     <!-- PLAYER 2 -->
     <div class="card p2-card">
-      <div class="card-head">
+      <div class="card-head" style="flex-wrap:wrap;gap:8px;">
         <span class="card-title">Player 2 (Right)</span>
         <span class="big-score" id="ui-p2-score">0</span>
       </div>
@@ -3193,7 +3355,6 @@
     <div class="tab-nav" id="bottom-tabs">
       <button id="tab-btn-designs" data-tab="designs" style="display:none;">🎨 Scorebar Designs (32)</button>
       <button class="active-chip" data-tab="tweaks">✨ Style Studio (Fonts, Colors, FX)</button>
-      <button data-tab="casters">🎙 Commentators</button>
       <button data-tab="players">👥 Saved Players</button>
       <button data-tab="obs">📡 OBS, Mobile LAN &amp; Hotkeys</button>
     </div>
@@ -3845,34 +4006,7 @@
       </div>
     </div>
 
-    <!-- TAB 2: COMMENTATORS -->
-    <div class="tab-pane" id="tab-casters">
-      <div class="row">
-        <div>
-          <label for="c1-name">Commentator 1</label>
-          <input type="text" id="c1-name" placeholder="Caster 1 Name" />
-        </div>
-        <div>
-          <label for="c1-handle">Social / @Handle 1</label>
-          <input type="text" id="c1-handle" placeholder="@caster1" />
-        </div>
-      </div>
-      <div class="row">
-        <div>
-          <label for="c2-name">Commentator 2 (leave blank to hide)</label>
-          <input type="text" id="c2-name" placeholder="Caster 2 Name" />
-        </div>
-        <div>
-          <label for="c2-handle">Social / @Handle 2</label>
-          <input type="text" id="c2-handle" placeholder="@caster2" />
-        </div>
-      </div>
-      <div style="display:flex;gap:8px;margin-top:8px;">
-        <button id="btn-swap-casters">⇄ Swap Commentators</button>
-      </div>
-    </div>
-
-    <!-- TAB 3: SAVED PLAYERS DB -->
+    <!-- TAB 2: SAVED PLAYERS DB -->
     <div class="tab-pane" id="tab-players">
       <p style="font-size:11px;color:var(--muted);margin-bottom:8px;">
         Click <b>P1</b> or <b>P2</b> to instantly load a player's name, sponsor, flags, and main character. Use the 💾 button above to save new players.
@@ -3899,12 +4033,22 @@
             <span id="results-url-text">http://localhost:8787/results.html</span>
             <button id="copy-results-2" style="padding:3px 8px;font-size:11px;">Copy</button>
           </div>
-          <label style="margin-top:10px;">4. Built-in OBS Custom Browser Dock (Docks → Custom Browser Docks)</label>
+          <label style="margin-top:10px;">4. OBS Studio Top 8 Bracket URL (Browser Source 1920x1080)</label>
+          <div class="code-line">
+            <span id="bracket-url-text">http://localhost:8787/bracket.html</span>
+            <button id="copy-bracket-2" style="padding:3px 8px;font-size:11px;">Copy</button>
+          </div>
+          <label style="margin-top:10px;">5. OBS Studio Casters Screen URL (Browser Source 1920x1080)</label>
+          <div class="code-line">
+            <span id="casters-url-text">http://localhost:8787/casters.html</span>
+            <button id="copy-casters-2" style="padding:3px 8px;font-size:11px;">Copy</button>
+          </div>
+          <label style="margin-top:10px;">6. Built-in OBS Custom Browser Dock (Docks → Custom Browser Docks)</label>
           <div class="code-line">
             <span id="dock-url-text">http://localhost:8787/panel.html</span>
             <button id="copy-dock" style="padding:3px 8px;font-size:11px;">Copy</button>
           </div>
-          <label style="margin-top:10px;">5. Mobile / Tablet LAN Remote Control (same Wi-Fi / router) <span id="lan-iface-badge" style="color:#4ade80;font-weight:700;margin-left:4px;"></span></label>
+          <label style="margin-top:10px;">7. Mobile / Tablet LAN Remote Control (same Wi-Fi / router) <span id="lan-iface-badge" style="color:#4ade80;font-weight:700;margin-left:4px;"></span></label>
           <div class="code-line">
             <span id="lan-url-text">Detecting local IP...</span>
             <button id="copy-lan" style="padding:3px 8px;font-size:11px;">Copy</button>
@@ -4960,6 +5104,314 @@
   </div>
 </div>
 
+<!-- =========================================================================
+     WORKSPACE 5: TOP 8 BRACKET TREE
+     ========================================================================= -->
+<div class="workspace-view" id="ws-bracket">
+  <div class="brk-workspace-shell">
+    <section class="vs-preview-card is-pinned" id="brk-preview-card">
+      <div class="preview-toolbar">
+        <div class="preview-toolbar-group">
+          <button type="button" id="btn-brk-sync" class="primary" title="Sync Top 8 Bracket from connected Start.gg / Challonge tournament">⚡ Sync Top 8 Start.gg</button>
+          <button type="button" id="btn-brk-demo" title="Load Demo Top 8 Bracket to preview layout">⚡ Demo Bracket</button>
+          <button type="button" id="btn-brk-test-anim" title="Replay Bracket entry animation">🎬 Replay Intro</button>
+        </div>
+        <div class="preview-toolbar-group">
+          <select id="brk-bg-mode" style="width:auto;padding:4px 8px;font-size:11px;" title="Bracket Background Mode">
+            <option value="auto">🖼 Background: Auto (Reset if active)</option>
+            <option value="standard">🖼 Background: Top 8 Standard</option>
+            <option value="reset">🖼 Background: Top 8 Reset</option>
+            <option value="transparent">🏁 Background: Transparent Only</option>
+          </select>
+          <button type="button" id="btn-pin-brk" class="active-chip" title="Keep the Bracket Live Preview pinned at the top while scrolling">📌 Pin</button>
+        </div>
+      </div>
+      <div class="brk-preview-stage">
+        <iframe id="bracket-preview-frame" src="bracket.html?preview=1"></iframe>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head" style="margin-bottom:12px;">
+        <div>
+          <span class="card-title">🏆 Top 8 Bracket Tree</span>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">Edit matches manually or sync directly from Start.gg / Challonge. Losing scores automatically dim on the overlay.</div>
+        </div>
+      </div>
+
+      <!-- WINNERS BRACKET (4 Columns) -->
+      <div class="brk-tree-grid" style="margin-bottom:14px;">
+        <!-- Col 1: Winners Semis -->
+        <div class="brk-col">
+          <div class="brk-col-title winners">Winners Semis</div>
+          <div class="brk-match-card">
+            <div class="brk-slot-row">
+              <input type="text" list="brk-players-datalist" data-brk="ws1.p1" placeholder="WS1 Player 1" />
+              <input type="text" class="brk-score" data-brk="ws1.p1s" placeholder="0" />
+            </div>
+            <div class="brk-slot-row">
+              <input type="text" list="brk-players-datalist" data-brk="ws1.p2" placeholder="WS1 Player 2" />
+              <input type="text" class="brk-score" data-brk="ws1.p2s" placeholder="0" />
+            </div>
+          </div>
+          <div class="brk-match-card">
+            <div class="brk-slot-row">
+              <input type="text" list="brk-players-datalist" data-brk="ws2.p1" placeholder="WS2 Player 1" />
+              <input type="text" class="brk-score" data-brk="ws2.p1s" placeholder="0" />
+            </div>
+            <div class="brk-slot-row">
+              <input type="text" list="brk-players-datalist" data-brk="ws2.p2" placeholder="WS2 Player 2" />
+              <input type="text" class="brk-score" data-brk="ws2.p2s" placeholder="0" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Col 2: Winners Finals -->
+        <div class="brk-col">
+          <div class="brk-col-title winners">Winners Finals</div>
+          <div class="brk-match-card">
+            <div class="brk-slot-row">
+              <input type="text" list="brk-players-datalist" data-brk="wf.p1" placeholder="WF Player 1" />
+              <input type="text" class="brk-score" data-brk="wf.p1s" placeholder="0" />
+            </div>
+            <div class="brk-slot-row">
+              <input type="text" list="brk-players-datalist" data-brk="wf.p2" placeholder="WF Player 2" />
+              <input type="text" class="brk-score" data-brk="wf.p2s" placeholder="0" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Col 3: Grand Finals -->
+        <div class="brk-col">
+          <div class="brk-col-title grand">Grand Finals</div>
+          <div class="brk-match-card is-gf">
+            <div class="brk-slot-row">
+              <input type="text" list="brk-players-datalist" data-brk="gf.p1" placeholder="GF Winners" />
+              <input type="text" class="brk-score" data-brk="gf.p1s" placeholder="0" />
+            </div>
+            <div class="brk-slot-row">
+              <input type="text" list="brk-players-datalist" data-brk="gf.p2" placeholder="GF Losers" />
+              <input type="text" class="brk-score" data-brk="gf.p2s" placeholder="0" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Col 4: Grand Finals Reset -->
+        <div class="brk-col">
+          <div class="brk-col-title grand">Grand Finals Reset</div>
+          <div class="brk-match-card is-gf">
+            <div class="brk-slot-row">
+              <input type="text" list="brk-players-datalist" data-brk="gfr.p1" placeholder="Reset Player 1" />
+              <input type="text" class="brk-score" data-brk="gfr.p1s" placeholder="0" />
+            </div>
+            <div class="brk-slot-row">
+              <input type="text" list="brk-players-datalist" data-brk="gfr.p2" placeholder="Reset Player 2" />
+              <input type="text" class="brk-score" data-brk="gfr.p2s" placeholder="0" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LOSERS BRACKET (4 Columns) -->
+      <div class="brk-tree-grid">
+        <!-- Col 1: Losers Top 8 -->
+        <div class="brk-col">
+          <div class="brk-col-title losers">Losers Top 8</div>
+          <div class="brk-match-card">
+            <div class="brk-slot-row">
+              <input type="text" list="brk-players-datalist" data-brk="ltop81.p1" placeholder="LTop8 1 P1" />
+              <input type="text" class="brk-score" data-brk="ltop81.p1s" placeholder="0" />
+            </div>
+            <div class="brk-slot-row">
+              <input type="text" list="brk-players-datalist" data-brk="ltop81.p2" placeholder="LTop8 1 P2" />
+              <input type="text" class="brk-score" data-brk="ltop81.p2s" placeholder="0" />
+            </div>
+          </div>
+          <div class="brk-match-card">
+            <div class="brk-slot-row">
+              <input type="text" list="brk-players-datalist" data-brk="ltop82.p1" placeholder="LTop8 2 P1" />
+              <input type="text" class="brk-score" data-brk="ltop82.p1s" placeholder="0" />
+            </div>
+            <div class="brk-slot-row">
+              <input type="text" list="brk-players-datalist" data-brk="ltop82.p2" placeholder="LTop8 2 P2" />
+              <input type="text" class="brk-score" data-brk="ltop82.p2s" placeholder="0" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Col 2: Losers Quarters -->
+        <div class="brk-col">
+          <div class="brk-col-title losers">Losers Quarters</div>
+          <div class="brk-match-card">
+            <div class="brk-slot-row">
+              <input type="text" list="brk-players-datalist" data-brk="lq1.p1" placeholder="LQ 1 P1" />
+              <input type="text" class="brk-score" data-brk="lq1.p1s" placeholder="0" />
+            </div>
+            <div class="brk-slot-row">
+              <input type="text" list="brk-players-datalist" data-brk="lq1.p2" placeholder="LQ 1 P2" />
+              <input type="text" class="brk-score" data-brk="lq1.p2s" placeholder="0" />
+            </div>
+          </div>
+          <div class="brk-match-card">
+            <div class="brk-slot-row">
+              <input type="text" list="brk-players-datalist" data-brk="lq2.p1" placeholder="LQ 2 P1" />
+              <input type="text" class="brk-score" data-brk="lq2.p1s" placeholder="0" />
+            </div>
+            <div class="brk-slot-row">
+              <input type="text" list="brk-players-datalist" data-brk="lq2.p2" placeholder="LQ 2 P2" />
+              <input type="text" class="brk-score" data-brk="lq2.p2s" placeholder="0" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Col 3: Losers Semis -->
+        <div class="brk-col">
+          <div class="brk-col-title losers">Losers Semis</div>
+          <div class="brk-match-card">
+            <div class="brk-slot-row">
+              <input type="text" list="brk-players-datalist" data-brk="ls.p1" placeholder="LS Player 1" />
+              <input type="text" class="brk-score" data-brk="ls.p1s" placeholder="0" />
+            </div>
+            <div class="brk-slot-row">
+              <input type="text" list="brk-players-datalist" data-brk="ls.p2" placeholder="LS Player 2" />
+              <input type="text" class="brk-score" data-brk="ls.p2s" placeholder="0" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Col 4: Losers Finals -->
+        <div class="brk-col">
+          <div class="brk-col-title losers">Losers Finals</div>
+          <div class="brk-match-card">
+            <div class="brk-slot-row">
+              <input type="text" list="brk-players-datalist" data-brk="lf.p1" placeholder="LF Player 1" />
+              <input type="text" class="brk-score" data-brk="lf.p1s" placeholder="0" />
+            </div>
+            <div class="brk-slot-row">
+              <input type="text" list="brk-players-datalist" data-brk="lf.p2" placeholder="LF Player 2" />
+              <input type="text" class="brk-score" data-brk="lf.p2s" placeholder="0" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer: Bottom Text + Reset Switch + CLEAN ALL -->
+      <div class="brk-footer-bar">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:240px;flex-wrap:wrap;">
+          <label for="brk-bottom-text" style="margin:0;white-space:nowrap;">Bottom Text:</label>
+          <input type="text" id="brk-bottom-text" placeholder="Optional footer text (TOP8text)..." style="max-width:340px;" />
+          <label class="toggle-item" style="padding:4px 9px;"><input type="checkbox" id="chk-brk-reset" /> Force Reset Slot</label>
+        </div>
+        <button type="button" id="btn-brk-clear" style="background:#7f1d1d;border-color:#991b1b;color:#fecaca;font-weight:800;padding:7px 18px;">🗑 CLEAN ALL</button>
+      </div>
+      <datalist id="brk-players-datalist"></datalist>
+    </section>
+  </div>
+</div>
+
+<!-- =========================================================================
+     WORKSPACE 6: CASTERS SCREEN 
+     ========================================================================= -->
+<div class="workspace-view" id="ws-casters">
+  <div class="brk-workspace-shell">
+    <section class="vs-preview-card is-pinned" id="cas-preview-card">
+      <div class="preview-toolbar">
+        <div class="preview-toolbar-group">
+          <strong style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);">Casters Screen Preview (1920×1080):</strong>
+          <button type="button" id="btn-cas-test-anim" title="Replay Casters entry animation">🎬 Replay Intro</button>
+        </div>
+        <div class="preview-toolbar-group">
+          <select id="cas-bg-mode" style="width:auto;padding:4px 8px;font-size:11px;" title="Casters Background Mode">
+            <option value="title">🖼 Caster Screen</option>
+            <option value="transparent">🏁 Text Only (Transparent)</option>
+          </select>
+          <button type="button" id="btn-pin-cas" class="active-chip" title="Keep the Casters Live Preview pinned at the top while scrolling">📌 Pin</button>
+        </div>
+      </div>
+      <div class="brk-preview-stage">
+        <iframe id="casters-preview-frame" src="casters.html?preview=1"></iframe>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head" style="flex-wrap:wrap;gap:8px;">
+        <div>
+          <span class="card-title">🎙 Casters (Commentators)</span>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">Fills the Casters overlay screen and stays synced with the Scorebar commentators bar.</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <label class="toggle-item" style="padding:4px 9px;"><input type="checkbox" id="chk-cas-scorebar" /> Show on Scorebar</label>
+          <button type="button" id="btn-cas-swap">⇄ Swap Casters</button>
+          <button type="button" id="btn-cas-clear">🗑 Clear</button>
+        </div>
+      </div>
+
+      <div class="cas-grid">
+        <!-- Caster 1 -->
+        <div class="cas-card c1">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+            <strong style="font-size:12px;color:var(--p1-hi);text-transform:uppercase;letter-spacing:.06em;">Caster 1 (Left)</strong>
+            <button type="button" id="btn-cas-save-1" style="padding:3px 8px;font-size:11px;" title="Save Caster 1 to quick presets">💾 Save</button>
+          </div>
+          <div>
+            <label for="cas-c1-preset">Quick Select Saved Caster</label>
+            <select id="cas-c1-preset">
+              <option value="">— Select saved caster —</option>
+            </select>
+          </div>
+          <div class="row" style="margin-bottom:0;">
+            <div>
+              <label for="cas-c1-name">Caster 1 Name</label>
+              <input type="text" id="cas-c1-name" placeholder="Caster 1 Name" />
+            </div>
+            <div>
+              <label for="cas-c1-handle">Twitter / X</label>
+              <input type="text" id="cas-c1-handle" placeholder="@caster1" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Caster 2 -->
+        <div class="cas-card c2">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+            <strong style="font-size:12px;color:var(--p2-hi);text-transform:uppercase;letter-spacing:.06em;">Caster 2 (Right)</strong>
+            <button type="button" id="btn-cas-save-2" style="padding:3px 8px;font-size:11px;" title="Save Caster 2 to quick presets">💾 Save</button>
+          </div>
+          <div>
+            <label for="cas-c2-preset">Quick Select Saved Caster</label>
+            <select id="cas-c2-preset">
+              <option value="">— Select saved caster —</option>
+            </select>
+          </div>
+          <div class="row" style="margin-bottom:0;">
+            <div>
+              <label for="cas-c2-name">Caster 2 Name (leave blank to hide)</label>
+              <input type="text" id="cas-c2-name" placeholder="Caster 2 Name" />
+            </div>
+            <div>
+              <label for="cas-c2-handle">Twitter / X</label>
+              <input type="text" id="cas-c2-handle" placeholder="@caster2" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Saved Casters Quick Library -->
+      <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+          <span class="card-title">📋 Saved Casters Presets</span>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+            <input type="text" id="cas-add-name" placeholder="Name" style="width:150px;padding:4px 8px;font-size:12px;" />
+            <input type="text" id="cas-add-handle" placeholder="@twitter" style="width:135px;padding:4px 8px;font-size:12px;" />
+            <button type="button" id="btn-cas-add-saved" class="primary" style="padding:4px 10px;font-size:11.5px;">+ Add Caster</button>
+          </div>
+        </div>
+        <div class="cas-saved-list" id="cas-saved-list"></div>
+      </div>
+    </section>
+  </div>
+</div>
+
 <!-- VISUAL FLAG & REGION PICKER MODAL -->
 <div class="flag-modal-backdrop" id="flag-modal" role="dialog" aria-modal="true">
   <div class="flag-modal">
@@ -5440,105 +5892,108 @@
      CATALOGS: 33 T8/FGC + 24 SF6 DESIGNS, 12+ CUSTOM PC FONTS, 114 FLAGS
      ========================================================================= */
   const THEMES = [
-    { id: 't8-native-hud',        name: '★ Tekken 8 Native HUD',     cat: 'blade',   layout: 'Native HUD',   colors: ['#ffae19','#18121a','#ef4444'],
-      pv: { lay:'blade', sh:'blade', fs:'blade', cs:'trap',  edge:true,  bg:'linear-gradient(180deg,rgba(22,19,28,0.92),rgba(12,10,16,0.96))', p1:'#ff9d1c', p2:'#ff9d1c', sc1:'linear-gradient(145deg,#fff8c7,#ffbe26 32%,#e84800)', sc2:'linear-gradient(215deg,#fff8c7,#ffbe26 32%,#e84800)', sct:'#160602', cbg:'#161018', ct:'#fff', tx:'#fff', sp1:'#ffc845', sp2:'#ffc845' },
-      desc: 'Matches Tekken 8 in-game healthbar aesthetics 1:1: chrome-silver bevels, molten gold-orange energy, smoked glass, and UE5 italic typography.' },
-    { id: 't8-pbrd-kazuya-fists', name: '🥊 PBRD Kazuya Fists',       cat: 'blade',   layout: 'Kazuya Orbs',  colors: ['#e51942','#18181f','#e51942'],
-      pv: { lay:'blade', sh:'flat',  fs:'classic', cs:'trap', edge:false, bg:'linear-gradient(90deg,rgba(12,12,16,0.2),rgba(18,18,24,0.96))', p1:'#e51942', p2:'#e51942', sc1:'linear-gradient(180deg,#b91c3a,#7a0c24)', sc2:'linear-gradient(180deg,#b91c3a,#7a0c24)', sct:'#fff', cbg:'linear-gradient(180deg,#eb1648,#9a0c2e)', ct:'#fff', tx:'#fff', sp1:'#fda4af', sp2:'#fda4af' },
-      desc: 'Pibardos (PBRD) signature Tekken 8 overlay: Kazuya Mishima crimson studded gloves framing all 3 in-game round orbs with smoked fade nameplates.' },
-    { id: 't8-twt-2026-official', name: '★ TWT 2026 Official Blade', cat: 'blade',   layout: 'Blade T8',     colors: ['#f41f64','#181822','#f41f64'],
-      pv: { lay:'blade', sh:'blade', fs:'blade', cs:'float', edge:true,  bg:'rgba(20,20,30,0.9)',  p1:'#f41f64', p2:'#f41f64', sc1:'linear-gradient(135deg,#f41f64,#a50f46)', sc2:'linear-gradient(135deg,#f41f64,#a50f46)', sct:'#fff', cbg:'transparent', ct:'#fff', tx:'#fff', sp1:'#f43f5e', sp2:'#f43f5e' },
-      desc: 'Modern TWT broadcast blade: smoked dark glass, crimson-magenta portrait edge, slanted score trapezoid, and integrated flags.' },
-    { id: 't8-twt-finals-pro',    name: '★ TWT 2019 Grand Finals',   cat: 'blade',   layout: 'Crown TWT',    colors: ['#e53927','#161c28','#2474f5'],
-      pv: { lay:'crown', sh:'diag',  fs:'blade', cs:'trap',  edge:false, bg:'linear-gradient(180deg,#1b2230,#0d1118)', p1:'#e53927', p2:'#2474f5', sc1:'#e53927', sc2:'#2474f5', sct:'#fff', cbg:'#111622', ct:'#fff', tx:'#fff', sp1:'#f44336', sp2:'#3b82f6' },
-      desc: 'Classic TWT Finals silhouette: full-height slanted flags with sharp red vs. blue broadcast plates.' },
-    { id: 't8-blade-cyber-gold',  name: '★ Blade Liquid Gold',       cat: 'blade',   layout: 'Blade T8',     colors: ['#f3c652','#141210','#d49e2d'],
-      pv: { lay:'blade', sh:'blade', fs:'fade',  cs:'trap',  edge:true,  bg:'linear-gradient(180deg,#181512,#090806)', p1:'#f3c652', p2:'#f3c652', sc1:'linear-gradient(135deg,#fff0a6,#b7821e)', sc2:'linear-gradient(135deg,#fff0a6,#b7821e)', sct:'#110c04', cbg:'#15120d', ct:'#f6cf65', tx:'#fff', sp1:'#f6cf65', sp2:'#f6cf65' },
-      desc: 'Blade geometry in obsidian and liquid gold with smooth fade-blended flags.' },
-    { id: 't8-blade-heat-neon',   name: '★ Blade T8 Heat Dual',      cat: 'blade',   layout: 'Blade T8',     colors: ['#ff5e1a','#ffae2b','#7b4dff'],
-      pv: { lay:'blade', sh:'blade', fs:'blade', cs:'float', edge:true,  bg:'rgba(14,14,24,0.92)', p1:'#ff5e1a', p2:'#7b4dff', sc1:'linear-gradient(135deg,#ff7b1c,#cc1f00)', sc2:'linear-gradient(135deg,#6340ff,#a333ff)', sct:'#fff', cbg:'transparent', ct:'#ffbe4f', tx:'#fff', sp1:'#ff9d3b', sp2:'#b794ff' },
-      desc: 'Flush blade above the healthbars: Heat fire (P1) vs. electric violet (P2) with parallel slanted flags.' },
-    { id: 't8-heat-ignited',      name: 'T8 Heat Ignited',           cat: 'tekken',  layout: 'Split-Wing',   colors: ['#ff6b1a','#ffae2b','#7a5cff'],
-      pv: { lay:'split', sh:'diag',  fs:'blade', cs:'trap',  edge:false, bg:'rgba(14,15,24,0.94)', p1:'#ff6b1a', p2:'#7a5cff', sc1:'linear-gradient(135deg,#ff7b1c,#cc2200)', sc2:'linear-gradient(135deg,#5c3cff,#9f38ff)', sct:'#fff', cbg:'#171422', ct:'#fff', tx:'#fff', sp1:'#ffbd4a', sp2:'#ffbd4a' },
-      desc: 'Heat fire (P1) vs. electric violet energy (P2) cleanly framed between portraits and round orbs.' },
-    { id: 't8-twt-official',      name: 'Tekken World Tour',         cat: 'tekken',  layout: 'Crown 36px',   colors: ['#e61e3c','#e61e3c','#e61e3c'],
-      pv: { lay:'crown', sh:'diag',  fs:'blade', cs:'trap',  edge:false, bg:'#12141c', p1:'#e61e3c', p2:'#e61e3c', sc1:'#f1f5f9', sc2:'#f1f5f9', sct:'#0b0c12', cbg:'#d41634', ct:'#fff', tx:'#fff', sp1:'#ff4764', sp2:'#ff4764' },
-      desc: 'Broadcast tournament styling: matte carbon plates, crimson accents, and crisp white score blocks.' },
-    { id: 't8-iron-fist-gold',    name: 'King of Iron Fist Gold',    cat: 'tekken',  layout: 'Crown 36px',   colors: ['#e8c25a','#f3d273','#e8c25a'],
-      pv: { lay:'crown', sh:'diag',  fs:'blade', cs:'trap',  edge:false, bg:'#12100f', p1:'#e8c25a', p2:'#e8c25a', sc1:'linear-gradient(135deg,#fff1a8,#c9942a)', sc2:'linear-gradient(135deg,#fff1a8,#c9942a)', sct:'#110d05', cbg:'#151210', ct:'#fff', tx:'#fff', sp1:'#f3c852', sp2:'#f3c852' },
-      desc: 'Metallic beveled gold championship tribute with deep charcoal contrast.' },
-    { id: 't8-ewc-riyadh',        name: 'Esports World Cup',         cat: 'tekken',  layout: 'Crown 36px',   colors: ['#e5c158','#0b0a07','#10b981'],
-      pv: { lay:'crown', sh:'flat',  fs:'fade',  cs:'trap',  edge:false, bg:'#11110f', p1:'#e5c158', p2:'#10b981', sc1:'linear-gradient(135deg,#f8e294,#b78926)', sc2:'linear-gradient(135deg,#34d399,#059669)', sct:'#0a0906', cbg:'#1b170f', ct:'#f3d273', tx:'#fff', sp1:'#f3d273', sp2:'#34d399' },
-      desc: 'Luxury obsidian paired with liquid gold (P1) and championship emerald (P2).' },
-    { id: 't8-mishima-electric',  name: 'Mishima Electric EWGF',     cat: 'tekken',  layout: 'Split-Wing',   colors: ['#00d4ff','#00e5ff','#388bff'],
-      pv: { lay:'split', sh:'hex',   fs:'fade',  cs:'hex',   edge:false, bg:'#071024', p1:'#00d4ff', p2:'#388bff', sc1:'linear-gradient(135deg,#00e1ff,#0066ff)', sc2:'linear-gradient(135deg,#0077ff,#00d4ff)', sct:'#fff', cbg:'#091834', ct:'#67e8f9', tx:'#fff', sp1:'#4fe6ff', sp2:'#4fe6ff' },
-      desc: 'Midnight blue steel accented with electric cyan lightning borders and sharp katana cuts.' },
-    { id: 't8-devil-gene',        name: 'Devil Gene Crimson',        cat: 'tekken',  layout: 'Split-Wing',   colors: ['#ff1744','#ff1744','#d500f9'],
-      pv: { lay:'split', sh:'diag',  fs:'blade', cs:'trap',  edge:false, bg:'#150409', p1:'#ff1744', p2:'#d500f9', sc1:'#d5002f', sc2:'#a60054', sct:'#fff', cbg:'#21030b', ct:'#ff6b8b', tx:'#fff', sp1:'#ff4f73', sp2:'#e879f9' },
-      desc: 'Infernal obsidian and crimson-violet wings with aggressive angles and Match Point aura.' },
-    { id: 't8-g-corp-tactical',   name: 'G-Corp Armored Arch',       cat: 'tekken',  layout: 'Stepped Arch', colors: ['#dc2626','#ef4444','#dc2626'],
-      pv: { lay:'arch',  sh:'diag',  fs:'blade', cs:'trap',  edge:false, bg:'#1d2028', p1:'#dc2626', p2:'#dc2626', sc1:'#dc2626', sc2:'#dc2626', sct:'#fff', cbg:'#171a20', ct:'#fff', tx:'#fff', sp1:'#f87171', sp2:'#f87171', bridge:'linear-gradient(90deg,#dc2626,#333945 20%,#333945 80%,#dc2626)' },
-      desc: 'Tactical stepped visor joined by an armored top rail bridging above the round orbs.' },
-    { id: 't8-evo-grand-finals',  name: 'EVO Grand Finals',          cat: 'tekken',  layout: 'Stepped Arch', colors: ['#00b4ff','#ffd75e','#ff2e55'],
-      pv: { lay:'arch',  sh:'diag',  fs:'blade', cs:'trap',  edge:false, bg:'#111420', p1:'#00b4ff', p2:'#ff2e55', sc1:'#0088ee', sc2:'#e11d48', sct:'#fff', cbg:'#181c2c', ct:'#ffd75e', tx:'#fff', sp1:'#ffd75e', sp2:'#ffd75e', bridge:'linear-gradient(90deg,#00b4ff,#ffd75e,#ff2e55)' },
-      desc: 'Major finals prestige: blue vs. crimson crowned with a platinum-gold arch bridge.' },
-    { id: 't8-jin-flame',         name: 'Jin Kazama Flame',          cat: 'char',    layout: 'Split-Wing',   colors: ['#ff2e1f','#ffffff','#ff8c1a'],
-      pv: { lay:'split', sh:'diag',  fs:'fade',  cs:'trap',  edge:false, bg:'#120d10', p1:'#ff2e1f', p2:'#ff8c1a', sc1:'linear-gradient(135deg,#ff1e1e,#ff8800)', sc2:'linear-gradient(135deg,#ff7b00,#c81414)', sct:'#fff', cbg:'#20080a', ct:'#fff', tx:'#fff', sp1:'#ff6b4a', sp2:'#ff9f43' },
-      desc: 'Scarlet flame accents and clean white edges inspired by Jin Kazama.' },
-    { id: 't8-kazuya-crimson',    name: 'Kazuya Blood & Void',       cat: 'char',    layout: 'Split-Wing',   colors: ['#be123c','#f43f5e','#7e22ce'],
-      pv: { lay:'split', sh:'diag',  fs:'blade', cs:'trap',  edge:false, bg:'#120816', p1:'#be123c', p2:'#7e22ce', sc1:'#be123c', sc2:'#7e22ce', sct:'#fff', cbg:'#1b0720', ct:'#fb7185', tx:'#fff', sp1:'#fb7185', sp2:'#c084fc' },
-      desc: 'Blood crimson and dark void purple inspired by Kazuya Mishima.' },
-    { id: 't8-kazama-sanctuary',  name: 'Kazama Sanctuary',          cat: 'char',    layout: 'Split-Wing',   colors: ['#0ea5e9','#ffffff','#6366f1'],
-      pv: { lay:'split', sh:'round', fs:'bezel', cs:'pill',  edge:false, bg:'linear-gradient(180deg,#f8fbff,#dbeafe)', p1:'#0ea5e9', p2:'#6366f1', sc1:'#0284c7', sc2:'#4f46e5', sct:'#fff', cbg:'#f0f7ff', ct:'#0f172a', tx:'#0f172a', sp1:'#0284c7', sp2:'#4f46e5' },
-      desc: 'Pearl alabaster and celestial blue inspired by Jun Kazama.' },
-    { id: 't8-reina-thunder',     name: 'Reina Purple Voltage',      cat: 'char',    layout: 'Split-Wing',   colors: ['#c026d3','#e879f9','#a855f7'],
-      pv: { lay:'split', sh:'skew',  fs:'fade',  cs:'trap',  edge:false, bg:'#14091e', p1:'#c026d3', p2:'#a855f7', sc1:'#c026d3', sc2:'#9333ea', sct:'#fff', cbg:'#210a33', ct:'#f0abfc', tx:'#fff', sp1:'#f0abfc', sp2:'#d8b4fe' },
-      desc: 'Aggressive skewed carbon wings charged with violet lightning.' },
-    { id: 't8-king-lucha',        name: 'King Jaguar Gold',          cat: 'char',    layout: 'Crown 36px',   colors: ['#facc15','#b91c1c','#16a34a'],
-      pv: { lay:'crown', sh:'flat',  fs:'blade', cs:'flat',  edge:false, bg:'#17120a', p1:'#facc15', p2:'#16a34a', sc1:'#facc15', sc2:'#22c55e', sct:'#111', cbg:'#a61616', ct:'#fde047', tx:'#fff', sp1:'#fde047', sp2:'#4ade80' },
-      desc: 'Championship belt styling in gold, emerald, and lucha crimson.' },
-    { id: 't8-victor-paris',      name: 'Victor Cyber Noir',         cat: 'char',    layout: 'Stepped Arch', colors: ['#22d3ee','#94a3b8','#f43f5e'],
-      pv: { lay:'arch',  sh:'flat',  fs:'fade',  cs:'trap',  edge:false, bg:'#141820', p1:'#22d3ee', p2:'#f43f5e', sc1:'#06b6d4', sc2:'#f43f5e', sct:'#fff', cbg:'#11151e', ct:'#67e8f9', tx:'#fff', sp1:'#67e8f9', sp2:'#fb7185', bridge:'linear-gradient(90deg,#22d3ee,#94a3b8,#f43f5e)' },
-      desc: 'Sleek Parisian carbon accented with cyan and crimson laser katana highlights.' },
-    { id: 't8-yakushima-jade',    name: 'Yakushima Ancient Jade',    cat: 'char',    layout: 'Split-Wing',   colors: ['#10b981','#d4af37','#14b8a6'],
-      pv: { lay:'split', sh:'hex',   fs:'bezel', cs:'trap',  edge:false, bg:'#071b17', p1:'#10b981', p2:'#14b8a6', sc1:'#059669', sc2:'#0d9488', sct:'#fff', cbg:'#09201b', ct:'#eab308', tx:'#fff', sp1:'#eab308', sp2:'#eab308' },
-      desc: 'Deep forest jade plates lined with weathered bronze trim.' },
-    { id: 't8-urban-square-neon', name: 'Urban Square Cyberpunk',    cat: 'char',    layout: 'Crown 36px',   colors: ['#ff007f','#ffe600','#00f5d4'],
-      pv: { lay:'crown', sh:'diag',  fs:'blade', cs:'trap',  edge:false, bg:'#120722', p1:'#ff007f', p2:'#00f5d4', sc1:'#ff007f', sc2:'#00f5d4', sct:'#080412', cbg:'#190a2e', ct:'#ffe600', tx:'#fff', sp1:'#ffe600', sp2:'#ffe600' },
-      desc: 'Neon magenta and cyan cyberpunk glow over deep midnight purple.' },
-    { id: 't8-arena-cage',        name: 'Arena Underground Cage',    cat: 'char',    layout: 'Stepped Arch', colors: ['#f59e0b','#fbbf24','#f97316'],
-      pv: { lay:'arch',  sh:'flat',  fs:'bezel', cs:'trap',  edge:false, bg:'#222226', p1:'#f59e0b', p2:'#f97316', sc1:'#f59e0b', sc2:'#f97316', sct:'#111', cbg:'#1a1a1e', ct:'#fbbf24', tx:'#fff', sp1:'#fbbf24', sp2:'#fbbf24', bridge:'linear-gradient(90deg,#f59e0b,#52525b,#f97316)' },
-      desc: 'Industrial titanium mesh finish paired with tactical amber accents.' },
-    { id: 't8-zaibatsu-obsidian', name: 'Zaibatsu Luxury Carbon',    cat: 'char',    layout: 'Crown 36px',   colors: ['#d6b67c','#18181d','#d6b67c'],
-      pv: { lay:'crown', sh:'flat',  fs:'fade',  cs:'flat',  edge:false, bg:'#0f0f13', p1:'#d6b67c', p2:'#d6b67c', sc1:'rgba(214,182,124,0.22)', sc2:'rgba(214,182,124,0.22)', sct:'#f6e1b8', cbg:'#15151a', ct:'#e5ca94', tx:'#fff', sp1:'#e5ca94', sp2:'#e5ca94' },
-      desc: 'Minimalist matte carbon black accented with champagne filigree.' },
-    { id: 't8-prism-holo',        name: 'Prism Holo Animated',       cat: 'char',    layout: 'Split-Wing',   colors: ['#ff0080','#40e0d0','#7928ca'],
-      pv: { lay:'split', sh:'round', fs:'bezel', cs:'pill',  edge:false, prism:true, bg:'#0b0d18', p1:'#ec4899', p2:'#06b6d4', sc1:'linear-gradient(135deg,#ff0080,#7928ca)', sc2:'linear-gradient(135deg,#00dfd8,#007cf0)', sct:'#fff', cbg:'#101222', ct:'#fff', tx:'#fff', sp1:'#67e8f9', sp2:'#f472b6' },
-      desc: 'Continuously looping holographic rainbow border over smoked dark glass.' },
-    { id: 't8-sakura-dojo',       name: 'Sakura Dojo Kyoto',         cat: 'char',    layout: 'Split-Wing',   colors: ['#f472b6','#f9a8d4','#818cf8'],
-      pv: { lay:'split', sh:'round', fs:'fade',  cs:'pill',  edge:false, bg:'#150f1a', p1:'#f472b6', p2:'#818cf8', sc1:'#db2777', sc2:'#4f46e5', sct:'#fff', cbg:'#1b1222', ct:'#f9a8d4', tx:'#fff', sp1:'#f9a8d4', sp2:'#a5b4fc' },
-      desc: 'Sumi-e dark ink canvas with soft sakura pink and indigo silk gradients.' },
-    { id: 'fgc-hex-arcane',       name: 'Hex Forge (2XKO)',          cat: 'fgc',     layout: 'Crown Outer',  colors: ['#d6b164','#3b82f6','#d6b164'],
-      pv: { lay:'crown', sh:'flat',  fs:'bezel', cs:'hex',   edge:false, outer:true, bg:'linear-gradient(180deg,#272c3a,#141722)', p1:'#d6b164', p2:'#d6b164', sc1:'#141722', sc2:'#141722', sct:'#fff', cbg:'linear-gradient(180deg,#3b82f6,#1d4ed8)', ct:'#fff', tx:'#fff', sp1:'#e7c97f', sp2:'#e7c97f' },
-      desc: 'Metallic slate plates with gold chevron trim and a central blue hex emblem.' },
-    { id: 'fgc-strive-bolt',      name: 'Heavy Rock (GGST)',         cat: 'fgc',     layout: 'Split-Wing',   colors: ['#f5b31a','#f5b31a','#f5b31a'],
-      pv: { lay:'split', sh:'strive',fs:'bezel', cs:'trap',  edge:false, bg:'#140404', p1:'#f5b31a', p2:'#f5b31a', sc1:'#f5b31a', sc2:'#f5b31a', sct:'#140404', cbg:'#f5b31a', ct:'#140404', tx:'#fff', sp1:'#f5b31a', sp2:'#f5b31a', fullBorder:true },
-      desc: 'High-impact crimson-black metal framing bold yellow arcade score blocks.' },
-    { id: 'fgc-metro-clash',      name: 'Metro Clash (SF6)',         cat: 'fgc',     layout: 'Split-Wing',   colors: ['#e11d48','#9333ea','#2563eb'],
-      pv: { lay:'split', sh:'hex',   fs:'blade', cs:'trap',  edge:false, bg1:'linear-gradient(90deg,#6e0a23,#b9163e)', bg2:'linear-gradient(270deg,#103080,#2563eb)', p1:'#fb7185', p2:'#60a5fa', sc1:'#881337', sc2:'#1e3a8a', sct:'#fff', cbg:'#7e22ce', ct:'#fff', tx:'#fff', sp1:'#fde047', sp2:'#fde047' },
-      desc: 'Vibrant street red vs. electric blue hexagonal shields with purple center accent.' },
-    { id: 'fgc-clean-major',      name: 'Clean Major (EVO)',         cat: 'fgc',     layout: 'Crown Outer',  colors: ['#b91c2e','#ffffff','#b91c2e'],
-      pv: { lay:'crown', sh:'flat',  fs:'classic',cs:'flat', edge:false, outer:true, bg:'#f8fafc', p1:'#b91c2e', p2:'#b91c2e', sc1:'#b91c2e', sc2:'#b91c2e', sct:'#fff', cbg:'#b91c2e', ct:'#fff', tx:'#0f172a', sp1:'#b91c2e', sp2:'#b91c2e' },
-      desc: 'Ultra-clean white and crimson television broadcast layout for maximum legibility.' },
-    { id: 'fgc-hyper-flame',      name: 'Hyper Flame (MvC)',         cat: 'fgc',     layout: 'Crown 36px',   colors: ['#ff5500','#ffffff','#ff5500'],
-      pv: { lay:'crown', sh:'diag',  fs:'blade', cs:'trap',  edge:false, bg:'#0f0d0d', p1:'#ff5500', p2:'#ff5500', sc1:'#f8fafc', sc2:'#f8fafc', sct:'#09090b', cbg:'#141111', ct:'#ff6a00', tx:'#fff', sp1:'#ff6a00', sp2:'#ff6a00' },
-      desc: 'Black angled wings with fiery orange trim and crisp white score wedges.' },
-    { id: 't8-glass-minimal',     name: 'Liquid Frosted Glass',      cat: 'minimal', layout: 'Split-Wing',   colors: ['#38bdf8','#e2e8f0','#fb7185'],
-      pv: { lay:'split', sh:'round', fs:'bezel', cs:'pill',  edge:false, bg:'rgba(14,18,28,0.72)', p1:'#38bdf8', p2:'#fb7185', sc1:'rgba(56,189,248,0.3)', sc2:'rgba(251,113,133,0.3)', sct:'#fff', cbg:'rgba(14,18,28,0.8)', ct:'#fff', tx:'#fff', sp1:'#94a3b8', sp2:'#94a3b8' },
-      desc: 'Modern translucent frosted glass with subtle backdrop blur and slim color accents.' },
-    { id: 't8-arcade-1997',       name: 'Tekken 3 Arcade 1997',      cat: 'minimal', layout: 'Crown 36px',   colors: ['#1d4ed8','#fde047','#b91c1c'],
-      pv: { lay:'crown', sh:'flat',  fs:'classic',cs:'flat', edge:false, bg:'linear-gradient(180deg,#1d4ed8,#0f172a)', p1:'#fbbf24', p2:'#fbbf24', sc1:'#fde047', sc2:'#fde047', sct:'#111', cbg:'#991b1b', ct:'#fde047', tx:'#fff', sp1:'#fde047', sp2:'#fde047', fullBorder:true },
-      desc: 'Retro 1997 Namco arcade homage in metallic royal blue and gold bevels.' },
+    // { id: 't8-native-hud',        name: '★ Tekken 8 Native HUD',     cat: 'blade',   layout: 'Native HUD',   colors: ['#ffae19','#18121a','#ef4444'],
+    //   pv: { lay:'blade', sh:'blade', fs:'blade', cs:'trap',  edge:true,  bg:'linear-gradient(180deg,rgba(22,19,28,0.92),rgba(12,10,16,0.96))', p1:'#ff9d1c', p2:'#ff9d1c', sc1:'linear-gradient(145deg,#fff8c7,#ffbe26 32%,#e84800)', sc2:'linear-gradient(215deg,#fff8c7,#ffbe26 32%,#e84800)', sct:'#160602', cbg:'#161018', ct:'#fff', tx:'#fff', sp1:'#ffc845', sp2:'#ffc845' },
+    //   desc: 'Matches Tekken 8 in-game healthbar aesthetics 1:1: chrome-silver bevels, molten gold-orange energy, smoked glass, and UE5 italic typography.' },
+    // { id: 't8-pbrd-kazuya-fists', name: '🥊 PBRD Kazuya Fists',       cat: 'blade',   layout: 'Kazuya Orbs',  colors: ['#e51942','#18181f','#e51942'],
+    //   pv: { lay:'blade', sh:'flat',  fs:'classic', cs:'trap', edge:false, bg:'linear-gradient(90deg,rgba(12,12,16,0.2),rgba(18,18,24,0.96))', p1:'#e51942', p2:'#e51942', sc1:'linear-gradient(180deg,#b91c3a,#7a0c24)', sc2:'linear-gradient(180deg,#b91c3a,#7a0c24)', sct:'#fff', cbg:'linear-gradient(180deg,#eb1648,#9a0c2e)', ct:'#fff', tx:'#fff', sp1:'#fda4af', sp2:'#fda4af' },
+    //   desc: 'Pibardos (PBRD) signature Tekken 8 overlay: Kazuya Mishima crimson studded gloves framing all 3 in-game round orbs with smoked fade nameplates.' },
+    // { id: 't8-twt-2026-official', name: '★ TWT 2026 Official Blade', cat: 'blade',   layout: 'Blade T8',     colors: ['#f41f64','#181822','#f41f64'],
+    //   pv: { lay:'blade', sh:'blade', fs:'blade', cs:'float', edge:true,  bg:'rgba(20,20,30,0.9)',  p1:'#f41f64', p2:'#f41f64', sc1:'linear-gradient(135deg,#f41f64,#a50f46)', sc2:'linear-gradient(135deg,#f41f64,#a50f46)', sct:'#fff', cbg:'transparent', ct:'#fff', tx:'#fff', sp1:'#f43f5e', sp2:'#f43f5e' },
+    //   desc: 'Modern TWT broadcast blade: smoked dark glass, crimson-magenta portrait edge, slanted score trapezoid, and integrated flags.' },
+    // { id: 't8-twt-finals-pro',    name: '★ TWT 2019 Grand Finals',   cat: 'blade',   layout: 'Crown TWT',    colors: ['#e53927','#161c28','#2474f5'],
+    //   pv: { lay:'crown', sh:'diag',  fs:'blade', cs:'trap',  edge:false, bg:'linear-gradient(180deg,#1b2230,#0d1118)', p1:'#e53927', p2:'#2474f5', sc1:'#e53927', sc2:'#2474f5', sct:'#fff', cbg:'#111622', ct:'#fff', tx:'#fff', sp1:'#f44336', sp2:'#3b82f6' },
+    //   desc: 'Classic TWT Finals silhouette: full-height slanted flags with sharp red vs. blue broadcast plates.' },
+    // { id: 't8-blade-cyber-gold',  name: '★ Blade Liquid Gold',       cat: 'blade',   layout: 'Blade T8',     colors: ['#f3c652','#141210','#d49e2d'],
+    //   pv: { lay:'blade', sh:'blade', fs:'fade',  cs:'trap',  edge:true,  bg:'linear-gradient(180deg,#181512,#090806)', p1:'#f3c652', p2:'#f3c652', sc1:'linear-gradient(135deg,#fff0a6,#b7821e)', sc2:'linear-gradient(135deg,#fff0a6,#b7821e)', sct:'#110c04', cbg:'#15120d', ct:'#f6cf65', tx:'#fff', sp1:'#f6cf65', sp2:'#f6cf65' },
+    //   desc: 'Blade geometry in obsidian and liquid gold with smooth fade-blended flags.' },
+    // { id: 't8-blade-heat-neon',   name: '★ Blade T8 Heat Dual',      cat: 'blade',   layout: 'Blade T8',     colors: ['#ff5e1a','#ffae2b','#7b4dff'],
+    //   pv: { lay:'blade', sh:'blade', fs:'blade', cs:'float', edge:true,  bg:'rgba(14,14,24,0.92)', p1:'#ff5e1a', p2:'#7b4dff', sc1:'linear-gradient(135deg,#ff7b1c,#cc1f00)', sc2:'linear-gradient(135deg,#6340ff,#a333ff)', sct:'#fff', cbg:'transparent', ct:'#ffbe4f', tx:'#fff', sp1:'#ff9d3b', sp2:'#b794ff' },
+    //   desc: 'Flush blade above the healthbars: Heat fire (P1) vs. electric violet (P2) with parallel slanted flags.' },
+    // { id: 't8-heat-ignited',      name: 'T8 Heat Ignited',           cat: 'tekken',  layout: 'Split-Wing',   colors: ['#ff6b1a','#ffae2b','#7a5cff'],
+    //   pv: { lay:'split', sh:'diag',  fs:'blade', cs:'trap',  edge:false, bg:'rgba(14,15,24,0.94)', p1:'#ff6b1a', p2:'#7a5cff', sc1:'linear-gradient(135deg,#ff7b1c,#cc2200)', sc2:'linear-gradient(135deg,#5c3cff,#9f38ff)', sct:'#fff', cbg:'#171422', ct:'#fff', tx:'#fff', sp1:'#ffbd4a', sp2:'#ffbd4a' },
+    //   desc: 'Heat fire (P1) vs. electric violet energy (P2) cleanly framed between portraits and round orbs.' },
+    // { id: 't8-twt-official',      name: 'Tekken World Tour',         cat: 'tekken',  layout: 'Crown 36px',   colors: ['#e61e3c','#e61e3c','#e61e3c'],
+    //   pv: { lay:'crown', sh:'diag',  fs:'blade', cs:'trap',  edge:false, bg:'#12141c', p1:'#e61e3c', p2:'#e61e3c', sc1:'#f1f5f9', sc2:'#f1f5f9', sct:'#0b0c12', cbg:'#d41634', ct:'#fff', tx:'#fff', sp1:'#ff4764', sp2:'#ff4764' },
+    //   desc: 'Broadcast tournament styling: matte carbon plates, crimson accents, and crisp white score blocks.' },
+    // { id: 't8-iron-fist-gold',    name: 'King of Iron Fist Gold',    cat: 'tekken',  layout: 'Crown 36px',   colors: ['#e8c25a','#f3d273','#e8c25a'],
+    //   pv: { lay:'crown', sh:'diag',  fs:'blade', cs:'trap',  edge:false, bg:'#12100f', p1:'#e8c25a', p2:'#e8c25a', sc1:'linear-gradient(135deg,#fff1a8,#c9942a)', sc2:'linear-gradient(135deg,#fff1a8,#c9942a)', sct:'#110d05', cbg:'#151210', ct:'#fff', tx:'#fff', sp1:'#f3c852', sp2:'#f3c852' },
+    //   desc: 'Metallic beveled gold championship tribute with deep charcoal contrast.' },
+    // { id: 't8-ewc-riyadh',        name: 'Esports World Cup',         cat: 'tekken',  layout: 'Crown 36px',   colors: ['#e5c158','#0b0a07','#10b981'],
+    //   pv: { lay:'crown', sh:'flat',  fs:'fade',  cs:'trap',  edge:false, bg:'#11110f', p1:'#e5c158', p2:'#10b981', sc1:'linear-gradient(135deg,#f8e294,#b78926)', sc2:'linear-gradient(135deg,#34d399,#059669)', sct:'#0a0906', cbg:'#1b170f', ct:'#f3d273', tx:'#fff', sp1:'#f3d273', sp2:'#34d399' },
+    //   desc: 'Luxury obsidian paired with liquid gold (P1) and championship emerald (P2).' },
+    // { id: 't8-mishima-electric',  name: 'Mishima Electric EWGF',     cat: 'tekken',  layout: 'Split-Wing',   colors: ['#00d4ff','#00e5ff','#388bff'],
+    //   pv: { lay:'split', sh:'hex',   fs:'fade',  cs:'hex',   edge:false, bg:'#071024', p1:'#00d4ff', p2:'#388bff', sc1:'linear-gradient(135deg,#00e1ff,#0066ff)', sc2:'linear-gradient(135deg,#0077ff,#00d4ff)', sct:'#fff', cbg:'#091834', ct:'#67e8f9', tx:'#fff', sp1:'#4fe6ff', sp2:'#4fe6ff' },
+    //   desc: 'Midnight blue steel accented with electric cyan lightning borders and sharp katana cuts.' },
+    // { id: 't8-devil-gene',        name: 'Devil Gene Crimson',        cat: 'tekken',  layout: 'Split-Wing',   colors: ['#ff1744','#ff1744','#d500f9'],
+    //   pv: { lay:'split', sh:'diag',  fs:'blade', cs:'trap',  edge:false, bg:'#150409', p1:'#ff1744', p2:'#d500f9', sc1:'#d5002f', sc2:'#a60054', sct:'#fff', cbg:'#21030b', ct:'#ff6b8b', tx:'#fff', sp1:'#ff4f73', sp2:'#e879f9' },
+    //   desc: 'Infernal obsidian and crimson-violet wings with aggressive angles and Match Point aura.' },
+    // { id: 't8-g-corp-tactical',   name: 'G-Corp Armored Arch',       cat: 'tekken',  layout: 'Stepped Arch', colors: ['#dc2626','#ef4444','#dc2626'],
+    //   pv: { lay:'arch',  sh:'diag',  fs:'blade', cs:'trap',  edge:false, bg:'#1d2028', p1:'#dc2626', p2:'#dc2626', sc1:'#dc2626', sc2:'#dc2626', sct:'#fff', cbg:'#171a20', ct:'#fff', tx:'#fff', sp1:'#f87171', sp2:'#f87171', bridge:'linear-gradient(90deg,#dc2626,#333945 20%,#333945 80%,#dc2626)' },
+    //   desc: 'Tactical stepped visor joined by an armored top rail bridging above the round orbs.' },
+    // { id: 't8-evo-grand-finals',  name: 'EVO Grand Finals',          cat: 'tekken',  layout: 'Stepped Arch', colors: ['#00b4ff','#ffd75e','#ff2e55'],
+    //   pv: { lay:'arch',  sh:'diag',  fs:'blade', cs:'trap',  edge:false, bg:'#111420', p1:'#00b4ff', p2:'#ff2e55', sc1:'#0088ee', sc2:'#e11d48', sct:'#fff', cbg:'#181c2c', ct:'#ffd75e', tx:'#fff', sp1:'#ffd75e', sp2:'#ffd75e', bridge:'linear-gradient(90deg,#00b4ff,#ffd75e,#ff2e55)' },
+    //   desc: 'Major finals prestige: blue vs. crimson crowned with a platinum-gold arch bridge.' },
+    // { id: 't8-jin-flame',         name: 'Jin Kazama Flame',          cat: 'char',    layout: 'Split-Wing',   colors: ['#ff2e1f','#ffffff','#ff8c1a'],
+    //   pv: { lay:'split', sh:'diag',  fs:'fade',  cs:'trap',  edge:false, bg:'#120d10', p1:'#ff2e1f', p2:'#ff8c1a', sc1:'linear-gradient(135deg,#ff1e1e,#ff8800)', sc2:'linear-gradient(135deg,#ff7b00,#c81414)', sct:'#fff', cbg:'#20080a', ct:'#fff', tx:'#fff', sp1:'#ff6b4a', sp2:'#ff9f43' },
+    //   desc: 'Scarlet flame accents and clean white edges inspired by Jin Kazama.' },
+    // { id: 't8-kazuya-crimson',    name: 'Kazuya Blood & Void',       cat: 'char',    layout: 'Split-Wing',   colors: ['#be123c','#f43f5e','#7e22ce'],
+    //   pv: { lay:'split', sh:'diag',  fs:'blade', cs:'trap',  edge:false, bg:'#120816', p1:'#be123c', p2:'#7e22ce', sc1:'#be123c', sc2:'#7e22ce', sct:'#fff', cbg:'#1b0720', ct:'#fb7185', tx:'#fff', sp1:'#fb7185', sp2:'#c084fc' },
+    //   desc: 'Blood crimson and dark void purple inspired by Kazuya Mishima.' },
+    // { id: 't8-kazama-sanctuary',  name: 'Kazama Sanctuary',          cat: 'char',    layout: 'Split-Wing',   colors: ['#0ea5e9','#ffffff','#6366f1'],
+    //   pv: { lay:'split', sh:'round', fs:'bezel', cs:'pill',  edge:false, bg:'linear-gradient(180deg,#f8fbff,#dbeafe)', p1:'#0ea5e9', p2:'#6366f1', sc1:'#0284c7', sc2:'#4f46e5', sct:'#fff', cbg:'#f0f7ff', ct:'#0f172a', tx:'#0f172a', sp1:'#0284c7', sp2:'#4f46e5' },
+    //   desc: 'Pearl alabaster and celestial blue inspired by Jun Kazama.' },
+    // { id: 't8-reina-thunder',     name: 'Reina Purple Voltage',      cat: 'char',    layout: 'Split-Wing',   colors: ['#c026d3','#e879f9','#a855f7'],
+    //   pv: { lay:'split', sh:'skew',  fs:'fade',  cs:'trap',  edge:false, bg:'#14091e', p1:'#c026d3', p2:'#a855f7', sc1:'#c026d3', sc2:'#9333ea', sct:'#fff', cbg:'#210a33', ct:'#f0abfc', tx:'#fff', sp1:'#f0abfc', sp2:'#d8b4fe' },
+    //   desc: 'Aggressive skewed carbon wings charged with violet lightning.' },
+    // { id: 't8-king-lucha',        name: 'King Jaguar Gold',          cat: 'char',    layout: 'Crown 36px',   colors: ['#facc15','#b91c1c','#16a34a'],
+    //   pv: { lay:'crown', sh:'flat',  fs:'blade', cs:'flat',  edge:false, bg:'#17120a', p1:'#facc15', p2:'#16a34a', sc1:'#facc15', sc2:'#22c55e', sct:'#111', cbg:'#a61616', ct:'#fde047', tx:'#fff', sp1:'#fde047', sp2:'#4ade80' },
+    //   desc: 'Championship belt styling in gold, emerald, and lucha crimson.' },
+    // { id: 't8-victor-paris',      name: 'Victor Cyber Noir',         cat: 'char',    layout: 'Stepped Arch', colors: ['#22d3ee','#94a3b8','#f43f5e'],
+    //   pv: { lay:'arch',  sh:'flat',  fs:'fade',  cs:'trap',  edge:false, bg:'#141820', p1:'#22d3ee', p2:'#f43f5e', sc1:'#06b6d4', sc2:'#f43f5e', sct:'#fff', cbg:'#11151e', ct:'#67e8f9', tx:'#fff', sp1:'#67e8f9', sp2:'#fb7185', bridge:'linear-gradient(90deg,#22d3ee,#94a3b8,#f43f5e)' },
+    //   desc: 'Sleek Parisian carbon accented with cyan and crimson laser katana highlights.' },
+    // { id: 't8-yakushima-jade',    name: 'Yakushima Ancient Jade',    cat: 'char',    layout: 'Split-Wing',   colors: ['#10b981','#d4af37','#14b8a6'],
+    //   pv: { lay:'split', sh:'hex',   fs:'bezel', cs:'trap',  edge:false, bg:'#071b17', p1:'#10b981', p2:'#14b8a6', sc1:'#059669', sc2:'#0d9488', sct:'#fff', cbg:'#09201b', ct:'#eab308', tx:'#fff', sp1:'#eab308', sp2:'#eab308' },
+    //   desc: 'Deep forest jade plates lined with weathered bronze trim.' },
+    // { id: 't8-urban-square-neon', name: 'Urban Square Cyberpunk',    cat: 'char',    layout: 'Crown 36px',   colors: ['#ff007f','#ffe600','#00f5d4'],
+    //   pv: { lay:'crown', sh:'diag',  fs:'blade', cs:'trap',  edge:false, bg:'#120722', p1:'#ff007f', p2:'#00f5d4', sc1:'#ff007f', sc2:'#00f5d4', sct:'#080412', cbg:'#190a2e', ct:'#ffe600', tx:'#fff', sp1:'#ffe600', sp2:'#ffe600' },
+    //   desc: 'Neon magenta and cyan cyberpunk glow over deep midnight purple.' },
+    // { id: 't8-arena-cage',        name: 'Arena Underground Cage',    cat: 'char',    layout: 'Stepped Arch', colors: ['#f59e0b','#fbbf24','#f97316'],
+    //   pv: { lay:'arch',  sh:'flat',  fs:'bezel', cs:'trap',  edge:false, bg:'#222226', p1:'#f59e0b', p2:'#f97316', sc1:'#f59e0b', sc2:'#f97316', sct:'#111', cbg:'#1a1a1e', ct:'#fbbf24', tx:'#fff', sp1:'#fbbf24', sp2:'#fbbf24', bridge:'linear-gradient(90deg,#f59e0b,#52525b,#f97316)' },
+    //   desc: 'Industrial titanium mesh finish paired with tactical amber accents.' },
+    // { id: 't8-zaibatsu-obsidian', name: 'Zaibatsu Luxury Carbon',    cat: 'char',    layout: 'Crown 36px',   colors: ['#d6b67c','#18181d','#d6b67c'],
+    //   pv: { lay:'crown', sh:'flat',  fs:'fade',  cs:'flat',  edge:false, bg:'#0f0f13', p1:'#d6b67c', p2:'#d6b67c', sc1:'rgba(214,182,124,0.22)', sc2:'rgba(214,182,124,0.22)', sct:'#f6e1b8', cbg:'#15151a', ct:'#e5ca94', tx:'#fff', sp1:'#e5ca94', sp2:'#e5ca94' },
+    //   desc: 'Minimalist matte carbon black accented with champagne filigree.' },
+    // { id: 't8-prism-holo',        name: 'Prism Holo Animated',       cat: 'char',    layout: 'Split-Wing',   colors: ['#ff0080','#40e0d0','#7928ca'],
+    //   pv: { lay:'split', sh:'round', fs:'bezel', cs:'pill',  edge:false, prism:true, bg:'#0b0d18', p1:'#ec4899', p2:'#06b6d4', sc1:'linear-gradient(135deg,#ff0080,#7928ca)', sc2:'linear-gradient(135deg,#00dfd8,#007cf0)', sct:'#fff', cbg:'#101222', ct:'#fff', tx:'#fff', sp1:'#67e8f9', sp2:'#f472b6' },
+    //   desc: 'Continuously looping holographic rainbow border over smoked dark glass.' },
+    // { id: 't8-sakura-dojo',       name: 'Sakura Dojo Kyoto',         cat: 'char',    layout: 'Split-Wing',   colors: ['#f472b6','#f9a8d4','#818cf8'],
+    //   pv: { lay:'split', sh:'round', fs:'fade',  cs:'pill',  edge:false, bg:'#150f1a', p1:'#f472b6', p2:'#818cf8', sc1:'#db2777', sc2:'#4f46e5', sct:'#fff', cbg:'#1b1222', ct:'#f9a8d4', tx:'#fff', sp1:'#f9a8d4', sp2:'#a5b4fc' },
+    //   desc: 'Sumi-e dark ink canvas with soft sakura pink and indigo silk gradients.' },
+    // { id: 'fgc-hex-arcane',       name: 'Hex Forge (2XKO)',          cat: 'fgc',     layout: 'Crown Outer',  colors: ['#d6b164','#3b82f6','#d6b164'],
+    //   pv: { lay:'crown', sh:'flat',  fs:'bezel', cs:'hex',   edge:false, outer:true, bg:'linear-gradient(180deg,#272c3a,#141722)', p1:'#d6b164', p2:'#d6b164', sc1:'#141722', sc2:'#141722', sct:'#fff', cbg:'linear-gradient(180deg,#3b82f6,#1d4ed8)', ct:'#fff', tx:'#fff', sp1:'#e7c97f', sp2:'#e7c97f' },
+    //   desc: 'Metallic slate plates with gold chevron trim and a central blue hex emblem.' },
+    // { id: 'fgc-strive-bolt',      name: 'Heavy Rock (GGST)',         cat: 'fgc',     layout: 'Split-Wing',   colors: ['#f5b31a','#f5b31a','#f5b31a'],
+    //   pv: { lay:'split', sh:'strive',fs:'bezel', cs:'trap',  edge:false, bg:'#140404', p1:'#f5b31a', p2:'#f5b31a', sc1:'#f5b31a', sc2:'#f5b31a', sct:'#140404', cbg:'#f5b31a', ct:'#140404', tx:'#fff', sp1:'#f5b31a', sp2:'#f5b31a', fullBorder:true },
+    //   desc: 'High-impact crimson-black metal framing bold yellow arcade score blocks.' },
+    // { id: 'fgc-metro-clash',      name: 'Metro Clash (SF6)',         cat: 'fgc',     layout: 'Split-Wing',   colors: ['#e11d48','#9333ea','#2563eb'],
+    //   pv: { lay:'split', sh:'hex',   fs:'blade', cs:'trap',  edge:false, bg1:'linear-gradient(90deg,#6e0a23,#b9163e)', bg2:'linear-gradient(270deg,#103080,#2563eb)', p1:'#fb7185', p2:'#60a5fa', sc1:'#881337', sc2:'#1e3a8a', sct:'#fff', cbg:'#7e22ce', ct:'#fff', tx:'#fff', sp1:'#fde047', sp2:'#fde047' },
+    //   desc: 'Vibrant street red vs. electric blue hexagonal shields with purple center accent.' },
+    // { id: 'fgc-clean-major',      name: 'Clean Major (EVO)',         cat: 'fgc',     layout: 'Crown Outer',  colors: ['#b91c2e','#ffffff','#b91c2e'],
+    //   pv: { lay:'crown', sh:'flat',  fs:'classic',cs:'flat', edge:false, outer:true, bg:'#f8fafc', p1:'#b91c2e', p2:'#b91c2e', sc1:'#b91c2e', sc2:'#b91c2e', sct:'#fff', cbg:'#b91c2e', ct:'#fff', tx:'#0f172a', sp1:'#b91c2e', sp2:'#b91c2e' },
+    //   desc: 'Ultra-clean white and crimson television broadcast layout for maximum legibility.' },
+    // { id: 'fgc-hyper-flame',      name: 'Hyper Flame (MvC)',         cat: 'fgc',     layout: 'Crown 36px',   colors: ['#ff5500','#ffffff','#ff5500'],
+    //   pv: { lay:'crown', sh:'diag',  fs:'blade', cs:'trap',  edge:false, bg:'#0f0d0d', p1:'#ff5500', p2:'#ff5500', sc1:'#f8fafc', sc2:'#f8fafc', sct:'#09090b', cbg:'#141111', ct:'#ff6a00', tx:'#fff', sp1:'#ff6a00', sp2:'#ff6a00' },
+    //   desc: 'Black angled wings with fiery orange trim and crisp white score wedges.' },
+    // { id: 't8-glass-minimal',     name: 'Liquid Frosted Glass',      cat: 'minimal', layout: 'Split-Wing',   colors: ['#38bdf8','#e2e8f0','#fb7185'],
+    //   pv: { lay:'split', sh:'round', fs:'bezel', cs:'pill',  edge:false, bg:'rgba(14,18,28,0.72)', p1:'#38bdf8', p2:'#fb7185', sc1:'rgba(56,189,248,0.3)', sc2:'rgba(251,113,133,0.3)', sct:'#fff', cbg:'rgba(14,18,28,0.8)', ct:'#fff', tx:'#fff', sp1:'#94a3b8', sp2:'#94a3b8' },
+    //   desc: 'Modern translucent frosted glass with subtle backdrop blur and slim color accents.' },
+    // { id: 't8-arcade-1997',       name: 'Tekken 3 Arcade 1997',      cat: 'minimal', layout: 'Crown 36px',   colors: ['#1d4ed8','#fde047','#b91c1c'],
+    //   pv: { lay:'crown', sh:'flat',  fs:'classic',cs:'flat', edge:false, bg:'linear-gradient(180deg,#1d4ed8,#0f172a)', p1:'#fbbf24', p2:'#fbbf24', sc1:'#fde047', sc2:'#fde047', sct:'#111', cbg:'#991b1b', ct:'#fde047', tx:'#fff', sp1:'#fde047', sp2:'#fde047', fullBorder:true },
+    //   desc: 'Retro 1997 Namco arcade homage in metallic royal blue and gold bevels.' },
+    { id: 'valquiria-cotw',      name: 'Valquiria Cotw',            cat: 'valquiria', layout: 'Crown Outer',  colors: ['#e8004e','#ffffff','#e8004e'],
+      pv: { lay:'crown', sh:'diag',  fs:'blade', cs:'trap',  edge:true, outer:true, bg:'#f8fafc', p1:'#e8004e', p2:'#e8004e', sc1:'linear-gradient(135deg,#e8004e,#8b0028)', sc2:'linear-gradient(135deg,#e8004e,#8b0028)', sct:'#fff', cbg:'#1a0008', ct:'#fff', tx:'#0f172a', sp1:'#ff4d7d', sp2:'#ff4d7d' },
+      desc: 'Valquiria COTW overlay — crisp white broadcast canvas with vivid crimson-pink angular frames, Valquiria E-Sports signature style.' },
     ...(window.FGC_SF6_THEMES || [])
   ];
 
@@ -5838,6 +6293,37 @@
   let bc = null;
   try { bc = new BroadcastChannel('fgc_open_scorebar'); } catch {}
 
+  const DEFAULT_BRACKET = {
+    visible: true,
+    bgMode: 'auto',
+    showReset: false,
+    introNonce: 0,
+    bottomText: '',
+    matches: {
+      ws1:    { p1: '', p1s: '', p2: '', p2s: '' },
+      ws2:    { p1: '', p1s: '', p2: '', p2s: '' },
+      wf:     { p1: '', p1s: '', p2: '', p2s: '' },
+      ltop81: { p1: '', p1s: '', p2: '', p2s: '' },
+      ltop82: { p1: '', p1s: '', p2: '', p2s: '' },
+      lq1:    { p1: '', p1s: '', p2: '', p2s: '' },
+      lq2:    { p1: '', p1s: '', p2: '', p2s: '' },
+      ls:     { p1: '', p1s: '', p2: '', p2s: '' },
+      lf:     { p1: '', p1s: '', p2: '', p2s: '' },
+      gf:     { p1: '', p1s: '', p2: '', p2s: '' },
+      gfr:    { p1: '', p1s: '', p2: '', p2s: '' }
+    }
+  };
+  const DEFAULT_COMMENTATORS = {
+    c1Name: 'CASTER 1',
+    c1Handle: '@caster1',
+    c2Name: 'CASTER 2',
+    c2Handle: '@caster2',
+    visible: true,
+    bgMode: 'valquiria',
+    introNonce: 0,
+    saved: []
+  };
+
   let state = {
     visible: true,
     theme: 't8-native-hud',
@@ -5851,11 +6337,12 @@
     showCommentators: false,
     p1: { name: 'PLAYER 1', sponsor: '', score: 0, flag: '', region: '', bracket: '', character: '', avatar: '' },
     p2: { name: 'PLAYER 2', sponsor: '', score: 0, flag: '', region: '', bracket: '', character: '', avatar: '' },
-    commentators: { c1Name: 'CASTER 1', c1Handle: '@caster1', c2Name: 'CASTER 2', c2Handle: '@caster2' },
+    commentators: structuredClone(DEFAULT_COMMENTATORS),
     tweaks: { offsetY: 0, scale: 100, wingSpread: 0, opacity: 100, customColors: false, p1Color: '#ff6a1a', p2Color: '#7b5cff', centerColor: '#ffd24d' },
     style: { ...DEFAULT_STYLE },
     vs: structuredClone(DEFAULT_VS),
-    results: structuredClone(DEFAULT_RESULTS)
+    results: structuredClone(DEFAULT_RESULTS),
+    bracket: structuredClone(DEFAULT_BRACKET)
   };
   let gamesCatalog = { featured: [], all: [], loadedAll: false };
   let activeRoster = { game: 'tekken8', gameName: 'Tekken 8', pack: 'full', characters: [], cachedCount: 0, total: 0 };
@@ -5883,15 +6370,19 @@
   let previewPinned = localStorage.getItem('fgc_preview_pinned') !== '0';
   let vsPreviewPinned = localStorage.getItem('fgc_vs_preview_pinned') !== '0';
   let resPreviewPinned = localStorage.getItem('fgc_res_preview_pinned') !== '0';
+  let brkPreviewPinned = localStorage.getItem('fgc_brk_preview_pinned') !== '0';
+  let casPreviewPinned = localStorage.getItem('fgc_cas_preview_pinned') !== '0';
   let sidebarCollapsed = localStorage.getItem('fgc_sidebar_collapsed') === '1';
   let activeWorkspace = localStorage.getItem('fgc_active_workspace') || 'scorebars';
-  if (!['scorebars', 'vs', 'results', 'tournaments'].includes(activeWorkspace)) activeWorkspace = 'scorebars';
+  if (!['scorebars', 'vs', 'results', 'bracket', 'casters', 'tournaments'].includes(activeWorkspace)) activeWorkspace = 'scorebars';
   let pickerState = { open: false, side: 'p1', slot: 'flag', cat: 'world', query: '' };
 
   const $ = (id) => document.getElementById(id);
   const previewFrame = $('preview-frame');
   const vsPreviewFrame = $('vs-preview-frame');
   const resultsPreviewFrame = $('results-preview-frame');
+  const bracketPreviewFrame = $('bracket-preview-frame');
+  const castersPreviewFrame = $('casters-preview-frame');
 
   const tr = (msg) => (window.FGC_I18N ? window.FGC_I18N.t(msg) : msg);
 
@@ -5921,10 +6412,18 @@
       resultsPreviewFrame.contentWindow.postMessage({ type: 'fonts-update', fonts: fontsPayload }, '*');
       resultsPreviewFrame.contentWindow.postMessage({ type: 'state-update', state }, '*');
     }
+    if (bracketPreviewFrame?.contentWindow) {
+      bracketPreviewFrame.contentWindow.postMessage({ type: 'state-update', state }, '*');
+    }
+    if (castersPreviewFrame?.contentWindow) {
+      castersPreviewFrame.contentWindow.postMessage({ type: 'state-update', state }, '*');
+    }
   }
   previewFrame.addEventListener('load', pushPreviewConfig);
   vsPreviewFrame?.addEventListener('load', pushPreviewConfig);
   resultsPreviewFrame?.addEventListener('load', pushPreviewConfig);
+  bracketPreviewFrame?.addEventListener('load', pushPreviewConfig);
+  castersPreviewFrame?.addEventListener('load', pushPreviewConfig);
 
   let pushTimer = null;
   function commitState(patch, immediate = false) {
@@ -5975,17 +6474,42 @@
           ...baseRes,
           placements: Array.isArray(baseRes.placements) && baseRes.placements.length ? baseRes.placements : structuredClone(DEFAULT_RESULTS.placements)
         };
+    const baseBrk = { ...structuredClone(DEFAULT_BRACKET), ...(state.bracket || {}) };
+    const nextBrkMatches = { ...structuredClone(DEFAULT_BRACKET.matches), ...(baseBrk.matches || {}) };
+    if (patch.bracket?.matches) {
+      for (const slotKey of Object.keys(DEFAULT_BRACKET.matches)) {
+        if (patch.bracket.matches[slotKey]) {
+          nextBrkMatches[slotKey] = {
+            ...(nextBrkMatches[slotKey] || { p1: '', p1s: '', p2: '', p2s: '' }),
+            ...patch.bracket.matches[slotKey]
+          };
+        }
+      }
+    }
+    const nextBrk = patch.bracket
+      ? { ...baseBrk, ...patch.bracket, matches: nextBrkMatches }
+      : { ...baseBrk, matches: nextBrkMatches };
     const seq = ++localSeq;
     state = {
       ...state,
       ...patch,
       p1: patch.p1 ? { ...state.p1, ...patch.p1 } : state.p1,
       p2: patch.p2 ? { ...state.p2, ...patch.p2 } : state.p2,
-      commentators: patch.commentators ? { ...state.commentators, ...patch.commentators } : state.commentators,
+      commentators: patch.commentators
+        ? {
+            ...DEFAULT_COMMENTATORS,
+            ...(state.commentators || {}),
+            ...patch.commentators,
+            saved: Array.isArray(patch.commentators.saved)
+              ? patch.commentators.saved
+              : (Array.isArray(state.commentators?.saved) ? state.commentators.saved : [])
+          }
+        : { ...DEFAULT_COMMENTATORS, ...(state.commentators || {}) },
       tweaks: patch.tweaks ? { ...state.tweaks, ...patch.tweaks } : state.tweaks,
       style: patch.style ? { ...DEFAULT_STYLE, ...(state.style || {}), ...patch.style } : { ...DEFAULT_STYLE, ...(state.style || {}) },
       vs: nextVs,
       results: nextRes,
+      bracket: nextBrk,
       _cid: CLIENT_ID,
       _seq: seq
     };
@@ -6683,7 +7207,7 @@
   }
 
   function setActiveWorkspace(ws) {
-    if (!['scorebars', 'vs', 'results', 'tournaments'].includes(ws)) ws = 'scorebars';
+    if (!['scorebars', 'vs', 'results', 'bracket', 'casters', 'tournaments'].includes(ws)) ws = 'scorebars';
     activeWorkspace = ws;
     try { localStorage.setItem('fgc_active_workspace', ws); } catch {}
     $('top-workspace-nav')?.querySelectorAll('button[data-ws]').forEach(b => {
@@ -6694,12 +7218,16 @@
     });
     const isVs = ws === 'vs';
     const isRes = ws === 'results';
-    $('hdr-group-scorebars')?.classList.toggle('hidden', isVs || isRes);
+    const isBrk = ws === 'bracket';
+    const isCas = ws === 'casters';
+    $('hdr-group-scorebars')?.classList.toggle('hidden', isVs || isRes || isBrk || isCas);
     $('hdr-group-vs')?.classList.toggle('hidden', !isVs);
     $('hdr-group-results')?.classList.toggle('hidden', !isRes);
+    $('hdr-group-bracket')?.classList.toggle('hidden', !isBrk);
+    $('hdr-group-casters')?.classList.toggle('hidden', !isCas);
     if ($('btn-am-go-scorebar')) $('btn-am-go-scorebar').style.display = ws === 'scorebars' ? 'none' : 'inline-flex';
     syncWorkspaceLayout();
-    if (isVs || isRes) pushPreviewConfig();
+    if (isVs || isRes || isBrk || isCas) pushPreviewConfig();
   }
 
   function syncWorkspaceLayout() {
@@ -6733,6 +7261,10 @@
     $('btn-pin-vs')?.classList.toggle('active-chip', vsPreviewPinned);
     $('res-preview-card')?.classList.toggle('is-pinned', resPreviewPinned);
     $('btn-pin-res')?.classList.toggle('active-chip', resPreviewPinned);
+    $('brk-preview-card')?.classList.toggle('is-pinned', brkPreviewPinned);
+    $('btn-pin-brk')?.classList.toggle('active-chip', brkPreviewPinned);
+    $('cas-preview-card')?.classList.toggle('is-pinned', casPreviewPinned);
+    $('btn-pin-cas')?.classList.toggle('active-chip', casPreviewPinned);
   }
 
   function renderPlayersDb() {
@@ -6754,6 +7286,12 @@
         </div>
       </div>`;
     }).join('') || '<div style="color:var(--muted)">No saved players yet.</div>';
+    if ($('brk-players-datalist')) {
+      const escAttr = (s) => String(s || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+      $('brk-players-datalist').innerHTML = playersDb
+        .map(p => `<option value="${escAttr(p.sponsor ? `${p.sponsor} | ${p.name}` : p.name)}"></option>`)
+        .join('');
+    }
     if (comboOpenSide) renderPlayerPopover(comboOpenSide);
   }
 
@@ -6904,7 +7442,6 @@
     $('chk-format').checked = state.showFormat !== false;
     $('chk-mp').checked = state.showMatchPoint !== false;
     $('chk-chars').checked = Boolean(state.showCharacters);
-    $('chk-casters').checked = Boolean(state.showCommentators);
     if (pickerState.open) renderFlagPickerModal();
 
     const visBtn = $('btn-toggle-vis');
@@ -7026,16 +7563,12 @@
     setIfNotFocused($('st-mpText'), st.mpText || 'MATCH POINT');
     renderFlagFadeEditor(st);
 
-    const cm = state.commentators || {};
-    setIfNotFocused($('c1-name'), cm.c1Name);
-    setIfNotFocused($('c1-handle'), cm.c1Handle);
-    setIfNotFocused($('c2-name'), cm.c2Name);
-    setIfNotFocused($('c2-handle'), cm.c2Handle);
-
     renderActiveMatchBar();
     renderH2H();
     renderVsUI();
     renderResultsUI();
+    renderBracketUI();
+    renderCastersUI();
   }
 
   /* =========================================================================
@@ -7152,7 +7685,6 @@
     $('chk-format').addEventListener('change', (e) => commitState({ showFormat: e.target.checked }, true));
     $('chk-mp').addEventListener('change', (e) => commitState({ showMatchPoint: e.target.checked }, true));
     $('chk-chars').addEventListener('change', (e) => commitState({ showCharacters: e.target.checked }, true));
-    $('chk-casters').addEventListener('change', (e) => commitState({ showCommentators: e.target.checked }, true));
     $('btn-toggle-vis').addEventListener('click', () => commitState({ visible: state.visible === false }, true));
 
     // Visual Flag Picker Modal events
@@ -7999,16 +8531,6 @@
       e.target.value = '';
     });
 
-    // Commentators
-    for (const k of ['c1Name', 'c1Handle', 'c2Name', 'c2Handle']) {
-      const domId = k.replace('Name', '-name').replace('Handle', '-handle');
-      $(domId).addEventListener('input', (e) => commitState({ commentators: { [k]: e.target.value } }));
-    }
-    $('btn-swap-casters').addEventListener('click', () => {
-      const c = state.commentators;
-      commitState({ commentators: { c1Name: c.c2Name, c1Handle: c.c2Handle, c2Name: c.c1Name, c2Handle: c.c1Handle } }, true);
-    });
-
     // Saved players click actions
     $('players-list').addEventListener('click', (e) => {
       const b1 = e.target.closest('[data-load-p1]');
@@ -8044,6 +8566,10 @@
     $('copy-vs-2').addEventListener('click', () => copyText($('vs-url-text').textContent, 'VS Splash OBS URL'));
     $('btn-copy-results').addEventListener('click', () => copyText($('results-url-text').textContent, 'Tournament Results OBS URL'));
     $('copy-results-2').addEventListener('click', () => copyText($('results-url-text').textContent, 'Tournament Results OBS URL'));
+    $('btn-copy-bracket')?.addEventListener('click', () => copyText($('bracket-url-text').textContent, 'Top 8 Bracket OBS URL'));
+    $('copy-bracket-2')?.addEventListener('click', () => copyText($('bracket-url-text').textContent, 'Top 8 Bracket OBS URL'));
+    $('btn-copy-casters')?.addEventListener('click', () => copyText($('casters-url-text').textContent, 'Casters Screen OBS URL'));
+    $('copy-casters-2')?.addEventListener('click', () => copyText($('casters-url-text').textContent, 'Casters Screen OBS URL'));
     $('copy-dock').addEventListener('click', () => copyText($('dock-url-text').textContent, 'Dock URL'));
     let lastRenderedQrUrl = '';
     const renderLanQr = (url) => {
@@ -8085,6 +8611,8 @@
     $('btn-open-overlay').addEventListener('click', () => window.open('index.html', '_blank'));
     $('btn-open-vs').addEventListener('click', () => window.open('vs.html', '_blank'));
     $('btn-open-results').addEventListener('click', () => window.open('results.html', '_blank'));
+    $('btn-open-bracket')?.addEventListener('click', () => window.open('bracket.html', '_blank'));
+    $('btn-open-casters')?.addEventListener('click', () => window.open('casters.html', '_blank'));
 
     // Global Keyboard Hotkeys
     window.addEventListener('keydown', (e) => {
@@ -10358,6 +10886,307 @@
   }
 
   /* =========================================================================
+     WORKSPACE 5 & 6: TOP 8 BRACKET TREE & CASTERS 
+     ========================================================================= */
+  function renderBracketUI() {
+    const brk = { ...structuredClone(DEFAULT_BRACKET), ...(state.bracket || {}) };
+    const matches = brk.matches || {};
+    const isVis = brk.visible !== false;
+    const visBtn = $('btn-bracket-vis');
+    if (visBtn) {
+      visBtn.textContent = isVis ? '👁 Bracket ON' : '🚫 Bracket HIDDEN';
+      visBtn.classList.toggle('is-hidden', !isVis);
+    }
+    if ($('brk-bg-mode')) $('brk-bg-mode').value = brk.bgMode || 'auto';
+    if ($('chk-brk-reset')) $('chk-brk-reset').checked = Boolean(brk.showReset);
+    setIfNotFocused($('brk-bottom-text'), brk.bottomText || '');
+
+    document.querySelectorAll('[data-brk]').forEach(inp => {
+      const [slotKey, field] = String(inp.dataset.brk || '').split('.');
+      if (!slotKey || !field) return;
+      const val = matches[slotKey]?.[field] ?? '';
+      setIfNotFocused(inp, val);
+    });
+  }
+
+  async function pullTournamentTop8Bracket(providerOverride, silent = false) {
+    if (!isHttp) {
+      if (providerOverride === 'demo') {
+        const demoMatches = {
+          ws1: { p1: 'TEAM A | PLAYER ALPHA', p1s: '3', p2: 'PLAYER ECHO', p2s: '1' },
+          ws2: { p1: 'TEAM B | PLAYER BRAVO', p1s: '3', p2: 'WEST | PLAYER GULF', p2s: '2' },
+          wf:  { p1: 'TEAM A | PLAYER ALPHA', p1s: '3', p2: 'TEAM B | PLAYER BRAVO', p2s: '1' },
+          ltop81: { p1: 'FGC | PLAYER CHARLIE', p1s: '3', p2: 'T8 | PLAYER FOXTROT', p2s: '2' },
+          ltop82: { p1: 'PRO | PLAYER DELTA', p1s: '3', p2: 'EAST | PLAYER HOTEL', p2s: '1' },
+          lq1: { p1: 'WEST | PLAYER GULF', p1s: '1', p2: 'FGC | PLAYER CHARLIE', p2s: '3' },
+          lq2: { p1: 'PLAYER ECHO', p1s: '2', p2: 'PRO | PLAYER DELTA', p2s: '3' },
+          ls:  { p1: 'FGC | PLAYER CHARLIE', p1s: '3', p2: 'PRO | PLAYER DELTA', p2s: '2' },
+          lf:  { p1: 'TEAM B | PLAYER BRAVO', p1s: '3', p2: 'FGC | PLAYER CHARLIE', p2s: '1' },
+          gf:  { p1: 'TEAM A | PLAYER ALPHA', p1s: '3', p2: 'TEAM B | PLAYER BRAVO', p2s: '2' },
+          gfr: { p1: '', p1s: '', p2: '', p2s: '' }
+        };
+        commitState({ bracket: { matches: demoMatches, bottomText: state.tournament || '' } }, true);
+        if (!silent) toast('⚡ Demo Top 8 Bracket loaded');
+      } else if (!silent) {
+        toast('Start the local server first (Start_Scorebar.bat)');
+      }
+      return;
+    }
+
+    const btn = $('btn-brk-sync');
+    const origText = btn?.textContent || '';
+    if (!silent && btn) { btn.disabled = true; btn.textContent = '⏳ Syncing Top 8...'; }
+    try {
+      const provider = providerOverride || trnState.snapshot?.provider || trnState.provider || trnState.config?.provider || 'startgg';
+      const payload = {
+        provider,
+        eventId: trnState.snapshot?.selectedEventId || undefined,
+        url: $('trn-url-input')?.value?.trim() || undefined,
+        token: $('trn-token-input')?.value?.trim() || '__KEEP__'
+      };
+      const res = await fetch('/api/tournament/top8-bracket', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Could not pull Top 8 bracket');
+      const incoming = data.matches || {};
+      const cleanMatches = structuredClone(DEFAULT_BRACKET.matches);
+      let assigned = 0;
+      for (const k of Object.keys(cleanMatches)) {
+        if (incoming[k]) {
+          cleanMatches[k] = {
+            p1: String(incoming[k].p1 || ''),
+            p1s: String(incoming[k].p1s ?? ''),
+            p2: String(incoming[k].p2 || ''),
+            p2s: String(incoming[k].p2s ?? '')
+          };
+          if (cleanMatches[k].p1 || cleanMatches[k].p2) assigned++;
+        }
+      }
+      commitState({ bracket: { matches: cleanMatches } }, true);
+      if (!silent) {
+        toast(`⚡ Top 8 Bracket synced (${assigned} rounds from ${provider.toUpperCase()})`);
+      }
+    } catch (err) {
+      if (!silent) toast(`⚠️ ${err.message}`);
+    } finally {
+      if (!silent && btn) { btn.disabled = false; btn.textContent = origText; }
+    }
+  }
+
+  function bindBracketEvents() {
+    $('btn-bracket-vis')?.addEventListener('click', () => {
+      commitState({ bracket: { visible: state.bracket?.visible === false } }, true);
+    });
+    const replayBracketIntro = () => {
+      commitState({ bracket: { introNonce: Date.now() } }, true);
+      bracketPreviewFrame?.contentWindow?.postMessage({ type: 'test-bracket-entry' }, '*');
+      toast('🎬 Replaying Bracket intro');
+    };
+    $('btn-bracket-replay')?.addEventListener('click', replayBracketIntro);
+    $('btn-brk-test-anim')?.addEventListener('click', replayBracketIntro);
+
+    $('btn-brk-sync')?.addEventListener('click', () => pullTournamentTop8Bracket(undefined, false));
+    $('btn-brk-demo')?.addEventListener('click', () => pullTournamentTop8Bracket('demo', false));
+    $('brk-bg-mode')?.addEventListener('change', (e) => {
+      commitState({ bracket: { bgMode: e.target.value } }, true);
+    });
+    $('chk-brk-reset')?.addEventListener('change', (e) => {
+      commitState({ bracket: { showReset: e.target.checked } }, true);
+    });
+    $('brk-bottom-text')?.addEventListener('input', (e) => {
+      commitState({ bracket: { bottomText: e.target.value } });
+    });
+    $('btn-pin-brk')?.addEventListener('click', () => {
+      brkPreviewPinned = !brkPreviewPinned;
+      try { localStorage.setItem('fgc_brk_preview_pinned', brkPreviewPinned ? '1' : '0'); } catch {}
+      syncWorkspaceLayout();
+      toast(brkPreviewPinned ? '📌 Bracket Preview pinned' : 'Bracket Preview unpinned');
+    });
+    $('btn-brk-clear')?.addEventListener('click', () => {
+      commitState({
+        bracket: {
+          bottomText: '',
+          matches: structuredClone(DEFAULT_BRACKET.matches)
+        }
+      }, true);
+      toast('🗑 Top 8 Bracket cleared');
+    });
+
+    document.querySelectorAll('[data-brk]').forEach(inp => {
+      inp.addEventListener('input', (e) => {
+        const [slotKey, field] = String(e.target.dataset.brk || '').split('.');
+        if (!slotKey || !field) return;
+        commitState({
+          bracket: {
+            matches: {
+              [slotKey]: { [field]: e.target.value }
+            }
+          }
+        });
+      });
+    });
+  }
+
+  function renderCastersUI() {
+    const cm = { ...DEFAULT_COMMENTATORS, ...(state.commentators || {}) };
+    const isVis = cm.visible !== false;
+    const visBtn = $('btn-casters-vis');
+    if (visBtn) {
+      visBtn.textContent = isVis ? '👁 Casters ON' : '🚫 Casters HIDDEN';
+      visBtn.classList.toggle('is-hidden', !isVis);
+    }
+    if ($('cas-bg-mode')) $('cas-bg-mode').value = cm.bgMode === 'transparent' ? 'transparent' : 'valquiria';
+    if ($('chk-cas-scorebar')) $('chk-cas-scorebar').checked = Boolean(state.showCommentators);
+
+    setIfNotFocused($('cas-c1-name'), cm.c1Name || '');
+    setIfNotFocused($('cas-c1-handle'), cm.c1Handle || '');
+    setIfNotFocused($('cas-c2-name'), cm.c2Name || '');
+    setIfNotFocused($('cas-c2-handle'), cm.c2Handle || '');
+
+    const saved = Array.isArray(cm.saved) ? cm.saved : [];
+    const escHtml = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const optsHtml = `<option value="">— Select saved caster —</option>` +
+      saved.map((c, idx) => `<option value="${idx}">${escHtml(c.name)}${c.handle ? ` (${escHtml(c.handle)})` : ''}</option>`).join('');
+
+    if ($('cas-c1-preset')) $('cas-c1-preset').innerHTML = optsHtml;
+    if ($('cas-c2-preset')) $('cas-c2-preset').innerHTML = optsHtml;
+
+    if ($('cas-saved-list')) {
+      $('cas-saved-list').innerHTML = saved.map((c, idx) => `
+        <div class="cas-saved-item">
+          <div style="min-width:0;overflow:hidden;">
+            <strong style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(c.name)}</strong>
+            <small>${escHtml(c.handle || 'No handle')}</small>
+          </div>
+          <div style="display:flex;gap:4px;flex-shrink:0;">
+            <button type="button" data-cas-set1="${idx}" style="padding:3px 7px;font-size:10.5px;border-color:var(--p1);">C1</button>
+            <button type="button" data-cas-set2="${idx}" style="padding:3px 7px;font-size:10.5px;border-color:var(--p2);">C2</button>
+            <button type="button" data-cas-del="${idx}" style="padding:3px 7px;font-size:10.5px;" title="Delete">✕</button>
+          </div>
+        </div>
+      `).join('') || '<div style="grid-column:1/-1;color:var(--muted);font-size:11px;padding:6px 2px;">No saved casters yet. Fill Caster 1/2 above and click 💾 Save, or add one here.</div>';
+    }
+  }
+
+  function saveCasterPreset(name, handle) {
+    const cleanName = String(name || '').trim();
+    const cleanHandle = String(handle || '').trim();
+    if (!cleanName) return toast('Enter a caster name first');
+    const list = Array.isArray(state.commentators?.saved) ? [...state.commentators.saved] : [];
+    const idx = list.findIndex(c => c.name.toLowerCase() === cleanName.toLowerCase());
+    if (idx >= 0) list[idx] = { name: cleanName, handle: cleanHandle };
+    else list.unshift({ name: cleanName, handle: cleanHandle });
+    commitState({ commentators: { saved: list.slice(0, 80) } }, true);
+    toast(`💾 Saved caster: ${cleanName}`);
+  }
+
+  function bindCastersEvents() {
+    $('btn-casters-vis')?.addEventListener('click', () => {
+      commitState({ commentators: { visible: state.commentators?.visible === false } }, true);
+    });
+    const replayCastersIntro = () => {
+      commitState({ commentators: { introNonce: Date.now() } }, true);
+      castersPreviewFrame?.contentWindow?.postMessage({ type: 'test-casters-entry' }, '*');
+      toast('🎬 Replaying Casters intro');
+    };
+    $('btn-casters-replay')?.addEventListener('click', replayCastersIntro);
+    $('btn-cas-test-anim')?.addEventListener('click', replayCastersIntro);
+
+    $('cas-bg-mode')?.addEventListener('change', (e) => {
+      commitState({ commentators: { bgMode: e.target.value } }, true);
+    });
+    $('btn-pin-cas')?.addEventListener('click', () => {
+      casPreviewPinned = !casPreviewPinned;
+      try { localStorage.setItem('fgc_cas_preview_pinned', casPreviewPinned ? '1' : '0'); } catch {}
+      syncWorkspaceLayout();
+      toast(casPreviewPinned ? '📌 Casters Preview pinned' : 'Casters Preview unpinned');
+    });
+
+    $('chk-cas-scorebar')?.addEventListener('change', (e) => {
+      commitState({ showCommentators: e.target.checked }, true);
+    });
+
+    $('cas-c1-name')?.addEventListener('input', (e) => commitState({ commentators: { c1Name: e.target.value } }));
+    $('cas-c1-handle')?.addEventListener('input', (e) => commitState({ commentators: { c1Handle: e.target.value } }));
+    $('cas-c2-name')?.addEventListener('input', (e) => commitState({ commentators: { c2Name: e.target.value } }));
+    $('cas-c2-handle')?.addEventListener('input', (e) => commitState({ commentators: { c2Handle: e.target.value } }));
+
+    $('cas-c1-preset')?.addEventListener('change', (e) => {
+      const idx = e.target.value;
+      if (idx === '') return;
+      const item = (state.commentators?.saved || [])[Number(idx)];
+      if (item) {
+        commitState({ commentators: { c1Name: item.name, c1Handle: item.handle || '' } }, true);
+        toast(`🎙 Caster 1 → ${item.name}`);
+      }
+    });
+    $('cas-c2-preset')?.addEventListener('change', (e) => {
+      const idx = e.target.value;
+      if (idx === '') return;
+      const item = (state.commentators?.saved || [])[Number(idx)];
+      if (item) {
+        commitState({ commentators: { c2Name: item.name, c2Handle: item.handle || '' } }, true);
+        toast(`🎙 Caster 2 → ${item.name}`);
+      }
+    });
+
+    $('btn-cas-swap')?.addEventListener('click', () => {
+      const c = state.commentators || {};
+      commitState({
+        commentators: { c1Name: c.c2Name || '', c1Handle: c.c2Handle || '', c2Name: c.c1Name || '', c2Handle: c.c1Handle || '' }
+      }, true);
+      toast('⇄ Swapped Caster 1 & Caster 2');
+    });
+    $('btn-cas-clear')?.addEventListener('click', () => {
+      commitState({
+        commentators: { c1Name: '', c1Handle: '', c2Name: '', c2Handle: '' }
+      }, true);
+      toast('🗑 Casters cleared');
+    });
+
+    $('btn-cas-save-1')?.addEventListener('click', () => saveCasterPreset(state.commentators?.c1Name, state.commentators?.c1Handle));
+    $('btn-cas-save-2')?.addEventListener('click', () => saveCasterPreset(state.commentators?.c2Name, state.commentators?.c2Handle));
+    $('btn-cas-add-saved')?.addEventListener('click', () => {
+      const n = $('cas-add-name')?.value || '';
+      const h = $('cas-add-handle')?.value || '';
+      if (!n.trim()) return toast('Enter a caster name first');
+      saveCasterPreset(n, h);
+      if ($('cas-add-name')) $('cas-add-name').value = '';
+      if ($('cas-add-handle')) $('cas-add-handle').value = '';
+    });
+
+    $('cas-saved-list')?.addEventListener('click', (e) => {
+      const b1 = e.target.closest('[data-cas-set1]');
+      const b2 = e.target.closest('[data-cas-set2]');
+      const del = e.target.closest('[data-cas-del]');
+      const saved = Array.isArray(state.commentators?.saved) ? [...state.commentators.saved] : [];
+      if (b1) {
+        const item = saved[Number(b1.dataset.casSet1)];
+        if (item) {
+          commitState({ commentators: { c1Name: item.name, c1Handle: item.handle || '' } }, true);
+          toast(`🎙 Caster 1 → ${item.name}`);
+        }
+      } else if (b2) {
+        const item = saved[Number(b2.dataset.casSet2)];
+        if (item) {
+          commitState({ commentators: { c2Name: item.name, c2Handle: item.handle || '' } }, true);
+          toast(`🎙 Caster 2 → ${item.name}`);
+        }
+      } else if (del) {
+        const idx = Number(del.dataset.casDel);
+        if (idx >= 0 && idx < saved.length) {
+          saved.splice(idx, 1);
+          commitState({ commentators: { saved } }, true);
+          toast('Deleted saved caster');
+        }
+      }
+    });
+  }
+
+  /* =========================================================================
      BOOTSTRAP & SERVER CONNECTION
      ========================================================================= */
   initSelects();
@@ -10367,6 +11196,8 @@
   bindTournamentEvents();
   bindVsAndAssetEvents();
   bindResultsEvents();
+  bindBracketEvents();
+  bindCastersEvents();
 
   if (isHttp) {
     const stateReady = fetch('/api/state').then(r => r.json()).then(s => {
@@ -10404,6 +11235,8 @@
         $('obs-url-text').textContent = info.overlayUrl;
         if (info.vsOverlayUrl) $('vs-url-text').textContent = info.vsOverlayUrl;
         if (info.resultsOverlayUrl && $('results-url-text')) $('results-url-text').textContent = info.resultsOverlayUrl;
+        if (info.bracketOverlayUrl && $('bracket-url-text')) $('bracket-url-text').textContent = info.bracketOverlayUrl;
+        if (info.castersOverlayUrl && $('casters-url-text')) $('casters-url-text').textContent = info.castersOverlayUrl;
         $('dock-url-text').textContent = info.panelUrl;
         const ifaces = Array.isArray(info.networkInterfaces) ? info.networkInterfaces : [];
         const primaryLan = ifaces.find(n => n.kind === 'lan') || ifaces[0];
